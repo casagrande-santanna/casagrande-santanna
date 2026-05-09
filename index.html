@@ -214,6 +214,7 @@ textarea.form-in{resize:vertical}
     <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
     <button class="tab" id="tab-ocorrencias"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
+    <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config</button>
   </div>
   <div class="content">
     <div class="screen active" id="screen-avisos">
@@ -260,6 +261,92 @@ textarea.form-in{resize:vertical}
       <div id="oco-detail"></div>
       <button class="btn-p" id="btn-nova-oco" style="margin-top:6px"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrencia</button>
     </div>
+    <div class="screen" id="screen-config">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i>Limites por apartamento</div>
+        <div class="form-row"><label class="form-lbl">Reservas maximas por mes (por apto)</label>
+          <input type="number" class="form-in" id="cfg-max-mes" value="4" min="1" max="20"></div>
+        <div class="form-row"><label class="form-lbl">Reservas simultaneas abertas</label>
+          <input type="number" class="form-in" id="cfg-max-simult" value="2" min="1" max="5"></div>
+        <div class="form-row"><label class="form-lbl">Antecedencia minima para reservar</label>
+          <select class="form-in" id="cfg-ant-min">
+            <option value="0">Sem restricao</option>
+            <option value="30">30 minutos</option>
+            <option value="60" selected>1 hora</option>
+            <option value="120">2 horas</option>
+          </select></div>
+        <div class="form-row"><label class="form-lbl">Antecedencia maxima para reservar</label>
+          <select class="form-in" id="cfg-ant-max">
+            <option value="7">7 dias</option>
+            <option value="15" selected>15 dias</option>
+            <option value="30">30 dias</option>
+          </select></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</div>
+        <div class="form-row"><label class="form-lbl">Janela de check-in (minutos apos o inicio)</label>
+          <select class="form-in" id="cfg-ckin-janela">
+            <option value="10">10 minutos</option>
+            <option value="15" selected>15 minutos</option>
+            <option value="20">20 minutos</option>
+            <option value="30">30 minutos</option>
+          </select></div>
+        <div class="form-row"><label class="form-lbl">Antecipacao permitida para check-in</label>
+          <select class="form-in" id="cfg-ckin-ant">
+            <option value="10" selected>10 minutos antes</option>
+            <option value="15">15 minutos antes</option>
+            <option value="30">30 minutos antes</option>
+          </select></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-shield-x" aria-hidden="true"></i>Penalidades por ausencia</div>
+        <div class="form-row"><label class="form-lbl">Faltas para suspensao automatica</label>
+          <input type="number" class="form-in" id="cfg-faltas-susp" value="2" min="1" max="10"></div>
+        <div class="form-row"><label class="form-lbl">Carencia para cancelar sem penalidade</label>
+          <select class="form-in" id="cfg-carencia">
+            <option value="60">1 hora antes</option>
+            <option value="120" selected>2 horas antes</option>
+            <option value="240">4 horas antes</option>
+          </select></div>
+        <div class="form-row"><label class="form-lbl">Duracao da suspensao</label>
+          <select class="form-in" id="cfg-susp-dias">
+            <option value="7">7 dias</option>
+            <option value="15" selected>15 dias</option>
+            <option value="30">30 dias</option>
+          </select></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar-off" aria-hidden="true"></i>Bloquear periodo</div>
+        <div class="form-row"><label class="form-lbl">Data inicial</label>
+          <input type="date" class="form-in" id="blk-ini"></div>
+        <div class="form-row"><label class="form-lbl">Data final</label>
+          <input type="date" class="form-in" id="blk-fim"></div>
+        <div class="form-row"><label class="form-lbl">Motivo</label>
+          <input type="text" class="form-in" id="blk-motivo" placeholder="Ex: Festa junina, Manutencao..."></div>
+        <button class="btn-p" id="btn-add-bloqueio" style="margin-bottom:10px">
+          <i class="ti ti-plus" aria-hidden="true"></i>Adicionar bloqueio
+        </button>
+        <div id="lista-bloqueios"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-ban" aria-hidden="true"></i>Apartamentos suspensos</div>
+        <div id="lista-suspensos"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Agenda do dia — todos os agendamentos</div>
+        <div id="agenda-adm"></div>
+      </div>
+
+      <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px">
+        <i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar configuracoes
+      </button>
+    </div>
+
     <div class="screen" id="screen-perfil">
       <div class="card">
         <div class="perfil-av" id="pf-av">DT</div>
@@ -546,6 +633,7 @@ function iniciarApp(user) {
       if(morador.tipo==='admin') {
         document.getElementById('fab-aviso').innerHTML = '<button class="btn-p" id="btn-novo-aviso" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>';
         document.getElementById('btn-novo-aviso').addEventListener('click', function() { abrirModal('m-novo-aviso'); });
+        document.getElementById('tab-config').style.display = 'flex';
       }
     }
     carregarBloqueios();
@@ -566,10 +654,11 @@ document.getElementById('tab-reservar').addEventListener('click', function() { g
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
 document.getElementById('tab-checkin').addEventListener('click', function() { goScreen('checkin'); renderCheckin(); });
 document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); });
+document.getElementById('tab-config').addEventListener('click', function() { goScreen('config'); renderConfig(); });
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
 function goScreen(name) {
-  var telas = ['avisos','reservar','minhas','checkin','ocorrencias','perfil'];
+  var telas = ['avisos','reservar','minhas','checkin','ocorrencias','config','perfil'];
   telas.forEach(function(t) {
     document.getElementById('screen-'+t).classList.remove('active');
     var tab = document.getElementById('tab-'+t);
@@ -993,6 +1082,113 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
     document.getElementById('av-corpo').value='';
     fecharModal('m-novo-aviso'); renderAvisos(); toast('Aviso publicado!');
   });
+});
+
+// CONFIGURACOES
+function renderConfig() {
+  if(!morador || morador.tipo!=='admin') return;
+
+  // Carregar bloqueios
+  sb.from('bloqueios').select('*').order('data_inicio').then(function(res) {
+    var blqs = res.data||[];
+    var html = '';
+    if(!blqs.length) { html = '<div style="font-size:11px;color:var(--t2)">Nenhum bloqueio cadastrado.</div>'; }
+    blqs.forEach(function(b) {
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
+      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+b.motivo+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">'+fmtD(b.data_inicio)+(b.data_inicio!==b.data_fim?' a '+fmtD(b.data_fim):'')+'</div></div>';
+      html += '<button class="btn-sm r" data-blk-id="'+b.id+'"><i class="ti ti-trash" aria-hidden="true"></i></button>';
+      html += '</div>';
+    });
+    var lb = document.getElementById('lista-bloqueios');
+    if(lb) {
+      lb.innerHTML = html;
+      lb.querySelectorAll('[data-blk-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('bloqueios').delete().eq('id',btn.dataset.blkId).then(function() {
+            toast('Bloqueio removido.'); renderConfig(); carregarBloqueios(); renderCal();
+          });
+        });
+      });
+    }
+  });
+
+  // Carregar suspensos
+  sb.from('moradores').select('*,unidades(codigo)').eq('status','suspenso').then(function(res) {
+    var susps = res.data||[];
+    var html = '';
+    if(!susps.length) { html = '<div style="font-size:11px;color:var(--t2)">Nenhum apartamento suspenso.</div>'; }
+    susps.forEach(function(m) {
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="font-size:12px;font-weight:600">'+(m.unidades?m.unidades.codigo:'')+' - '+m.nome+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--rdt)">'+m.faltas_mes+' falta(s) - Suspenso ate '+(m.suspenso_ate?fmtD(m.suspenso_ate):'indefinido')+'</div>';
+      html += '</div>';
+      html += '<button class="btn-sm g" data-susp-id="'+m.id+'"><i class="ti ti-lock-open" aria-hidden="true"></i>Liberar</button>';
+      html += '</div>';
+    });
+    var ls = document.getElementById('lista-suspensos');
+    if(ls) {
+      ls.innerHTML = html;
+      ls.querySelectorAll('[data-susp-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('moradores').update({status:'ativo',suspenso_ate:null,faltas_mes:0}).eq('id',btn.dataset.suspId).then(function() {
+            toast('Apartamento liberado!'); renderConfig();
+          });
+        });
+      });
+    }
+  });
+
+  // Agenda do dia
+  var hoje = ts();
+  sb.from('reservas').select('*,unidades(codigo),modalidades(nome,icone)').eq('data_reserva',hoje).neq('status','cancelada').order('slot_inicio').then(function(res) {
+    var ags = res.data||[];
+    var html = '';
+    if(!ags.length) { html = '<div style="font-size:11px;color:var(--t2)">Nenhuma reserva hoje.</div>'; }
+    ags.forEach(function(r) {
+      var dotC = r.checkin_feito ? '#3B6D11' : '#EF9F27';
+      var bl = r.checkin_feito ? '<span class="badge b-teal">Presente</span>' : '<span class="badge b-warn">Aguardando</span>';
+      var m = r.modalidades;
+      var u = r.unidades;
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
+      html += '<div style="width:8px;height:8px;border-radius:50%;background:'+dotC+';flex-shrink:0"></div>';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="font-size:12px;font-weight:600">'+(r.slot_inicio||'').slice(0,5)+' - Apto '+(u?u.codigo:'')+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">'+(m?m.icone+' '+m.nome:'')+'</div>';
+      html += '</div>'+bl+'</div>';
+    });
+    var ag = document.getElementById('agenda-adm');
+    if(ag) ag.innerHTML = html;
+  });
+}
+
+// Salvar configuracoes
+document.addEventListener('DOMContentLoaded', function() {
+  var btnSalvarCfg = document.getElementById('btn-salvar-config');
+  if(btnSalvarCfg) {
+    btnSalvarCfg.addEventListener('click', function() {
+      toast('Configuracoes salvas!');
+    });
+  }
+
+  var btnAddBlk = document.getElementById('btn-add-bloqueio');
+  if(btnAddBlk) {
+    btnAddBlk.addEventListener('click', function() {
+      var ini = document.getElementById('blk-ini').value;
+      var fim = document.getElementById('blk-fim').value;
+      var mot = document.getElementById('blk-motivo').value.trim();
+      if(!ini||!fim||!mot) { toast('Preencha data inicial, final e motivo.'); return; }
+      sb.from('bloqueios').insert({data_inicio:ini,data_fim:fim,motivo:mot,criado_por:morador.id}).then(function(r) {
+        if(r.error) { toast('Erro: '+r.error.message); return; }
+        document.getElementById('blk-ini').value='';
+        document.getElementById('blk-fim').value='';
+        document.getElementById('blk-motivo').value='';
+        toast('Periodo bloqueado!');
+        renderConfig(); carregarBloqueios(); renderCal();
+      });
+    });
+  }
 });
 
 // OCORRENCIAS
