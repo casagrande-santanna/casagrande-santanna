@@ -621,7 +621,7 @@ function selData(ds) {
   sc.style.display = 'block';
   var blk = isBlocked(ds);
   var dow = new Date(ds+'T12:00:00').getDay();
-  var maxH = (dow===0||dow===6) ? 18 : 22;
+  var maxH = (dow===0||dow===6) ? 20 : 22;
   document.getElementById('slots-lbl').textContent = blk ? ('Bloqueado - '+fmtD(ds)) : ('Horarios - '+fmtD(ds));
   var sg = document.getElementById('slot-grid');
   if(blk) {
@@ -739,9 +739,14 @@ function showStep(n) {
 
 function confirmarReserva() {
   if(!morador||!pendSlot||!pendMod||!pendDur) return;
+  // Busca modalidade por ilike (ignora acentos e maiúsculas)
   var modNome = MODS.find(function(x){return x.id===pendMod;}).nome;
-  sb.from('modalidades').select('id').eq('nome',modNome).single().then(function(r) {
-    var mid = r.data ? r.data.id : null;
+  sb.from('modalidades').select('id,nome').then(function(r) {
+    var todas = r.data||[];
+    // Tenta match sem acento
+    var semAcento = function(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
+    var found = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNome); });
+    var mid = found ? found.id : null;
     sb.from('reservas').insert({
       unidade_id: morador.unidade_id,
       morador_id: morador.id,
