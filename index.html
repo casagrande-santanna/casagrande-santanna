@@ -673,7 +673,7 @@ async function selData(ds){
       const mine=morador&&r.unidade_id===morador.unidade_id;
       cls=mine?'slot meu':'slot ocupado';
       lbl=mine?`Minha (${r.duracao_min===60?'1h':'2h'})`:r.modalidades?r.modalidades.icone:'Ocupado';
-      oc=mine?`abrirModalCancelar(${JSON.stringify(r).replace(/"/g,'&quot;')})`:'';
+      oc=mine?`abrirModalCancelarId('${r.id}')`:'';
     }
     sg.innerHTML+=`<div class="${cls}" onclick="${oc}"><div class="sh">${slot}</div><div class="sl">${lbl}</div></div>`;
   });
@@ -769,6 +769,11 @@ function abrirModalCancelar(r){
   abrirModal('m-cancelar');
 }
 
+async function abrirModalCancelarId(id){
+  const{data:r}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('id',id).single();
+  if(r)abrirModalCancelar(r);
+}
+
 async function execCancelar(){
   const{error}=await sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',cancelId);
   if(error){toast('Erro ao cancelar');return;}
@@ -783,22 +788,38 @@ async function renderMinhas(){
   if(!morador)return;
   const{data:mine}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(20);
   const list=document.getElementById('minhas-list');
-  if(!mine?.length){list.innerHTML=`<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>`;return;}
+  if(!mine||!mine.length){list.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>';return;}
   const today=ts();
-  list.innerHTML=mine.map(r=>{
-    const bc=r.checkin_feito?'b-teal':r.status==='cancelada'?'b-danger':r.status==='expirada'?'b-gray':'b-ok';
-    const bl=r.checkin_feito?'Check-in':r.status==='cancelada'?'Cancelada':r.status==='expirada'?'Ausência':'Confirmada';
+  let html='';
+  for(const r of mine){
+    let bc='b-ok';
+    if(r.checkin_feito)bc='b-teal';
+    else if(r.status==='cancelada')bc='b-danger';
+    else if(r.status==='expirada')bc='b-gray';
+    let bl='Confirmada';
+    if(r.checkin_feito)bl='Check-in';
+    else if(r.status==='cancelada')bl='Cancelada';
+    else if(r.status==='expirada')bl='Ausencia';
     const mod=r.modalidades;
-    const acts=r.status==='confirmada'?`<div class="res-acts">
-      ${!r.checkin_feito&&r.data_reserva===today?`<button class="btn-sm b" onclick="doCheckin('${r.id}')"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>`:''}
-      <button class="btn-sm r" onclick="abrirModalCancelar(${JSON.stringify(r).replace(/'/g,'\\'')})"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>
-    </div>`:'';
-    return`<div class="res-card ${r.status}">
-      <div class="res-top"><div class="res-data">${fmtD(r.data_reserva)} · ${(r.slot_inicio||'').slice(0,5)}</div><span class="badge ${bc}">${bl}</span></div>
-      <div class="res-info">${mod?mod.icone+' '+mod.nome:'—'} · ${r.duracao_min===60?'1 hora':'2 horas'}</div>
-      ${acts}
-    </div>`;
-  }).join('');
+    const modTxt=mod?(mod.icone+' '+mod.nome):'---';
+    const durTxt=r.duracao_min===60?'1 hora':'2 horas';
+    const dataHora=fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5);
+    let acts='';
+    if(r.status==='confirmada'){
+      let btns='';
+      if(!r.checkin_feito&&r.data_reserva===today){
+        btns+='<button class="btn-sm b" onclick="doCheckin(''+r.id+'')"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>';
+      }
+      btns+='<button class="btn-sm r" onclick="abrirModalCancelarId(''+r.id+'')"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
+      acts='<div class="res-acts">'+btns+'</div>';
+    }
+    html+='<div class="res-card '+r.status+'">';
+    html+='<div class="res-top"><div class="res-data">'+dataHora+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
+    html+='<div class="res-info">'+modTxt+' - '+durTxt+'</div>';
+    html+=acts;
+    html+='</div>';
+  }
+  list.innerHTML=html;
 }
 
 // ── CHECK-IN ─────────────────────────────────────────────────
@@ -818,12 +839,11 @@ async function renderCheckin(){
   if(proxima){
     nd.classList.add('show');
     const m=proxima.modalidades;
-    main.innerHTML=`<div class="ckin-hero">
-      <div class="ckin-hero-title"><i class="ti ti-door-enter" aria-hidden="true"></i> Reserva de hoje</div>
-      <div class="ckin-hero-sub">${m?m.icone+' '+m.nome:''} · ${(proxima.slot_inicio||'').slice(0,5)} – ${(proxima.slot_fim||'').slice(0,5)}</div>
-      <button class="ckin-big-btn" onclick="doCheckin('${proxima.id}')"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>
-      <div style="font-size:10px;opacity:.75;margin-top:10px">Disponível 10 min antes. Cancela após 15 min sem check-in.</div>
-    </div>`;
+    const nomeMod=m?(m.icone+' '+m.nome):'';
+    const slotIn=(proxima.slot_inicio||'').slice(0,5);
+    const slotFm=(proxima.slot_fim||'').slice(0,5);
+    const btnCI='<button class="ckin-big-btn" onclick="doCheckin(''+proxima.id+'')"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>';
+    main.innerHTML='<div class="ckin-hero"><div class="ckin-hero-title"><i class="ti ti-door-enter" aria-hidden="true"></i> Reserva de hoje</div><div class="ckin-hero-sub">'+nomeMod+' - '+slotIn+' a '+slotFm+'</div>'+btnCI+'<div style="font-size:10px;opacity:.75;margin-top:10px">Disponivel 10 min antes. Cancela apos 15 min sem check-in.</div></div>';
   }else{
     nd.classList.remove('show');
     const{data:prox}=await sb.from('reservas').select('data_reserva,slot_inicio').eq('unidade_id',morador.unidade_id).gt('data_reserva',today).eq('status','confirmada').order('data_reserva').limit(1).maybeSingle();
@@ -832,17 +852,22 @@ async function renderCheckin(){
   const{data:hist}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(10);
   const hel=document.getElementById('ckin-hist');
   if(!hist?.length){hel.innerHTML=`<div class="empty"><i class="ti ti-history"></i>Sem histórico</div>`;return;}
-  hel.innerHTML=hist.map(r=>{
-    const dotC=r.checkin_feito?'#3B6D11':r.status==='cancelada'||r.status==='expirada'?'#E24B4A':'#EF9F27';
-    const bl=r.checkin_feito?`<span class="badge b-teal">Presente</span>`:r.status==='cancelada'?`<span class="badge b-danger">Cancelada</span>`:r.status==='expirada'?`<span class="badge b-gray">Ausência</span>`:`<span class="badge b-warn">Aguardando</span>`;
+  let hhtml='';
+  for(const r of hist){
+    const dotC=r.checkin_feito?'#3B6D11':(r.status==='cancelada'||r.status==='expirada'?'#E24B4A':'#EF9F27');
+    let bl='<span class="badge b-warn">Aguardando</span>';
+    if(r.checkin_feito)bl='<span class="badge b-teal">Presente</span>';
+    else if(r.status==='cancelada')bl='<span class="badge b-danger">Cancelada</span>';
+    else if(r.status==='expirada')bl='<span class="badge b-gray">Ausencia</span>';
     const m=r.modalidades;
-    return`<div class="ckin-row">
-      <div class="ckin-dot" style="background:${dotC}"></div>
-      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">${fmtD(r.data_reserva)} · ${(r.slot_inicio||'').slice(0,5)}</div>
-      <div style="font-size:10.5px;color:var(--txt2)">${m?m.icone+' '+m.nome:'—'}</div></div>
-      ${bl}
-    </div>`;
-  }).join('');
+    const modN=m?(m.icone+' '+m.nome):'---';
+    hhtml+='<div class="ckin-row">';
+    hhtml+='<div class="ckin-dot" style="background:'+dotC+'"></div>';
+    hhtml+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div>';
+    hhtml+='<div style="font-size:10.5px;color:var(--txt2)">'+modN+'</div></div>';
+    hhtml+=bl+'</div>';
+  }
+  hel.innerHTML=hhtml;
 }
 
 // ── AVISOS ───────────────────────────────────────────────────
@@ -871,7 +896,7 @@ async function renderAvisos(){
       <div class="av-corpo">${av.corpo}</div>
       <div class="av-foot">
         <span>${fmtD(av.publicado_em?.slice(0,10))}</span>
-        ${morador.tipo==='admin'?`<span>${pct}% leram</span>`:lido?`<span style="color:var(--verde)"><i class="ti ti-check" aria-hidden="true"></i> Lido</span>`:`<span style="color:#E24B4A;cursor:pointer" onclick="marcarLido('${av.id}')">Marcar como lido</span>`}
+        ${morador.tipo==='admin'?`<span>${pct}% leram</span>`:lido?`<span style="color:var(--verde)"><i class="ti ti-check" aria-hidden="true"></i> Lido</span>`:'<span style="color:#E24B4A;cursor:pointer" onclick="marcarLido(''+av.id+'')">Marcar como lido</span>'}
       </div>
       ${morador.tipo==='admin'?`<div class="leitura-bar"><div class="leitura-fill" style="width:${pct}%"></div></div>`:''}
     </div>`;
@@ -927,14 +952,14 @@ async function renderOco(){
       </div>`).join('')}
       <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
         <button class="btn-sm" onclick="ocoDetalhe=null;renderOco()"><i class="ti ti-arrow-left" aria-hidden="true"></i> Voltar</button>
-        ${morador.tipo==='admin'&&(o.status==='aberta'||o.status==='andamento')?`<button class="btn-sm a" onclick="responderOco('${o.id}')"><i class="ti ti-message" aria-hidden="true"></i> Responder</button>`:''}
+        ${morador.tipo==='admin'&&(o.status==='aberta'||o.status==='andamento')?'<button class="btn-sm a" onclick="responderOco(''+o.id+'')"><i class="ti ti-message" aria-hidden="true"></i> Responder</button>':''}
       </div>
     </div>`:'';
     return;
   }
   det.innerHTML='';
   list.innerHTML=ocosCache.length?ocosCache.map(o=>`
-    <div class="oco-card ${o.status}" onclick="ocoDetalhe='${o.id}';renderOco()">
+    <div class="oco-card ${o.status}" onclick="ocoDetalhe='"+o.id+"';renderOco()">
       <div class="oco-top"><div class="oco-titulo">${o.prioridade==='urgente'?'⚠ ':''} ${o.titulo}</div>
         <span class="badge ${o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray'}">${ST_LABELS[o.status]}</span></div>
       <div class="oco-meta"><span class="oco-cat">${OCA_LABELS[o.categoria]||o.categoria}</span><span>${o.local||''}</span><span>${fmtD(o.created_at?.slice(0,10))}</span></div>
