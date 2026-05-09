@@ -615,6 +615,11 @@ function renderCal() {
 }
 
 function selData(ds) {
+  var hoje = ts();
+  if(ds < hoje) {
+    toast('Nao e possivel reservar datas passadas.');
+    return;
+  }
   selDate = ds;
   renderCal();
   var sc = document.getElementById('slots-card');
@@ -633,10 +638,23 @@ function selData(ds) {
   sb.from('reservas').select('id,unidade_id,slot_inicio,slot_fim,duracao_min,status,modalidades(nome,icone)').eq('data_reserva',ds).neq('status','cancelada').neq('status','expirada').then(function(res) {
     var reservasDia = res.data||[];
     var html = '';
+    var agora = new Date();
+    var agoraMin = agora.getHours()*60 + agora.getMinutes();
+    var ehHoje = (ds === ts());
     SLOTS.forEach(function(slot) {
       if(parseInt(slot) >= maxH) return;
+      var slotMin = parseInt(slot.split(':')[0])*60 + parseInt(slot.split(':')[1]);
+      // Bloqueia horários já passados se for hoje (com 30 min de antecedência mínima)
+      if(ehHoje && slotMin <= agoraMin + 30) return;
       var r = null;
-      reservasDia.forEach(function(x) { if((x.slot_inicio||'').slice(0,5)===slot) r=x; });
+      reservasDia.forEach(function(x) {
+        var ini = x.slot_inicio||'00:00:00';
+        var fim = x.slot_fim||'00:00:00';
+        var iniMin = parseInt(ini.slice(0,2))*60 + parseInt(ini.slice(3,5));
+        var fimMin = parseInt(fim.slice(0,2))*60 + parseInt(fim.slice(3,5));
+        // slot está dentro do intervalo da reserva
+        if(slotMin >= iniMin && slotMin < fimMin) r=x;
+      });
       var cls, lbl, action;
       if(!r) {
         cls='slot livre'; lbl='Livre'; action='livre';
@@ -819,9 +837,18 @@ function renderCheckin() {
       html += '<div class="ckin-hero-sub">'+nomeMod+' - '+si+' a '+sf+'</div>';
       html += '<button class="ckin-big-btn" id="btn-fazer-ckin"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>';
       html += '<div style="font-size:10px;opacity:.75;margin-top:10px">Disponivel 10 min antes. Cancela apos 15 min sem check-in.</div>';
+      html += '<button style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;margin-top:10px;width:100%" id="btn-cancelar-ckin"><i class="ti ti-x"></i> Cancelar minha reserva e liberar a quadra</button>';
       html += '</div>';
       main.innerHTML = html;
       document.getElementById('btn-fazer-ckin').addEventListener('click', function() { doCheckin(proxima.id); });
+      document.getElementById('btn-cancelar-ckin').addEventListener('click', function() {
+        if(confirm('Cancelar sua reserva e liberar o horario para outros moradores?')) {
+          sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',proxima.id).then(function() {
+            toast('Reserva cancelada. Horario liberado para outros moradores.');
+            renderCheckin(); renderMinhas();
+          });
+        }
+      });
     } else {
       nd.classList.remove('show');
       sb.from('reservas').select('data_reserva,slot_inicio').eq('unidade_id',morador.unidade_id).gt('data_reserva',today).eq('status','confirmada').order('data_reserva').limit(1).maybeSingle().then(function(r2) {
