@@ -5,261 +5,196 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#27500A">
 <title>Casa Grande Sant'Anna</title>
-<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
-  --verde:#27500A;--verde-claro:#EAF3DE;--verde-med:#3B6D11;
-  --amber:#FAEEDA;--amber-bord:#EF9F27;--amber-txt:#854F0B;
-  --red:#FCEBEB;--red-bord:#F09595;--red-txt:#A32D2D;
-  --blue:#E6F1FB;--blue-bord:#85B7EB;--blue-txt:#185FA5;
-  --gray:#F1EFE8;--gray-bord:#B4B2A9;--gray-txt:#5F5E5A;
-  --bg:#F5F5F0;--card:#fff;--bord:#E0E0DA;
-  --txt:#1A1A1A;--txt2:#666;--txt3:#999;
-  --radius:10px;--radius-lg:14px;
+  --v:#27500A;--vl:#EAF3DE;--vm:#3B6D11;
+  --am:#FAEEDA;--amb:#EF9F27;--amt:#854F0B;
+  --rd:#FCEBEB;--rdb:#F09595;--rdt:#A32D2D;
+  --bl:#E6F1FB;--blb:#85B7EB;--blt:#185FA5;
+  --gy:#F1EFE8;--gyb:#B4B2A9;--gyt:#5F5E5A;
+  --bg:#F5F5F0;--cd:#fff;--br:#E0E0DA;
+  --tx:#1A1A1A;--t2:#666;--t3:#999;
+  --r:10px;--rl:14px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.5;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
-.app{flex:1;display:flex;flex-direction:column;min-height:100vh}
-
-/* HEADER */
-.hdr{background:var(--verde);color:#fff;padding:12px 16px 10px;position:sticky;top:0;z-index:30}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.app{flex:1;display:flex;flex-direction:column}
+.hdr{background:var(--v);color:#fff;padding:12px 16px 10px;position:sticky;top:0;z-index:30}
 .hdr-row{display:flex;align-items:center;justify-content:space-between}
 .hdr-title{font-size:15px;font-weight:600}
 .hdr-sub{font-size:10px;opacity:.75;margin-top:1px}
 .hdr-right{display:flex;align-items:center;gap:8px}
-.role-tag{font-size:9px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 8px;white-space:nowrap}
+.role-tag{font-size:9px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 8px}
 .av-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;cursor:pointer}
-
-/* TAB BAR */
-.tab-bar{display:flex;background:var(--card);border-bottom:0.5px solid var(--bord);position:sticky;top:58px;z-index:29}
-.tab{flex:1;padding:8px 2px 6px;text-align:center;font-size:9px;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;border:none;background:none;line-height:1.2}
+.tab-bar{display:flex;background:var(--cd);border-bottom:0.5px solid var(--br);position:sticky;top:58px;z-index:29}
+.tab{flex:1;padding:8px 2px 6px;text-align:center;font-size:9px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;border:none;background:none;line-height:1.2}
 .tab i{font-size:17px}
-.tab.active{color:var(--verde);border-bottom:2px solid var(--verde)}
+.tab.active{color:var(--v);border-bottom:2px solid var(--v)}
 .ndot{width:6px;height:6px;background:#E24B4A;border-radius:50%;position:absolute;top:4px;right:5px;display:none}
 .ndot.show{display:block}
-
-/* CONTENT */
 .content{flex:1;overflow-y:auto;padding:14px 16px 80px}
 .screen{display:none}
 .screen.active{display:block}
-
-/* CARDS */
-.card{background:var(--card);border:0.5px solid var(--bord);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px}
-.card-title{font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;color:var(--txt)}
-.card-title i{font-size:14px;color:var(--verde)}
-.sec-lbl{font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 5px}
-
-/* FORMS */
+.card{background:var(--cd);border:0.5px solid var(--br);border-radius:var(--rl);padding:12px 14px;margin-bottom:10px}
+.card-title{font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card-title i{font-size:14px;color:var(--v)}
+.sec-lbl{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 5px}
 .form-row{margin-bottom:10px}
-.form-lbl{font-size:10.5px;font-weight:600;color:var(--txt2);display:block;margin-bottom:3px}
-.form-in{width:100%;border:0.5px solid var(--bord);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--txt);outline:none}
-.form-in:focus{border-color:var(--verde)}
+.form-lbl{font-size:10.5px;font-weight:600;color:var(--t2);display:block;margin-bottom:3px}
+.form-in{width:100%;border:0.5px solid var(--br);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--cd);color:var(--tx);outline:none}
+.form-in:focus{border-color:var(--v)}
 textarea.form-in{resize:vertical}
-
-/* BUTTONS */
-.btn-p{background:var(--verde);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;width:100%;justify-content:center}
-.btn-p:active{opacity:.85}
-.btn-s{background:none;border:0.5px solid var(--bord);border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--txt);display:inline-flex;align-items:center;gap:5px;flex:1;justify-content:center}
-.btn-d{background:var(--red);border:none;border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--red-txt);font-weight:600;display:inline-flex;align-items:center;gap:5px;flex:1;justify-content:center}
-.btn-sm{font-size:10.5px;padding:4px 9px;border-radius:6px;border:0.5px solid var(--bord);background:none;cursor:pointer;color:var(--txt)}
-.btn-sm.g{background:var(--verde-claro);border-color:#97C459;color:var(--verde)}
-.btn-sm.r{background:var(--red);border-color:var(--red-bord);color:var(--red-txt)}
-.btn-sm.b{background:var(--blue);border-color:var(--blue-bord);color:var(--blue-txt)}
+.btn-p{background:var(--v);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;width:100%;justify-content:center}
+.btn-s{background:none;border:0.5px solid var(--br);border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--tx);display:inline-flex;align-items:center;gap:5px;flex:1;justify-content:center}
+.btn-d{background:var(--rd);border:none;border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--rdt);font-weight:600;display:inline-flex;align-items:center;gap:5px;flex:1;justify-content:center}
+.btn-sm{font-size:10.5px;padding:4px 9px;border-radius:6px;border:0.5px solid var(--br);background:none;cursor:pointer;color:var(--tx)}
+.btn-sm.g{background:var(--vl);border-color:#97C459;color:var(--v)}
+.btn-sm.r{background:var(--rd);border-color:var(--rdb);color:var(--rdt)}
+.btn-sm.b{background:var(--bl);border-color:var(--blb);color:var(--blt)}
 .macts{display:flex;gap:7px;margin-top:12px}
-
-/* BADGES */
 .badge{font-size:9.5px;padding:2px 7px;border-radius:20px;font-weight:600;display:inline-block}
-.b-ok{background:var(--verde-claro);color:var(--verde)}
-.b-warn{background:var(--amber);color:var(--amber-txt)}
-.b-danger{background:var(--red);color:var(--red-txt)}
-.b-info{background:var(--blue);color:var(--blue-txt)}
-.b-gray{background:var(--gray);color:var(--gray-txt)}
+.b-ok{background:var(--vl);color:var(--v)}
+.b-warn{background:var(--am);color:var(--amt)}
+.b-danger{background:var(--rd);color:var(--rdt)}
+.b-info{background:var(--bl);color:var(--blt)}
+.b-gray{background:var(--gy);color:var(--gyt)}
 .b-teal{background:#E1F5EE;color:#0F6E56}
-
-/* INFO BOXES */
 .ib{border-radius:8px;padding:9px 11px;font-size:11px;line-height:1.5;margin:8px 0}
-.ib-green{background:var(--verde-claro);color:var(--verde);border-left:3px solid var(--verde-med)}
-.ib-amber{background:var(--amber);color:var(--amber-txt);border-left:3px solid var(--amber-bord)}
-.ib-blue{background:var(--blue);color:var(--blue-txt);border-left:3px solid var(--blue-txt)}
-.ib-red{background:var(--red);color:var(--red-txt);border-left:3px solid var(--red-txt)}
-
-/* CALENDÁRIO */
+.ib-green{background:var(--vl);color:var(--v);border-left:3px solid var(--vm)}
+.ib-amber{background:var(--am);color:var(--amt);border-left:3px solid var(--amb)}
+.ib-blue{background:var(--bl);color:var(--blt);border-left:3px solid var(--blt)}
+.ib-red{background:var(--rd);color:var(--rdt);border-left:3px solid var(--rdt)}
 .cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.cal-nav{background:none;border:0.5px solid var(--bord);border-radius:7px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt)}
+.cal-nav{background:none;border:0.5px solid var(--br);border-radius:7px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tx)}
 .cal-month{font-size:13px;font-weight:600}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-dn{text-align:center;font-size:9.5px;color:var(--txt2);padding:3px 0}
+.cal-dn{text-align:center;font-size:9.5px;color:var(--t2);padding:3px 0}
 .cal-d{text-align:center;font-size:12px;padding:6px 0;border-radius:7px;cursor:pointer;position:relative}
-.cal-d:hover{background:var(--verde-claro)}
-.cal-d.today{font-weight:600;color:var(--verde)}
-.cal-d.sel{background:var(--verde);color:#fff!important}
-.cal-d.blk{background:var(--red);color:var(--red-txt);cursor:default}
-.cal-d.hasr::after{content:'';width:4px;height:4px;background:var(--amber-bord);border-radius:50%;position:absolute;bottom:1px;left:50%;transform:translateX(-50%)}
+.cal-d:hover{background:var(--vl)}
+.cal-d.today{font-weight:600;color:var(--v)}
+.cal-d.sel{background:var(--v);color:#fff!important}
+.cal-d.blk{background:var(--rd);color:var(--rdt);cursor:default}
+.cal-d.hasr::after{content:'';width:4px;height:4px;background:var(--amb);border-radius:50%;position:absolute;bottom:1px;left:50%;transform:translateX(-50%)}
 .cal-d.sel.hasr::after{background:#fff}
 .leg-row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 8px}
-.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2)}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)}
 .leg-dot{width:8px;height:8px;border-radius:2px}
-
-/* SLOTS */
 .slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
-.slot{border:0.5px solid var(--bord);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;transition:background .1s}
-.slot.livre{background:var(--verde-claro);border-color:#97C459}
-.slot.ocupado{background:var(--red);border-color:var(--red-bord);cursor:default}
-.slot.meu{background:var(--blue);border-color:var(--blue-bord)}
-.slot.bloq{background:var(--gray);border-color:var(--gray-bord);cursor:default}
+.slot{border:0.5px solid var(--br);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer}
+.slot.livre{background:var(--vl);border-color:#97C459}
+.slot.ocupado{background:var(--rd);border-color:var(--rdb);cursor:default}
+.slot.meu{background:var(--bl);border-color:var(--blb)}
+.slot.bloq{background:var(--gy);border-color:var(--gyb);cursor:default}
 .slot .sh{font-size:11px;font-weight:600}
 .slot .sl{font-size:9.5px;margin-top:1px}
-.slot.livre .sl{color:var(--verde)}
-.slot.ocupado .sl{color:var(--red-txt)}
-.slot.meu .sl{color:var(--blue-txt)}
-.slot.bloq .sl{color:var(--gray-txt)}
-
-/* MODALIDADES */
+.slot.livre .sl{color:var(--v)}
+.slot.ocupado .sl{color:var(--rdt)}
+.slot.meu .sl{color:var(--blt)}
+.slot.bloq .sl{color:var(--gyt)}
 .mod-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
-.mod-btn{border:0.5px solid var(--bord);border-radius:8px;padding:10px 6px;cursor:pointer;text-align:center;background:var(--card);transition:border-color .15s}
-.mod-btn:hover{border-color:var(--verde)}
-.mod-btn.sel{border:2px solid var(--verde);background:var(--verde-claro)}
+.mod-btn{border:0.5px solid var(--br);border-radius:8px;padding:10px 6px;cursor:pointer;text-align:center;background:var(--cd)}
+.mod-btn.sel{border:2px solid var(--v);background:var(--vl)}
 .mod-btn .mi{font-size:20px;margin-bottom:3px}
-.mod-btn .mn{font-size:11px;font-weight:600;color:var(--txt)}
-.mod-btn .mr{font-size:9.5px;color:var(--txt2)}
+.mod-btn .mn{font-size:11px;font-weight:600;color:var(--tx)}
+.mod-btn .mr{font-size:9.5px;color:var(--t2)}
 .dur-row{display:flex;gap:6px;margin:8px 0}
-.dur-btn{flex:1;border:0.5px solid var(--bord);border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:var(--card)}
-.dur-btn:hover{border-color:var(--verde)}
-.dur-btn.sel{border:2px solid var(--verde);background:var(--verde-claro)}
+.dur-btn{flex:1;border:0.5px solid var(--br);border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:var(--cd)}
+.dur-btn.sel{border:2px solid var(--v);background:var(--vl)}
 .dur-btn .dt{font-size:14px;font-weight:600}
-.dur-btn .dl{font-size:10px;color:var(--txt2)}
-
-/* RESERVAS */
-.res-card{border:0.5px solid var(--bord);border-radius:var(--radius);padding:10px 12px;margin-bottom:7px}
-.res-card.confirmada{border-left:3px solid #97C459;border-radius:0 var(--radius) var(--radius) 0}
-.res-card.pendente{border-left:3px solid var(--amber-bord);border-radius:0 var(--radius) var(--radius) 0}
-.res-card.cancelada{border-left:3px solid var(--red-bord);border-radius:0 var(--radius) var(--radius) 0;opacity:.65}
-.res-card.expirada{border-left:3px solid var(--gray-bord);border-radius:0 var(--radius) var(--radius) 0;opacity:.65}
+.dur-btn .dl{font-size:10px;color:var(--t2)}
+.res-card{border:0.5px solid var(--br);border-radius:var(--r);padding:10px 12px;margin-bottom:7px}
+.res-card.confirmada{border-left:3px solid #97C459;border-radius:0 var(--r) var(--r) 0}
+.res-card.cancelada{border-left:3px solid var(--rdb);border-radius:0 var(--r) var(--r) 0;opacity:.65}
+.res-card.expirada{border-left:3px solid var(--gyb);border-radius:0 var(--r) var(--r) 0;opacity:.65}
 .res-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
 .res-data{font-size:12px;font-weight:600}
-.res-info{font-size:11px;color:var(--txt2);display:flex;align-items:center;gap:4px;margin-top:2px}
+.res-info{font-size:11px;color:var(--t2);margin-top:2px}
 .res-acts{display:flex;gap:5px;margin-top:8px}
-
-/* CHECK-IN */
-.ckin-hero{background:var(--verde);border-radius:var(--radius-lg);padding:18px 16px;color:#fff;text-align:center;margin-bottom:10px}
+.ckin-hero{background:var(--v);border-radius:var(--rl);padding:18px 16px;color:#fff;text-align:center;margin-bottom:10px}
 .ckin-hero-title{font-size:15px;font-weight:600;margin-bottom:4px}
 .ckin-hero-sub{font-size:11px;opacity:.8;margin-bottom:14px}
-.ckin-big-btn{background:#fff;color:var(--verde);border:none;border-radius:10px;padding:14px 20px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;width:100%;justify-content:center}
-.ckin-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--bord)}
+.ckin-big-btn{background:#fff;color:var(--v);border:none;border-radius:10px;padding:14px 20px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;width:100%;justify-content:center}
+.ckin-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--br)}
 .ckin-row:last-child{border-bottom:none}
 .ckin-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-
-/* AVISOS */
-.av-card{border:0.5px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:8px}
-.av-card.urgente{border-left:3px solid #E24B4A;border-radius:0 var(--radius) var(--radius) 0}
-.av-card.info{border-left:3px solid var(--blue-txt);border-radius:0 var(--radius) var(--radius) 0}
-.av-card.manutencao{border-left:3px solid var(--amber-bord);border-radius:0 var(--radius) var(--radius) 0}
-.av-card.comunicado{border-left:3px solid var(--verde);border-radius:0 var(--radius) var(--radius) 0}
+.av-card{border:0.5px solid var(--br);border-radius:var(--r);overflow:hidden;margin-bottom:8px}
+.av-card.urgente{border-left:3px solid #E24B4A;border-radius:0 var(--r) var(--r) 0}
+.av-card.info{border-left:3px solid var(--blt);border-radius:0 var(--r) var(--r) 0}
+.av-card.manutencao{border-left:3px solid var(--amb);border-radius:0 var(--r) var(--r) 0}
+.av-card.comunicado{border-left:3px solid var(--v);border-radius:0 var(--r) var(--r) 0}
 .av-hdr{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 11px 4px}
 .av-titulo{font-size:12px;font-weight:600;flex:1;line-height:1.3}
-.av-corpo{font-size:11px;color:var(--txt2);padding:0 11px 6px;line-height:1.4}
-.av-foot{display:flex;align-items:center;justify-content:space-between;padding:5px 11px 9px;font-size:10px;color:var(--txt2)}
-.leitura-bar{height:3px;background:var(--bg);margin:0 11px 7px;border-radius:2px;overflow:hidden}
-.leitura-fill{height:100%;background:var(--verde);border-radius:2px}
-
-/* OCORRÊNCIAS */
-.oco-card{border:0.5px solid var(--bord);border-radius:var(--radius);padding:10px 11px;margin-bottom:7px;cursor:pointer}
-.oco-card.aberta{border-left:3px solid var(--blue-txt);border-radius:0 var(--radius) var(--radius) 0}
-.oco-card.andamento{border-left:3px solid var(--amber-bord);border-radius:0 var(--radius) var(--radius) 0}
-.oco-card.resolvida{border-left:3px solid var(--verde);border-radius:0 var(--radius) var(--radius) 0}
-.oco-card.encerrada{border-left:3px solid var(--gray-bord);border-radius:0 var(--radius) var(--radius) 0;opacity:.7}
+.av-corpo{font-size:11px;color:var(--t2);padding:0 11px 6px;line-height:1.4}
+.av-foot{display:flex;align-items:center;justify-content:space-between;padding:5px 11px 9px;font-size:10px;color:var(--t2)}
+.oco-card{border:0.5px solid var(--br);border-radius:var(--r);padding:10px 11px;margin-bottom:7px;cursor:pointer}
+.oco-card.aberta{border-left:3px solid var(--blt);border-radius:0 var(--r) var(--r) 0}
+.oco-card.andamento{border-left:3px solid var(--amb);border-radius:0 var(--r) var(--r) 0}
+.oco-card.resolvida{border-left:3px solid var(--v);border-radius:0 var(--r) var(--r) 0}
+.oco-card.encerrada{border-left:3px solid var(--gyb);border-radius:0 var(--r) var(--r) 0;opacity:.7}
 .oco-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px}
 .oco-titulo{font-size:12px;font-weight:600;flex:1;line-height:1.3}
-.oco-meta{font-size:10px;color:var(--txt2);display:flex;gap:6px;flex-wrap:wrap}
-.oco-cat{font-size:9.5px;padding:1px 6px;border-radius:20px;background:var(--bg);color:var(--txt2)}
-.tl-item{display:flex;gap:8px;margin-bottom:9px}
-.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
-.tl-body{flex:1;min-width:0}
-.tl-ev{font-size:11px;font-weight:600}
-.tl-dt{font-size:10px;color:var(--txt2)}
-.tl-msg{font-size:11px;color:var(--txt2);margin-top:2px;line-height:1.4}
-
-/* RESUMO */
+.oco-meta{font-size:10px;color:var(--t2);display:flex;gap:6px;flex-wrap:wrap}
+.oco-cat{font-size:9.5px;padding:1px 6px;border-radius:20px;background:var(--bg);color:var(--t2)}
 .resumo-box{background:var(--bg);border-radius:8px;padding:10px 12px;margin:10px 0}
-.resumo-row{display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0;border-bottom:0.5px solid var(--bord)}
+.resumo-row{display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0;border-bottom:0.5px solid var(--br)}
 .resumo-row:last-child{border-bottom:none;font-weight:600}
-.resumo-lbl{color:var(--txt2)}
-
-/* MODAL */
+.resumo-lbl{color:var(--t2)}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-end;justify-content:center}
 .modal-bg.open{display:flex}
-.modal-card{background:var(--card);border-radius:16px 16px 0 0;padding:16px 16px 28px;width:100%;max-width:430px;max-height:88vh;overflow-y:auto}
+.modal-card{background:var(--cd);border-radius:16px 16px 0 0;padding:16px 16px 28px;width:100%;max-width:430px;max-height:88vh;overflow-y:auto}
 .modal-card.center{border-radius:14px;margin:20px;max-height:85vh}
-.mhandle{width:28px;height:3px;background:var(--bord);border-radius:2px;margin:0 auto 12px}
+.mhandle{width:28px;height:3px;background:var(--br);border-radius:2px;margin:0 auto 12px}
 .mtitle{font-size:14px;font-weight:600;margin-bottom:3px}
-.msub{font-size:11px;color:var(--txt2);margin-bottom:11px}
-.m-info-row{display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--bord)}
-.m-info-row i{font-size:14px;color:var(--verde)}
-
-/* TELA DE LOGIN */
-.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:var(--verde)}
+.msub{font-size:11px;color:var(--t2);margin-bottom:11px}
+.m-info-row{display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--br)}
+.m-info-row i{font-size:14px;color:var(--v)}
+.filter-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px}
+.filter-bar::-webkit-scrollbar{display:none}
+.fpill{font-size:10px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--br);background:none;cursor:pointer;white-space:nowrap;color:var(--t2)}
+.fpill.active{background:var(--v);color:#fff;border-color:var(--v)}
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:var(--v)}
 .login-logo{font-size:48px;margin-bottom:12px}
 .login-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;text-align:center}
 .login-sub{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:32px;text-align:center}
-.login-card{background:#fff;border-radius:var(--radius-lg);padding:24px;width:100%;max-width:360px}
-.login-lbl{font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:4px;display:block}
-.login-input{width:100%;border:0.5px solid var(--bord);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:14px;outline:none}
-.login-input:focus{border-color:var(--verde)}
-.login-btn{width:100%;background:var(--verde);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
-.login-err{background:var(--red);color:var(--red-txt);border-radius:7px;padding:8px 12px;font-size:11px;margin-top:8px;display:none}
-
-/* TOAST */
-#toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(23,52,4,.94);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:500;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
-
-/* PERFIL */
-.perfil-av{width:52px;height:52px;border-radius:50%;background:var(--verde-claro);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--verde);margin-bottom:10px}
-.p-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--bord);font-size:12px}
+.login-card{background:#fff;border-radius:var(--rl);padding:24px;width:100%;max-width:360px}
+.login-lbl{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:4px;display:block}
+.login-input{width:100%;border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:14px;outline:none}
+.login-input:focus{border-color:var(--v)}
+.login-btn{width:100%;background:var(--v);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
+.login-err{background:var(--rd);color:var(--rdt);border-radius:7px;padding:8px 12px;font-size:11px;margin-top:8px;display:none}
+.perfil-av{width:52px;height:52px;border-radius:50%;background:var(--vl);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--v);margin-bottom:10px}
+.p-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br);font-size:12px}
 .p-row:last-child{border-bottom:none}
-.tgl{width:34px;height:18px;background:var(--bord);border-radius:9px;cursor:pointer;position:relative;transition:.2s;flex-shrink:0}
-.tgl.on{background:var(--verde)}
+.tgl{width:34px;height:18px;background:var(--br);border-radius:9px;cursor:pointer;position:relative;transition:.2s;flex-shrink:0}
+.tgl.on{background:var(--v)}
 .tgl::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:.2s}
 .tgl.on::after{left:18px}
-
-/* EMPTY STATE */
-.empty{text-align:center;padding:32px 16px;color:var(--txt2)}
-.empty i{font-size:40px;display:block;margin-bottom:8px;color:var(--bord)}
-
-/* FILTROS */
-.filter-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px}
-.filter-bar::-webkit-scrollbar{display:none}
-.fpill{font-size:10px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--bord);background:none;cursor:pointer;white-space:nowrap;color:var(--txt2)}
-.fpill.active{background:var(--verde);color:#fff;border-color:var(--verde)}
-
-@media(min-width:640px){
-  body{background:#eee}
-  .app{margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,.1)}
-  .modal-card:not(.center){max-width:430px;margin:0 auto}
-}
+.empty{text-align:center;padding:32px 16px;color:var(--t2)}
+.empty i{font-size:40px;display:block;margin-bottom:8px;color:var(--br)}
+#toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(23,52,4,.94);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:500;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
 
-<!-- TELA DE LOGIN -->
 <div class="login-wrap" id="login-screen">
-  <div class="login-logo">🏢</div>
+  <div class="login-logo">&#127968;</div>
   <div class="login-title">Casa Grande Sant'Anna</div>
   <div class="login-sub">Sistema de reserva da quadra</div>
   <div class="login-card">
     <label class="login-lbl">E-mail</label>
     <input class="login-input" type="email" id="login-email" placeholder="seu@email.com">
     <label class="login-lbl">Senha</label>
-    <input class="login-input" type="password" id="login-pass" placeholder="••••••••">
-    <button class="login-btn" onclick="fazerLogin()">Entrar</button>
+    <input class="login-input" type="password" id="login-pass" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;">
+    <button class="login-btn" id="btn-entrar">Entrar</button>
     <div class="login-err" id="login-err"></div>
     <div style="text-align:center;margin-top:12px">
-      <span style="font-size:11px;color:#666;cursor:pointer" onclick="abrirCadastro()">Não tem conta? Cadastre-se</span>
+      <span style="font-size:11px;color:#666;cursor:pointer;text-decoration:underline" id="link-cadastro">Nao tem conta? Cadastre-se</span>
     </div>
   </div>
 </div>
 
-<!-- APP PRINCIPAL -->
 <div class="app" id="app-main" style="display:none">
   <div class="hdr">
     <div class="hdr-row">
@@ -269,99 +204,82 @@ textarea.form-in{resize:vertical}
       </div>
       <div class="hdr-right">
         <span class="role-tag" id="role-tag">Morador</span>
-        <div class="av-btn" id="av-btn" onclick="go('perfil')">DT</div>
+        <div class="av-btn" id="av-btn">DT</div>
       </div>
     </div>
   </div>
-
   <div class="tab-bar">
-    <button class="tab active" id="tab-avisos" onclick="go('avisos')"><i class="ti ti-bell" aria-hidden="true"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
-    <button class="tab" id="tab-reservar" onclick="go('reservar')"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
-    <button class="tab" id="tab-minhas" onclick="go('minhas')"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas<span class="ndot" id="nd-minhas"></span></button>
-    <button class="tab" id="tab-checkin" onclick="go('checkin')"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
-    <button class="tab" id="tab-ocorrencias" onclick="go('ocorrencias')"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
+    <button class="tab active" id="tab-avisos"><i class="ti ti-bell" aria-hidden="true"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
+    <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
+    <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
+    <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
+    <button class="tab" id="tab-ocorrencias"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
   </div>
-
   <div class="content">
-
-    <!-- AVISOS -->
     <div class="screen active" id="screen-avisos">
       <div id="fab-aviso"></div>
-      <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Nenhum aviso</div></div>
+      <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
     </div>
-
-    <!-- RESERVAR -->
     <div class="screen" id="screen-reservar">
       <div class="card">
         <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Selecione uma data</div>
         <div class="cal-hdr">
-          <button class="cal-nav" onclick="prevM()"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+          <button class="cal-nav" id="btn-prev-m"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
           <span class="cal-month" id="cal-lbl"></span>
-          <button class="cal-nav" onclick="nextM()"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+          <button class="cal-nav" id="btn-next-m"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
         <div class="leg-row">
-          <div class="leg"><div class="leg-dot" style="background:var(--verde-claro);border:1px solid #97C459"></div>Livre</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--red);border:1px solid var(--red-bord)"></div>Ocupado</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--blue);border:1px solid var(--blue-bord)"></div>Minha reserva</div>
-          <div class="leg"><div class="leg-dot" style="background:var(--gray);border:1px solid var(--gray-bord)"></div>Bloqueado</div>
+          <div class="leg"><div class="leg-dot" style="background:#EAF3DE;border:1px solid #97C459"></div>Livre</div>
+          <div class="leg"><div class="leg-dot" style="background:#FCEBEB;border:1px solid #F09595"></div>Ocupado</div>
+          <div class="leg"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB"></div>Minha</div>
+          <div class="leg"><div class="leg-dot" style="background:#F1EFE8;border:1px solid #B4B2A9"></div>Bloqueado</div>
         </div>
       </div>
       <div class="card" id="slots-card" style="display:none">
-        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="slots-lbl">Horários</span></div>
+        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="slots-lbl">Horarios</span></div>
         <div class="slot-grid" id="slot-grid"></div>
       </div>
     </div>
-
-    <!-- MINHAS RESERVAS -->
     <div class="screen" id="screen-minhas">
       <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
     </div>
-
-    <!-- CHECK-IN -->
     <div class="screen" id="screen-checkin">
       <div id="ckin-main"></div>
-      <div class="sec-lbl">Histórico</div>
+      <div class="sec-lbl">Historico</div>
       <div id="ckin-hist"></div>
     </div>
-
-    <!-- OCORRÊNCIAS -->
     <div class="screen" id="screen-ocorrencias">
       <div class="filter-bar">
-        <button class="fpill active" onclick="setFiltroOco('todos',this)">Todas</button>
-        <button class="fpill" onclick="setFiltroOco('aberta',this)">Abertas</button>
-        <button class="fpill" onclick="setFiltroOco('andamento',this)">Em andamento</button>
-        <button class="fpill" onclick="setFiltroOco('resolvida',this)">Resolvidas</button>
+        <button class="fpill active" id="fpill-todos">Todas</button>
+        <button class="fpill" id="fpill-aberta">Abertas</button>
+        <button class="fpill" id="fpill-andamento">Em andamento</button>
+        <button class="fpill" id="fpill-resolvida">Resolvidas</button>
       </div>
       <div id="oco-list"></div>
       <div id="oco-detail"></div>
-      <button class="btn-p" onclick="abrirModal('m-nova-oco')" style="margin-top:6px"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrência</button>
+      <button class="btn-p" id="btn-nova-oco" style="margin-top:6px"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrencia</button>
     </div>
-
-    <!-- PERFIL -->
     <div class="screen" id="screen-perfil">
       <div class="card">
         <div class="perfil-av" id="pf-av">DT</div>
-        <div style="font-size:15px;font-weight:600" id="pf-nome">—</div>
-        <div style="font-size:12px;color:var(--txt2)" id="pf-apto">—</div>
-        <div style="margin-top:12px;border-top:0.5px solid var(--bord);padding-top:10px">
-          <div class="p-row"><span><i class="ti ti-bell" aria-hidden="true" style="margin-right:5px"></i>Notificações push</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-          <div class="p-row"><span><i class="ti ti-mail" aria-hidden="true" style="margin-right:5px"></i>Avisos por e-mail</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="font-size:15px;font-weight:600" id="pf-nome">Carregando...</div>
+        <div style="font-size:12px;color:var(--t2)" id="pf-apto"></div>
+        <div style="margin-top:12px;border-top:0.5px solid var(--br);padding-top:10px">
+          <div class="p-row"><span>Notificacoes push</span><div class="tgl on" id="tgl-push"></div></div>
           <div class="p-row" style="border:none;padding-top:12px">
-            <button class="btn-d" style="width:100%" onclick="fazerLogout()"><i class="ti ti-logout" aria-hidden="true"></i>Sair da conta</button>
+            <button class="btn-d" style="width:100%" id="btn-logout"><i class="ti ti-logout" aria-hidden="true"></i>Sair da conta</button>
           </div>
         </div>
       </div>
       <div class="ib ib-amber" style="font-size:10.5px">
-        <i class="ti ti-shield-lock" aria-hidden="true" style="margin-right:4px"></i>
-        <strong>LGPD:</strong> Seus dados são usados exclusivamente para gestão condominial. Controlador: Condomínio Casa Grande Sant'Anna.
+        LGPD: Seus dados sao usados exclusivamente para gestao condominial. Controlador: Condominio Casa Grande Sant'Anna.
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- MODAIS -->
+<!-- MODAL RESERVA -->
 <div class="modal-bg" id="m-reserva">
   <div class="modal-card">
     <div class="mhandle"></div>
@@ -369,27 +287,28 @@ textarea.form-in{resize:vertical}
       <div class="mtitle">Escolha a modalidade</div>
       <div class="msub" id="m-res-date-lbl"></div>
       <div class="mod-grid" id="m-mod-grid"></div>
-      <div class="macts"><button class="btn-s" style="flex:1" onclick="fecharModal('m-reserva')">Cancelar</button></div>
+      <div class="macts"><button class="btn-s" id="btn-cancelar-res">Cancelar</button></div>
     </div>
     <div id="m-res-step2" style="display:none">
-      <div class="mtitle">Escolha a duração</div>
+      <div class="mtitle">Escolha a duracao</div>
       <div class="msub" id="m-res-mod-lbl"></div>
       <div class="dur-row" id="m-dur-row"></div>
       <div id="m-dur-info"></div>
-      <div class="macts"><button class="btn-s" style="flex:1" onclick="voltarStep1()">Voltar</button></div>
+      <div class="macts"><button class="btn-s" id="btn-voltar-step1">Voltar</button></div>
     </div>
     <div id="m-res-step3" style="display:none">
       <div class="mtitle">Confirmar reserva</div>
       <div class="resumo-box" id="m-resumo"></div>
-      <div class="ib ib-blue" style="font-size:10.5px"><i class="ti ti-shield-check" aria-hidden="true" style="margin-right:4px"></i>Reserva vinculada ao seu apartamento. Dados protegidos — LGPD.</div>
+      <div class="ib ib-blue" style="font-size:10.5px">Reserva vinculada ao seu apartamento. Dados protegidos - LGPD.</div>
       <div class="macts">
-        <button class="btn-s" onclick="voltarStep2()">Voltar</button>
-        <button class="btn-p" onclick="confirmarReserva()"><i class="ti ti-check" aria-hidden="true"></i>Confirmar</button>
+        <button class="btn-s" id="btn-voltar-step2">Voltar</button>
+        <button class="btn-p" id="btn-confirmar-res"><i class="ti ti-check" aria-hidden="true"></i>Confirmar</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- MODAL CANCELAR -->
 <div class="modal-bg" id="m-cancelar">
   <div class="modal-card">
     <div class="mhandle"></div>
@@ -397,629 +316,750 @@ textarea.form-in{resize:vertical}
     <div class="msub" id="mc-sub"></div>
     <div class="m-info-row"><i class="ti ti-calendar" aria-hidden="true"></i><span id="mc-dt"></span></div>
     <div class="m-info-row"><i class="ti ti-clock" aria-hidden="true"></i><span id="mc-hr"></span></div>
-    <div class="m-info-row"><i class="ti ti-activity" aria-hidden="true"></i><span id="mc-mod"></span></div>
-    <div class="ib ib-amber" id="mc-warn" style="display:none;font-size:10.5px"></div>
     <div class="macts">
-      <button class="btn-s" onclick="fecharModal('m-cancelar')">Voltar</button>
-      <button class="btn-d" onclick="execCancelar()"><i class="ti ti-x" aria-hidden="true"></i>Cancelar reserva</button>
+      <button class="btn-s" id="btn-fechar-cancel">Voltar</button>
+      <button class="btn-d" id="btn-exec-cancel"><i class="ti ti-x" aria-hidden="true"></i>Confirmar</button>
     </div>
   </div>
 </div>
 
+<!-- MODAL NOVA OCO -->
 <div class="modal-bg" id="m-nova-oco">
   <div class="modal-card center">
     <div class="mhandle"></div>
-    <div class="mtitle">Registrar ocorrência</div>
-    <div class="msub">Visível apenas para a administração</div>
+    <div class="mtitle">Registrar ocorrencia</div>
+    <div class="msub">Visivel apenas para a administracao</div>
     <div class="form-row"><label class="form-lbl">Categoria</label>
-      <select class="form-in" id="oc-cat"><option value="manutencao">Manutenção</option><option value="barulho">Barulho</option><option value="seguranca">Segurança</option><option value="limpeza">Limpeza</option><option value="outros">Outros</option></select></div>
-    <div class="form-row"><label class="form-lbl">Título</label><input type="text" class="form-in" id="oc-tit" placeholder="Descreva o problema brevemente"></div>
-    <div class="form-row"><label class="form-lbl">Descrição</label><textarea class="form-in" id="oc-desc" rows="3" placeholder="Local, horário, detalhes…"></textarea></div>
+      <select class="form-in" id="oc-cat">
+        <option value="manutencao">Manutencao</option>
+        <option value="barulho">Barulho</option>
+        <option value="seguranca">Seguranca</option>
+        <option value="limpeza">Limpeza</option>
+        <option value="outros">Outros</option>
+      </select></div>
+    <div class="form-row"><label class="form-lbl">Titulo</label><input type="text" class="form-in" id="oc-tit" placeholder="Descreva o problema"></div>
+    <div class="form-row"><label class="form-lbl">Descricao</label><textarea class="form-in" id="oc-desc" rows="3" placeholder="Local, horario, detalhes..."></textarea></div>
     <div class="form-row"><label class="form-lbl">Local</label>
-      <select class="form-in" id="oc-loc"><option>Garagem — Bloco A</option><option>Garagem — Bloco B</option><option>Quadra poliesportiva</option><option>Elevador — Bloco A</option><option>Elevador — Bloco B</option><option>Portaria</option><option>Área externa</option></select></div>
+      <select class="form-in" id="oc-loc">
+        <option>Garagem - Bloco A</option><option>Garagem - Bloco B</option>
+        <option>Quadra poliesportiva</option><option>Elevador - Bloco A</option>
+        <option>Elevador - Bloco B</option><option>Portaria</option><option>Area externa</option>
+      </select></div>
     <div class="form-row"><label class="form-lbl">Prioridade</label>
       <select class="form-in" id="oc-prio"><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div>
     <div class="macts">
-      <button class="btn-s" onclick="fecharModal('m-nova-oco')">Cancelar</button>
-      <button class="btn-p" onclick="salvarOco()"><i class="ti ti-check" aria-hidden="true"></i>Registrar</button>
+      <button class="btn-s" id="btn-fechar-oco">Cancelar</button>
+      <button class="btn-p" id="btn-salvar-oco"><i class="ti ti-check" aria-hidden="true"></i>Registrar</button>
     </div>
   </div>
 </div>
 
+<!-- MODAL NOVO AVISO -->
 <div class="modal-bg" id="m-novo-aviso">
   <div class="modal-card center">
     <div class="mhandle"></div>
     <div class="mtitle">Publicar aviso</div>
-    <div class="msub">Enviado com notificação a todos os destinatários</div>
     <div class="form-row"><label class="form-lbl">Tipo</label>
-      <select class="form-in" id="av-tipo"><option value="comunicado">Comunicado</option><option value="info">Informativo</option><option value="manutencao">Manutenção</option><option value="urgente">Urgente</option></select></div>
-    <div class="form-row"><label class="form-lbl">Título</label><input type="text" class="form-in" id="av-tit" placeholder="Título do aviso"></div>
-    <div class="form-row"><label class="form-lbl">Mensagem</label><textarea class="form-in" id="av-corpo" rows="3" placeholder="Texto completo do aviso…"></textarea></div>
-    <div class="form-row"><label class="form-lbl">Destinatários</label>
-      <select class="form-in" id="av-dest"><option value="todos">Todos os moradores</option><option value="blocoA">Somente Bloco A</option><option value="blocoB">Somente Bloco B</option></select></div>
+      <select class="form-in" id="av-tipo">
+        <option value="comunicado">Comunicado</option><option value="info">Informativo</option>
+        <option value="manutencao">Manutencao</option><option value="urgente">Urgente</option>
+      </select></div>
+    <div class="form-row"><label class="form-lbl">Titulo</label><input type="text" class="form-in" id="av-tit" placeholder="Titulo do aviso"></div>
+    <div class="form-row"><label class="form-lbl">Mensagem</label><textarea class="form-in" id="av-corpo" rows="3"></textarea></div>
+    <div class="form-row"><label class="form-lbl">Destinatarios</label>
+      <select class="form-in" id="av-dest">
+        <option value="todos">Todos os moradores</option>
+        <option value="blocoA">Somente Bloco A</option>
+        <option value="blocoB">Somente Bloco B</option>
+      </select></div>
     <div class="macts">
-      <button class="btn-s" onclick="fecharModal('m-novo-aviso')">Cancelar</button>
-      <button class="btn-p" onclick="publicarAviso()"><i class="ti ti-send" aria-hidden="true"></i>Publicar</button>
+      <button class="btn-s" id="btn-fechar-aviso">Cancelar</button>
+      <button class="btn-p" id="btn-pub-aviso"><i class="ti ti-send" aria-hidden="true"></i>Publicar</button>
     </div>
   </div>
 </div>
 
+<!-- MODAL CADASTRO -->
 <div class="modal-bg" id="m-cadastro">
   <div class="modal-card center">
     <div class="mhandle"></div>
     <div class="mtitle">Criar conta</div>
     <div class="msub">Morador do Casa Grande Sant'Anna</div>
     <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="cad-nome" placeholder="Seu nome completo"></div>
-    <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="cad-email" placeholder="seu@email.com"></div>
-    <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Mínimo 6 caracteres"></div>
-    <div class="form-row"><label class="form-lbl">Apartamento</label>
-      <select class="form-in" id="cad-apto"></select></div>
+    <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="cad-email"></div>
+    <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Minimo 6 caracteres"></div>
+    <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="cad-apto"></select></div>
     <div class="macts">
-      <button class="btn-s" onclick="fecharModal('m-cadastro')">Cancelar</button>
-      <button class="btn-p" onclick="fazerCadastro()"><i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar</button>
+      <button class="btn-s" id="btn-fechar-cad">Cancelar</button>
+      <button class="btn-p" id="btn-fazer-cad"><i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar</button>
     </div>
-    <div class="login-err" id="cad-err" style="display:none"></div>
+    <div class="login-err" id="cad-err"></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ── SUPABASE CONFIG ──────────────────────────────────────────
-const SUPA_URL = 'https://gkdwfntluopycapxyvfx.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+var SURL = 'https://gkdwfntluopycapxyvfx.supabase.co';
+var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
+var sb = supabase.createClient(SURL, SKEY);
 
-// ── CONSTANTES ───────────────────────────────────────────────
-const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const DIAS_N=['D','S','T','Q','Q','S','S'];
-const SLOTS=['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
-const MODALIDADES=[
-  {id:'tenis1',nome:'Tênis simples',sub:'1×1',icon:'🎾',fixo:true,durs:[60]},
-  {id:'tenis2',nome:'Tênis duplas',sub:'2×2',icon:'🎾',fixo:false,durs:[60,120]},
+var MESES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var DIAS_N = ['D','S','T','Q','Q','S','S'];
+var SLOTS = ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+var MODS = [
+  {id:'tenis1',nome:'Tenis simples',sub:'1x1',icon:'🎾',fixo:true,durs:[60]},
+  {id:'tenis2',nome:'Tenis duplas',sub:'2x2',icon:'🎾',fixo:false,durs:[60,120]},
   {id:'basquete',nome:'Basquete',sub:'coletivo',icon:'🏀',fixo:false,durs:[60,120]},
   {id:'futebol',nome:'Futebol',sub:'coletivo',icon:'⚽',fixo:false,durs:[60,120]},
-  {id:'volei',nome:'Vôlei',sub:'coletivo',icon:'🏐',fixo:false,durs:[60,120]},
-  {id:'livre',nome:'Uso livre',sub:'treino',icon:'🏃',fixo:false,durs:[60,120]},
+  {id:'volei',nome:'Volei',sub:'coletivo',icon:'🏐',fixo:false,durs:[60,120]},
+  {id:'livre',nome:'Uso livre',sub:'treino',icon:'🏃',fixo:false,durs:[60,120]}
 ];
-const OCA_LABELS={manutencao:'Manutenção',barulho:'Barulho',seguranca:'Segurança',limpeza:'Limpeza',outros:'Outros'};
-const ST_LABELS={aberta:'Aberta',andamento:'Em andamento',resolvida:'Resolvida',encerrada:'Encerrada'};
-const AV_LABELS={urgente:'Urgente',info:'Informativo',manutencao:'Manutenção',comunicado:'Comunicado'};
+var OCA = {manutencao:'Manutencao',barulho:'Barulho',seguranca:'Seguranca',limpeza:'Limpeza',outros:'Outros'};
+var STL = {aberta:'Aberta',andamento:'Em andamento',resolvida:'Resolvida',encerrada:'Encerrada'};
+var AVL = {urgente:'Urgente',info:'Informativo',manutencao:'Manutencao',comunicado:'Comunicado'};
 
-// ── ESTADO ───────────────────────────────────────────────────
-let usuario=null, morador=null;
-let vY=new Date().getFullYear(), vM=new Date().getMonth(), selDate=null;
-let pendSlot=null, pendMod=null, pendDur=null, cancelId=null;
-let ocoFiltro='todos', ocoDetalhe=null;
-let reservasCache=[], avisosCache=[], ocosCache=[], bloquCache=[];
+var usuario = null;
+var morador = null;
+var vY = new Date().getFullYear();
+var vM = new Date().getMonth();
+var selDate = null;
+var pendSlot = null;
+var pendMod = null;
+var pendDur = null;
+var cancelId = null;
+var ocoFiltro = 'todos';
+var ocoDetalhe = null;
+var bloquCache = [];
 
-// ── UTILITÁRIOS ──────────────────────────────────────────────
-function ts(){return new Date().toISOString().slice(0,10);}
-function fd(o){const d=new Date();d.setDate(d.getDate()+o);return d.toISOString().slice(0,10);}
-function fmtD(ds){if(!ds)return'';const[y,m,d]=ds.split('-');return`${d}/${m}/${y}`;}
-function addH(t,h){const[hr,mn]=t.split(':').map(Number);return`${String(hr+h).padStart(2,'0')}:${String(mn).padStart(2,'0')}`;}
-function agora(){return new Date().toTimeString().slice(0,5);}
+function ts() { return new Date().toISOString().slice(0,10); }
+function fmtD(ds) { if(!ds) return ''; var p=ds.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function addH(t,h) { var p=t.split(':').map(Number); return String(p[0]+h).padStart(2,'0')+':'+String(p[1]).padStart(2,'0'); }
 
-let toastT;
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.style.opacity='1';
-  clearTimeout(toastT);toastT=setTimeout(()=>el.style.opacity='0',2800);
+var toastT;
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(toastT); toastT = setTimeout(function(){ el.style.opacity='0'; }, 2800);
 }
 
-// ── AUTENTICAÇÃO ─────────────────────────────────────────────
-async function fazerLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  const err=document.getElementById('login-err');
-  err.style.display='none';
-  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error){err.textContent='E-mail ou senha incorretos.';err.style.display='block';return;}
-  await iniciarApp(data.user);
-}
+function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
 
-async function fazerCadastro(){
-  const nome=document.getElementById('cad-nome').value.trim();
-  const email=document.getElementById('cad-email').value.trim();
-  const pass=document.getElementById('cad-pass').value;
-  const aptoCod=document.getElementById('cad-apto').value;
-  const err=document.getElementById('cad-err');
-  err.style.display='none';
-  if(!nome||!email||!pass||!aptoCod){err.textContent='Preencha todos os campos.';err.style.display='block';return;}
-  // Cadastra no Supabase Auth
-  const {data,error}=await sb.auth.signUp({email,password:pass});
-  if(error){err.textContent=error.message;err.style.display='block';return;}
-  if(!data.user){err.textContent='Confirme seu e-mail para continuar.';err.style.display='block';return;}
-  // Busca o unidade_id pelo código
-  const {data:unidade}=await sb.from('unidades').select('id').eq('codigo',aptoCod).single();
-  const unidadeId=unidade?.id||null;
-  // Define tipo: A-1501 é admin
-  const tipo=aptoCod==='A-1501'?'admin':'proprietario';
-  const status=aptoCod==='A-1501'?'ativo':'pendente';
-  // Cria registro de morador
-  const {error:errM}=await sb.from('moradores').insert({
-    auth_user_id:data.user.id,
-    unidade_id:unidadeId,
-    nome,email,
-    tipo,
-    status,
-    lgpd_aceito:true,
-    lgpd_aceito_em:new Date().toISOString()
+// Fechar modais clicando no fundo
+document.querySelectorAll('.modal-bg').forEach(function(m) {
+  m.addEventListener('click', function(e) { if(e.target===m) fecharModal(m.id); });
+});
+
+// LOGIN
+document.getElementById('btn-entrar').addEventListener('click', function() {
+  var email = document.getElementById('login-email').value.trim();
+  var pass = document.getElementById('login-pass').value;
+  var err = document.getElementById('login-err');
+  err.style.display = 'none';
+  if(!email || !pass) { err.textContent='Preencha e-mail e senha.'; err.style.display='block'; return; }
+  sb.auth.signInWithPassword({email:email, password:pass}).then(function(res) {
+    if(res.error) { err.textContent='E-mail ou senha incorretos.'; err.style.display='block'; return; }
+    iniciarApp(res.data.user);
   });
-  if(errM){err.textContent='Erro ao salvar: '+errM.message;err.style.display='block';return;}
-  fecharModal('m-cadastro');
-  if(tipo==='admin'){
-    toast('Conta de administrador criada! Faça login.');
-  } else {
-    toast('Cadastro realizado! Faça login para continuar.');
-  }
-}
-
-async function fazerLogout(){
-  await sb.auth.signOut();
-  document.getElementById('app-main').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  usuario=null;morador=null;
-}
-
-async function iniciarApp(user){
-  usuario=user;
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app-main').style.display='flex';
-  // Busca dados do morador
-  const {data:m}=await sb.from('moradores').select('*,unidades(*)').eq('auth_user_id',user.id).single();
-  morador=m;
-  if(m){
-    const ini=m.nome.split(' ').filter((_,j,a)=>j===0||j===a.length-1).map(n=>n[0]).join('').toUpperCase();
-    document.getElementById('av-btn').textContent=ini;
-    document.getElementById('pf-av').textContent=ini;
-    document.getElementById('pf-nome').textContent=m.nome;
-    document.getElementById('pf-apto').textContent=m.unidades?`Apto ${m.unidades.codigo} · ${({proprietario:'Proprietário',inquilino:'Inquilino',admin:'Administrador'}[m.tipo]||m.tipo)}`:'';
-    document.getElementById('role-tag').textContent=m.tipo==='admin'?'Administrador':'Morador';
-    document.getElementById('hdr-sub').textContent=m.unidades?`Apto ${m.unidades.codigo} · Quadra Poliesportiva`:'Quadra Poliesportiva';
-    if(m.tipo==='admin'){
-      document.getElementById('fab-aviso').innerHTML=`<button class="btn-p" onclick="abrirModal('m-novo-aviso')" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>`;
-    }
-  }
-  // Carrega dados iniciais
-  await Promise.all([carregarAvisos(),carregarBloqueios()]);
-  renderCal();
-  renderAvisos();
-  renderCheckin();
-  // Verifica se admin deve ver menu extra
-  verificarAdminMenu();
-}
-
-function verificarAdminMenu(){
-  if(!morador||morador.tipo!=='admin')return;
-}
-
-// ── VERIFICAÇÃO DE SESSÃO ────────────────────────────────────
-sb.auth.onAuthStateChange(async(event,session)=>{
-  if(session&&event==='SIGNED_IN'){
-    if(!usuario)await iniciarApp(session.user);
-  }
 });
 
-sb.auth.getSession().then(({data:{session}})=>{
-  if(session)iniciarApp(session.user);
-});
-
-// ── CADASTRO: POPULAR APTOS ──────────────────────────────────
-function abrirCadastro(){
-  // Gera lista de apartamentos estaticamente
-  // Bloco A: unidades 01 e 02 | Bloco B: unidades 03 e 04
-  const sel=document.getElementById('cad-apto');
-  let opts='';
-  for(let a=1;a<=15;a++){
-    const andar=String(a).padStart(2,'0');
-    opts+=`<option value="A-${andar}01">A-${andar}01</option>`;
-    opts+=`<option value="A-${andar}02">A-${andar}02</option>`;
+// CADASTRO - link
+document.getElementById('link-cadastro').addEventListener('click', function() {
+  var sel = document.getElementById('cad-apto');
+  var opts = '';
+  for(var a=1; a<=15; a++) {
+    var andar = String(a).padStart(2,'0');
+    opts += '<option value="A-'+andar+'01">A-'+andar+'01</option>';
+    opts += '<option value="A-'+andar+'02">A-'+andar+'02</option>';
   }
-  for(let a=1;a<=15;a++){
-    const andar=String(a).padStart(2,'0');
-    opts+=`<option value="B-${andar}03">B-${andar}03</option>`;
-    opts+=`<option value="B-${andar}04">B-${andar}04</option>`;
+  for(var a=1; a<=15; a++) {
+    var andar = String(a).padStart(2,'0');
+    opts += '<option value="B-'+andar+'03">B-'+andar+'03</option>';
+    opts += '<option value="B-'+andar+'04">B-'+andar+'04</option>';
   }
-  sel.innerHTML=opts;
-  // Pré-selecionar A-1501 como padrão
-  sel.value='A-1501';
+  sel.innerHTML = opts;
+  sel.value = 'A-1501';
   abrirModal('m-cadastro');
-}
+});
 
-// ── CALENDÁRIO ───────────────────────────────────────────────
-async function carregarBloqueios(){
-  const {data}=await sb.from('bloqueios').select('*');
-  bloquCache=data||[];
-}
+document.getElementById('btn-fechar-cad').addEventListener('click', function() { fecharModal('m-cadastro'); });
 
-function isBlocked(ds){return bloquCache.some(b=>ds>=b.data_inicio&&ds<=b.data_fim);}
-function hasRes(ds){return reservasCache.some(r=>r.data_reserva===ds&&r.status!=='cancelada'&&r.status!=='expirada');}
-
-function renderCal(){
-  document.getElementById('cal-lbl').textContent=MESES[vM]+' '+vY;
-  const g=document.getElementById('cal-grid');
-  g.innerHTML=DIAS_N.map(d=>`<div class="cal-dn">${d}</div>`).join('');
-  const first=new Date(vY,vM,1).getDay(),days=new Date(vY,vM+1,0).getDate(),today=ts();
-  for(let i=0;i<first;i++)g.innerHTML+=`<div></div>`;
-  for(let d=1;d<=days;d++){
-    const ds=`${vY}-${String(vM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    let cls='cal-d';
-    if(ds===today)cls+=' today';
-    if(ds===selDate)cls+=' sel';
-    if(isBlocked(ds))cls+=' blk';
-    if(hasRes(ds))cls+=' hasr';
-    g.innerHTML+=`<div class="${cls}" onclick="selData('${ds}')">${d}</div>`;
-  }
-}
-
-async function selData(ds){
-  selDate=ds;renderCal();
-  const sc=document.getElementById('slots-card');sc.style.display='block';
-  const blk=isBlocked(ds);
-  const dow=new Date(ds+'T12:00:00').getDay(),maxH=dow===0||dow===6?18:22;
-  document.getElementById('slots-lbl').textContent=blk?`Bloqueado — ${fmtD(ds)}`:`Horários — ${fmtD(ds)}`;
-  const sg=document.getElementById('slot-grid');
-  if(blk){sg.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:14px;font-size:11px;color:var(--red-txt)">${(bloquCache.find(b=>ds>=b.data_inicio&&ds<=b.data_fim)||{motivo:''}).motivo}</div>`;return;}
-  // Busca reservas do dia
-  const {data:res}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('data_reserva',ds).neq('status','cancelada').neq('status','expirada');
-  reservasCache=reservasCache.filter(r=>r.data_reserva!==ds);
-  if(res)reservasCache.push(...res);
-  sg.innerHTML='';
-  SLOTS.filter(s=>parseInt(s)<maxH).forEach(slot=>{
-    const r=(res||[]).find(x=>x.slot_inicio===slot+':00'||x.slot_inicio===slot);
-    let cls='slot livre',lbl='Livre',oc=`abrirModalReserva('${ds}','${slot}')`;
-    if(r){
-      const mine=morador&&r.unidade_id===morador.unidade_id;
-      cls=mine?'slot meu':'slot ocupado';
-      lbl=mine?`Minha (${r.duracao_min===60?'1h':'2h'})`:r.modalidades?r.modalidades.icone:'Ocupado';
-      oc=mine?`abrirModalCancelarId('${r.id}')`:'';
-    }
-    sg.innerHTML+=`<div class="${cls}" onclick="${oc}"><div class="sh">${slot}</div><div class="sl">${lbl}</div></div>`;
+document.getElementById('btn-fazer-cad').addEventListener('click', function() {
+  var nome = document.getElementById('cad-nome').value.trim();
+  var email = document.getElementById('cad-email').value.trim();
+  var pass = document.getElementById('cad-pass').value;
+  var aptoCod = document.getElementById('cad-apto').value;
+  var err = document.getElementById('cad-err');
+  err.style.display = 'none';
+  if(!nome||!email||!pass||!aptoCod) { err.textContent='Preencha todos os campos.'; err.style.display='block'; return; }
+  sb.auth.signUp({email:email, password:pass}).then(function(res) {
+    if(res.error) { err.textContent=res.error.message; err.style.display='block'; return; }
+    if(!res.data.user) { err.textContent='Confirme seu e-mail para continuar.'; err.style.display='block'; return; }
+    var uid = res.data.user.id;
+    var tipo = aptoCod==='A-1501' ? 'admin' : 'proprietario';
+    var status = aptoCod==='A-1501' ? 'ativo' : 'pendente';
+    sb.from('unidades').select('id').eq('codigo',aptoCod).single().then(function(r2) {
+      var unidadeId = r2.data ? r2.data.id : null;
+      sb.from('moradores').insert({
+        auth_user_id: uid, unidade_id: unidadeId,
+        nome: nome, email: email, tipo: tipo, status: status,
+        lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString()
+      }).then(function(r3) {
+        if(r3.error) { err.textContent='Erro: '+r3.error.message; err.style.display='block'; return; }
+        fecharModal('m-cadastro');
+        toast('Cadastro realizado! Faca login.');
+      });
+    });
   });
-}
+});
 
-function prevM(){vM--;if(vM<0){vM=11;vY--;}renderCal();}
-function nextM(){vM++;if(vM>11){vM=0;vY++;}renderCal();}
-
-// ── MODAL RESERVA ────────────────────────────────────────────
-function abrirModalReserva(date,slot){
-  if(!morador){toast('Faça login para reservar');return;}
-  pendSlot=slot;pendMod=null;pendDur=null;
-  document.getElementById('m-res-date-lbl').textContent=`${fmtD(date)} às ${slot}`;
-  renderModGrid();showStep(1);abrirModal('m-reserva');
-  pendSlot={date,slot};
-}
-
-function renderModGrid(){
-  document.getElementById('m-mod-grid').innerHTML=MODALIDADES.map(m=>`
-    <div class="mod-btn${pendMod===m.id?' sel':''}" onclick="selMod('${m.id}')">
-      <div class="mi">${m.icon}</div>
-      <div class="mn">${m.nome}</div>
-      <div class="mr">${m.sub} · ${m.fixo?'1h fixo':'1h ou 2h'}</div>
-    </div>`).join('');
-}
-
-function selMod(id){
-  pendMod=id;const m=MODALIDADES.find(x=>x.id===id);
-  if(m.fixo){pendDur=m.durs[0];showStep(3);buildResumo();}
-  else{showStep(2);buildDurRow(m);}
-}
-
-function buildDurRow(m){
-  document.getElementById('m-res-mod-lbl').textContent=`${m.icon} ${m.nome} (${m.sub})`;
-  document.getElementById('m-dur-row').innerHTML=m.durs.map(d=>`
-    <div class="dur-btn${pendDur===d?' sel':''}" onclick="selDur(${d})">
-      <div class="dt">${d===60?'1 hora':'2 horas'}</div>
-      <div class="dl">Encerra às ${addH(pendSlot.slot,d/60)}</div>
-    </div>`).join('');
-  document.getElementById('m-dur-info').innerHTML=`<div class="ib ib-amber" style="font-size:10.5px"><i class="ti ti-info-circle" aria-hidden="true" style="margin-right:3px"></i>Máximo: 2 horas para ${m.nome}.</div>`;
-}
-
-function selDur(d){pendDur=d;showStep(3);buildResumo();}
-
-function buildResumo(){
-  const m=MODALIDADES.find(x=>x.id===pendMod);
-  document.getElementById('m-resumo').innerHTML=`
-    <div class="resumo-row"><span class="resumo-lbl">Apartamento</span><span>${morador?.unidades?.codigo||'—'}</span></div>
-    <div class="resumo-row"><span class="resumo-lbl">Data</span><span>${fmtD(pendSlot.date)}</span></div>
-    <div class="resumo-row"><span class="resumo-lbl">Horário</span><span>${pendSlot.slot} – ${addH(pendSlot.slot,pendDur/60)}</span></div>
-    <div class="resumo-row"><span class="resumo-lbl">Modalidade</span><span>${m.icon} ${m.nome}</span></div>
-    <div class="resumo-row"><span class="resumo-lbl">Duração</span><span>${pendDur===60?'1 hora':'2 horas'}</span></div>
-    <div class="resumo-row"><span class="resumo-lbl">Check-in</span><span>Obrigatório — 15 min após início</span></div>`;
-}
-
-function voltarStep1(){pendDur=null;showStep(1);renderModGrid();}
-function voltarStep2(){pendDur=null;const m=MODALIDADES.find(x=>x.id===pendMod);showStep(2);buildDurRow(m);}
-function showStep(n){[1,2,3].forEach(i=>document.getElementById('m-res-step'+i).style.display=i===n?'block':'none');}
-
-async function confirmarReserva(){
-  if(!morador||!pendSlot||!pendMod||!pendDur)return;
-  // Busca modalidade_id do banco
-  const {data:modalDB}=await sb.from('modalidades').select('id').eq('nome',MODALIDADES.find(x=>x.id===pendMod).nome).single();
-  const slotFim=addH(pendSlot.slot,pendDur/60);
-  const {error}=await sb.from('reservas').insert({
-    unidade_id:morador.unidade_id,
-    morador_id:morador.id,
-    modalidade_id:modalDB?.id||null,
-    data_reserva:pendSlot.date,
-    slot_inicio:pendSlot.slot+':00',
-    slot_fim:slotFim+':00',
-    duracao_min:pendDur,
-    tipo_reserva:'pontual',
-    status:'confirmada'
+// LOGOUT
+document.getElementById('btn-logout').addEventListener('click', function() {
+  sb.auth.signOut().then(function() {
+    document.getElementById('app-main').style.display='none';
+    document.getElementById('login-screen').style.display='flex';
+    usuario=null; morador=null;
   });
-  if(error){toast('Erro: '+error.message);return;}
-  fecharModal('m-reserva');
-  await selData(pendSlot.date);
-  renderMinhas();renderCheckin();
-  toast('Reserva confirmada!');
-}
+});
 
-// ── CANCELAR RESERVA ─────────────────────────────────────────
-function abrirModalCancelar(r){
-  if(typeof r==='string')r=JSON.parse(r);
-  cancelId=r.id;
-  document.getElementById('mc-sub').textContent='Apto '+(morador?.unidades?.codigo||'');
-  document.getElementById('mc-dt').textContent=fmtD(r.data_reserva);
-  document.getElementById('mc-hr').textContent=(r.slot_inicio||'').slice(0,5)+' – '+(r.slot_fim||'').slice(0,5);
-  const m=MODALIDADES.find(x=>x.nome===(r.modalidades?.nome));
-  document.getElementById('mc-mod').textContent=m?m.icon+' '+m.nome:(r.modalidades?.nome||'—');
-  document.getElementById('mc-warn').style.display='none';
-  abrirModal('m-cancelar');
-}
-
-async function abrirModalCancelarId(id){
-  const{data:r}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('id',id).single();
-  if(r)abrirModalCancelar(r);
-}
-
-async function execCancelar(){
-  const{error}=await sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',cancelId);
-  if(error){toast('Erro ao cancelar');return;}
-  fecharModal('m-cancelar');
-  if(selDate)await selData(selDate);
-  renderMinhas();renderCheckin();
-  toast('Reserva cancelada.');
-}
-
-// ── MINHAS RESERVAS ──────────────────────────────────────────
-async function renderMinhas(){
-  if(!morador)return;
-  const{data:mine}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(20);
-  const list=document.getElementById('minhas-list');
-  if(!mine||!mine.length){list.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>';return;}
-  const today=ts();
-  let html='';
-  for(const r of mine){
-    let bc='b-ok';
-    if(r.checkin_feito)bc='b-teal';
-    else if(r.status==='cancelada')bc='b-danger';
-    else if(r.status==='expirada')bc='b-gray';
-    let bl='Confirmada';
-    if(r.checkin_feito)bl='Check-in';
-    else if(r.status==='cancelada')bl='Cancelada';
-    else if(r.status==='expirada')bl='Ausencia';
-    const mod=r.modalidades;
-    const modTxt=mod?(mod.icone+' '+mod.nome):'---';
-    const durTxt=r.duracao_min===60?'1 hora':'2 horas';
-    const dataHora=fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5);
-    let acts='';
-    if(r.status==='confirmada'){
-      let btns='';
-      if(!r.checkin_feito&&r.data_reserva===today){
-        btns+='<button class="btn-sm b" onclick="doCheckin(''+r.id+'')"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>';
+// INICIAR APP
+function iniciarApp(user) {
+  usuario = user;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-main').style.display = 'flex';
+  sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).single().then(function(res) {
+    morador = res.data;
+    if(morador) {
+      var n = morador.nome||'';
+      var partes = n.split(' ');
+      var ini = ((partes[0]||'')[0]||'') + ((partes[partes.length-1]||'')[0]||'');
+      ini = ini.toUpperCase();
+      document.getElementById('av-btn').textContent = ini;
+      document.getElementById('pf-av').textContent = ini;
+      document.getElementById('pf-nome').textContent = morador.nome;
+      var tipoTxt = {proprietario:'Proprietario',inquilino:'Inquilino',admin:'Administrador'}[morador.tipo] || morador.tipo;
+      var cod = morador.unidades ? morador.unidades.codigo : '';
+      document.getElementById('pf-apto').textContent = 'Apto '+cod+' - '+tipoTxt;
+      document.getElementById('hdr-sub').textContent = 'Apto '+cod+' - Quadra Poliesportiva';
+      document.getElementById('role-tag').textContent = morador.tipo==='admin' ? 'Administrador' : 'Morador';
+      if(morador.tipo==='admin') {
+        document.getElementById('fab-aviso').innerHTML = '<button class="btn-p" id="btn-novo-aviso" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>';
+        document.getElementById('btn-novo-aviso').addEventListener('click', function() { abrirModal('m-novo-aviso'); });
       }
-      btns+='<button class="btn-sm r" onclick="abrirModalCancelarId(''+r.id+'')"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
-      acts='<div class="res-acts">'+btns+'</div>';
     }
-    html+='<div class="res-card '+r.status+'">';
-    html+='<div class="res-top"><div class="res-data">'+dataHora+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
-    html+='<div class="res-info">'+modTxt+' - '+durTxt+'</div>';
-    html+=acts;
-    html+='</div>';
-  }
-  list.innerHTML=html;
-}
-
-// ── CHECK-IN ─────────────────────────────────────────────────
-async function doCheckin(id){
-  const{error}=await sb.from('reservas').update({checkin_feito:true,checkin_em:new Date().toISOString()}).eq('id',id);
-  if(error){toast('Erro no check-in');return;}
-  renderCheckin();renderMinhas();toast('Check-in realizado! Boa partida!');
-  document.getElementById('nd-ckin').classList.remove('show');
-}
-
-async function renderCheckin(){
-  if(!morador)return;
-  const today=ts();
-  const{data:proxima}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).eq('data_reserva',today).eq('status','confirmada').eq('checkin_feito',false).limit(1).maybeSingle();
-  const main=document.getElementById('ckin-main');
-  const nd=document.getElementById('nd-ckin');
-  if(proxima){
-    nd.classList.add('show');
-    const m=proxima.modalidades;
-    const nomeMod=m?(m.icone+' '+m.nome):'';
-    const slotIn=(proxima.slot_inicio||'').slice(0,5);
-    const slotFm=(proxima.slot_fim||'').slice(0,5);
-    const btnCI='<button class="ckin-big-btn" onclick="doCheckin(''+proxima.id+'')"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>';
-    main.innerHTML='<div class="ckin-hero"><div class="ckin-hero-title"><i class="ti ti-door-enter" aria-hidden="true"></i> Reserva de hoje</div><div class="ckin-hero-sub">'+nomeMod+' - '+slotIn+' a '+slotFm+'</div>'+btnCI+'<div style="font-size:10px;opacity:.75;margin-top:10px">Disponivel 10 min antes. Cancela apos 15 min sem check-in.</div></div>';
-  }else{
-    nd.classList.remove('show');
-    const{data:prox}=await sb.from('reservas').select('data_reserva,slot_inicio').eq('unidade_id',morador.unidade_id).gt('data_reserva',today).eq('status','confirmada').order('data_reserva').limit(1).maybeSingle();
-    main.innerHTML=`<div class="ib ib-blue"><i class="ti ti-calendar" aria-hidden="true" style="margin-right:4px"></i>${prox?`Próxima reserva: ${fmtD(prox.data_reserva)} às ${(prox.slot_inicio||'').slice(0,5)}`:'Nenhuma reserva ativa no momento.'}</div>`;
-  }
-  const{data:hist}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(10);
-  const hel=document.getElementById('ckin-hist');
-  if(!hist?.length){hel.innerHTML=`<div class="empty"><i class="ti ti-history"></i>Sem histórico</div>`;return;}
-  let hhtml='';
-  for(const r of hist){
-    const dotC=r.checkin_feito?'#3B6D11':(r.status==='cancelada'||r.status==='expirada'?'#E24B4A':'#EF9F27');
-    let bl='<span class="badge b-warn">Aguardando</span>';
-    if(r.checkin_feito)bl='<span class="badge b-teal">Presente</span>';
-    else if(r.status==='cancelada')bl='<span class="badge b-danger">Cancelada</span>';
-    else if(r.status==='expirada')bl='<span class="badge b-gray">Ausencia</span>';
-    const m=r.modalidades;
-    const modN=m?(m.icone+' '+m.nome):'---';
-    hhtml+='<div class="ckin-row">';
-    hhtml+='<div class="ckin-dot" style="background:'+dotC+'"></div>';
-    hhtml+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div>';
-    hhtml+='<div style="font-size:10.5px;color:var(--txt2)">'+modN+'</div></div>';
-    hhtml+=bl+'</div>';
-  }
-  hel.innerHTML=hhtml;
-}
-
-// ── AVISOS ───────────────────────────────────────────────────
-async function carregarAvisos(){
-  if(!morador)return;
-  const{data}=await sb.from('avisos').select('*,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20);
-  avisosCache=data||[];
-}
-
-async function renderAvisos(){
-  if(!morador){document.getElementById('avisos-list').innerHTML=`<div class="empty"><i class="ti ti-bell-off"></i>Faça login para ver avisos</div>`;return;}
-  await carregarAvisos();
-  const vistos=avisosCache.filter(a=>a.destino==='todos'||(a.destino==='blocoA'&&morador.unidades?.bloco==='A')||(a.destino==='blocoB'&&morador.unidades?.bloco==='B'));
-  const naoLidos=vistos.filter(a=>!a.leituras_avisos?.find(l=>l.morador_id===morador.id)).length;
-  document.getElementById('nd-avisos').classList.toggle('show',naoLidos>0);
-  const list=document.getElementById('avisos-list');
-  if(!vistos.length){list.innerHTML=`<div class="empty"><i class="ti ti-bell-off"></i>Nenhum aviso</div>`;return;}
-  list.innerHTML=vistos.map(av=>{
-    const lido=av.leituras_avisos?.find(l=>l.morador_id===morador.id);
-    const pct=av.leituras_avisos?Math.round(av.leituras_avisos.length/60*100):0;
-    return`<div class="av-card ${av.tipo}">
-      <div class="av-hdr">
-        <div class="av-titulo">${!lido?'<span style="display:inline-block;width:6px;height:6px;background:#E24B4A;border-radius:50%;margin-right:5px;vertical-align:middle"></span>':''}${av.titulo}</div>
-        <span class="badge ${av.tipo==='urgente'?'b-danger':av.tipo==='manutencao'?'b-warn':av.tipo==='info'?'b-info':'b-ok'}" style="margin-left:8px;flex-shrink:0">${AV_LABELS[av.tipo]}</span>
-      </div>
-      <div class="av-corpo">${av.corpo}</div>
-      <div class="av-foot">
-        <span>${fmtD(av.publicado_em?.slice(0,10))}</span>
-        ${morador.tipo==='admin'?`<span>${pct}% leram</span>`:lido?`<span style="color:var(--verde)"><i class="ti ti-check" aria-hidden="true"></i> Lido</span>`:'<span style="color:#E24B4A;cursor:pointer" onclick="marcarLido(''+av.id+'')">Marcar como lido</span>'}
-      </div>
-      ${morador.tipo==='admin'?`<div class="leitura-bar"><div class="leitura-fill" style="width:${pct}%"></div></div>`:''}
-    </div>`;
-  }).join('');
-}
-
-async function marcarLido(id){
-  await sb.from('leituras_avisos').upsert({aviso_id:id,morador_id:morador.id});
-  renderAvisos();
-}
-
-async function publicarAviso(){
-  const t=document.getElementById('av-tit').value.trim();
-  const c=document.getElementById('av-corpo').value.trim();
-  if(!t||!c){toast('Preencha título e mensagem');return;}
-  const{error}=await sb.from('avisos').insert({
-    tipo:document.getElementById('av-tipo').value,
-    titulo:t,corpo:c,
-    destino:document.getElementById('av-dest').value,
-    publicado_por:morador.id
+    carregarBloqueios();
+    renderCal();
+    renderAvisos();
+    renderCheckin();
   });
-  if(error){toast('Erro: '+error.message);return;}
-  document.getElementById('av-tit').value='';document.getElementById('av-corpo').value='';
-  fecharModal('m-novo-aviso');renderAvisos();toast('Aviso publicado!');
 }
 
-// ── OCORRÊNCIAS ──────────────────────────────────────────────
-async function renderOco(){
-  if(!morador)return;
-  let query=sb.from('ocorrencias').select('*,mensagens_ocorrencia(*)');
-  if(morador.tipo!=='admin')query=query.eq('unidade_id',morador.unidade_id);
-  if(ocoFiltro!=='todos')query=query.eq('status',ocoFiltro);
-  const{data}=await query.order('created_at',{ascending:false}).limit(20);
-  ocosCache=data||[];
-  const list=document.getElementById('oco-list');
-  const det=document.getElementById('oco-detail');
-  if(ocoDetalhe){
-    const o=ocosCache.find(x=>x.id===ocoDetalhe);
-    list.innerHTML='';
-    det.innerHTML=o?`<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div style="font-size:13px;font-weight:600;flex:1">${o.titulo}</div>
-        <span class="badge ${o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray'}">${ST_LABELS[o.status]}</span>
-      </div>
-      <div style="font-size:10.5px;color:var(--txt2);margin-bottom:8px">${o.local||''} · <span class="oco-cat">${OCA_LABELS[o.categoria]||o.categoria}</span></div>
-      <div style="font-size:11px;color:var(--txt2);margin-bottom:10px">${o.descricao||''}</div>
-      <div class="sec-lbl">Timeline</div>
-      ${(o.mensagens_ocorrencia||[]).map(m=>`<div class="tl-item">
-        <div class="tl-dot" style="background:${m.origem==='admin'?'#27500A':'#378ADD'}"></div>
-        <div class="tl-body"><div class="tl-ev">${m.origem==='admin'?'Administração':'Morador'}</div>
-        <div class="tl-dt">${fmtD(m.created_at?.slice(0,10))}</div>
-        <div class="tl-msg">${m.mensagem}</div></div>
-      </div>`).join('')}
-      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn-sm" onclick="ocoDetalhe=null;renderOco()"><i class="ti ti-arrow-left" aria-hidden="true"></i> Voltar</button>
-        ${morador.tipo==='admin'&&(o.status==='aberta'||o.status==='andamento')?'<button class="btn-sm a" onclick="responderOco(''+o.id+'')"><i class="ti ti-message" aria-hidden="true"></i> Responder</button>':''}
-      </div>
-    </div>`:'';
+// Sessao persistente
+sb.auth.getSession().then(function(res) {
+  if(res.data && res.data.session) iniciarApp(res.data.session.user);
+});
+
+// TABS
+document.getElementById('tab-avisos').addEventListener('click', function() { goScreen('avisos'); renderAvisos(); });
+document.getElementById('tab-reservar').addEventListener('click', function() { goScreen('reservar'); renderCal(); });
+document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
+document.getElementById('tab-checkin').addEventListener('click', function() { goScreen('checkin'); renderCheckin(); });
+document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); });
+document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
+
+function goScreen(name) {
+  var telas = ['avisos','reservar','minhas','checkin','ocorrencias','perfil'];
+  telas.forEach(function(t) {
+    document.getElementById('screen-'+t).classList.remove('active');
+    var tab = document.getElementById('tab-'+t);
+    if(tab) tab.classList.remove('active');
+  });
+  document.getElementById('screen-'+name).classList.add('active');
+  var tab = document.getElementById('tab-'+name);
+  if(tab) tab.classList.add('active');
+}
+
+// CALENDARIO
+document.getElementById('btn-prev-m').addEventListener('click', function() { vM--; if(vM<0){vM=11;vY--;} renderCal(); });
+document.getElementById('btn-next-m').addEventListener('click', function() { vM++; if(vM>11){vM=0;vY++;} renderCal(); });
+
+function carregarBloqueios() {
+  sb.from('bloqueios').select('*').then(function(res) { bloquCache = res.data||[]; });
+}
+
+function isBlocked(ds) {
+  return bloquCache.some(function(b) { return ds>=b.data_inicio && ds<=b.data_fim; });
+}
+
+function renderCal() {
+  document.getElementById('cal-lbl').textContent = MESES[vM]+' '+vY;
+  var g = document.getElementById('cal-grid');
+  var html = DIAS_N.map(function(d) { return '<div class="cal-dn">'+d+'</div>'; }).join('');
+  var first = new Date(vY,vM,1).getDay();
+  var days = new Date(vY,vM+1,0).getDate();
+  var today = ts();
+  for(var i=0; i<first; i++) html += '<div></div>';
+  for(var d=1; d<=days; d++) {
+    var ds = vY+'-'+String(vM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var cls = 'cal-d';
+    if(ds===today) cls += ' today';
+    if(ds===selDate) cls += ' sel';
+    if(isBlocked(ds)) cls += ' blk';
+    html += '<div class="'+cls+'" data-ds="'+ds+'">'+d+'</div>';
+  }
+  g.innerHTML = html;
+  g.querySelectorAll('.cal-d').forEach(function(el) {
+    el.addEventListener('click', function() { selData(el.dataset.ds); });
+  });
+}
+
+function selData(ds) {
+  selDate = ds;
+  renderCal();
+  var sc = document.getElementById('slots-card');
+  sc.style.display = 'block';
+  var blk = isBlocked(ds);
+  var dow = new Date(ds+'T12:00:00').getDay();
+  var maxH = (dow===0||dow===6) ? 18 : 22;
+  document.getElementById('slots-lbl').textContent = blk ? ('Bloqueado - '+fmtD(ds)) : ('Horarios - '+fmtD(ds));
+  var sg = document.getElementById('slot-grid');
+  if(blk) {
+    var motivo = '';
+    bloquCache.forEach(function(b) { if(ds>=b.data_inicio&&ds<=b.data_fim) motivo=b.motivo||'Bloqueado'; });
+    sg.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;font-size:11px;color:var(--rdt)">'+motivo+'</div>';
     return;
   }
-  det.innerHTML='';
-  list.innerHTML=ocosCache.length?ocosCache.map(o=>`
-    <div class="oco-card ${o.status}" onclick="ocoDetalhe='"+o.id+"';renderOco()">
-      <div class="oco-top"><div class="oco-titulo">${o.prioridade==='urgente'?'⚠ ':''} ${o.titulo}</div>
-        <span class="badge ${o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray'}">${ST_LABELS[o.status]}</span></div>
-      <div class="oco-meta"><span class="oco-cat">${OCA_LABELS[o.categoria]||o.categoria}</span><span>${o.local||''}</span><span>${fmtD(o.created_at?.slice(0,10))}</span></div>
-    </div>`).join(''):`<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma ocorrência</div>`;
+  sb.from('reservas').select('id,unidade_id,slot_inicio,slot_fim,duracao_min,status,modalidades(nome,icone)').eq('data_reserva',ds).neq('status','cancelada').neq('status','expirada').then(function(res) {
+    var reservasDia = res.data||[];
+    var html = '';
+    SLOTS.forEach(function(slot) {
+      if(parseInt(slot) >= maxH) return;
+      var r = null;
+      reservasDia.forEach(function(x) { if((x.slot_inicio||'').slice(0,5)===slot) r=x; });
+      var cls, lbl, action;
+      if(!r) {
+        cls='slot livre'; lbl='Livre'; action='livre';
+      } else if(morador && r.unidade_id===morador.unidade_id) {
+        cls='slot meu'; lbl='Minha'; action='meu_'+r.id;
+      } else {
+        cls='slot ocupado'; lbl='Ocupado'; action='';
+      }
+      html += '<div class="'+cls+'" data-action="'+action+'" data-slot="'+slot+'" data-ds="'+ds+'">';
+      html += '<div class="sh">'+slot+'</div><div class="sl">'+lbl+'</div></div>';
+    });
+    sg.innerHTML = html;
+    sg.querySelectorAll('.slot').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var action = el.dataset.action;
+        var slot = el.dataset.slot;
+        var ds2 = el.dataset.ds;
+        if(action==='livre') { abrirModalReserva(ds2, slot); }
+        else if(action && action.indexOf('meu_')===0) { abrirModalCancelar(action.replace('meu_','')); }
+      });
+    });
+  });
 }
 
-function setFiltroOco(f,el){
-  ocoFiltro=f;ocoDetalhe=null;
-  document.querySelectorAll('.fpill').forEach(b=>{b.className='fpill';});
-  el.className='fpill active';
+// MODAL RESERVA
+document.getElementById('btn-cancelar-res').addEventListener('click', function() { fecharModal('m-reserva'); });
+document.getElementById('btn-voltar-step1').addEventListener('click', function() { pendDur=null; showStep(1); renderModGrid(); });
+document.getElementById('btn-voltar-step2').addEventListener('click', function() { pendDur=null; var m=MODS.find(function(x){return x.id===pendMod;}); showStep(2); buildDurRow(m); });
+document.getElementById('btn-confirmar-res').addEventListener('click', confirmarReserva);
+
+function abrirModalReserva(date, slot) {
+  if(!morador) { toast('Faca login para reservar'); return; }
+  pendSlot = {date:date, slot:slot};
+  pendMod = null; pendDur = null;
+  document.getElementById('m-res-date-lbl').textContent = fmtD(date)+' as '+slot;
+  renderModGrid(); showStep(1); abrirModal('m-reserva');
+}
+
+function renderModGrid() {
+  var html = '';
+  MODS.forEach(function(m) {
+    var cls = 'mod-btn' + (pendMod===m.id ? ' sel' : '');
+    html += '<div class="'+cls+'" data-mid="'+m.id+'">';
+    html += '<div class="mi">'+m.icon+'</div>';
+    html += '<div class="mn">'+m.nome+'</div>';
+    html += '<div class="mr">'+m.sub+' - '+(m.fixo?'1h fixo':'1h ou 2h')+'</div>';
+    html += '</div>';
+  });
+  var g = document.getElementById('m-mod-grid');
+  g.innerHTML = html;
+  g.querySelectorAll('.mod-btn').forEach(function(el) {
+    el.addEventListener('click', function() { selMod(el.dataset.mid); });
+  });
+}
+
+function selMod(id) {
+  pendMod = id;
+  var m = MODS.find(function(x){return x.id===id;});
+  if(m.fixo) { pendDur=m.durs[0]; showStep(3); buildResumo(); }
+  else { showStep(2); buildDurRow(m); }
+}
+
+function buildDurRow(m) {
+  document.getElementById('m-res-mod-lbl').textContent = m.icon+' '+m.nome+' ('+m.sub+')';
+  var html = '';
+  m.durs.forEach(function(d) {
+    var cls = 'dur-btn'+(pendDur===d?' sel':'');
+    html += '<div class="'+cls+'" data-dur="'+d+'">';
+    html += '<div class="dt">'+(d===60?'1 hora':'2 horas')+'</div>';
+    html += '<div class="dl">Encerra as '+addH(pendSlot.slot, d/60)+'</div>';
+    html += '</div>';
+  });
+  var g = document.getElementById('m-dur-row');
+  g.innerHTML = html;
+  g.querySelectorAll('.dur-btn').forEach(function(el) {
+    el.addEventListener('click', function() { selDur(parseInt(el.dataset.dur)); });
+  });
+  document.getElementById('m-dur-info').innerHTML = '<div class="ib ib-amber" style="font-size:10.5px">Maximo: 2 horas para '+m.nome+'.</div>';
+}
+
+function selDur(d) { pendDur=d; showStep(3); buildResumo(); }
+
+function buildResumo() {
+  var m = MODS.find(function(x){return x.id===pendMod;});
+  var cod = morador && morador.unidades ? morador.unidades.codigo : '---';
+  var html = '';
+  html += '<div class="resumo-row"><span class="resumo-lbl">Apartamento</span><span>'+cod+'</span></div>';
+  html += '<div class="resumo-row"><span class="resumo-lbl">Data</span><span>'+fmtD(pendSlot.date)+'</span></div>';
+  html += '<div class="resumo-row"><span class="resumo-lbl">Horario</span><span>'+pendSlot.slot+' - '+addH(pendSlot.slot,pendDur/60)+'</span></div>';
+  html += '<div class="resumo-row"><span class="resumo-lbl">Modalidade</span><span>'+m.icon+' '+m.nome+'</span></div>';
+  html += '<div class="resumo-row"><span class="resumo-lbl">Duracao</span><span>'+(pendDur===60?'1 hora':'2 horas')+'</span></div>';
+  document.getElementById('m-resumo').innerHTML = html;
+}
+
+function showStep(n) {
+  [1,2,3].forEach(function(i) {
+    document.getElementById('m-res-step'+i).style.display = (i===n?'block':'none');
+  });
+}
+
+function confirmarReserva() {
+  if(!morador||!pendSlot||!pendMod||!pendDur) return;
+  var modNome = MODS.find(function(x){return x.id===pendMod;}).nome;
+  sb.from('modalidades').select('id').eq('nome',modNome).single().then(function(r) {
+    var mid = r.data ? r.data.id : null;
+    sb.from('reservas').insert({
+      unidade_id: morador.unidade_id,
+      morador_id: morador.id,
+      modalidade_id: mid,
+      data_reserva: pendSlot.date,
+      slot_inicio: pendSlot.slot+':00',
+      slot_fim: addH(pendSlot.slot,pendDur/60)+':00',
+      duracao_min: pendDur,
+      tipo_reserva: 'pontual',
+      status: 'confirmada'
+    }).then(function(r2) {
+      if(r2.error) { toast('Erro: '+r2.error.message); return; }
+      fecharModal('m-reserva');
+      selData(pendSlot.date);
+      renderMinhas(); renderCheckin();
+      toast('Reserva confirmada!');
+    });
+  });
+}
+
+// MODAL CANCELAR
+document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
+document.getElementById('btn-exec-cancel').addEventListener('click', function() {
+  if(!cancelId) return;
+  sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',cancelId).then(function(r) {
+    if(r.error) { toast('Erro ao cancelar'); return; }
+    fecharModal('m-cancelar');
+    if(selDate) selData(selDate);
+    renderMinhas(); renderCheckin();
+    toast('Reserva cancelada.');
+  });
+});
+
+function abrirModalCancelar(id) {
+  cancelId = id;
+  sb.from('reservas').select('*').eq('id',id).single().then(function(res) {
+    var r = res.data;
+    if(!r) return;
+    document.getElementById('mc-sub').textContent = 'Apto '+(morador && morador.unidades ? morador.unidades.codigo : '');
+    document.getElementById('mc-dt').textContent = fmtD(r.data_reserva);
+    document.getElementById('mc-hr').textContent = (r.slot_inicio||'').slice(0,5)+' - '+(r.slot_fim||'').slice(0,5);
+    abrirModal('m-cancelar');
+  });
+}
+
+// CHECK-IN
+function doCheckin(id) {
+  sb.from('reservas').update({checkin_feito:true,checkin_em:new Date().toISOString()}).eq('id',id).then(function(r) {
+    if(r.error) { toast('Erro no check-in'); return; }
+    renderCheckin(); renderMinhas();
+    toast('Check-in realizado! Boa partida!');
+  });
+}
+
+function renderCheckin() {
+  if(!morador) return;
+  var today = ts();
+  sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).eq('data_reserva',today).eq('status','confirmada').eq('checkin_feito',false).limit(1).maybeSingle().then(function(res) {
+    var proxima = res.data;
+    var main = document.getElementById('ckin-main');
+    var nd = document.getElementById('nd-ckin');
+    if(proxima) {
+      nd.classList.add('show');
+      var m = proxima.modalidades;
+      var nomeMod = m ? (m.icone+' '+m.nome) : '';
+      var si = (proxima.slot_inicio||'').slice(0,5);
+      var sf = (proxima.slot_fim||'').slice(0,5);
+      var html = '<div class="ckin-hero">';
+      html += '<div class="ckin-hero-title">Reserva de hoje</div>';
+      html += '<div class="ckin-hero-sub">'+nomeMod+' - '+si+' a '+sf+'</div>';
+      html += '<button class="ckin-big-btn" id="btn-fazer-ckin"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>';
+      html += '<div style="font-size:10px;opacity:.75;margin-top:10px">Disponivel 10 min antes. Cancela apos 15 min sem check-in.</div>';
+      html += '</div>';
+      main.innerHTML = html;
+      document.getElementById('btn-fazer-ckin').addEventListener('click', function() { doCheckin(proxima.id); });
+    } else {
+      nd.classList.remove('show');
+      sb.from('reservas').select('data_reserva,slot_inicio').eq('unidade_id',morador.unidade_id).gt('data_reserva',today).eq('status','confirmada').order('data_reserva').limit(1).maybeSingle().then(function(r2) {
+        var prox = r2.data;
+        main.innerHTML = '<div class="ib ib-blue">' + (prox ? 'Proxima reserva: '+fmtD(prox.data_reserva)+' as '+(prox.slot_inicio||'').slice(0,5) : 'Nenhuma reserva ativa.') + '</div>';
+      });
+    }
+  });
+  sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(10).then(function(res) {
+    var hist = res.data||[];
+    var hel = document.getElementById('ckin-hist');
+    if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
+    var html = '';
+    hist.forEach(function(r) {
+      var dotC = r.checkin_feito ? '#3B6D11' : ((r.status==='cancelada'||r.status==='expirada') ? '#E24B4A' : '#EF9F27');
+      var bl = '<span class="badge b-warn">Aguardando</span>';
+      if(r.checkin_feito) bl='<span class="badge b-teal">Presente</span>';
+      else if(r.status==='cancelada') bl='<span class="badge b-danger">Cancelada</span>';
+      else if(r.status==='expirada') bl='<span class="badge b-gray">Ausencia</span>';
+      var m = r.modalidades;
+      var modN = m ? (m.icone+' '+m.nome) : '---';
+      html += '<div class="ckin-row">';
+      html += '<div class="ckin-dot" style="background:'+dotC+'"></div>';
+      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">'+modN+'</div></div>';
+      html += bl+'</div>';
+    });
+    hel.innerHTML = html;
+  });
+}
+
+// MINHAS RESERVAS
+function renderMinhas() {
+  if(!morador) return;
+  sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(20).then(function(res) {
+    var mine = res.data||[];
+    var list = document.getElementById('minhas-list');
+    if(!mine.length) { list.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>'; return; }
+    var today = ts();
+    var html = '';
+    var cancelIds = [];
+    var checkinIds = [];
+    mine.forEach(function(r) {
+      var bc = 'b-ok';
+      if(r.checkin_feito) bc='b-teal';
+      else if(r.status==='cancelada') bc='b-danger';
+      else if(r.status==='expirada') bc='b-gray';
+      var bl = 'Confirmada';
+      if(r.checkin_feito) bl='Check-in';
+      else if(r.status==='cancelada') bl='Cancelada';
+      else if(r.status==='expirada') bl='Ausencia';
+      var m = r.modalidades;
+      var modTxt = m ? (m.icone+' '+m.nome) : '---';
+      var dur = r.duracao_min===60 ? '1 hora' : '2 horas';
+      var dh = fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5);
+      html += '<div class="res-card '+r.status+'">';
+      html += '<div class="res-top"><div class="res-data">'+dh+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
+      html += '<div class="res-info">'+modTxt+' - '+dur+'</div>';
+      if(r.status==='confirmada') {
+        html += '<div class="res-acts">';
+        if(!r.checkin_feito && r.data_reserva===today) {
+          html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>';
+          checkinIds.push(r.id);
+        }
+        html += '<button class="btn-sm r" data-cancel-id="'+r.id+'"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
+        cancelIds.push(r.id);
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    list.innerHTML = html;
+    list.querySelectorAll('[data-cancel-id]').forEach(function(btn) {
+      btn.addEventListener('click', function() { abrirModalCancelar(btn.dataset.cancelId); });
+    });
+    list.querySelectorAll('[data-ckin-id]').forEach(function(btn) {
+      btn.addEventListener('click', function() { doCheckin(btn.dataset.ckinId); });
+    });
+  });
+}
+
+// AVISOS
+function renderAvisos() {
+  if(!morador) { document.getElementById('avisos-list').innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Faca login</div>'; return; }
+  sb.from('avisos').select('*,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
+    var avisos = res.data||[];
+    var bloco = morador.unidades ? morador.unidades.bloco : '';
+    var vistos = avisos.filter(function(a) {
+      return a.destino==='todos' || (a.destino==='blocoA'&&bloco==='A') || (a.destino==='blocoB'&&bloco==='B');
+    });
+    var naoLidos = vistos.filter(function(a) {
+      return !(a.leituras_avisos||[]).find(function(l){return l.morador_id===morador.id;});
+    }).length;
+    document.getElementById('nd-avisos').classList.toggle('show', naoLidos>0);
+    var list = document.getElementById('avisos-list');
+    if(!vistos.length) { list.innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Nenhum aviso</div>'; return; }
+    var html = '';
+    var lidoIds = [];
+    vistos.forEach(function(av) {
+      var lido = (av.leituras_avisos||[]).find(function(l){return l.morador_id===morador.id;});
+      var bcls = av.tipo==='urgente'?'b-danger':av.tipo==='manutencao'?'b-warn':av.tipo==='info'?'b-info':'b-ok';
+      var pct = Math.round((av.leituras_avisos||[]).length/60*100);
+      html += '<div class="av-card '+av.tipo+'">';
+      html += '<div class="av-hdr"><div class="av-titulo">'+(lido?'':'<span style="display:inline-block;width:6px;height:6px;background:#E24B4A;border-radius:50%;margin-right:5px;vertical-align:middle"></span>')+av.titulo+'</div>';
+      html += '<span class="badge '+bcls+'" style="margin-left:8px;flex-shrink:0">'+AVL[av.tipo]+'</span></div>';
+      html += '<div class="av-corpo">'+av.corpo+'</div>';
+      html += '<div class="av-foot"><span>'+fmtD((av.publicado_em||'').slice(0,10))+'</span>';
+      if(morador.tipo==='admin') {
+        html += '<span>'+pct+'% leram</span>';
+      } else if(lido) {
+        html += '<span style="color:var(--v)">Lido</span>';
+      } else {
+        html += '<span style="color:#E24B4A;cursor:pointer;text-decoration:underline" data-lido-id="'+av.id+'">Marcar como lido</span>';
+        lidoIds.push(av.id);
+      }
+      html += '</div>';
+      if(morador.tipo==='admin') html += '<div style="height:3px;background:var(--bg);margin:0 11px 7px;border-radius:2px;overflow:hidden"><div style="height:100%;background:var(--v);border-radius:2px;width:'+pct+'%"></div></div>';
+      html += '</div>';
+    });
+    list.innerHTML = html;
+    list.querySelectorAll('[data-lido-id]').forEach(function(el) {
+      el.addEventListener('click', function() {
+        sb.from('leituras_avisos').upsert({aviso_id:el.dataset.lidoId, morador_id:morador.id}).then(function() { renderAvisos(); });
+      });
+    });
+  });
+}
+
+// PUBLICAR AVISO
+document.getElementById('btn-fechar-aviso').addEventListener('click', function() { fecharModal('m-novo-aviso'); });
+document.getElementById('btn-pub-aviso').addEventListener('click', function() {
+  var t = document.getElementById('av-tit').value.trim();
+  var c = document.getElementById('av-corpo').value.trim();
+  if(!t||!c) { toast('Preencha titulo e mensagem'); return; }
+  sb.from('avisos').insert({
+    tipo: document.getElementById('av-tipo').value,
+    titulo: t, corpo: c,
+    destino: document.getElementById('av-dest').value,
+    publicado_por: morador.id
+  }).then(function(r) {
+    if(r.error) { toast('Erro: '+r.error.message); return; }
+    document.getElementById('av-tit').value='';
+    document.getElementById('av-corpo').value='';
+    fecharModal('m-novo-aviso'); renderAvisos(); toast('Aviso publicado!');
+  });
+});
+
+// OCORRENCIAS
+document.getElementById('btn-nova-oco').addEventListener('click', function() { abrirModal('m-nova-oco'); });
+document.getElementById('btn-fechar-oco').addEventListener('click', function() { fecharModal('m-nova-oco'); });
+document.getElementById('btn-salvar-oco').addEventListener('click', function() {
+  var t = document.getElementById('oc-tit').value.trim();
+  if(!t) { toast('Informe o titulo'); return; }
+  sb.from('ocorrencias').insert({
+    unidade_id: morador.unidade_id, morador_id: morador.id,
+    categoria: document.getElementById('oc-cat').value,
+    titulo: t, descricao: document.getElementById('oc-desc').value||t,
+    local: document.getElementById('oc-loc').value,
+    prioridade: document.getElementById('oc-prio').value,
+    status: 'aberta'
+  }).then(function(r) {
+    if(r.error) { toast('Erro: '+r.error.message); return; }
+    document.getElementById('oc-tit').value='';
+    document.getElementById('oc-desc').value='';
+    fecharModal('m-nova-oco'); renderOco(); toast('Ocorrencia registrada.');
+  });
+});
+
+document.getElementById('fpill-todos').addEventListener('click', function() { setFiltro('todos',this); });
+document.getElementById('fpill-aberta').addEventListener('click', function() { setFiltro('aberta',this); });
+document.getElementById('fpill-andamento').addEventListener('click', function() { setFiltro('andamento',this); });
+document.getElementById('fpill-resolvida').addEventListener('click', function() { setFiltro('resolvida',this); });
+
+function setFiltro(f, el) {
+  ocoFiltro=f; ocoDetalhe=null;
+  document.querySelectorAll('.fpill').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
   renderOco();
 }
 
-async function salvarOco(){
-  const t=document.getElementById('oc-tit').value.trim();
-  if(!t){toast('Informe o título');return;}
-  const{error}=await sb.from('ocorrencias').insert({
-    unidade_id:morador.unidade_id,morador_id:morador.id,
-    categoria:document.getElementById('oc-cat').value,
-    titulo:t,descricao:document.getElementById('oc-desc').value||t,
-    local:document.getElementById('oc-loc').value,
-    prioridade:document.getElementById('oc-prio').value,
-    status:'aberta'
+function renderOco() {
+  if(!morador) return;
+  var q = sb.from('ocorrencias').select('*,mensagens_ocorrencia(*)');
+  if(morador.tipo!=='admin') q = q.eq('unidade_id',morador.unidade_id);
+  if(ocoFiltro!=='todos') q = q.eq('status',ocoFiltro);
+  q.order('created_at',{ascending:false}).limit(20).then(function(res) {
+    var ocos = res.data||[];
+    var list = document.getElementById('oco-list');
+    var det = document.getElementById('oco-detail');
+    if(ocoDetalhe) {
+      var o = ocos.find(function(x){return x.id===ocoDetalhe;});
+      list.innerHTML='';
+      if(!o) { det.innerHTML=''; return; }
+      var html = '<div class="card">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">';
+      html += '<div style="font-size:13px;font-weight:600;flex:1">'+o.titulo+'</div>';
+      html += '<span class="badge '+(o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray')+'">'+STL[o.status]+'</span></div>';
+      html += '<div style="font-size:10.5px;color:var(--t2);margin-bottom:8px">'+(o.local||'')+' - <span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span></div>';
+      html += '<div style="font-size:11px;color:var(--t2);margin-bottom:10px">'+(o.descricao||'')+'</div>';
+      html += '<div class="sec-lbl">Timeline</div>';
+      (o.mensagens_ocorrencia||[]).forEach(function(msg) {
+        var cor = msg.origem==='admin' ? '#27500A' : '#378ADD';
+        html += '<div style="display:flex;gap:8px;margin-bottom:9px">';
+        html += '<div style="width:8px;height:8px;border-radius:50%;background:'+cor+';flex-shrink:0;margin-top:3px"></div>';
+        html += '<div><div style="font-size:11px;font-weight:600">'+(msg.origem==='admin'?'Administracao':'Morador')+'</div>';
+        html += '<div style="font-size:10px;color:var(--t2)">'+fmtD((msg.created_at||'').slice(0,10))+'</div>';
+        html += '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+msg.mensagem+'</div></div></div>';
+      });
+      html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">';
+      html += '<button class="btn-sm" id="btn-voltar-oco">Voltar</button>';
+      if(morador.tipo==='admin' && (o.status==='aberta'||o.status==='andamento')) {
+        html += '<button class="btn-sm b" id="btn-resp-oco">Responder</button>';
+      }
+      html += '</div></div>';
+      det.innerHTML = html;
+      document.getElementById('btn-voltar-oco').addEventListener('click', function() { ocoDetalhe=null; renderOco(); });
+      var btnResp = document.getElementById('btn-resp-oco');
+      if(btnResp) {
+        btnResp.addEventListener('click', function() {
+          var msg = prompt('Mensagem de atualizacao:');
+          if(!msg) return;
+          sb.from('mensagens_ocorrencia').insert({ocorrencia_id:o.id,autor_id:morador.id,origem:'admin',mensagem:msg}).then(function() {
+            sb.from('ocorrencias').update({status:'andamento'}).eq('id',o.id).then(function() { renderOco(); toast('Resposta enviada.'); });
+          });
+        });
+      }
+      return;
+    }
+    det.innerHTML='';
+    if(!ocos.length) { list.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma ocorrencia</div>'; return; }
+    var html = '';
+    ocos.forEach(function(o) {
+      var bc = o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray';
+      html += '<div class="oco-card '+o.status+'" data-oco-id="'+o.id+'">';
+      html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'⚠ ':'')+o.titulo+'</div>';
+      html += '<span class="badge '+bc+'">'+STL[o.status]+'</span></div>';
+      html += '<div class="oco-meta"><span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span>';
+      html += '<span>'+(o.local||'')+'</span><span>'+fmtD((o.created_at||'').slice(0,10))+'</span></div></div>';
+    });
+    list.innerHTML = html;
+    list.querySelectorAll('[data-oco-id]').forEach(function(el) {
+      el.addEventListener('click', function() { ocoDetalhe=el.dataset.ocoId; renderOco(); });
+    });
   });
-  if(error){toast('Erro: '+error.message);return;}
-  document.getElementById('oc-tit').value='';document.getElementById('oc-desc').value='';
-  fecharModal('m-nova-oco');renderOco();toast('Ocorrência registrada.');
-}
-
-async function responderOco(id){
-  const msg=prompt('Mensagem de atualização:');
-  if(!msg)return;
-  await sb.from('mensagens_ocorrencia').insert({ocorrencia_id:id,autor_id:morador.id,origem:'admin',mensagem:msg,status_novo:'andamento'});
-  await sb.from('ocorrencias').update({status:'andamento'}).eq('id',id);
-  renderOco();toast('Resposta enviada.');
-}
-
-// ── NAVEGAÇÃO ────────────────────────────────────────────────
-const screenTitles={avisos:'Avisos',reservar:'Reservar quadra',minhas:'Minhas reservas',checkin:'Check-in',ocorrencias:'Ocorrências',perfil:'Meu perfil'};
-function go(name){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  const sc=document.getElementById('screen-'+name);if(sc)sc.classList.add('active');
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  const tb=document.getElementById('tab-'+name);if(tb)tb.classList.add('active');
-  if(name==='minhas')renderMinhas();
-  if(name==='checkin')renderCheckin();
-  if(name==='avisos')renderAvisos();
-  if(name==='ocorrencias')renderOco();
-}
-
-// ── MODAIS ───────────────────────────────────────────────────
-function abrirModal(id){document.getElementById(id).classList.add('open');}
-function fecharModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.modal-bg').forEach(m=>{
-  m.addEventListener('click',e=>{if(e.target===m)fecharModal(m.id);});
-});
-
-// ── SERVICE WORKER (PWA) ─────────────────────────────────────
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 </script>
 </body>
