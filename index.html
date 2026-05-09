@@ -522,24 +522,37 @@ async function fazerCadastro(){
   const nome=document.getElementById('cad-nome').value.trim();
   const email=document.getElementById('cad-email').value.trim();
   const pass=document.getElementById('cad-pass').value;
-  const aptoId=document.getElementById('cad-apto').value;
+  const aptoCod=document.getElementById('cad-apto').value;
   const err=document.getElementById('cad-err');
   err.style.display='none';
-  if(!nome||!email||!pass||!aptoId){err.textContent='Preencha todos os campos.';err.style.display='block';return;}
+  if(!nome||!email||!pass||!aptoCod){err.textContent='Preencha todos os campos.';err.style.display='block';return;}
+  // Cadastra no Supabase Auth
   const {data,error}=await sb.auth.signUp({email,password:pass});
   if(error){err.textContent=error.message;err.style.display='block';return;}
+  if(!data.user){err.textContent='Confirme seu e-mail para continuar.';err.style.display='block';return;}
+  // Busca o unidade_id pelo código
+  const {data:unidade}=await sb.from('unidades').select('id').eq('codigo',aptoCod).single();
+  const unidadeId=unidade?.id||null;
+  // Define tipo: A-1501 é admin
+  const tipo=aptoCod==='A-1501'?'admin':'proprietario';
+  const status=aptoCod==='A-1501'?'ativo':'pendente';
   // Cria registro de morador
-  await sb.from('moradores').insert({
+  const {error:errM}=await sb.from('moradores').insert({
     auth_user_id:data.user.id,
-    unidade_id:aptoId,
+    unidade_id:unidadeId,
     nome,email,
-    tipo:'proprietario',
-    status:'pendente',
+    tipo,
+    status,
     lgpd_aceito:true,
     lgpd_aceito_em:new Date().toISOString()
   });
+  if(errM){err.textContent='Erro ao salvar: '+errM.message;err.style.display='block';return;}
   fecharModal('m-cadastro');
-  toast('Cadastro realizado! Aguarde aprovação do administrador.');
+  if(tipo==='admin'){
+    toast('Conta de administrador criada! Faça login.');
+  } else {
+    toast('Cadastro realizado! Faça login para continuar.');
+  }
 }
 
 async function fazerLogout(){
@@ -593,10 +606,24 @@ sb.auth.getSession().then(({data:{session}})=>{
 });
 
 // ── CADASTRO: POPULAR APTOS ──────────────────────────────────
-async function abrirCadastro(){
-  const {data:unidades}=await sb.from('unidades').select('id,codigo').order('codigo');
+function abrirCadastro(){
+  // Gera lista de apartamentos estaticamente
+  // Bloco A: unidades 01 e 02 | Bloco B: unidades 03 e 04
   const sel=document.getElementById('cad-apto');
-  if(unidades){sel.innerHTML=unidades.map(u=>`<option value="${u.id}">${u.codigo}</option>`).join('');}
+  let opts='';
+  for(let a=1;a<=15;a++){
+    const andar=String(a).padStart(2,'0');
+    opts+=`<option value="A-${andar}01">A-${andar}01</option>`;
+    opts+=`<option value="A-${andar}02">A-${andar}02</option>`;
+  }
+  for(let a=1;a<=15;a++){
+    const andar=String(a).padStart(2,'0');
+    opts+=`<option value="B-${andar}03">B-${andar}03</option>`;
+    opts+=`<option value="B-${andar}04">B-${andar}04</option>`;
+  }
+  sel.innerHTML=opts;
+  // Pré-selecionar A-1501 como padrão
+  sel.value='A-1501';
   abrirModal('m-cadastro');
 }
 
