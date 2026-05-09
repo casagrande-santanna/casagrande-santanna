@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#27500A">
+<title>Casa Grande Sant'Anna</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --verde:#27500A;--verde-claro:#EAF3DE;--verde-med:#3B6D11;
+  --amber:#FAEEDA;--amber-bord:#EF9F27;--amber-txt:#854F0B;
+  --red:#FCEBEB;--red-bord:#F09595;--red-txt:#A32D2D;
+  --blue:#E6F1FB;--blue-bord:#85B7EB;--blue-txt:#185FA5;
+  --gray:#F1EFE8;--gray-bord:#B4B2A9;--gray-txt:#5F5E5A;
+  --bg:#F5F5F0;--card:#fff;--bord:#E0E0DA;
+  --txt:#1A1A1A;--txt2:#666;--txt3:#999;
+  --radius:10px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.5;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.app{flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* HEADER */
+.hdr{background:var(--verde);color:#fff;padding:12px 16px 10px;position:sticky;top:0;z-index:30}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.hdr-title{font-size:15px;font-weight:600}
+.hdr-sub{font-size:10px;opacity:.75;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.role-tag{font-size:9px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 8px;white-space:nowrap}
+.av-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;cursor:pointer}
+
+/* TAB BAR */
+.tab-bar{display:flex;background:var(--card);border-bottom:0.5px solid var(--bord);position:sticky;top:58px;z-index:29}
+.tab{flex:1;padding:8px 2px 6px;text-align:center;font-size:9px;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;border:none;background:none;line-height:1.2}
+.tab i{font-size:17px}
+.tab.active{color:var(--verde);border-bottom:2px solid var(--verde)}
+.ndot{width:6px;height:6px;background:#E24B4A;border-radius:50%;position:absolute;top:4px;right:5px;display:none}
+.ndot.show{display:block}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:14px 16px 80px}
+.screen{display:none}
+.screen.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:0.5px solid var(--bord);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px}
+.card-title{font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;color:var(--txt)}
+.card-title i{font-size:14px;color:var(--verde)}
+.sec-lbl{font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 5px}
+
+/* FORMS */
+.form-row{margin-bottom:10px}
+.form-lbl{font-size:10.5px;font-weight:600;color:var(--txt2);display:block;margin-bottom:3px}
+.form-in{width:100%;border:0.5px solid var(--bord);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--txt);outline:none}
+.form-in:focus{border-color:var(--verde)}
+textarea.form-in{resize:vertical}
+
+/* BUTTONS */
+.btn-p{background:var(--verde);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;width:100%;justify-content:center}
+.btn-p:active{opacity:.85}
+.btn-s{background:none;border:0.5px solid var(--bord);border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--txt);display:inline-flex;align-items:center;gap:5px;flex:1;justify-content:center}
+.btn-d{background:var(--red);border:none;border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--red-txt);font-weight:600;display:inline-flex;align-items:center;gap:5px;flex:1;justify-content:center}
+.btn-sm{font-size:10.5px;padding:4px 9px;border-radius:6px;border:0.5px solid var(--bord);background:none;cursor:pointer;color:var(--txt)}
+.btn-sm.g{background:var(--verde-claro);border-color:#97C459;color:var(--verde)}
+.btn-sm.r{background:var(--red);border-color:var(--red-bord);color:var(--red-txt)}
+.btn-sm.b{background:var(--blue);border-color:var(--blue-bord);color:var(--blue-txt)}
+.macts{display:flex;gap:7px;margin-top:12px}
+
+/* BADGES */
+.badge{font-size:9.5px;padding:2px 7px;border-radius:20px;font-weight:600;display:inline-block}
+.b-ok{background:var(--verde-claro);color:var(--verde)}
+.b-warn{background:var(--amber);color:var(--amber-txt)}
+.b-danger{background:var(--red);color:var(--red-txt)}
+.b-info{background:var(--blue);color:var(--blue-txt)}
+.b-gray{background:var(--gray);color:var(--gray-txt)}
+.b-teal{background:#E1F5EE;color:#0F6E56}
+
+/* INFO BOXES */
+.ib{border-radius:8px;padding:9px 11px;font-size:11px;line-height:1.5;margin:8px 0}
+.ib-green{background:var(--verde-claro);color:var(--verde);border-left:3px solid var(--verde-med)}
+.ib-amber{background:var(--amber);color:var(--amber-txt);border-left:3px solid var(--amber-bord)}
+.ib-blue{background:var(--blue);color:var(--blue-txt);border-left:3px solid var(--blue-txt)}
+.ib-red{background:var(--red);color:var(--red-txt);border-left:3px solid var(--red-txt)}
+
+/* CALENDÁRIO */
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-nav{background:none;border:0.5px solid var(--bord);border-radius:7px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt)}
+.cal-month{font-size:13px;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dn{text-align:center;font-size:9.5px;color:var(--txt2);padding:3px 0}
+.cal-d{text-align:center;font-size:12px;padding:6px 0;border-radius:7px;cursor:pointer;position:relative}
+.cal-d:hover{background:var(--verde-claro)}
+.cal-d.today{font-weight:600;color:var(--verde)}
+.cal-d.sel{background:var(--verde);color:#fff!important}
+.cal-d.blk{background:var(--red);color:var(--red-txt);cursor:default}
+.cal-d.hasr::after{content:'';width:4px;height:4px;background:var(--amber-bord);border-radius:50%;position:absolute;bottom:1px;left:50%;transform:translateX(-50%)}
+.cal-d.sel.hasr::after{background:#fff}
+.leg-row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 8px}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2)}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+
+/* SLOTS */
+.slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.slot{border:0.5px solid var(--bord);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;transition:background .1s}
+.slot.livre{background:var(--verde-claro);border-color:#97C459}
+.slot.ocupado{background:var(--red);border-color:var(--red-bord);cursor:default}
+.slot.meu{background:var(--blue);border-color:var(--blue-bord)}
+.slot.bloq{background:var(--gray);border-color:var(--gray-bord);cursor:default}
+.slot .sh{font-size:11px;font-weight:600}
+.slot .sl{font-size:9.5px;margin-top:1px}
+.slot.livre .sl{color:var(--verde)}
+.slot.ocupado .sl{color:var(--red-txt)}
+.slot.meu .sl{color:var(--blue-txt)}
+.slot.bloq .sl{color:var(--gray-txt)}
+
+/* MODALIDADES */
+.mod-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.mod-btn{border:0.5px solid var(--bord);border-radius:8px;padding:10px 6px;cursor:pointer;text-align:center;background:var(--card);transition:border-color .15s}
+.mod-btn:hover{border-color:var(--verde)}
+.mod-btn.sel{border:2px solid var(--verde);background:var(--verde-claro)}
+.mod-btn .mi{font-size:20px;margin-bottom:3px}
+.mod-btn .mn{font-size:11px;font-weight:600;color:var(--txt)}
+.mod-btn .mr{font-size:9.5px;color:var(--txt2)}
+.dur-row{display:flex;gap:6px;margin:8px 0}
+.dur-btn{flex:1;border:0.5px solid var(--bord);border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:var(--card)}
+.dur-btn:hover{border-color:var(--verde)}
+.dur-btn.sel{border:2px solid var(--verde);background:var(--verde-claro)}
+.dur-btn .dt{font-size:14px;font-weight:600}
+.dur-btn .dl{font-size:10px;color:var(--txt2)}
+
+/* RESERVAS */
+.res-card{border:0.5px solid var(--bord);border-radius:var(--radius);padding:10px 12px;margin-bottom:7px}
+.res-card.confirmada{border-left:3px solid #97C459;border-radius:0 var(--radius) var(--radius) 0}
+.res-card.pendente{border-left:3px solid var(--amber-bord);border-radius:0 var(--radius) var(--radius) 0}
+.res-card.cancelada{border-left:3px solid var(--red-bord);border-radius:0 var(--radius) var(--radius) 0;opacity:.65}
+.res-card.expirada{border-left:3px solid var(--gray-bord);border-radius:0 var(--radius) var(--radius) 0;opacity:.65}
+.res-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.res-data{font-size:12px;font-weight:600}
+.res-info{font-size:11px;color:var(--txt2);display:flex;align-items:center;gap:4px;margin-top:2px}
+.res-acts{display:flex;gap:5px;margin-top:8px}
+
+/* CHECK-IN */
+.ckin-hero{background:var(--verde);border-radius:var(--radius-lg);padding:18px 16px;color:#fff;text-align:center;margin-bottom:10px}
+.ckin-hero-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.ckin-hero-sub{font-size:11px;opacity:.8;margin-bottom:14px}
+.ckin-big-btn{background:#fff;color:var(--verde);border:none;border-radius:10px;padding:14px 20px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;width:100%;justify-content:center}
+.ckin-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--bord)}
+.ckin-row:last-child{border-bottom:none}
+.ckin-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* AVISOS */
+.av-card{border:0.5px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:8px}
+.av-card.urgente{border-left:3px solid #E24B4A;border-radius:0 var(--radius) var(--radius) 0}
+.av-card.info{border-left:3px solid var(--blue-txt);border-radius:0 var(--radius) var(--radius) 0}
+.av-card.manutencao{border-left:3px solid var(--amber-bord);border-radius:0 var(--radius) var(--radius) 0}
+.av-card.comunicado{border-left:3px solid var(--verde);border-radius:0 var(--radius) var(--radius) 0}
+.av-hdr{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 11px 4px}
+.av-titulo{font-size:12px;font-weight:600;flex:1;line-height:1.3}
+.av-corpo{font-size:11px;color:var(--txt2);padding:0 11px 6px;line-height:1.4}
+.av-foot{display:flex;align-items:center;justify-content:space-between;padding:5px 11px 9px;font-size:10px;color:var(--txt2)}
+.leitura-bar{height:3px;background:var(--bg);margin:0 11px 7px;border-radius:2px;overflow:hidden}
+.leitura-fill{height:100%;background:var(--verde);border-radius:2px}
+
+/* OCORRÊNCIAS */
+.oco-card{border:0.5px solid var(--bord);border-radius:var(--radius);padding:10px 11px;margin-bottom:7px;cursor:pointer}
+.oco-card.aberta{border-left:3px solid var(--blue-txt);border-radius:0 var(--radius) var(--radius) 0}
+.oco-card.andamento{border-left:3px solid var(--amber-bord);border-radius:0 var(--radius) var(--radius) 0}
+.oco-card.resolvida{border-left:3px solid var(--verde);border-radius:0 var(--radius) var(--radius) 0}
+.oco-card.encerrada{border-left:3px solid var(--gray-bord);border-radius:0 var(--radius) var(--radius) 0;opacity:.7}
+.oco-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px}
+.oco-titulo{font-size:12px;font-weight:600;flex:1;line-height:1.3}
+.oco-meta{font-size:10px;color:var(--txt2);display:flex;gap:6px;flex-wrap:wrap}
+.oco-cat{font-size:9.5px;padding:1px 6px;border-radius:20px;background:var(--bg);color:var(--txt2)}
+.tl-item{display:flex;gap:8px;margin-bottom:9px}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.tl-body{flex:1;min-width:0}
+.tl-ev{font-size:11px;font-weight:600}
+.tl-dt{font-size:10px;color:var(--txt2)}
+.tl-msg{font-size:11px;color:var(--txt2);margin-top:2px;line-height:1.4}
+
+/* RESUMO */
+.resumo-box{background:var(--bg);border-radius:8px;padding:10px 12px;margin:10px 0}
+.resumo-row{display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0;border-bottom:0.5px solid var(--bord)}
+.resumo-row:last-child{border-bottom:none;font-weight:600}
+.resumo-lbl{color:var(--txt2)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal-card{background:var(--card);border-radius:16px 16px 0 0;padding:16px 16px 28px;width:100%;max-width:430px;max-height:88vh;overflow-y:auto}
+.modal-card.center{border-radius:14px;margin:20px;max-height:85vh}
+.mhandle{width:28px;height:3px;background:var(--bord);border-radius:2px;margin:0 auto 12px}
+.mtitle{font-size:14px;font-weight:600;margin-bottom:3px}
+.msub{font-size:11px;color:var(--txt2);margin-bottom:11px}
+.m-info-row{display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--bord)}
+.m-info-row i{font-size:14px;color:var(--verde)}
+
+/* TELA DE LOGIN */
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:var(--verde)}
+.login-logo{font-size:48px;margin-bottom:12px}
+.login-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;text-align:center}
+.login-sub{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:32px;text-align:center}
+.login-card{background:#fff;border-radius:var(--radius-lg);padding:24px;width:100%;max-width:360px}
+.login-lbl{font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:4px;display:block}
+.login-input{width:100%;border:0.5px solid var(--bord);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:14px;outline:none}
+.login-input:focus{border-color:var(--verde)}
+.login-btn{width:100%;background:var(--verde);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
+.login-err{background:var(--red);color:var(--red-txt);border-radius:7px;padding:8px 12px;font-size:11px;margin-top:8px;display:none}
+
+/* TOAST */
+#toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(23,52,4,.94);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:500;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
+
+/* PERFIL */
+.perfil-av{width:52px;height:52px;border-radius:50%;background:var(--verde-claro);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--verde);margin-bottom:10px}
+.p-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--bord);font-size:12px}
+.p-row:last-child{border-bottom:none}
+.tgl{width:34px;height:18px;background:var(--bord);border-radius:9px;cursor:pointer;position:relative;transition:.2s;flex-shrink:0}
+.tgl.on{background:var(--verde)}
+.tgl::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:.2s}
+.tgl.on::after{left:18px}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:32px 16px;color:var(--txt2)}
+.empty i{font-size:40px;display:block;margin-bottom:8px;color:var(--bord)}
+
+/* FILTROS */
+.filter-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px}
+.filter-bar::-webkit-scrollbar{display:none}
+.fpill{font-size:10px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--bord);background:none;cursor:pointer;white-space:nowrap;color:var(--txt2)}
+.fpill.active{background:var(--verde);color:#fff;border-color:var(--verde)}
+
+@media(min-width:640px){
+  body{background:#eee}
+  .app{margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,.1)}
+  .modal-card:not(.center){max-width:430px;margin:0 auto}
+}
+</style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-logo">🏢</div>
+  <div class="login-title">Casa Grande Sant'Anna</div>
+  <div class="login-sub">Sistema de reserva da quadra</div>
+  <div class="login-card">
+    <label class="login-lbl">E-mail</label>
+    <input class="login-input" type="email" id="login-email" placeholder="seu@email.com">
+    <label class="login-lbl">Senha</label>
+    <input class="login-input" type="password" id="login-pass" placeholder="••••••••">
+    <button class="login-btn" onclick="fazerLogin()">Entrar</button>
+    <div class="login-err" id="login-err"></div>
+    <div style="text-align:center;margin-top:12px">
+      <span style="font-size:11px;color:#666;cursor:pointer" onclick="abrirCadastro()">Não tem conta? Cadastre-se</span>
+    </div>
+  </div>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div class="app" id="app-main" style="display:none">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div>
+        <div class="hdr-title">Casa Grande Sant'Anna</div>
+        <div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div>
+      </div>
+      <div class="hdr-right">
+        <span class="role-tag" id="role-tag">Morador</span>
+        <div class="av-btn" id="av-btn" onclick="go('perfil')">DT</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" id="tab-avisos" onclick="go('avisos')"><i class="ti ti-bell" aria-hidden="true"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
+    <button class="tab" id="tab-reservar" onclick="go('reservar')"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
+    <button class="tab" id="tab-minhas" onclick="go('minhas')"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas<span class="ndot" id="nd-minhas"></span></button>
+    <button class="tab" id="tab-checkin" onclick="go('checkin')"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
+    <button class="tab" id="tab-ocorrencias" onclick="go('ocorrencias')"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
+  </div>
+
+  <div class="content">
+
+    <!-- AVISOS -->
+    <div class="screen active" id="screen-avisos">
+      <div id="fab-aviso"></div>
+      <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Nenhum aviso</div></div>
+    </div>
+
+    <!-- RESERVAR -->
+    <div class="screen" id="screen-reservar">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Selecione uma data</div>
+        <div class="cal-hdr">
+          <button class="cal-nav" onclick="prevM()"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+          <span class="cal-month" id="cal-lbl"></span>
+          <button class="cal-nav" onclick="nextM()"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="leg-row">
+          <div class="leg"><div class="leg-dot" style="background:var(--verde-claro);border:1px solid #97C459"></div>Livre</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--red);border:1px solid var(--red-bord)"></div>Ocupado</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--blue);border:1px solid var(--blue-bord)"></div>Minha reserva</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--gray);border:1px solid var(--gray-bord)"></div>Bloqueado</div>
+        </div>
+      </div>
+      <div class="card" id="slots-card" style="display:none">
+        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="slots-lbl">Horários</span></div>
+        <div class="slot-grid" id="slot-grid"></div>
+      </div>
+    </div>
+
+    <!-- MINHAS RESERVAS -->
+    <div class="screen" id="screen-minhas">
+      <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
+    </div>
+
+    <!-- CHECK-IN -->
+    <div class="screen" id="screen-checkin">
+      <div id="ckin-main"></div>
+      <div class="sec-lbl">Histórico</div>
+      <div id="ckin-hist"></div>
+    </div>
+
+    <!-- OCORRÊNCIAS -->
+    <div class="screen" id="screen-ocorrencias">
+      <div class="filter-bar">
+        <button class="fpill active" onclick="setFiltroOco('todos',this)">Todas</button>
+        <button class="fpill" onclick="setFiltroOco('aberta',this)">Abertas</button>
+        <button class="fpill" onclick="setFiltroOco('andamento',this)">Em andamento</button>
+        <button class="fpill" onclick="setFiltroOco('resolvida',this)">Resolvidas</button>
+      </div>
+      <div id="oco-list"></div>
+      <div id="oco-detail"></div>
+      <button class="btn-p" onclick="abrirModal('m-nova-oco')" style="margin-top:6px"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrência</button>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="screen" id="screen-perfil">
+      <div class="card">
+        <div class="perfil-av" id="pf-av">DT</div>
+        <div style="font-size:15px;font-weight:600" id="pf-nome">—</div>
+        <div style="font-size:12px;color:var(--txt2)" id="pf-apto">—</div>
+        <div style="margin-top:12px;border-top:0.5px solid var(--bord);padding-top:10px">
+          <div class="p-row"><span><i class="ti ti-bell" aria-hidden="true" style="margin-right:5px"></i>Notificações push</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="p-row"><span><i class="ti ti-mail" aria-hidden="true" style="margin-right:5px"></i>Avisos por e-mail</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="p-row" style="border:none;padding-top:12px">
+            <button class="btn-d" style="width:100%" onclick="fazerLogout()"><i class="ti ti-logout" aria-hidden="true"></i>Sair da conta</button>
+          </div>
+        </div>
+      </div>
+      <div class="ib ib-amber" style="font-size:10.5px">
+        <i class="ti ti-shield-lock" aria-hidden="true" style="margin-right:4px"></i>
+        <strong>LGPD:</strong> Seus dados são usados exclusivamente para gestão condominial. Controlador: Condomínio Casa Grande Sant'Anna.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAIS -->
+<div class="modal-bg" id="m-reserva">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div id="m-res-step1">
+      <div class="mtitle">Escolha a modalidade</div>
+      <div class="msub" id="m-res-date-lbl"></div>
+      <div class="mod-grid" id="m-mod-grid"></div>
+      <div class="macts"><button class="btn-s" style="flex:1" onclick="fecharModal('m-reserva')">Cancelar</button></div>
+    </div>
+    <div id="m-res-step2" style="display:none">
+      <div class="mtitle">Escolha a duração</div>
+      <div class="msub" id="m-res-mod-lbl"></div>
+      <div class="dur-row" id="m-dur-row"></div>
+      <div id="m-dur-info"></div>
+      <div class="macts"><button class="btn-s" style="flex:1" onclick="voltarStep1()">Voltar</button></div>
+    </div>
+    <div id="m-res-step3" style="display:none">
+      <div class="mtitle">Confirmar reserva</div>
+      <div class="resumo-box" id="m-resumo"></div>
+      <div class="ib ib-blue" style="font-size:10.5px"><i class="ti ti-shield-check" aria-hidden="true" style="margin-right:4px"></i>Reserva vinculada ao seu apartamento. Dados protegidos — LGPD.</div>
+      <div class="macts">
+        <button class="btn-s" onclick="voltarStep2()">Voltar</button>
+        <button class="btn-p" onclick="confirmarReserva()"><i class="ti ti-check" aria-hidden="true"></i>Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-cancelar">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Cancelar reserva</div>
+    <div class="msub" id="mc-sub"></div>
+    <div class="m-info-row"><i class="ti ti-calendar" aria-hidden="true"></i><span id="mc-dt"></span></div>
+    <div class="m-info-row"><i class="ti ti-clock" aria-hidden="true"></i><span id="mc-hr"></span></div>
+    <div class="m-info-row"><i class="ti ti-activity" aria-hidden="true"></i><span id="mc-mod"></span></div>
+    <div class="ib ib-amber" id="mc-warn" style="display:none;font-size:10.5px"></div>
+    <div class="macts">
+      <button class="btn-s" onclick="fecharModal('m-cancelar')">Voltar</button>
+      <button class="btn-d" onclick="execCancelar()"><i class="ti ti-x" aria-hidden="true"></i>Cancelar reserva</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-nova-oco">
+  <div class="modal-card center">
+    <div class="mhandle"></div>
+    <div class="mtitle">Registrar ocorrência</div>
+    <div class="msub">Visível apenas para a administração</div>
+    <div class="form-row"><label class="form-lbl">Categoria</label>
+      <select class="form-in" id="oc-cat"><option value="manutencao">Manutenção</option><option value="barulho">Barulho</option><option value="seguranca">Segurança</option><option value="limpeza">Limpeza</option><option value="outros">Outros</option></select></div>
+    <div class="form-row"><label class="form-lbl">Título</label><input type="text" class="form-in" id="oc-tit" placeholder="Descreva o problema brevemente"></div>
+    <div class="form-row"><label class="form-lbl">Descrição</label><textarea class="form-in" id="oc-desc" rows="3" placeholder="Local, horário, detalhes…"></textarea></div>
+    <div class="form-row"><label class="form-lbl">Local</label>
+      <select class="form-in" id="oc-loc"><option>Garagem — Bloco A</option><option>Garagem — Bloco B</option><option>Quadra poliesportiva</option><option>Elevador — Bloco A</option><option>Elevador — Bloco B</option><option>Portaria</option><option>Área externa</option></select></div>
+    <div class="form-row"><label class="form-lbl">Prioridade</label>
+      <select class="form-in" id="oc-prio"><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div>
+    <div class="macts">
+      <button class="btn-s" onclick="fecharModal('m-nova-oco')">Cancelar</button>
+      <button class="btn-p" onclick="salvarOco()"><i class="ti ti-check" aria-hidden="true"></i>Registrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-novo-aviso">
+  <div class="modal-card center">
+    <div class="mhandle"></div>
+    <div class="mtitle">Publicar aviso</div>
+    <div class="msub">Enviado com notificação a todos os destinatários</div>
+    <div class="form-row"><label class="form-lbl">Tipo</label>
+      <select class="form-in" id="av-tipo"><option value="comunicado">Comunicado</option><option value="info">Informativo</option><option value="manutencao">Manutenção</option><option value="urgente">Urgente</option></select></div>
+    <div class="form-row"><label class="form-lbl">Título</label><input type="text" class="form-in" id="av-tit" placeholder="Título do aviso"></div>
+    <div class="form-row"><label class="form-lbl">Mensagem</label><textarea class="form-in" id="av-corpo" rows="3" placeholder="Texto completo do aviso…"></textarea></div>
+    <div class="form-row"><label class="form-lbl">Destinatários</label>
+      <select class="form-in" id="av-dest"><option value="todos">Todos os moradores</option><option value="blocoA">Somente Bloco A</option><option value="blocoB">Somente Bloco B</option></select></div>
+    <div class="macts">
+      <button class="btn-s" onclick="fecharModal('m-novo-aviso')">Cancelar</button>
+      <button class="btn-p" onclick="publicarAviso()"><i class="ti ti-send" aria-hidden="true"></i>Publicar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-cadastro">
+  <div class="modal-card center">
+    <div class="mhandle"></div>
+    <div class="mtitle">Criar conta</div>
+    <div class="msub">Morador do Casa Grande Sant'Anna</div>
+    <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="cad-nome" placeholder="Seu nome completo"></div>
+    <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="cad-email" placeholder="seu@email.com"></div>
+    <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Mínimo 6 caracteres"></div>
+    <div class="form-row"><label class="form-lbl">Apartamento</label>
+      <select class="form-in" id="cad-apto"></select></div>
+    <div class="macts">
+      <button class="btn-s" onclick="fecharModal('m-cadastro')">Cancelar</button>
+      <button class="btn-p" onclick="fazerCadastro()"><i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar</button>
+    </div>
+    <div class="login-err" id="cad-err" style="display:none"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── SUPABASE CONFIG ──────────────────────────────────────────
+const SUPA_URL = 'SUPABASE_URL_PLACEHOLDER';
+const SUPA_KEY = 'SUPABASE_ANON_KEY_PLACEHOLDER';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ── CONSTANTES ───────────────────────────────────────────────
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS_N=['D','S','T','Q','Q','S','S'];
+const SLOTS=['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+const MODALIDADES=[
+  {id:'tenis1',nome:'Tênis simples',sub:'1×1',icon:'🎾',fixo:true,durs:[60]},
+  {id:'tenis2',nome:'Tênis duplas',sub:'2×2',icon:'🎾',fixo:false,durs:[60,120]},
+  {id:'basquete',nome:'Basquete',sub:'coletivo',icon:'🏀',fixo:false,durs:[60,120]},
+  {id:'futebol',nome:'Futebol',sub:'coletivo',icon:'⚽',fixo:false,durs:[60,120]},
+  {id:'volei',nome:'Vôlei',sub:'coletivo',icon:'🏐',fixo:false,durs:[60,120]},
+  {id:'livre',nome:'Uso livre',sub:'treino',icon:'🏃',fixo:false,durs:[60,120]},
+];
+const OCA_LABELS={manutencao:'Manutenção',barulho:'Barulho',seguranca:'Segurança',limpeza:'Limpeza',outros:'Outros'};
+const ST_LABELS={aberta:'Aberta',andamento:'Em andamento',resolvida:'Resolvida',encerrada:'Encerrada'};
+const AV_LABELS={urgente:'Urgente',info:'Informativo',manutencao:'Manutenção',comunicado:'Comunicado'};
+
+// ── ESTADO ───────────────────────────────────────────────────
+let usuario=null, morador=null;
+let vY=new Date().getFullYear(), vM=new Date().getMonth(), selDate=null;
+let pendSlot=null, pendMod=null, pendDur=null, cancelId=null;
+let ocoFiltro='todos', ocoDetalhe=null;
+let reservasCache=[], avisosCache=[], ocosCache=[], bloquCache=[];
+
+// ── UTILITÁRIOS ──────────────────────────────────────────────
+function ts(){return new Date().toISOString().slice(0,10);}
+function fd(o){const d=new Date();d.setDate(d.getDate()+o);return d.toISOString().slice(0,10);}
+function fmtD(ds){if(!ds)return'';const[y,m,d]=ds.split('-');return`${d}/${m}/${y}`;}
+function addH(t,h){const[hr,mn]=t.split(':').map(Number);return`${String(hr+h).padStart(2,'0')}:${String(mn).padStart(2,'0')}`;}
+function agora(){return new Date().toTimeString().slice(0,5);}
+
+let toastT;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(toastT);toastT=setTimeout(()=>el.style.opacity='0',2800);
+}
+
+// ── AUTENTICAÇÃO ─────────────────────────────────────────────
+async function fazerLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-err');
+  err.style.display='none';
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){err.textContent='E-mail ou senha incorretos.';err.style.display='block';return;}
+  await iniciarApp(data.user);
+}
+
+async function fazerCadastro(){
+  const nome=document.getElementById('cad-nome').value.trim();
+  const email=document.getElementById('cad-email').value.trim();
+  const pass=document.getElementById('cad-pass').value;
+  const aptoId=document.getElementById('cad-apto').value;
+  const err=document.getElementById('cad-err');
+  err.style.display='none';
+  if(!nome||!email||!pass||!aptoId){err.textContent='Preencha todos os campos.';err.style.display='block';return;}
+  const {data,error}=await sb.auth.signUp({email,password:pass});
+  if(error){err.textContent=error.message;err.style.display='block';return;}
+  // Cria registro de morador
+  await sb.from('moradores').insert({
+    auth_user_id:data.user.id,
+    unidade_id:aptoId,
+    nome,email,
+    tipo:'proprietario',
+    status:'pendente',
+    lgpd_aceito:true,
+    lgpd_aceito_em:new Date().toISOString()
+  });
+  fecharModal('m-cadastro');
+  toast('Cadastro realizado! Aguarde aprovação do administrador.');
+}
+
+async function fazerLogout(){
+  await sb.auth.signOut();
+  document.getElementById('app-main').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  usuario=null;morador=null;
+}
+
+async function iniciarApp(user){
+  usuario=user;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-main').style.display='flex';
+  // Busca dados do morador
+  const {data:m}=await sb.from('moradores').select('*,unidades(*)').eq('auth_user_id',user.id).single();
+  morador=m;
+  if(m){
+    const ini=m.nome.split(' ').filter((_,j,a)=>j===0||j===a.length-1).map(n=>n[0]).join('').toUpperCase();
+    document.getElementById('av-btn').textContent=ini;
+    document.getElementById('pf-av').textContent=ini;
+    document.getElementById('pf-nome').textContent=m.nome;
+    document.getElementById('pf-apto').textContent=m.unidades?`Apto ${m.unidades.codigo} · ${({proprietario:'Proprietário',inquilino:'Inquilino',admin:'Administrador'}[m.tipo]||m.tipo)}`:'';
+    document.getElementById('role-tag').textContent=m.tipo==='admin'?'Administrador':'Morador';
+    document.getElementById('hdr-sub').textContent=m.unidades?`Apto ${m.unidades.codigo} · Quadra Poliesportiva`:'Quadra Poliesportiva';
+    if(m.tipo==='admin'){
+      document.getElementById('fab-aviso').innerHTML=`<button class="btn-p" onclick="abrirModal('m-novo-aviso')" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>`;
+    }
+  }
+  // Carrega dados iniciais
+  await Promise.all([carregarAvisos(),carregarBloqueios()]);
+  renderCal();
+  renderAvisos();
+  renderCheckin();
+  // Verifica se admin deve ver menu extra
+  verificarAdminMenu();
+}
+
+function verificarAdminMenu(){
+  if(!morador||morador.tipo!=='admin')return;
+}
+
+// ── VERIFICAÇÃO DE SESSÃO ────────────────────────────────────
+sb.auth.onAuthStateChange(async(event,session)=>{
+  if(session&&event==='SIGNED_IN'){
+    if(!usuario)await iniciarApp(session.user);
+  }
+});
+
+sb.auth.getSession().then(({data:{session}})=>{
+  if(session)iniciarApp(session.user);
+});
+
+// ── CADASTRO: POPULAR APTOS ──────────────────────────────────
+async function abrirCadastro(){
+  const {data:unidades}=await sb.from('unidades').select('id,codigo').order('codigo');
+  const sel=document.getElementById('cad-apto');
+  if(unidades){sel.innerHTML=unidades.map(u=>`<option value="${u.id}">${u.codigo}</option>`).join('');}
+  abrirModal('m-cadastro');
+}
+
+// ── CALENDÁRIO ───────────────────────────────────────────────
+async function carregarBloqueios(){
+  const {data}=await sb.from('bloqueios').select('*');
+  bloquCache=data||[];
+}
+
+function isBlocked(ds){return bloquCache.some(b=>ds>=b.data_inicio&&ds<=b.data_fim);}
+function hasRes(ds){return reservasCache.some(r=>r.data_reserva===ds&&r.status!=='cancelada'&&r.status!=='expirada');}
+
+function renderCal(){
+  document.getElementById('cal-lbl').textContent=MESES[vM]+' '+vY;
+  const g=document.getElementById('cal-grid');
+  g.innerHTML=DIAS_N.map(d=>`<div class="cal-dn">${d}</div>`).join('');
+  const first=new Date(vY,vM,1).getDay(),days=new Date(vY,vM+1,0).getDate(),today=ts();
+  for(let i=0;i<first;i++)g.innerHTML+=`<div></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${vY}-${String(vM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls='cal-d';
+    if(ds===today)cls+=' today';
+    if(ds===selDate)cls+=' sel';
+    if(isBlocked(ds))cls+=' blk';
+    if(hasRes(ds))cls+=' hasr';
+    g.innerHTML+=`<div class="${cls}" onclick="selData('${ds}')">${d}</div>`;
+  }
+}
+
+async function selData(ds){
+  selDate=ds;renderCal();
+  const sc=document.getElementById('slots-card');sc.style.display='block';
+  const blk=isBlocked(ds);
+  const dow=new Date(ds+'T12:00:00').getDay(),maxH=dow===0||dow===6?18:22;
+  document.getElementById('slots-lbl').textContent=blk?`Bloqueado — ${fmtD(ds)}`:`Horários — ${fmtD(ds)}`;
+  const sg=document.getElementById('slot-grid');
+  if(blk){sg.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:14px;font-size:11px;color:var(--red-txt)">${(bloquCache.find(b=>ds>=b.data_inicio&&ds<=b.data_fim)||{motivo:''}).motivo}</div>`;return;}
+  // Busca reservas do dia
+  const {data:res}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('data_reserva',ds).neq('status','cancelada').neq('status','expirada');
+  reservasCache=reservasCache.filter(r=>r.data_reserva!==ds);
+  if(res)reservasCache.push(...res);
+  sg.innerHTML='';
+  SLOTS.filter(s=>parseInt(s)<maxH).forEach(slot=>{
+    const r=(res||[]).find(x=>x.slot_inicio===slot+':00'||x.slot_inicio===slot);
+    let cls='slot livre',lbl='Livre',oc=`abrirModalReserva('${ds}','${slot}')`;
+    if(r){
+      const mine=morador&&r.unidade_id===morador.unidade_id;
+      cls=mine?'slot meu':'slot ocupado';
+      lbl=mine?`Minha (${r.duracao_min===60?'1h':'2h'})`:r.modalidades?r.modalidades.icone:'Ocupado';
+      oc=mine?`abrirModalCancelar(${JSON.stringify(r).replace(/"/g,'&quot;')})`:'';
+    }
+    sg.innerHTML+=`<div class="${cls}" onclick="${oc}"><div class="sh">${slot}</div><div class="sl">${lbl}</div></div>`;
+  });
+}
+
+function prevM(){vM--;if(vM<0){vM=11;vY--;}renderCal();}
+function nextM(){vM++;if(vM>11){vM=0;vY++;}renderCal();}
+
+// ── MODAL RESERVA ────────────────────────────────────────────
+function abrirModalReserva(date,slot){
+  if(!morador){toast('Faça login para reservar');return;}
+  pendSlot=slot;pendMod=null;pendDur=null;
+  document.getElementById('m-res-date-lbl').textContent=`${fmtD(date)} às ${slot}`;
+  renderModGrid();showStep(1);abrirModal('m-reserva');
+  pendSlot={date,slot};
+}
+
+function renderModGrid(){
+  document.getElementById('m-mod-grid').innerHTML=MODALIDADES.map(m=>`
+    <div class="mod-btn${pendMod===m.id?' sel':''}" onclick="selMod('${m.id}')">
+      <div class="mi">${m.icon}</div>
+      <div class="mn">${m.nome}</div>
+      <div class="mr">${m.sub} · ${m.fixo?'1h fixo':'1h ou 2h'}</div>
+    </div>`).join('');
+}
+
+function selMod(id){
+  pendMod=id;const m=MODALIDADES.find(x=>x.id===id);
+  if(m.fixo){pendDur=m.durs[0];showStep(3);buildResumo();}
+  else{showStep(2);buildDurRow(m);}
+}
+
+function buildDurRow(m){
+  document.getElementById('m-res-mod-lbl').textContent=`${m.icon} ${m.nome} (${m.sub})`;
+  document.getElementById('m-dur-row').innerHTML=m.durs.map(d=>`
+    <div class="dur-btn${pendDur===d?' sel':''}" onclick="selDur(${d})">
+      <div class="dt">${d===60?'1 hora':'2 horas'}</div>
+      <div class="dl">Encerra às ${addH(pendSlot.slot,d/60)}</div>
+    </div>`).join('');
+  document.getElementById('m-dur-info').innerHTML=`<div class="ib ib-amber" style="font-size:10.5px"><i class="ti ti-info-circle" aria-hidden="true" style="margin-right:3px"></i>Máximo: 2 horas para ${m.nome}.</div>`;
+}
+
+function selDur(d){pendDur=d;showStep(3);buildResumo();}
+
+function buildResumo(){
+  const m=MODALIDADES.find(x=>x.id===pendMod);
+  document.getElementById('m-resumo').innerHTML=`
+    <div class="resumo-row"><span class="resumo-lbl">Apartamento</span><span>${morador?.unidades?.codigo||'—'}</span></div>
+    <div class="resumo-row"><span class="resumo-lbl">Data</span><span>${fmtD(pendSlot.date)}</span></div>
+    <div class="resumo-row"><span class="resumo-lbl">Horário</span><span>${pendSlot.slot} – ${addH(pendSlot.slot,pendDur/60)}</span></div>
+    <div class="resumo-row"><span class="resumo-lbl">Modalidade</span><span>${m.icon} ${m.nome}</span></div>
+    <div class="resumo-row"><span class="resumo-lbl">Duração</span><span>${pendDur===60?'1 hora':'2 horas'}</span></div>
+    <div class="resumo-row"><span class="resumo-lbl">Check-in</span><span>Obrigatório — 15 min após início</span></div>`;
+}
+
+function voltarStep1(){pendDur=null;showStep(1);renderModGrid();}
+function voltarStep2(){pendDur=null;const m=MODALIDADES.find(x=>x.id===pendMod);showStep(2);buildDurRow(m);}
+function showStep(n){[1,2,3].forEach(i=>document.getElementById('m-res-step'+i).style.display=i===n?'block':'none');}
+
+async function confirmarReserva(){
+  if(!morador||!pendSlot||!pendMod||!pendDur)return;
+  // Busca modalidade_id do banco
+  const {data:modalDB}=await sb.from('modalidades').select('id').eq('nome',MODALIDADES.find(x=>x.id===pendMod).nome).single();
+  const slotFim=addH(pendSlot.slot,pendDur/60);
+  const {error}=await sb.from('reservas').insert({
+    unidade_id:morador.unidade_id,
+    morador_id:morador.id,
+    modalidade_id:modalDB?.id||null,
+    data_reserva:pendSlot.date,
+    slot_inicio:pendSlot.slot+':00',
+    slot_fim:slotFim+':00',
+    duracao_min:pendDur,
+    tipo_reserva:'pontual',
+    status:'confirmada'
+  });
+  if(error){toast('Erro: '+error.message);return;}
+  fecharModal('m-reserva');
+  await selData(pendSlot.date);
+  renderMinhas();renderCheckin();
+  toast('Reserva confirmada!');
+}
+
+// ── CANCELAR RESERVA ─────────────────────────────────────────
+function abrirModalCancelar(r){
+  if(typeof r==='string')r=JSON.parse(r);
+  cancelId=r.id;
+  document.getElementById('mc-sub').textContent='Apto '+(morador?.unidades?.codigo||'');
+  document.getElementById('mc-dt').textContent=fmtD(r.data_reserva);
+  document.getElementById('mc-hr').textContent=(r.slot_inicio||'').slice(0,5)+' – '+(r.slot_fim||'').slice(0,5);
+  const m=MODALIDADES.find(x=>x.nome===(r.modalidades?.nome));
+  document.getElementById('mc-mod').textContent=m?m.icon+' '+m.nome:(r.modalidades?.nome||'—');
+  document.getElementById('mc-warn').style.display='none';
+  abrirModal('m-cancelar');
+}
+
+async function execCancelar(){
+  const{error}=await sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',cancelId);
+  if(error){toast('Erro ao cancelar');return;}
+  fecharModal('m-cancelar');
+  if(selDate)await selData(selDate);
+  renderMinhas();renderCheckin();
+  toast('Reserva cancelada.');
+}
+
+// ── MINHAS RESERVAS ──────────────────────────────────────────
+async function renderMinhas(){
+  if(!morador)return;
+  const{data:mine}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(20);
+  const list=document.getElementById('minhas-list');
+  if(!mine?.length){list.innerHTML=`<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>`;return;}
+  const today=ts();
+  list.innerHTML=mine.map(r=>{
+    const bc=r.checkin_feito?'b-teal':r.status==='cancelada'?'b-danger':r.status==='expirada'?'b-gray':'b-ok';
+    const bl=r.checkin_feito?'Check-in':r.status==='cancelada'?'Cancelada':r.status==='expirada'?'Ausência':'Confirmada';
+    const mod=r.modalidades;
+    const acts=r.status==='confirmada'?`<div class="res-acts">
+      ${!r.checkin_feito&&r.data_reserva===today?`<button class="btn-sm b" onclick="doCheckin('${r.id}')"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>`:''}
+      <button class="btn-sm r" onclick="abrirModalCancelar(${JSON.stringify(r).replace(/'/g,'\\'')})"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>
+    </div>`:'';
+    return`<div class="res-card ${r.status}">
+      <div class="res-top"><div class="res-data">${fmtD(r.data_reserva)} · ${(r.slot_inicio||'').slice(0,5)}</div><span class="badge ${bc}">${bl}</span></div>
+      <div class="res-info">${mod?mod.icone+' '+mod.nome:'—'} · ${r.duracao_min===60?'1 hora':'2 horas'}</div>
+      ${acts}
+    </div>`;
+  }).join('');
+}
+
+// ── CHECK-IN ─────────────────────────────────────────────────
+async function doCheckin(id){
+  const{error}=await sb.from('reservas').update({checkin_feito:true,checkin_em:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro no check-in');return;}
+  renderCheckin();renderMinhas();toast('Check-in realizado! Boa partida!');
+  document.getElementById('nd-ckin').classList.remove('show');
+}
+
+async function renderCheckin(){
+  if(!morador)return;
+  const today=ts();
+  const{data:proxima}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).eq('data_reserva',today).eq('status','confirmada').eq('checkin_feito',false).limit(1).maybeSingle();
+  const main=document.getElementById('ckin-main');
+  const nd=document.getElementById('nd-ckin');
+  if(proxima){
+    nd.classList.add('show');
+    const m=proxima.modalidades;
+    main.innerHTML=`<div class="ckin-hero">
+      <div class="ckin-hero-title"><i class="ti ti-door-enter" aria-hidden="true"></i> Reserva de hoje</div>
+      <div class="ckin-hero-sub">${m?m.icone+' '+m.nome:''} · ${(proxima.slot_inicio||'').slice(0,5)} – ${(proxima.slot_fim||'').slice(0,5)}</div>
+      <button class="ckin-big-btn" onclick="doCheckin('${proxima.id}')"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>
+      <div style="font-size:10px;opacity:.75;margin-top:10px">Disponível 10 min antes. Cancela após 15 min sem check-in.</div>
+    </div>`;
+  }else{
+    nd.classList.remove('show');
+    const{data:prox}=await sb.from('reservas').select('data_reserva,slot_inicio').eq('unidade_id',morador.unidade_id).gt('data_reserva',today).eq('status','confirmada').order('data_reserva').limit(1).maybeSingle();
+    main.innerHTML=`<div class="ib ib-blue"><i class="ti ti-calendar" aria-hidden="true" style="margin-right:4px"></i>${prox?`Próxima reserva: ${fmtD(prox.data_reserva)} às ${(prox.slot_inicio||'').slice(0,5)}`:'Nenhuma reserva ativa no momento.'}</div>`;
+  }
+  const{data:hist}=await sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(10);
+  const hel=document.getElementById('ckin-hist');
+  if(!hist?.length){hel.innerHTML=`<div class="empty"><i class="ti ti-history"></i>Sem histórico</div>`;return;}
+  hel.innerHTML=hist.map(r=>{
+    const dotC=r.checkin_feito?'#3B6D11':r.status==='cancelada'||r.status==='expirada'?'#E24B4A':'#EF9F27';
+    const bl=r.checkin_feito?`<span class="badge b-teal">Presente</span>`:r.status==='cancelada'?`<span class="badge b-danger">Cancelada</span>`:r.status==='expirada'?`<span class="badge b-gray">Ausência</span>`:`<span class="badge b-warn">Aguardando</span>`;
+    const m=r.modalidades;
+    return`<div class="ckin-row">
+      <div class="ckin-dot" style="background:${dotC}"></div>
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">${fmtD(r.data_reserva)} · ${(r.slot_inicio||'').slice(0,5)}</div>
+      <div style="font-size:10.5px;color:var(--txt2)">${m?m.icone+' '+m.nome:'—'}</div></div>
+      ${bl}
+    </div>`;
+  }).join('');
+}
+
+// ── AVISOS ───────────────────────────────────────────────────
+async function carregarAvisos(){
+  if(!morador)return;
+  const{data}=await sb.from('avisos').select('*,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20);
+  avisosCache=data||[];
+}
+
+async function renderAvisos(){
+  if(!morador){document.getElementById('avisos-list').innerHTML=`<div class="empty"><i class="ti ti-bell-off"></i>Faça login para ver avisos</div>`;return;}
+  await carregarAvisos();
+  const vistos=avisosCache.filter(a=>a.destino==='todos'||(a.destino==='blocoA'&&morador.unidades?.bloco==='A')||(a.destino==='blocoB'&&morador.unidades?.bloco==='B'));
+  const naoLidos=vistos.filter(a=>!a.leituras_avisos?.find(l=>l.morador_id===morador.id)).length;
+  document.getElementById('nd-avisos').classList.toggle('show',naoLidos>0);
+  const list=document.getElementById('avisos-list');
+  if(!vistos.length){list.innerHTML=`<div class="empty"><i class="ti ti-bell-off"></i>Nenhum aviso</div>`;return;}
+  list.innerHTML=vistos.map(av=>{
+    const lido=av.leituras_avisos?.find(l=>l.morador_id===morador.id);
+    const pct=av.leituras_avisos?Math.round(av.leituras_avisos.length/60*100):0;
+    return`<div class="av-card ${av.tipo}">
+      <div class="av-hdr">
+        <div class="av-titulo">${!lido?'<span style="display:inline-block;width:6px;height:6px;background:#E24B4A;border-radius:50%;margin-right:5px;vertical-align:middle"></span>':''}${av.titulo}</div>
+        <span class="badge ${av.tipo==='urgente'?'b-danger':av.tipo==='manutencao'?'b-warn':av.tipo==='info'?'b-info':'b-ok'}" style="margin-left:8px;flex-shrink:0">${AV_LABELS[av.tipo]}</span>
+      </div>
+      <div class="av-corpo">${av.corpo}</div>
+      <div class="av-foot">
+        <span>${fmtD(av.publicado_em?.slice(0,10))}</span>
+        ${morador.tipo==='admin'?`<span>${pct}% leram</span>`:lido?`<span style="color:var(--verde)"><i class="ti ti-check" aria-hidden="true"></i> Lido</span>`:`<span style="color:#E24B4A;cursor:pointer" onclick="marcarLido('${av.id}')">Marcar como lido</span>`}
+      </div>
+      ${morador.tipo==='admin'?`<div class="leitura-bar"><div class="leitura-fill" style="width:${pct}%"></div></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function marcarLido(id){
+  await sb.from('leituras_avisos').upsert({aviso_id:id,morador_id:morador.id});
+  renderAvisos();
+}
+
+async function publicarAviso(){
+  const t=document.getElementById('av-tit').value.trim();
+  const c=document.getElementById('av-corpo').value.trim();
+  if(!t||!c){toast('Preencha título e mensagem');return;}
+  const{error}=await sb.from('avisos').insert({
+    tipo:document.getElementById('av-tipo').value,
+    titulo:t,corpo:c,
+    destino:document.getElementById('av-dest').value,
+    publicado_por:morador.id
+  });
+  if(error){toast('Erro: '+error.message);return;}
+  document.getElementById('av-tit').value='';document.getElementById('av-corpo').value='';
+  fecharModal('m-novo-aviso');renderAvisos();toast('Aviso publicado!');
+}
+
+// ── OCORRÊNCIAS ──────────────────────────────────────────────
+async function renderOco(){
+  if(!morador)return;
+  let query=sb.from('ocorrencias').select('*,mensagens_ocorrencia(*)');
+  if(morador.tipo!=='admin')query=query.eq('unidade_id',morador.unidade_id);
+  if(ocoFiltro!=='todos')query=query.eq('status',ocoFiltro);
+  const{data}=await query.order('created_at',{ascending:false}).limit(20);
+  ocosCache=data||[];
+  const list=document.getElementById('oco-list');
+  const det=document.getElementById('oco-detail');
+  if(ocoDetalhe){
+    const o=ocosCache.find(x=>x.id===ocoDetalhe);
+    list.innerHTML='';
+    det.innerHTML=o?`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:600;flex:1">${o.titulo}</div>
+        <span class="badge ${o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray'}">${ST_LABELS[o.status]}</span>
+      </div>
+      <div style="font-size:10.5px;color:var(--txt2);margin-bottom:8px">${o.local||''} · <span class="oco-cat">${OCA_LABELS[o.categoria]||o.categoria}</span></div>
+      <div style="font-size:11px;color:var(--txt2);margin-bottom:10px">${o.descricao||''}</div>
+      <div class="sec-lbl">Timeline</div>
+      ${(o.mensagens_ocorrencia||[]).map(m=>`<div class="tl-item">
+        <div class="tl-dot" style="background:${m.origem==='admin'?'#27500A':'#378ADD'}"></div>
+        <div class="tl-body"><div class="tl-ev">${m.origem==='admin'?'Administração':'Morador'}</div>
+        <div class="tl-dt">${fmtD(m.created_at?.slice(0,10))}</div>
+        <div class="tl-msg">${m.mensagem}</div></div>
+      </div>`).join('')}
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn-sm" onclick="ocoDetalhe=null;renderOco()"><i class="ti ti-arrow-left" aria-hidden="true"></i> Voltar</button>
+        ${morador.tipo==='admin'&&(o.status==='aberta'||o.status==='andamento')?`<button class="btn-sm a" onclick="responderOco('${o.id}')"><i class="ti ti-message" aria-hidden="true"></i> Responder</button>`:''}
+      </div>
+    </div>`:'';
+    return;
+  }
+  det.innerHTML='';
+  list.innerHTML=ocosCache.length?ocosCache.map(o=>`
+    <div class="oco-card ${o.status}" onclick="ocoDetalhe='${o.id}';renderOco()">
+      <div class="oco-top"><div class="oco-titulo">${o.prioridade==='urgente'?'⚠ ':''} ${o.titulo}</div>
+        <span class="badge ${o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray'}">${ST_LABELS[o.status]}</span></div>
+      <div class="oco-meta"><span class="oco-cat">${OCA_LABELS[o.categoria]||o.categoria}</span><span>${o.local||''}</span><span>${fmtD(o.created_at?.slice(0,10))}</span></div>
+    </div>`).join(''):`<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma ocorrência</div>`;
+}
+
+function setFiltroOco(f,el){
+  ocoFiltro=f;ocoDetalhe=null;
+  document.querySelectorAll('.fpill').forEach(b=>{b.className='fpill';});
+  el.className='fpill active';
+  renderOco();
+}
+
+async function salvarOco(){
+  const t=document.getElementById('oc-tit').value.trim();
+  if(!t){toast('Informe o título');return;}
+  const{error}=await sb.from('ocorrencias').insert({
+    unidade_id:morador.unidade_id,morador_id:morador.id,
+    categoria:document.getElementById('oc-cat').value,
+    titulo:t,descricao:document.getElementById('oc-desc').value||t,
+    local:document.getElementById('oc-loc').value,
+    prioridade:document.getElementById('oc-prio').value,
+    status:'aberta'
+  });
+  if(error){toast('Erro: '+error.message);return;}
+  document.getElementById('oc-tit').value='';document.getElementById('oc-desc').value='';
+  fecharModal('m-nova-oco');renderOco();toast('Ocorrência registrada.');
+}
+
+async function responderOco(id){
+  const msg=prompt('Mensagem de atualização:');
+  if(!msg)return;
+  await sb.from('mensagens_ocorrencia').insert({ocorrencia_id:id,autor_id:morador.id,origem:'admin',mensagem:msg,status_novo:'andamento'});
+  await sb.from('ocorrencias').update({status:'andamento'}).eq('id',id);
+  renderOco();toast('Resposta enviada.');
+}
+
+// ── NAVEGAÇÃO ────────────────────────────────────────────────
+const screenTitles={avisos:'Avisos',reservar:'Reservar quadra',minhas:'Minhas reservas',checkin:'Check-in',ocorrencias:'Ocorrências',perfil:'Meu perfil'};
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const sc=document.getElementById('screen-'+name);if(sc)sc.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const tb=document.getElementById('tab-'+name);if(tb)tb.classList.add('active');
+  if(name==='minhas')renderMinhas();
+  if(name==='checkin')renderCheckin();
+  if(name==='avisos')renderAvisos();
+  if(name==='ocorrencias')renderOco();
+}
+
+// ── MODAIS ───────────────────────────────────────────────────
+function abrirModal(id){document.getElementById(id).classList.add('open');}
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)fecharModal(m.id);});
+});
+
+// ── SERVICE WORKER (PWA) ─────────────────────────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
