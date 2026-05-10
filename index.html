@@ -724,6 +724,56 @@ function toast(msg) {
 
 function abrirModal(id) { document.getElementById(id).classList.add('open'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+function isAdmin() {
+  return !!(morador && morador.tipo === 'admin' && morador.status === 'ativo');
+}
+
+function requireAdmin() {
+  if(!isAdmin()) {
+    toast('Acesso restrito aos administradores.');
+    goScreen('avisos');
+    return false;
+  }
+  return true;
+}
+
+function resetPermissoesUI() {
+  var tabConfig = document.getElementById('tab-config');
+  var tabOcorrencias = d);
+  var btnNovaOco = document.getElementById('btn-nova-oco');
+  var fabAviso = document.getElementById('fab-aviso');
+  var ndConfig = document.getElementById('nd-config');
+
+  if(tabConfig) tabConfig.style.display = 'none';
+  if(tabOcorrencias) tabOcorrencias.style.display = 'none';
+  if(btnNovaOco) btnNovaOco.style.display = 'none';
+  if(fabAviso) fabAviso.innerHTML = '';
+  if(ndConfig) ndConfig.classList.remove('show');
+}
+
+function bloquearSessao(msg) {
+  sb.auth.signOut().finally(function() {
+    usuario = null;
+    morador = null;
+    resetPermissoesUI();
+    document.getElementById('app-main').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    var err = document.getElementById('login-err');
+    if(err) {
+      err.textContent = msg;
+      err.style.display = 'block';
+    }
+  });
+}
+
+function escapeHtml(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 // Fechar modais clicando no fundo
 document.querySelectorAll('.modal-bg').forEach(function(m) {
@@ -746,7 +796,7 @@ document.getElementById('btn-entrar').addEventListener('click', function() {
 // CADASTRO - link
 document.getElementById('link-cadastro').addEventListener('click', function() {
   var sel = document.getElementById('cad-apto');
-  var opts = '<option value="SINDICO">Administrador / Sindico (sem apartamento)</option>';
+  var opts = '';
   for(var a=1; a<=15; a++) {
     var andar = String(a).padStart(2,'0');
     opts += '<option value="A-'+andar+'01">A-'+andar+'01</option>';
@@ -775,32 +825,33 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
     if(res.error) { err.textContent=res.error.message; err.style.display='block'; return; }
     if(!res.data.user) { err.textContent='Confirme seu e-mail para continuar.'; err.style.display='block'; return; }
     var uid = res.data.user.id;
-    var tipo = (aptoCod==='SINDICO'||aptoCod==='A-1501') ? 'admin' : 'proprietario';
-    var status = (aptoCod==='SINDICO'||aptoCod==='A-1501') ? 'ativo' : 'pendente';
-    if(aptoCod==='SINDICO') {
-      sb.from('moradores').insert({
-        auth_user_id: uid, unidade_id: null,
-        nome: nome, email: email, tipo: tipo, status: status,
-        lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString()
-      }).then(function(r3) {
-        if(r3.error) { err.textContent='Erro: '+r3.error.message; err.style.display='block'; return; }
-        fecharModal('m-cadastro');
-        toast('Conta de administrador criada! Faca login.');
-      });
-    } else {
-      sb.from('unidades').select('id').eq('codigo',aptoCod).single().then(function(r2) {
-        var unidadeId = r2.data ? r2.data.id : null;
-        sb.from('moradores').insert({
-          auth_user_id: uid, unidade_id: unidadeId,
-          nome: nome, email: email, tipo: tipo, status: status,
-          lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString()
-        }).then(function(r3) {
-          if(r3.error) { err.textContent='Erro: '+r3.error.message; err.style.display='block'; return; }
-          fecharModal('m-cadastro');
-          toast('Cadastro realizado! Faca login.');
-        });
-      });
+var tipo = 'proprietario';
+var status = 'pendente';
+
+sb.from('unidades').select('id').eq('codigo',aptoCod).single().then(function(r2) {
+  var unidadeId = r2.data ? r2.data.id : null;
+  if(!unidadeId) {
+    err.textContent='Apartamento nao encontrado.';
+    err.style.display='block';
+    return;
+  }
+  sb.from('moradores').insert({
+    auth_user_id: uid,
+    unidade_id: unidadeId,
+    nome: nome,
+    email: email,
+    tipo: tipo,
+    status: status,
+    lgpd_aceito: true,
+    lgpd_aceito_em: new Date().toISOString()
+  }).then(function(r3) {
+    if(r3.error) {
+      err.textContent='Erro: '+r3.error.message;
+      err.style.display='block';
+      return;
     }
+    fecharModal('m-cadastro');
+    toast('Cadastro enviado para aprovacao do administrador.');
   });
 });
 
@@ -816,39 +867,123 @@ document.getElementById('btn-logout').addEventListener('click', function() {
 // INICIAR APP
 function iniciarApp(user) {
   usuario = user;
+  resetPermissoesUI();
+
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-main').style.display = 'flex';
-  sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).single().then(function(res) {
-    morador = res.data;
-    if(morador) {
-      var n = morador.nome||'';
-      var partes = n.split(' ');
-      var ini = ((partes[0]||'')[0]||'') + ((partes[partes.length-1]||'')[0]||'');
-      ini = ini.toUpperCase();
-      document.getElementById('av-btn').textContent = ini;
-      document.getElementById('pf-av').textContent = ini;
-      document.getElementById('pf-nome').textContent = morador.nome;
-      var tipoTxt = {proprietario:'Proprietario',inquilino:'Inquilino',admin:'Administrador'}[morador.tipo] || morador.tipo;
-      var cod = morador.unidades ? morador.unidades.codigo : '';
-      var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : ('Administrador / Sindico');
-      document.getElementById('pf-apto').textContent = aptoLabel;
-      document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
-      // Moradores podem reportar ocorrências pelo botão fixo na tela de ocorrências
-      // (mas a aba ocorrências é oculta — eles acessam via botão na tela de avisos apenas se admin liberar)
-      document.getElementById('role-tag').textContent = morador.tipo==='admin' ? 'Administrador' : 'Morador';
-      if(morador.tipo==='admin') {
-          document.getElementById('fab-aviso').innerHTML = '<button class="btn-p" id="btn-novo-aviso" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>';
-        document.getElementById('btn-novo-aviso').addEventListener('click', function() { abrirModal('m-novo-aviso'); });
-        document.getElementById('tab-config').style.display = 'flex';
-        document.getElementById('tab-ocorrencias').style.display = 'flex';
-        document.getElementById('btn-nova-oco').style.display = 'flex';
-        // Verificar pendentes ao logar
-        sb.from('moradores').select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r) {
-          var nd = document.getElementById('nd-config');
-          if(nd && r.count > 0) { nd.classList.add('show'); toast('Atencao: '+r.count+' inscricao(oes) pendente(s) de aprovacao!'); }
-        });
-      }
+
+  sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).maybeSingle().then(function(res) {
+    if(res.error || !res.data) {
+      bloquearSessao('Cadastro nao encontrado. Fale com a administracao.');
+      return;
     }
+
+    morador = res.data;
+
+    if(morador.status === 'pendente') {
+      bloquearSessao('Seu cadastro esta aguardando aprovacao do administrador.');
+      return;
+    }
+
+    if(morador.status === 'inativo') {
+      bloquearSessao('Seu cadastro esta inativo. Fale com a administracao.');
+      return;
+    }
+
+    if(morador.status === 'suspenso') {
+      bloquearSessao('Seu cadastro esta suspenso temporariamente.');
+      return;
+    }
+
+    if(morador.status !== 'ativo') {
+      bloquearSessao('Cadastro sem permissao de acesso.');
+      return;
+    }
+
+    var n = morador.nome || '';
+    var partes = n.split(' ');
+    var ini = ((partes[0] || '')[0] || '') + ((partes[partes.length - 1] || '')[0] || '');
+    ini = ini.toUpperCase();
+
+    document.getElementById('av-btn').textContent = ini;
+    document.getElementById('pf-av').textContent = ini;
+    document.getElementById('pf-nome').textContent = morador.nome;
+
+    var tipoTxt = {proprietario:'Proprietario',inquilino:'Inquilino',admin:'Administrador'}[morador.tipo] || morador.tipo;
+    var cod = morador.unidades ? morador.unidades.codigo : '';
+    var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : ('Administrador / Sindico');
+
+    document.getElementById('pf-apto').textContent = aptoLabel;
+    document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
+    document.getElementById('role-tag').textContent = isAdmin() ? 'Administrador' : 'Morador';
+
+    if(isAdmin()) {
+      document.getElementById('fab-aviso').innerHTML = '<button class="btn-p" id="btn-novo-aviso" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>';
+      document.getElementById('btn-novo-aviso').addEventListener('click', function() {
+        if(!requireAdmin()) return;
+        abrirModal('m-novo-aviso');
+      });
+document.getElementById('tab-ocorrencias').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  goScreen('ocorrencias');
+  renderOco();
+});
+
+document.getElementById('tab-config').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  goScreen('config');
+  renderConfig();
+});
+function renderConfig() {
+  if(!requireAdmin()) return;
+  ...
+}
+document.getElementById('btn-pub-aviso').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  ...
+});
+function criarContrato() {
+  if(!requireAdmin()) return;
+  ...
+}
+if(!morador.unidade_id) {
+  document.getElementById('ckin-main').innerHTML = '<div class="ib ib-blue">Administrador sem apartamento vinculado.</div>';
+  document.getElementById('ckin-hist').innerHTML = '';
+  var nd = document.getElementById('nd-ckin');
+  if(nd) nd.classList.remove('show');
+  return;
+}
+
+      document.getElementById('tab-config').style.display = 'flex';
+      document.getElementById('tab-ocorrencias').style.display = 'flex';
+      document.getElementById('btn-nova-oco').style.display = 'flex';
+
+      sb.from('moradores').select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r) {
+        var nd = document.getElementById('nd-config');
+        if(nd && r.count > 0) {
+          nd.classList.add('show');
+          toast('Atencao: '+r.count+' inscricao(oes) pendente(s) de aprovacao!');
+        document.getElementById('btn-logout').addEventListener('click', function() {
+  sb.auth.signOut().then(function() {
+    resetPermissoesUI();
+    document.getElementById('app-main').style.display='none';
+    document.getElementById('login-screen').style.display='flex';
+    usuario=null;
+    morador=null;
+  });
+});
+
+        }
+      });
+    }
+
+    carregarBloqueios();
+    renderCal();
+    renderAvisos();
+    renderCheckin();
+  });
+}
+
     carregarBloqueios();
     renderCal();
     renderAvisos();
