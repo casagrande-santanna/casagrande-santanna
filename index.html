@@ -1388,15 +1388,20 @@ document.addEventListener('DOMContentLoaded', function() {
         aula_aviso_dias: parseInt(document.getElementById('cfg-aula-aviso').value)||30,
         aula_max_contratos: parseInt(document.getElementById('cfg-aula-max-contr').value)||1
       };
-      sb.from('configuracoes').upsert(Object.assign({id:1, atualizado_em: new Date().toISOString()}, cfg)).then(function(r) {
-        if(r.error) {
-          // Tenta insert se upsert falhar (tabela pode não ter a coluna id=1)
-          sb.from('configuracoes').update(cfg).then(function(r2) {
-            if(r2.error) toast('Erro ao salvar: '+r2.error.message);
+      // Verificar se já existe uma linha de configuração
+      sb.from('configuracoes').select('id').limit(1).maybeSingle().then(function(rc) {
+        if(rc.data) {
+          // Atualizar linha existente
+          sb.from('configuracoes').update(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).eq('id', rc.data.id).then(function(r) {
+            if(r.error) toast('Erro ao salvar: '+r.error.message);
             else toast('Configuracoes salvas!');
           });
         } else {
-          toast('Configuracoes salvas!');
+          // Inserir primeira linha
+          sb.from('configuracoes').insert(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).then(function(r) {
+            if(r.error) toast('Erro ao salvar: '+r.error.message);
+            else toast('Configuracoes salvas!');
+          });
         }
       });
     });
@@ -1493,13 +1498,16 @@ function renderContratosAula() {
       lc.querySelectorAll('[data-renovar]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           if(!requireAdmin()) return;
-          var d = JSON.parse(decodeURIComponent(btn.dataset.renovar));
+          var rawData = btn.getAttribute('data-renovar');
+          var d = JSON.parse(decodeURIComponent(rawData));
           // Popular select de aptos
           sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
             var sel = document.getElementById('contr-apto');
             if(sel && res.data) {
-              sel.innerHTML = res.data.map(function(u){ return '<option value="'+u.id+'">'+u.codigo+'</option>'; }).join('');
-              sel.value = d.uid;
+              sel.innerHTML = res.data.map(function(u){
+                var selected = u.id === d.uid ? ' selected' : '';
+                return '<option value="'+u.id+'"'+selected+'>'+u.codigo+'</option>';
+              }).join('');
             }
           });
           // Preencher hora
@@ -1530,7 +1538,8 @@ function renderContratosAula() {
       lc.querySelectorAll('[data-cancelar-contr]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           if(!requireAdmin()) return;
-          var d = JSON.parse(decodeURIComponent(btn.dataset.cancelarContr));
+          var rawData = btn.getAttribute('data-cancelar-contr');
+          var d = JSON.parse(decodeURIComponent(rawData));
           var dow = d.dow;
           var slot = d.slot;
           var uid = d.uid;
