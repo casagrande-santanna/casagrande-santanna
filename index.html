@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#27500A">
-<title>Casa Grande de Sant'Anna</title>
+<title> de Sant'Anna</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <!-- Biblioteca para o Leitor de QR Code -->
@@ -171,7 +171,7 @@ textarea.form-in{resize:vertical}
 
 <div class="login-wrap" id="login-screen">
   <div class="login-logo">&#127970;&#127970;</div>
-  <div class="login-title">Casa Grande Sant'Anna</div>
+  <div class="login-title"> de Sant'Anna</div>
   <div class="login-sub">Sistema de reserva da quadra</div>
   <div class="login-card">
     <label class="login-lbl">E-mail</label>
@@ -190,7 +190,7 @@ textarea.form-in{resize:vertical}
   <div class="hdr">
     <div class="hdr-row">
       <div>
-        <div class="hdr-title">Casa Grande Sant'Anna</div>
+        <div class="hdr-title">Casa Grande de Sant'Anna</div>
         <div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div>
       </div>
       <div class="hdr-right">
@@ -531,7 +531,7 @@ textarea.form-in{resize:vertical}
           </div>
         </div>
       </div>
-      <div class="ib ib-amber" style="font-size:10.5px">LGPD: Seus dados são usados exclusivamente para gestão condominial. Controlador: Condomínio Casa Grande Sant'Anna.</div>
+      <div class="ib ib-amber" style="font-size:10.5px">LGPD: Seus dados são usados exclusivamente para gestão condominial. Controlador: Condomínio Casa Grande de Sant'Anna.</div>
       <button class="btn-s" id="btn-ver-regulamento" style="margin-top:6px;width:100%"><i class="ti ti-file-description" aria-hidden="true"></i>Ver regulamento da quadra</button>
     </div>
   </div>
@@ -704,7 +704,7 @@ textarea.form-in{resize:vertical}
     <div class="mtitle"><i class="ti ti-file-description" style="color:var(--v);margin-right:5px"></i>Regulamento da Quadra</div>
     <div style="font-size:11px;color:var(--t2);line-height:1.7;max-height:58vh;overflow-y:auto;padding-right:4px">
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">1. Uso e Reservas</div>
-      <div>A quadra poliesportiva é de uso exclusivo dos moradores do Condomínio Casa Grande Sant'Anna e seus convidados, desde que acompanhados do morador responsável. Cada apartamento pode realizar até o limite mensal de reservas pontuais definido pela administração.</div>
+      <div>A quadra poliesportiva é de uso exclusivo dos moradores do Condomínio Casa Grande de Sant'Anna e seus convidados, desde que acompanhados do morador responsável. Cada apartamento pode realizar até o limite mensal de reservas pontuais definido pela administração.</div>
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">2. Check-in e Tolerância</div>
       <div>O morador deve realizar o check-in pelo aplicativo (ou lendo o QR Code da quadra) até 15 minutos após o horário reservado. A ausência de check-in neste prazo resultará no cancelamento automático da reserva e registro de falta. Duas faltas no mês implicam suspensão temporária do direito de reserva.</div>
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">3. Cancelamentos</div>
@@ -728,7 +728,7 @@ textarea.form-in{resize:vertical}
   <div class="modal-card center">
     <div class="mhandle"></div>
     <div class="mtitle">Criar conta</div>
-    <div class="msub">Morador do Casa Grande Sant'Anna</div>
+    <div class="msub">Morador do Casa Grande de Sant'Anna</div>
     <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="cad-nome" placeholder="Seu nome completo"></div>
     <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="cad-email"></div>
     <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Mínimo 6 caracteres"></div>
@@ -1871,7 +1871,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tglPush.classList.remove('on'); toast('Acesse as configurações do navegador para desativar.'); tglPush.classList.add('on');
       } else {
         Notification.requestPermission().then(function(perm) {
-          if(perm === 'granted') { tglPush.classList.add('on'); toast('Notificações ativadas!'); new Notification('Casa Grande SantAnna', { body: 'Notificações ativadas com sucesso!', icon: '/favicon.ico' }); }
+          if(perm === 'granted') { tglPush.classList.add('on'); toast('Notificações ativadas!'); new Notification('Casa Grande de SantAnna', { body: 'Notificações ativadas com sucesso!', icon: '/favicon.ico' }); }
           else { tglPush.classList.remove('on'); toast('Permissão negada.'); }
         });
       }
