@@ -213,12 +213,13 @@ textarea.form-in{resize:vertical}
     <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
     <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
-    <button class="tab" id="tab-ocorrencias"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
+    <button class="tab" id="tab-ocorrencias" style="display:none"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
     <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config</button>
   </div>
   <div class="content">
     <div class="screen active" id="screen-avisos">
       <div id="fab-aviso"></div>
+      <div id="btn-reportar-oco-wrap"></div>
       <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
     </div>
     <div class="screen" id="screen-reservar">
@@ -259,7 +260,7 @@ textarea.form-in{resize:vertical}
       </div>
       <div id="oco-list"></div>
       <div id="oco-detail"></div>
-      <button class="btn-p" id="btn-nova-oco" style="margin-top:6px"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrencia</button>
+      <button class="btn-p" id="btn-nova-oco" style="margin-top:6px;display:none"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrencia</button>
     </div>
     <div class="screen" id="screen-config">
       <div class="card">
@@ -554,7 +555,7 @@ document.getElementById('btn-entrar').addEventListener('click', function() {
 // CADASTRO - link
 document.getElementById('link-cadastro').addEventListener('click', function() {
   var sel = document.getElementById('cad-apto');
-  var opts = '';
+  var opts = '<option value="SINDICO">Administrador / Sindico (sem apartamento)</option>';
   for(var a=1; a<=15; a++) {
     var andar = String(a).padStart(2,'0');
     opts += '<option value="A-'+andar+'01">A-'+andar+'01</option>';
@@ -566,7 +567,6 @@ document.getElementById('link-cadastro').addEventListener('click', function() {
     opts += '<option value="B-'+andar+'04">B-'+andar+'04</option>';
   }
   sel.innerHTML = opts;
-  sel.value = 'A-1501';
   abrirModal('m-cadastro');
 });
 
@@ -584,20 +584,32 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
     if(res.error) { err.textContent=res.error.message; err.style.display='block'; return; }
     if(!res.data.user) { err.textContent='Confirme seu e-mail para continuar.'; err.style.display='block'; return; }
     var uid = res.data.user.id;
-    var tipo = aptoCod==='A-1501' ? 'admin' : 'proprietario';
-    var status = aptoCod==='A-1501' ? 'ativo' : 'pendente';
-    sb.from('unidades').select('id').eq('codigo',aptoCod).single().then(function(r2) {
-      var unidadeId = r2.data ? r2.data.id : null;
+    var tipo = (aptoCod==='SINDICO'||aptoCod==='A-1501') ? 'admin' : 'proprietario';
+    var status = (aptoCod==='SINDICO'||aptoCod==='A-1501') ? 'ativo' : 'pendente';
+    if(aptoCod==='SINDICO') {
       sb.from('moradores').insert({
-        auth_user_id: uid, unidade_id: unidadeId,
+        auth_user_id: uid, unidade_id: null,
         nome: nome, email: email, tipo: tipo, status: status,
         lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString()
       }).then(function(r3) {
         if(r3.error) { err.textContent='Erro: '+r3.error.message; err.style.display='block'; return; }
         fecharModal('m-cadastro');
-        toast('Cadastro realizado! Faca login.');
+        toast('Conta de administrador criada! Faca login.');
       });
-    });
+    } else {
+      sb.from('unidades').select('id').eq('codigo',aptoCod).single().then(function(r2) {
+        var unidadeId = r2.data ? r2.data.id : null;
+        sb.from('moradores').insert({
+          auth_user_id: uid, unidade_id: unidadeId,
+          nome: nome, email: email, tipo: tipo, status: status,
+          lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString()
+        }).then(function(r3) {
+          if(r3.error) { err.textContent='Erro: '+r3.error.message; err.style.display='block'; return; }
+          fecharModal('m-cadastro');
+          toast('Cadastro realizado! Faca login.');
+        });
+      });
+    }
   });
 });
 
@@ -627,13 +639,24 @@ function iniciarApp(user) {
       document.getElementById('pf-nome').textContent = morador.nome;
       var tipoTxt = {proprietario:'Proprietario',inquilino:'Inquilino',admin:'Administrador'}[morador.tipo] || morador.tipo;
       var cod = morador.unidades ? morador.unidades.codigo : '';
-      document.getElementById('pf-apto').textContent = 'Apto '+cod+' - '+tipoTxt;
-      document.getElementById('hdr-sub').textContent = 'Apto '+cod+' - Quadra Poliesportiva';
+      var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : ('Administrador / Sindico');
+      document.getElementById('pf-apto').textContent = aptoLabel;
+      document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
+      // Para moradores: botão de reportar ocorrência fica nos avisos
+      if(morador.tipo !== 'admin') {
+        var wrap = document.getElementById('btn-reportar-oco-wrap');
+        if(wrap) {
+          wrap.innerHTML = '<button class="btn-s" id="btn-reportar-oco" style="margin-bottom:10px;width:100%"><i class="ti ti-alert-circle" aria-hidden="true"></i>Reportar ocorrencia</button>';
+          document.getElementById('btn-reportar-oco').addEventListener('click', function() { abrirModal('m-nova-oco'); });
+        }
+      }
       document.getElementById('role-tag').textContent = morador.tipo==='admin' ? 'Administrador' : 'Morador';
       if(morador.tipo==='admin') {
-        document.getElementById('fab-aviso').innerHTML = '<button class="btn-p" id="btn-novo-aviso" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>';
+          document.getElementById('fab-aviso').innerHTML = '<button class="btn-p" id="btn-novo-aviso" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>';
         document.getElementById('btn-novo-aviso').addEventListener('click', function() { abrirModal('m-novo-aviso'); });
         document.getElementById('tab-config').style.display = 'flex';
+        document.getElementById('tab-ocorrencias').style.display = 'flex';
+        document.getElementById('btn-nova-oco').style.display = 'flex';
       }
     }
     carregarBloqueios();
@@ -972,6 +995,7 @@ function renderCheckin() {
 // MINHAS RESERVAS
 function renderMinhas() {
   if(!morador) return;
+  if(!morador.unidade_id) { document.getElementById('minhas-list').innerHTML='<div class="empty"><i class="ti ti-user-check"></i>Administrador sem apartamento vinculado.</div>'; return; }
   sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(20).then(function(res) {
     var mine = res.data||[];
     var list = document.getElementById('minhas-list');
@@ -1046,6 +1070,7 @@ function renderAvisos() {
       html += '<div class="av-foot"><span>'+fmtD((av.publicado_em||'').slice(0,10))+'</span>';
       if(morador.tipo==='admin') {
         html += '<span>'+pct+'% leram</span>';
+        html += '<button class="btn-sm r" data-del-av-id="'+av.id+'" style="font-size:10px;padding:3px 8px"><i class="ti ti-trash" aria-hidden="true"></i>Apagar</button>';
       } else if(lido) {
         html += '<span style="color:var(--v)">Lido</span>';
       } else {
@@ -1060,6 +1085,14 @@ function renderAvisos() {
     list.querySelectorAll('[data-lido-id]').forEach(function(el) {
       el.addEventListener('click', function() {
         sb.from('leituras_avisos').upsert({aviso_id:el.dataset.lidoId, morador_id:morador.id}).then(function() { renderAvisos(); });
+      });
+    });
+    list.querySelectorAll('[data-del-av-id]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if(!confirm('Apagar este aviso para todos os moradores?')) return;
+        sb.from('avisos').update({ativo:false}).eq('id',btn.dataset.delAvId).then(function() {
+          toast('Aviso apagado.'); renderAvisos();
+        });
       });
     });
   });
