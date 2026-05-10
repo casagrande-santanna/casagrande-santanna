@@ -214,12 +214,12 @@ textarea.form-in{resize:vertical}
     <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
     <button class="tab" id="tab-ocorrencias" style="display:none"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
-    <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config</button>
+    <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config<span class="ndot" id="nd-config"></span></button>
   </div>
   <div class="content">
     <div class="screen active" id="screen-avisos">
       <div id="fab-aviso"></div>
-      <div id="btn-reportar-oco-wrap"></div>
+      <!-- Moradores podem reportar ocorrência pelo e-mail ou pessoalmente -->
       <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
     </div>
     <div class="screen" id="screen-reservar">
@@ -336,6 +336,17 @@ textarea.form-in{resize:vertical}
       <div class="card">
         <div class="card-title"><i class="ti ti-ban" aria-hidden="true"></i>Apartamentos suspensos</div>
         <div id="lista-suspensos"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-shield" aria-hidden="true"></i>Gerenciar administradores</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Promova moradores ativos a administrador ou rebaixe administradores a morador.</div>
+        <div id="lista-admins"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-user-check" aria-hidden="true"></i>Inscricoes pendentes de aprovacao<span id="badge-pendentes" class="badge b-warn" style="margin-left:8px"></span></div>
+        <div id="lista-pendentes"></div>
       </div>
 
       <div class="card">
@@ -642,14 +653,8 @@ function iniciarApp(user) {
       var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : ('Administrador / Sindico');
       document.getElementById('pf-apto').textContent = aptoLabel;
       document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
-      // Para moradores: botão de reportar ocorrência fica nos avisos
-      if(morador.tipo !== 'admin') {
-        var wrap = document.getElementById('btn-reportar-oco-wrap');
-        if(wrap) {
-          wrap.innerHTML = '<button class="btn-s" id="btn-reportar-oco" style="margin-bottom:10px;width:100%"><i class="ti ti-alert-circle" aria-hidden="true"></i>Reportar ocorrencia</button>';
-          document.getElementById('btn-reportar-oco').addEventListener('click', function() { abrirModal('m-nova-oco'); });
-        }
-      }
+      // Moradores podem reportar ocorrências pelo botão fixo na tela de ocorrências
+      // (mas a aba ocorrências é oculta — eles acessam via botão na tela de avisos apenas se admin liberar)
       document.getElementById('role-tag').textContent = morador.tipo==='admin' ? 'Administrador' : 'Morador';
       if(morador.tipo==='admin') {
           document.getElementById('fab-aviso').innerHTML = '<button class="btn-p" id="btn-novo-aviso" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Novo aviso</button>';
@@ -657,6 +662,11 @@ function iniciarApp(user) {
         document.getElementById('tab-config').style.display = 'flex';
         document.getElementById('tab-ocorrencias').style.display = 'flex';
         document.getElementById('btn-nova-oco').style.display = 'flex';
+        // Verificar pendentes ao logar
+        sb.from('moradores').select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r) {
+          var nd = document.getElementById('nd-config');
+          if(nd && r.count > 0) { nd.classList.add('show'); toast('Atencao: '+r.count+' inscricao(oes) pendente(s) de aprovacao!'); }
+        });
       }
     }
     carregarBloqueios();
@@ -1121,6 +1131,59 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
 function renderConfig() {
   if(!morador || morador.tipo!=='admin') return;
 
+  // Carregar inscrições pendentes
+  sb.from('moradores').select('*,unidades(codigo)').eq('status','pendente').order('created_at',{ascending:false}).then(function(res) {
+    var pends = res.data||[];
+    var badge = document.getElementById('badge-pendentes');
+    if(badge) badge.textContent = pends.length > 0 ? pends.length+' pendente(s)' : '';
+    var ndConfig = document.getElementById('nd-config');
+    if(ndConfig) ndConfig.classList.toggle('show', pends.length > 0);
+    var html = '';
+    if(!pends.length) { html = '<div style="font-size:11px;color:var(--t2)">Nenhuma inscricao pendente.</div>'; }
+    pends.forEach(function(m) {
+      var cod = m.unidades ? m.unidades.codigo : 'Sindico';
+      html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:7px">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">';
+      html += '<div><div style="font-size:12px;font-weight:600">'+m.nome+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">'+m.email+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">Apto '+cod+' - Cadastro em '+fmtD((m.created_at||'').slice(0,10))+'</div></div></div>';
+      html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+      html += '<button class="btn-sm g" data-apr-id="'+m.id+'"><i class="ti ti-check" aria-hidden="true"></i>Aprovar</button>';
+      html += '<button class="btn-sm" style="background:var(--bl);border-color:var(--blb);color:var(--blt)" data-adm-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Aprovar como Admin</button>';
+      html += '<button class="btn-sm r" data-rej-id="'+m.id+'"><i class="ti ti-x" aria-hidden="true"></i>Rejeitar</button>';
+      html += '</div></div>';
+    });
+    var lp = document.getElementById('lista-pendentes');
+    if(lp) {
+      lp.innerHTML = html;
+      // Aprovar como morador
+      lp.querySelectorAll('[data-apr-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('moradores').update({status:'ativo'}).eq('id',btn.dataset.aprId).then(function() {
+            toast('Inscricao aprovada!'); renderConfig();
+          });
+        });
+      });
+      // Aprovar como administrador
+      lp.querySelectorAll('[data-adm-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('moradores').update({status:'ativo',tipo:'admin'}).eq('id',btn.dataset.admId).then(function() {
+            toast('Aprovado como administrador!'); renderConfig();
+          });
+        });
+      });
+      // Rejeitar (inativar)
+      lp.querySelectorAll('[data-rej-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!confirm('Rejeitar esta inscricao?')) return;
+          sb.from('moradores').update({status:'inativo'}).eq('id',btn.dataset.rejId).then(function() {
+            toast('Inscricao rejeitada.'); renderConfig();
+          });
+        });
+      });
+    }
+  });
+
   // Carregar bloqueios
   sb.from('bloqueios').select('*').order('data_inicio').then(function(res) {
     var blqs = res.data||[];
@@ -1167,6 +1230,50 @@ function renderConfig() {
         btn.addEventListener('click', function() {
           sb.from('moradores').update({status:'ativo',suspenso_ate:null,faltas_mes:0}).eq('id',btn.dataset.suspId).then(function() {
             toast('Apartamento liberado!'); renderConfig();
+          });
+        });
+      });
+    }
+  });
+
+  // Gerenciar admins e moradores
+  sb.from('moradores').select('*,unidades(codigo)').eq('status','ativo').order('created_at').then(function(res) {
+    var todos = res.data||[];
+    var html = '';
+    todos.forEach(function(m) {
+      var cod = m.unidades ? m.unidades.codigo : 'Sindico';
+      var isAdm = m.tipo === 'admin';
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div style="font-size:12px;font-weight:600">'+m.nome+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">'+cod+' - '+(isAdm?'Administrador':'Morador')+'</div></div>';
+      if(m.id !== morador.id) {
+        if(!isAdm) {
+          html += '<button class="btn-sm b" data-prom-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Tornar admin</button>';
+        } else {
+          html += '<button class="btn-sm" data-rebx-id="'+m.id+'"><i class="ti ti-user" aria-hidden="true"></i>Tornar morador</button>';
+        }
+      } else {
+        html += '<span style="font-size:10px;color:var(--t2)">Voce</span>';
+      }
+      html += '</div>';
+    });
+    if(!todos.length) html = '<div style="font-size:11px;color:var(--t2)">Nenhum morador ativo.</div>';
+    var la = document.getElementById('lista-admins');
+    if(la) {
+      la.innerHTML = html;
+      la.querySelectorAll('[data-prom-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('moradores').update({tipo:'admin'}).eq('id',btn.dataset.promId).then(function() {
+            toast('Promovido a administrador!'); renderConfig();
+          });
+        });
+      });
+      la.querySelectorAll('[data-rebx-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!confirm('Rebaixar este administrador a morador comum?')) return;
+          sb.from('moradores').update({tipo:'proprietario'}).eq('id',btn.dataset.rebxId).then(function() {
+            toast('Revertido a morador.'); renderConfig();
           });
         });
       });
