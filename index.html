@@ -1411,13 +1411,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if(btnNC) {
     btnNC.addEventListener('click', function() {
       if(!requireAdmin()) return;
-      sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
-        var sel = document.getElementById('contr-apto');
-        if(sel && res.data) sel.innerHTML = res.data.map(function(u){ return '<option value="'+u.id+'">'+u.codigo+'</option>'; }).join('');
-      });
-      var dIni = document.getElementById('contr-ini');
-      if(dIni) dIni.min = ts();
-      abrirModal('m-novo-contrato');
+      abrirModalContrato(null, false);
     });
   }
 
@@ -1431,6 +1425,45 @@ document.addEventListener('DOMContentLoaded', function() {
     var el = document.getElementById(id);
     if(el) el.addEventListener('click', function() { el.classList.toggle('on'); });
   });
+
+  // Toggle de notificações push
+  var tglPush = document.getElementById('tgl-push');
+  if(tglPush) {
+    // Verificar se já tem permissão
+    if('Notification' in window) {
+      if(Notification.permission === 'granted') {
+        tglPush.classList.add('on');
+      } else {
+        tglPush.classList.remove('on');
+      }
+    }
+    tglPush.addEventListener('click', function() {
+      if(!('Notification' in window)) {
+        toast('Notificacoes nao suportadas neste navegador.');
+        return;
+      }
+      if(Notification.permission === 'granted') {
+        // Desativar: não tem API para revogar, mostrar instrução
+        tglPush.classList.remove('on');
+        toast('Para desativar, acesse as configuracoes do navegador.');
+        tglPush.classList.add('on'); // manter on pois ainda tem permissão
+      } else {
+        Notification.requestPermission().then(function(perm) {
+          if(perm === 'granted') {
+            tglPush.classList.add('on');
+            toast('Notificacoes ativadas!');
+            new Notification('Casa Grande SantAnna', {
+              body: 'Notificacoes ativadas com sucesso!',
+              icon: '/favicon.ico'
+            });
+          } else {
+            tglPush.classList.remove('on');
+            toast('Permissao negada. Verifique as configuracoes do navegador.');
+          }
+        });
+      }
+    });
+  }
 
   var btnAddBlk = document.getElementById('btn-add-bloqueio');
   if(btnAddBlk) {
@@ -1454,114 +1487,190 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── CONTRATOS DE AULA ──────────────────────────────────────────
 function renderContratosAula() {
-  sb.from('reservas').select('*,unidades(codigo),modalidades(nome,icone)').eq('tipo_reserva','aula').neq('status','cancelada').order('data_reserva',{ascending:true}).then(function(res) {
-    var contratos = {};
-    (res.data||[]).forEach(function(r) {
-      var dow = new Date(r.data_reserva+'T12:00:00').getDay();
-      var key = (r.unidade_id||'')+'_'+(r.slot_inicio||'')+'_'+dow;
-      if(!contratos[key]) {
-        contratos[key] = {unidade:r.unidades,modalidade:r.modalidades,slot:r.slot_inicio,dow:dow,dur:r.duracao_min,fim:r.data_reserva,count:0};
-      }
-      if(r.data_reserva > contratos[key].fim) contratos[key].fim = r.data_reserva;
-      contratos[key].count++;
-    });
-    var dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
-    var lista = Object.values(contratos);
-    var html = lista.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum contrato ativo.</div>';
-    lista.forEach(function(c) {
-      var vence = new Date(c.fim);
-      var diasR = Math.ceil((vence-new Date())/(1000*60*60*24));
-      var corV = diasR <= 30 ? 'var(--rdt)' : diasR <= 60 ? 'var(--amt)' : 'var(--t2)';
-      var cod = c.unidade ? c.unidade.codigo : '---';
-      var mod = c.modalidade ? (c.modalidade.icone+' '+c.modalidade.nome) : '---';
-      var dataRenovar = encodeURIComponent(JSON.stringify({uid:c.unidade_id,slot:c.slot,dow:c.dow,dur:c.dur,fim:c.fim}));
-      var dataCancelar = encodeURIComponent(JSON.stringify({uid:c.unidade_id,slot:c.slot,dow:c.dow,cod:cod}));
-      html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:8px">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">';
-      html += '<div><div style="font-size:12px;font-weight:600">Apto '+cod+' - '+mod+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+dias[c.dow]+' - '+(c.slot||'').slice(0,5)+' - '+(c.dur===60?'1h':'2h')+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+c.count+' aulas | '+fmtD(c.inicio)+' a '+fmtD(c.fim)+'</div></div>';
-      html += '<div style="text-align:right"><div style="font-size:10px;color:'+corV+'">Vence: '+fmtD(c.fim)+'</div>';
-      if(diasR<=30) html += '<span class="badge b-danger">Renovar em breve</span>';
-      else if(diasR<=60) html += '<span class="badge b-warn">'+diasR+' dias</span>';
-      html += '</div></div>';
-      html += '<div style="display:flex;gap:5px;flex-wrap:wrap">';
-      html += '<button class="btn-sm b" data-renovar="'+dataRenovar+'" style="font-size:10px"><i class="ti ti-refresh" aria-hidden="true"></i>Renovar</button>';
-      html += '<button class="btn-sm r" data-cancelar-contr="'+dataCancelar+'" style="font-size:10px"><i class="ti ti-trash" aria-hidden="true"></i>Cancelar contrato</button>';
-      html += '</div></div>';
-    });
-    var lc = document.getElementById('lista-contratos-aula');
-    if(lc) {
+  sb.from('reservas')
+    .select('id,unidade_id,slot_inicio,slot_fim,duracao_min,status,tipo_reserva,data_reserva,modalidade_id,morador_id,unidades(codigo),modalidades(nome,icone)')
+    .eq('tipo_reserva','aula')
+    .eq('status','confirmada')
+    .gte('data_reserva', ts())
+    .order('data_reserva',{ascending:true})
+    .then(function(res) {
+      // Agrupar por unidade_id + slot_inicio + dia da semana
+      var contratos = {};
+      (res.data||[]).forEach(function(r) {
+        var dow = new Date(r.data_reserva+'T12:00:00').getDay();
+        var key = (r.unidade_id||'sem_unidade')+'|'+(r.slot_inicio||'')+'|'+dow+'|'+(r.modalidade_id||'');
+        if(!contratos[key]) {
+          contratos[key] = {
+            unidade: r.unidades,
+            modalidade: r.modalidades,
+            slot: r.slot_inicio,
+            dow: dow,
+            dur: r.duracao_min,
+            inicio: r.data_reserva,
+            fim: r.data_reserva,
+            count: 0,
+            unidade_id: r.unidade_id,
+            modalidade_id: r.modalidade_id,
+            morador_id: r.morador_id,
+            ids: []
+          };
+        }
+        if(r.data_reserva > contratos[key].fim) contratos[key].fim = r.data_reserva;
+        contratos[key].count++;
+        contratos[key].ids.push(r.id);
+      });
+
+      var dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+      var lista = Object.values(contratos);
+      var html = lista.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum contrato ativo.</div>';
+
+      lista.forEach(function(c) {
+        var vence = new Date(c.fim+'T12:00:00');
+        var diasR = Math.ceil((vence - new Date())/(1000*60*60*24));
+        var corV = diasR <= 30 ? 'var(--rdt)' : diasR <= 60 ? 'var(--amt)' : 'var(--t2)';
+        var cod = c.unidade ? c.unidade.codigo : (c.unidade_id ? c.unidade_id.slice(0,8) : '---');
+        var icone = c.modalidade ? c.modalidade.icone : '';
+        var mod = c.modalidade ? (icone+' '+c.modalidade.nome) : '---';
+
+        // Dados para os botões — codificados como JSON
+        var dadosEditar = encodeURIComponent(JSON.stringify({
+          unidade_id: c.unidade_id||'',
+          slot: c.slot||'',
+          dow: c.dow,
+          dur: c.dur,
+          fim: c.fim,
+          modalidade_id: c.modalidade_id||'',
+          morador_id: c.morador_id||'',
+          ids: c.ids
+        }));
+        var dadosCancelar = encodeURIComponent(JSON.stringify({
+          ids: c.ids,
+          cod: cod
+        }));
+
+        html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:8px">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
+        html += '<div>';
+        html += '<div style="font-size:12px;font-weight:600">Apto '+cod+' - '+mod+'</div>';
+        html += '<div style="font-size:10.5px;color:var(--t2)">'+dias[c.dow]+' - '+(c.slot||'').slice(0,5)+' - '+(c.dur===60?'1h':'2h')+'</div>';
+        html += '<div style="font-size:10.5px;color:var(--t2)">'+c.count+' aulas | '+fmtD(c.inicio)+' a '+fmtD(c.fim)+'</div>';
+        html += '</div>';
+        html += '<div style="text-align:right">';
+        html += '<div style="font-size:10px;color:'+corV+'">Vence: '+fmtD(c.fim)+'</div>';
+        if(diasR <= 30) html += '<span class="badge b-danger" style="font-size:9px">Renovar</span>';
+        else if(diasR <= 60) html += '<span class="badge b-warn" style="font-size:9px">'+diasR+'d</span>';
+        html += '</div></div>';
+        html += '<div style="display:flex;gap:5px;flex-wrap:wrap">';
+        html += '<button class="btn-sm b" data-editar-contr="'+dadosEditar+'" style="font-size:10px"><i class="ti ti-edit" aria-hidden="true"></i>Alterar</button>';
+        html += '<button class="btn-sm" style="background:var(--am);border-color:var(--amb);color:var(--amt);font-size:10px" data-renovar-contr="'+dadosEditar+'"><i class="ti ti-refresh" aria-hidden="true"></i>Renovar</button>';
+        html += '<button class="btn-sm r" data-cancelar-contr="'+dadosCancelar+'" style="font-size:10px"><i class="ti ti-trash" aria-hidden="true"></i>Cancelar</button>';
+        html += '</div></div>';
+      });
+
+      var lc = document.getElementById('lista-contratos-aula');
+      if(!lc) return;
       lc.innerHTML = html;
 
-      // RENOVAR: abre modal com dados pré-preenchidos
-      lc.querySelectorAll('[data-renovar]').forEach(function(btn) {
+      // ── ALTERAR contrato ─────────────────────────────────────────────────
+      lc.querySelectorAll('[data-editar-contr]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           if(!requireAdmin()) return;
-          var rawData = btn.getAttribute('data-renovar');
-          var d = JSON.parse(decodeURIComponent(rawData));
-          // Popular select de aptos
-          sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
-            var sel = document.getElementById('contr-apto');
-            if(sel && res.data) {
-              sel.innerHTML = res.data.map(function(u){
-                var selected = u.id === d.uid ? ' selected' : '';
-                return '<option value="'+u.id+'"'+selected+'>'+u.codigo+'</option>';
-              }).join('');
-            }
-          });
-          // Preencher hora
-          var horaEl = document.getElementById('contr-hora');
-          var slotHora = (d.slot||'').slice(0,5);
-          if(horaEl) {
-            for(var i=0; i<horaEl.options.length; i++) {
-              if(horaEl.options[i].value === slotHora) { horaEl.selectedIndex = i; break; }
-            }
-          }
-          // Preencher duração
-          var durEl = document.getElementById('contr-dur');
-          if(durEl) durEl.value = d.dur;
-          // Data inicio = dia seguinte ao fim atual
-          var novoIni = new Date(d.fim+'T12:00:00');
-          novoIni.setDate(novoIni.getDate()+1);
-          var dIni = document.getElementById('contr-ini');
-          if(dIni) { dIni.value = novoIni.toISOString().slice(0,10); dIni.min = ts(); }
-          // Marcar dia da semana
-          document.querySelectorAll('#contr-dias input').forEach(function(cb) {
-            cb.checked = (parseInt(cb.value) === d.dow);
-          });
-          abrirModal('m-novo-contrato');
+          var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-editar-contr')));
+          abrirModalContrato(d, false);
         });
       });
 
-      // CANCELAR: exclui todas as reservas futuras deste contrato
+      // ── RENOVAR contrato (novo período a partir do dia seguinte ao fim) ───
+      lc.querySelectorAll('[data-renovar-contr]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!requireAdmin()) return;
+          var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-renovar-contr')));
+          var novoIni = new Date(d.fim+'T12:00:00');
+          novoIni.setDate(novoIni.getDate()+1);
+          d.novoIni = novoIni.toISOString().slice(0,10);
+          abrirModalContrato(d, true);
+        });
+      });
+
+      // ── CANCELAR contrato ────────────────────────────────────────────────
       lc.querySelectorAll('[data-cancelar-contr]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           if(!requireAdmin()) return;
-          var rawData = btn.getAttribute('data-cancelar-contr');
-          var d = JSON.parse(decodeURIComponent(rawData));
-          var dow = d.dow;
-          var slot = d.slot;
-          var uid = d.uid;
-          var cod = d.cod;
-          if(!confirm('Cancelar todas as aulas futuras do contrato de '+cod+'? Isso removera todas as reservas futuras para este slot.')) return;
-          var hoje = ts();
-          sb.from('reservas')
-            .update({status:'cancelada',cancelado_por:'admin'})
-            .eq('unidade_id', uid)
-            .eq('slot_inicio', slot)
-            .eq('tipo_reserva','aula')
-            .eq('status','confirmada')
-            .gte('data_reserva', hoje)
-            .then(function(r) {
-              if(r.error) { toast('Erro ao cancelar: '+r.error.message); return; }
-              toast('Contrato cancelado. Reservas futuras removidas.');
-              renderContratosAula();
-            });
+          var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-cancelar-contr')));
+          if(!d.ids || !d.ids.length) { toast('Nenhuma reserva encontrada para cancelar.'); return; }
+          if(!confirm('Cancelar todas as aulas futuras do contrato de '+d.cod+'? Esta acao nao pode ser desfeita.')) return;
+          // Cancelar em lote pelos IDs das reservas
+          var updates = d.ids.map(function(id) {
+            return sb.from('reservas').update({status:'cancelada',cancelado_por:'admin'}).eq('id',id);
+          });
+          Promise.all(updates).then(function(results) {
+            var erros = results.filter(function(r){ return r.error; });
+            if(erros.length) { toast('Erro ao cancelar: '+erros[0].error.message); return; }
+            toast('Contrato cancelado. '+d.ids.length+' aulas removidas.');
+            renderContratosAula();
+          });
         });
       });
+    });
+}
+
+// Abrir modal de contrato (novo, alterar ou renovar)
+function abrirModalContrato(dadosExistentes, isRenovar) {
+  sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
+    var sel = document.getElementById('contr-apto');
+    if(sel && res.data) {
+      sel.innerHTML = res.data.map(function(u) {
+        var sel2 = (dadosExistentes && u.id === dadosExistentes.unidade_id) ? ' selected' : '';
+        return '<option value="'+u.id+'"'+sel2+'>'+u.codigo+'</option>';
+      }).join('');
     }
   });
+
+  if(dadosExistentes) {
+    // Preencher hora
+    var slotHora = (dadosExistentes.slot||'').slice(0,5);
+    var horaEl = document.getElementById('contr-hora');
+    if(horaEl && slotHora) {
+      for(var i=0; i<horaEl.options.length; i++) {
+        if(horaEl.options[i].value === slotHora || horaEl.options[i].text === slotHora) {
+          horaEl.selectedIndex = i; break;
+        }
+      }
+    }
+    // Duração
+    var durEl = document.getElementById('contr-dur');
+    if(durEl && dadosExistentes.dur) durEl.value = dadosExistentes.dur;
+    // Dia da semana
+    document.querySelectorAll('#contr-dias input').forEach(function(cb) {
+      cb.checked = (parseInt(cb.value) === dadosExistentes.dow);
+    });
+    // Data de início
+    var dIni = document.getElementById('contr-ini');
+    if(dIni) {
+      dIni.min = ts();
+      if(isRenovar && dadosExistentes.novoIni) {
+        dIni.value = dadosExistentes.novoIni;
+      } else {
+        dIni.value = ts();
+      }
+    }
+  } else {
+    // Novo contrato: limpar formulário
+    document.querySelectorAll('#contr-dias input').forEach(function(cb){ cb.checked = false; });
+    var dIni = document.getElementById('contr-ini');
+    if(dIni) { dIni.value = ''; dIni.min = ts(); }
+  }
+
+  // Guardar dados de edição para uso no criarContrato
+  document.getElementById('m-novo-contrato').dataset.editData = dadosExistentes ? JSON.stringify(dadosExistentes) : '';
+  document.getElementById('m-novo-contrato').dataset.isRenovar = isRenovar ? '1' : '0';
+
+  var titulo = document.querySelector('#m-novo-contrato .mtitle');
+  if(titulo) {
+    titulo.textContent = isRenovar ? 'Renovar contrato de aula' : (dadosExistentes ? 'Alterar contrato de aula' : 'Criar contrato de aula recorrente');
+  }
+
+  abrirModal('m-novo-contrato');
 }
 
 function criarContrato() {
@@ -1574,39 +1683,72 @@ function criarContrato() {
   var modId = document.getElementById('contr-mod').value;
   var diasSel = [];
   document.querySelectorAll('#contr-dias input:checked').forEach(function(cb) { diasSel.push(parseInt(cb.value)); });
+
   if(!aptoId||!hora||!iniStr||!diasSel.length) { toast('Preencha todos os campos e selecione ao menos um dia.'); return; }
+
+  var modalEl = document.getElementById('m-novo-contrato');
+  var editDataStr = modalEl ? modalEl.dataset.editData : '';
+  var editData = editDataStr ? JSON.parse(editDataStr) : null;
+
   var dataFim = new Date(iniStr+'T12:00:00');
   dataFim.setMonth(dataFim.getMonth() + meses);
+
   var modNomes = {tenis1:'Tenis simples',tenis2:'Tenis duplas',basquete:'Basquete',futebol:'Futebol',volei:'Volei',livre:'Uso livre'};
-  sb.from('modalidades').select('id,nome').then(function(rmod) {
-    var moradorId = null; // contrato criado pelo admin, sem morador específico
-    {
-      var todas = rmod.data||[];
-      var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
-      var modObj = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNomes[modId]||''); });
-      var modDbId = modObj ? modObj.id : null;
-      var reservas = [];
-      var cur = new Date(iniStr+'T12:00:00');
-      var horaFim = addH(hora, dur/60);
-      while(cur <= dataFim) {
-        var dow = cur.getDay();
-        if(diasSel.indexOf(dow) !== -1) {
-          var ds = cur.toISOString().slice(0,10);
-          reservas.push({unidade_id:aptoId,morador_id:moradorId,modalidade_id:modDbId,data_reserva:ds,slot_inicio:hora+':00',slot_fim:horaFim+':00',duracao_min:dur,tipo_reserva:'aula',status:'confirmada'});
-        }
-        cur.setDate(cur.getDate()+1);
+
+  // Buscar modalidade e um morador do apartamento
+  Promise.all([
+    sb.from('modalidades').select('id,nome'),
+    sb.from('moradores').select('id').eq('unidade_id',aptoId).eq('status','ativo').limit(1)
+  ]).then(function(results) {
+    var rmod = results[0];
+    var rmor = results[1];
+
+    var todas = rmod.data||[];
+    var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); };
+    var modObj = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNomes[modId]||''); });
+    var modDbId = modObj ? modObj.id : (editData ? editData.modalidade_id : null);
+
+    // morador_id: tentar buscar do apto, senão usar o admin logado
+    var morList = rmor.data||[];
+    var moradorId = morList.length > 0 ? morList[0].id : (editData ? editData.morador_id : null);
+    // Último fallback: usar o id do morador logado (admin)
+    if(!moradorId && morador) moradorId = morador.id;
+
+    var reservas = [];
+    var cur = new Date(iniStr+'T12:00:00');
+    var horaFim = addH(hora, dur/60);
+
+    while(cur <= dataFim) {
+      var dow = cur.getDay();
+      if(diasSel.indexOf(dow) !== -1) {
+        var ds = cur.toISOString().slice(0,10);
+        reservas.push({
+          unidade_id: aptoId,
+          morador_id: moradorId,
+          modalidade_id: modDbId,
+          data_reserva: ds,
+          slot_inicio: hora+':00',
+          slot_fim: horaFim+':00',
+          duracao_min: dur,
+          tipo_reserva: 'aula',
+          status: 'confirmada'
+        });
       }
-      if(!reservas.length) { toast('Nenhuma data gerada para os dias selecionados.'); return; }
-      var lotes = [];
-      for(var i=0; i<reservas.length; i+=100) lotes.push(reservas.slice(i,i+100));
-      Promise.all(lotes.map(function(lote){ return sb.from('reservas').insert(lote); })).then(function(results) {
-        var erros = results.filter(function(r){ return r.error; });
-        if(erros.length) { toast('Erro: '+erros[0].error.message); return; }
-        fecharModal('m-novo-contrato');
-        toast(reservas.length+' aulas criadas para '+meses+' mes(es)!');
-        renderConfig();
-      });
+      cur.setDate(cur.getDate()+1);
     }
+
+    if(!reservas.length) { toast('Nenhuma data gerada para os dias selecionados.'); return; }
+
+    var lotes = [];
+    for(var i=0; i<reservas.length; i+=100) lotes.push(reservas.slice(i,i+100));
+
+    Promise.all(lotes.map(function(lote){ return sb.from('reservas').insert(lote); })).then(function(results2) {
+      var erros = results2.filter(function(r){ return r.error; });
+      if(erros.length) { toast('Erro: '+erros[0].error.message); return; }
+      fecharModal('m-novo-contrato');
+      toast(reservas.length+' aulas criadas!');
+      renderConfig();
+    });
   });
 }
 
