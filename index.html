@@ -236,6 +236,14 @@ textarea.form-in{resize:vertical}
       </div>
     </div>
     <div class="screen" id="screen-minhas">
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <button class="btn-s" id="btn-cancelar-pontuais" style="flex:1;font-size:10.5px;color:var(--rdt);border-color:var(--rdb)">
+          <i class="ti ti-calendar-x" aria-hidden="true"></i>Cancelar pontuais
+        </button>
+        <button class="btn-s" id="btn-cancelar-aulas" style="flex:1;font-size:10.5px;color:var(--amt);border-color:var(--amb)">
+          <i class="ti ti-repeat-off" aria-hidden="true"></i>Cancelar aulas
+        </button>
+      </div>
       <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
     </div>
     <div class="screen" id="screen-checkin">
@@ -1239,6 +1247,41 @@ function renderMinhas() {
     list.querySelectorAll('[data-ckin-id]').forEach(function(btn) {
       btn.addEventListener('click', function() { doCheckin(btn.dataset.ckinId); });
     });
+
+    // Botões de cancelamento em lote
+    var btnCancPont = document.getElementById('btn-cancelar-pontuais');
+    if(btnCancPont) {
+      btnCancPont.addEventListener('click', function() {
+        var ids = mine
+          .filter(function(r){ return r.status==='confirmada' && r.tipo_reserva==='pontual'; })
+          .map(function(r){ return r.id; });
+        if(!ids.length) { toast('Nenhuma reserva pontual ativa para cancelar.'); return; }
+        if(!confirm('Cancelar todas as '+ids.length+' reservas pontuais confirmadas? Esta acao nao pode ser desfeita.')) return;
+        Promise.all(ids.map(function(id){
+          return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id);
+        })).then(function(res) {
+          toast(ids.length+' reservas pontuais canceladas.');
+          renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
+        });
+      });
+    }
+
+    var btnCancAulas = document.getElementById('btn-cancelar-aulas');
+    if(btnCancAulas) {
+      btnCancAulas.addEventListener('click', function() {
+        var ids = mine
+          .filter(function(r){ return r.status==='confirmada' && r.tipo_reserva==='aula'; })
+          .map(function(r){ return r.id; });
+        if(!ids.length) { toast('Nenhuma aula recorrente ativa para cancelar.'); return; }
+        if(!confirm('Cancelar todas as '+ids.length+' aulas recorrentes confirmadas? Esta acao cancela o contrato inteiro.')) return;
+        Promise.all(ids.map(function(id){
+          return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id);
+        })).then(function(res) {
+          toast(ids.length+' aulas canceladas.');
+          renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
+        });
+      });
+    }
   });
 }
 
@@ -1789,8 +1832,18 @@ function abrirModalContrato(dadosExistentes, isRenovar) {
   document.getElementById('m-novo-contrato').dataset.isRenovar = isRenovar ? '1' : '0';
 
   var titulo = document.querySelector('#m-novo-contrato .mtitle');
+  var btnCriar = document.getElementById('btn-criar-contrato');
   if(titulo) {
     titulo.textContent = isRenovar ? 'Renovar contrato de aula' : (dadosExistentes ? 'Alterar contrato de aula' : 'Criar contrato de aula recorrente');
+  }
+  if(btnCriar) {
+    if(isRenovar) {
+      btnCriar.innerHTML = '<i class="ti ti-refresh" aria-hidden="true"></i>Renovar contrato';
+    } else if(dadosExistentes) {
+      btnCriar.innerHTML = '<i class="ti ti-edit" aria-hidden="true"></i>Salvar alteracoes';
+    } else {
+      btnCriar.innerHTML = '<i class="ti ti-repeat" aria-hidden="true"></i>Criar contrato';
+    }
   }
 
   abrirModal('m-novo-contrato');
@@ -1812,35 +1865,29 @@ function criarContrato() {
   var modalEl = document.getElementById('m-novo-contrato');
   var editDataStr = modalEl ? modalEl.dataset.editData : '';
   var editData = editDataStr ? JSON.parse(editDataStr) : null;
+  var isEdicao = !!(editData && editData.ids && editData.ids.length);
 
   var dataFim = new Date(iniStr+'T12:00:00');
   dataFim.setMonth(dataFim.getMonth() + meses);
 
   var modNomes = {tenis1:'Tenis simples',tenis2:'Tenis duplas',basquete:'Basquete',futebol:'Futebol',volei:'Volei',livre:'Uso livre'};
 
-  // Buscar modalidade e um morador do apartamento
   Promise.all([
     sb.from('modalidades').select('id,nome'),
     sb.from('moradores').select('id').eq('unidade_id',aptoId).eq('status','ativo').limit(1)
   ]).then(function(results) {
-    var rmod = results[0];
-    var rmor = results[1];
-
-    var todas = rmod.data||[];
+    var todas = results[0].data||[];
+    var morList = results[1].data||[];
     var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); };
     var modObj = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNomes[modId]||''); });
     var modDbId = modObj ? modObj.id : (editData ? editData.modalidade_id : null);
-
-    // morador_id: tentar buscar do apto, senão usar o admin logado
-    var morList = rmor.data||[];
     var moradorId = morList.length > 0 ? morList[0].id : (editData ? editData.morador_id : null);
-    // Último fallback: usar o id do morador logado (admin)
     if(!moradorId && morador) moradorId = morador.id;
 
+    // Gerar novas reservas
     var reservas = [];
     var cur = new Date(iniStr+'T12:00:00');
     var horaFim = addH(hora, dur/60);
-
     while(cur <= dataFim) {
       var dow = cur.getDay();
       if(diasSel.indexOf(dow) !== -1) {
@@ -1862,15 +1909,35 @@ function criarContrato() {
 
     if(!reservas.length) { toast('Nenhuma data gerada para os dias selecionados.'); return; }
 
-    var lotes = [];
-    for(var i=0; i<reservas.length; i+=100) lotes.push(reservas.slice(i,i+100));
+    // Se for edição: cancelar reservas antigas FUTURAS antes de inserir as novas
+    var promiseCancelar = isEdicao
+      ? Promise.all(editData.ids
+          .filter(function(id){ return !!id; })
+          .map(function(id){
+            return sb.from('reservas').update({status:'cancelada',cancelado_por:'admin'}).eq('id',id);
+          }))
+      : Promise.resolve([]);
 
-    Promise.all(lotes.map(function(lote){ return sb.from('reservas').insert(lote); })).then(function(results2) {
-      var erros = results2.filter(function(r){ return r.error; });
-      if(erros.length) { toast('Erro: '+erros[0].error.message); return; }
-      fecharModal('m-novo-contrato');
-      toast(reservas.length+' aulas criadas!');
-      renderConfig();
+    promiseCancelar.then(function(cancelResults) {
+      var cancelErros = cancelResults.filter(function(r){ return r && r.error; });
+      if(cancelErros.length) {
+        toast('Aviso: erro ao cancelar reservas antigas. Prosseguindo com criacao.');
+      }
+
+      // Inserir novas reservas em lotes de 100
+      var lotes = [];
+      for(var i=0; i<reservas.length; i+=100) lotes.push(reservas.slice(i,i+100));
+
+      Promise.all(lotes.map(function(lote){ return sb.from('reservas').insert(lote); })).then(function(results2) {
+        var erros = results2.filter(function(r){ return r.error; });
+        if(erros.length) { toast('Erro: '+erros[0].error.message); return; }
+        fecharModal('m-novo-contrato');
+        var msg = isEdicao
+          ? 'Contrato alterado! '+reservas.length+' novas aulas criadas.'
+          : reservas.length+' aulas criadas!';
+        toast(msg);
+        renderConfig();
+      });
     });
   });
 }
