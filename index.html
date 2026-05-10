@@ -266,9 +266,26 @@ textarea.form-in{resize:vertical}
       <div class="card">
         <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i>Limites por apartamento</div>
         <div class="form-row"><label class="form-lbl">Reservas maximas por mes (por apto)</label>
-          <input type="number" class="form-in" id="cfg-max-mes" value="4" min="1" max="20"></div>
-        <div class="form-row"><label class="form-lbl">Reservas simultaneas abertas</label>
-          <input type="number" class="form-in" id="cfg-max-simult" value="2" min="1" max="5"></div>
+          <select class="form-in" id="cfg-max-mes">
+            <option value="1">1 reserva</option>
+            <option value="2">2 reservas</option>
+            <option value="3">3 reservas</option>
+            <option value="4" selected>4 reservas</option>
+            <option value="6">6 reservas</option>
+            <option value="8">8 reservas</option>
+            <option value="10">10 reservas</option>
+            <option value="0">Ilimitada</option>
+          </select>
+          <div style="font-size:10px;color:var(--t2);margin-top:3px">Aulas recorrentes tem cota separada e nao contam neste limite.</div></div>
+        <div class="form-row"><label class="form-lbl">Reservas pontuais abertas ao mesmo tempo (por apto)</label>
+          <select class="form-in" id="cfg-max-simult">
+            <option value="1">1 reserva por vez</option>
+            <option value="2" selected>2 reservas por vez</option>
+            <option value="3">3 reservas por vez</option>
+            <option value="4">4 reservas por vez</option>
+            <option value="0">Sem limite</option>
+          </select>
+          <div style="font-size:10px;color:var(--t2);margin-top:3px">Aulas recorrentes nao contam neste limite.</div></div>
         <div class="form-row"><label class="form-lbl">Antecedencia minima para reservar</label>
           <select class="form-in" id="cfg-ant-min">
             <option value="0">Sem restricao</option>
@@ -320,7 +337,51 @@ textarea.form-in{resize:vertical}
       </div>
 
       <div class="card">
-        <div class="card-title"><i class="ti ti-calendar-off" aria-hidden="true"></i>Bloquear periodo</div>
+        <div class="card-title"><i class="ti ti-calendar-week" aria-hidden="true"></i>Regras de fins de semana</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Configuracoes especificas para sabados e domingos.</div>
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br)">
+          <div>
+            <div style="font-size:12px;font-weight:600">Bloquear aulas recorrentes nos fins de semana</div>
+            <div style="font-size:10.5px;color:var(--t2);margin-top:2px">Sabado e domingo permitem apenas reservas pontuais. Aulas semanais fixas nao podem ser agendadas nestes dias.</div>
+          </div>
+          <div class="tgl on" id="tgl-blk-aulas-fds" style="margin-left:12px;margin-top:2px"></div>
+        </div>
+
+        <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Antecedencia minima para reservas pontuais no fim de semana</div>
+          <div style="font-size:10.5px;color:var(--t2);margin-bottom:8px">Moradores so podem fazer reservas pontuais no fim de semana com esta antecedencia minima.</div>
+          <select class="form-in" id="cfg-ant-fds">
+            <option value="0">Sem restricao</option>
+            <option value="1">1 hora antes</option>
+            <option value="2">2 horas antes</option>
+            <option value="3">3 horas antes</option>
+            <option value="4">4 horas antes</option>
+            <option value="24">1 dia antes</option>
+            <option value="48">2 dias antes</option>
+          </select>
+        </div>
+
+        <div style="padding:9px 0">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between">
+            <div>
+              <div style="font-size:12px;font-weight:600">Bloquear sabados completamente</div>
+              <div style="font-size:10.5px;color:var(--t2);margin-top:2px">Nenhum tipo de reserva permitido aos sabados.</div>
+            </div>
+            <div class="tgl" id="tgl-blk-sab" style="margin-left:12px;margin-top:2px"></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-top:10px">
+            <div>
+              <div style="font-size:12px;font-weight:600">Bloquear domingos completamente</div>
+              <div style="font-size:10.5px;color:var(--t2);margin-top:2px">Nenhum tipo de reserva permitido aos domingos.</div>
+            </div>
+            <div class="tgl" id="tgl-blk-dom" style="margin-left:12px;margin-top:2px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar-off" aria-hidden="true"></i>Bloquear periodo especifico</div>
         <div class="form-row"><label class="form-lbl">Data inicial</label>
           <input type="date" class="form-in" id="blk-ini"></div>
         <div class="form-row"><label class="form-lbl">Data final</label>
@@ -352,6 +413,58 @@ textarea.form-in{resize:vertical}
       <div class="card">
         <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Agenda do dia — todos os agendamentos</div>
         <div id="agenda-adm"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-repeat" aria-hidden="true"></i>Aulas recorrentes — regras</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Um apartamento pode fixar um horario semanal por um periodo determinado. A reserva e renovada automaticamente com aviso previo.</div>
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br)">
+          <div>
+            <div style="font-size:12px;font-weight:600">Permitir aulas recorrentes semanais</div>
+            <div style="font-size:10.5px;color:var(--t2);margin-top:2px">Moradores podem solicitar um slot fixo semanal (ex: toda terca e quinta as 17h).</div>
+          </div>
+          <div class="tgl on" id="tgl-aulas-rec" style="margin-left:12px;margin-top:2px"></div>
+        </div>
+
+        <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Duracao maxima do contrato de aula</div>
+          <select class="form-in" id="cfg-aula-duracao">
+            <option value="1">1 mes</option>
+            <option value="2">2 meses</option>
+            <option value="3">3 meses</option>
+            <option value="6" selected>6 meses</option>
+            <option value="12">12 meses</option>
+          </select>
+        </div>
+
+        <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Aviso de renovacao (antes do vencimento)</div>
+          <select class="form-in" id="cfg-aula-aviso">
+            <option value="15">15 dias antes</option>
+            <option value="30" selected>30 dias antes</option>
+            <option value="45">45 dias antes</option>
+          </select>
+          <div style="font-size:10.5px;color:var(--t2);margin-top:3px">O apartamento recebe um aviso para renovar antes de o contrato vencer.</div>
+        </div>
+
+        <div style="padding:9px 0">
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Maximo de contratos de aula por apartamento</div>
+          <select class="form-in" id="cfg-aula-max-contr">
+            <option value="1" selected>1 contrato ativo por vez</option>
+            <option value="2">2 contratos ativos</option>
+            <option value="3">3 contratos ativos</option>
+          </select>
+          <div style="font-size:10.5px;color:var(--t2);margin-top:3px">Cada contrato pode ter mais de um dia da semana (ex: terca e quinta contam como 1 contrato).</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-repeat" aria-hidden="true"></i>Contratos de aula ativos</div>
+        <div id="lista-contratos-aula"></div>
+        <button class="btn-p" id="btn-novo-contrato" style="margin-top:10px">
+          <i class="ti ti-plus" aria-hidden="true"></i>Criar contrato de aula
+        </button>
       </div>
 
       <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px">
@@ -418,6 +531,73 @@ textarea.form-in{resize:vertical}
     <div class="macts">
       <button class="btn-s" id="btn-fechar-cancel">Voltar</button>
       <button class="btn-d" id="btn-exec-cancel"><i class="ti ti-x" aria-hidden="true"></i>Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVO CONTRATO DE AULA -->
+<div class="modal-bg" id="m-novo-contrato">
+  <div class="modal-card center">
+    <div class="mhandle"></div>
+    <div class="mtitle">Criar contrato de aula recorrente</div>
+    <div class="msub">Reserva semanal automatica por periodo fixo</div>
+
+    <div class="form-row"><label class="form-lbl">Apartamento</label>
+      <select class="form-in" id="contr-apto"></select></div>
+
+    <div class="form-row"><label class="form-lbl">Modalidade</label>
+      <select class="form-in" id="contr-mod">
+        <option value="tenis1">Tenis simples (1x1) — 1h</option>
+        <option value="tenis2">Tenis duplas (2x2) — 1h ou 2h</option>
+        <option value="basquete">Basquete — 1h ou 2h</option>
+        <option value="futebol">Futebol — 1h ou 2h</option>
+        <option value="volei">Volei — 1h ou 2h</option>
+        <option value="livre">Uso livre — 1h ou 2h</option>
+      </select></div>
+
+    <div class="form-row"><label class="form-lbl">Dias da semana</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="contr-dias">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="1"> Segunda</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="2"> Terca</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="3"> Quarta</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="4"> Quinta</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="5"> Sexta</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="6"> Sabado</label>
+      </div></div>
+
+    <div class="form-row"><label class="form-lbl">Horario de inicio</label>
+      <select class="form-in" id="contr-hora">
+        <option>07:00</option><option>08:00</option><option>09:00</option>
+        <option>10:00</option><option>11:00</option><option>13:00</option>
+        <option>14:00</option><option>15:00</option><option>16:00</option>
+        <option selected>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option>
+      </select></div>
+
+    <div class="form-row"><label class="form-lbl">Duracao por aula</label>
+      <select class="form-in" id="contr-dur">
+        <option value="60">1 hora</option>
+        <option value="120">2 horas</option>
+      </select></div>
+
+    <div class="form-row"><label class="form-lbl">Data de inicio do contrato</label>
+      <input type="date" class="form-in" id="contr-ini"></div>
+
+    <div class="form-row"><label class="form-lbl">Duracao do contrato</label>
+      <select class="form-in" id="contr-periodo">
+        <option value="1">1 mes</option>
+        <option value="2">2 meses</option>
+        <option value="3">3 meses</option>
+        <option value="6" selected>6 meses</option>
+        <option value="12">12 meses</option>
+      </select></div>
+
+    <div class="ib ib-blue" style="font-size:10.5px">
+      As reservas serao criadas automaticamente para todo o periodo. Um aviso sera enviado 30 dias antes do vencimento para renovacao.
+    </div>
+
+    <div class="macts">
+      <button class="btn-s" id="btn-fechar-contrato">Cancelar</button>
+      <button class="btn-p" id="btn-criar-contrato"><i class="ti ti-repeat" aria-hidden="true"></i>Criar contrato</button>
     </div>
   </div>
 </div>
@@ -837,6 +1017,11 @@ function selMod(id) {
   var m = MODS.find(function(x){return x.id===id;});
   if(m.fixo) { pendDur=m.durs[0]; showStep(3); buildResumo(); }
   else { showStep(2); buildDurRow(m); }
+}
+
+function isFimDeSemana(ds) {
+  var dow = new Date((ds||ts())+'T12:00:00').getDay();
+  return dow === 0 || dow === 6;
 }
 
 function buildDurRow(m) {
@@ -1280,6 +1465,9 @@ function renderConfig() {
     }
   });
 
+  // Contratos de aula
+  renderContratosAula();
+
   // Agenda do dia
   var hoje = ts();
   sb.from('reservas').select('*,unidades(codigo),modalidades(nome,icone)').eq('data_reserva',hoje).neq('status','cancelada').order('slot_inicio').then(function(res) {
@@ -1312,6 +1500,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Modal novo contrato
+  var btnNC = document.getElementById('btn-novo-contrato');
+  if(btnNC) {
+    btnNC.addEventListener('click', function() {
+      // Popular select de aptos
+      sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
+        var sel = document.getElementById('contr-apto');
+        if(sel && res.data) sel.innerHTML = res.data.map(function(u){ return '<option value="'+u.id+'">'+u.codigo+'</option>'; }).join('');
+      });
+      // Data minima = hoje
+      var dIni = document.getElementById('contr-ini');
+      if(dIni) dIni.min = ts();
+      abrirModal('m-novo-contrato');
+    });
+  }
+
+  var btnFechContr = document.getElementById('btn-fechar-contrato');
+  if(btnFechContr) btnFechContr.addEventListener('click', function() { fecharModal('m-novo-contrato'); });
+
+  var btnCriarContr = document.getElementById('btn-criar-contrato');
+  if(btnCriarContr) btnCriarContr.addEventListener('click', criarContrato);
+
+  // Toggles fins de semana
+  ['tgl-blk-aulas-fds','tgl-blk-sab','tgl-blk-dom'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('click', function() { el.classList.toggle('on'); });
+  });
+
   var btnAddBlk = document.getElementById('btn-add-bloqueio');
   if(btnAddBlk) {
     btnAddBlk.addEventListener('click', function() {
@@ -1330,6 +1546,140 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// CONTRATOS DE AULA RECORRENTE
+function renderContratosAula() {
+  // Busca contratos da tabela reservas com tipo_reserva = 'aula'
+  sb.from('reservas').select('*,unidades(codigo),modalidades(nome,icone)')
+    .eq('tipo_reserva','aula')
+    .neq('status','cancelada')
+    .order('data_reserva',{ascending:true})
+    .then(function(res) {
+      var contratos = {};
+      // Agrupa por unidade + slot + dia da semana para mostrar como contrato
+      (res.data||[]).forEach(function(r) {
+        var dow = new Date(r.data_reserva+'T12:00:00').getDay();
+        var key = (r.unidade_id||'') + '_' + (r.slot_inicio||'') + '_' + dow;
+        if(!contratos[key]) {
+          contratos[key] = {
+            unidade: r.unidades, modalidade: r.modalidades,
+            slot: r.slot_inicio, dow: dow, dur: r.duracao_min,
+            inicio: r.data_reserva, fim: r.data_reserva,
+            count: 0, unidade_id: r.unidade_id
+          };
+        }
+        if(r.data_reserva > contratos[key].fim) contratos[key].fim = r.data_reserva;
+        contratos[key].count++;
+      });
+
+      var dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+      var html = '';
+      var lista = Object.values(contratos);
+      if(!lista.length) html = '<div style="font-size:11px;color:var(--t2)">Nenhum contrato ativo.</div>';
+      lista.forEach(function(c) {
+        var vence = new Date(c.fim);
+        var hoje = new Date();
+        var diasRestantes = Math.ceil((vence-hoje)/(1000*60*60*24));
+        var corVence = diasRestantes <= 30 ? 'var(--rdt)' : diasRestantes <= 60 ? 'var(--amt)' : 'var(--t2)';
+        var cod = c.unidade ? c.unidade.codigo : '---';
+        var mod = c.modalidade ? (c.modalidade.icone+' '+c.modalidade.nome) : '---';
+        html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:8px">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">';
+        html += '<div><div style="font-size:12px;font-weight:600">Apto '+cod+' - '+mod+'</div>';
+        html += '<div style="font-size:10.5px;color:var(--t2)">'+dias[c.dow]+' - '+(c.slot||'').slice(0,5)+' - '+(c.dur===60?'1h':'2h')+'</div>';
+        html += '<div style="font-size:10.5px;color:var(--t2)">'+c.count+' aulas agendadas</div></div>';
+        html += '<div style="text-align:right">';
+        html += '<div style="font-size:10px;color:'+corVence+'">Vence: '+fmtD(c.fim)+'</div>';
+        if(diasRestantes <= 30) html += '<span class="badge b-danger">Renovar em breve</span>';
+        else if(diasRestantes <= 60) html += '<span class="badge b-warn">'+diasRestantes+' dias</span>';
+        html += '</div></div></div>';
+      });
+      var lc = document.getElementById('lista-contratos-aula');
+      if(lc) lc.innerHTML = html;
+    });
+}
+
+function criarContrato() {
+  var aptoId = document.getElementById('contr-apto').value;
+  var hora = document.getElementById('contr-hora').value;
+  var dur = parseInt(document.getElementById('contr-dur').value);
+  var iniStr = document.getElementById('contr-ini').value;
+  var meses = parseInt(document.getElementById('contr-periodo').value);
+  var modId = document.getElementById('contr-mod').value;
+
+  // Dias selecionados
+  var diasSel = [];
+  document.querySelectorAll('#contr-dias input:checked').forEach(function(cb) {
+    diasSel.push(parseInt(cb.value));
+  });
+
+  if(!aptoId||!hora||!iniStr||!diasSel.length) {
+    toast('Preencha todos os campos e selecione ao menos um dia.');
+    return;
+  }
+
+  // Calcula data fim
+  var dataFim = new Date(iniStr+'T12:00:00');
+  dataFim.setMonth(dataFim.getMonth() + meses);
+
+  // Mapear modalidade para nome do banco
+  var modNomes = {
+    tenis1:'Tenis simples', tenis2:'Tenis duplas',
+    basquete:'Basquete', futebol:'Futebol', volei:'Volei', livre:'Uso livre'
+  };
+
+  // Buscar unidade_id a partir do select (valor já é o id)
+  sb.from('moradores').select('id,unidade_id').eq('unidade_id', aptoId).eq('status','ativo').limit(1).single().then(function(rm) {
+    var moradorId = rm.data ? rm.data.id : null;
+    // Buscar modalidade
+    sb.from('modalidades').select('id').then(function(rmod) {
+      var todas = rmod.data||[];
+      var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); };
+      var modObj = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNomes[modId]||''); });
+      var modDbId = modObj ? modObj.id : null;
+
+      // Gerar todas as datas
+      var reservas = [];
+      var cur = new Date(iniStr+'T12:00:00');
+      var fim = new Date(dataFim);
+      var horaFim = addH(hora, dur/60);
+
+      while(cur <= fim) {
+        var dow = cur.getDay(); // 0=dom, 1=seg...
+        if(diasSel.indexOf(dow) !== -1) {
+          var ds = cur.toISOString().slice(0,10);
+          reservas.push({
+            unidade_id: aptoId,
+            morador_id: moradorId,
+            modalidade_id: modDbId,
+            data_reserva: ds,
+            slot_inicio: hora+':00',
+            slot_fim: horaFim+':00',
+            duracao_min: dur,
+            tipo_reserva: 'aula',
+            status: 'confirmada'
+          });
+        }
+        cur.setDate(cur.getDate()+1);
+      }
+
+      if(!reservas.length) { toast('Nenhuma data gerada para os dias selecionados.'); return; }
+
+      // Inserir em lote (max 100 por vez)
+      var lotes = [];
+      for(var i=0; i<reservas.length; i+=100) lotes.push(reservas.slice(i,i+100));
+
+      var inserts = lotes.map(function(lote) { return sb.from('reservas').insert(lote); });
+      Promise.all(inserts).then(function(results) {
+        var erros = results.filter(function(r){ return r.error; });
+        if(erros.length) { toast('Erro ao criar algumas reservas: '+erros[0].error.message); return; }
+        fecharModal('m-novo-contrato');
+        toast(reservas.length+' aulas criadas para '+meses+' mes(es)!');
+        renderConfig();
+      });
+    });
+  });
+}
 
 // OCORRENCIAS
 document.getElementById('btn-nova-oco').addEventListener('click', function() { abrirModal('m-nova-oco'); });
