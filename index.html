@@ -235,6 +235,15 @@ textarea.form-in{resize:vertical}
       <div id="ckin-hist"></div>
     </div>
     <div class="screen" id="screen-ocorrencias">
+      <div class="card" style="background:var(--bl);border-color:var(--blb)">
+        <div style="display:flex;align-items:flex-start;gap:8px">
+          <i class="ti ti-clipboard-list" style="font-size:20px;color:var(--blt);flex-shrink:0;margin-top:2px" aria-hidden="true"></i>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--blt);margin-bottom:3px">Relatorio de Danos e Ocorrencias</div>
+            <div style="font-size:11px;color:var(--t2);line-height:1.5">Canal direto para moradores e zelador reportarem problemas na area comum, quadra ou instalacoes. Registre danos, necessidades de manutencao ou qualquer irregularidade. A administracao recebe o relato, acompanha o atendimento e responde diretamente por este canal.</div>
+          </div>
+        </div>
+      </div>
       <div class="filter-bar">
         <button class="fpill active" id="fpill-todos">Todas</button>
         <button class="fpill" id="fpill-aberta">Abertas</button>
@@ -584,6 +593,33 @@ var vY = new Date().getFullYear(), vM = new Date().getMonth();
 var selDate = null, pendSlot = null, pendMod = null, pendDur = null;
 var cancelId = null, ocoFiltro = 'todos', ocoDetalhe = null;
 var bloquCache = [];
+var appCfg = {
+  max_reservas_mes: 4,
+  max_reservas_simult: 2,
+  antecedencia_min_h: 1,
+  antecedencia_max_dias: 15,
+  checkin_janela_min: 15,
+  checkin_ant_min: 10,
+  faltas_suspensao: 2,
+  carencia_cancel_min: 120,
+  suspensao_dias: 15,
+  blk_aulas_fds: true,
+  blk_sabado: false,
+  blk_domingo: false,
+  ant_fds_h: 0,
+  aulas_rec_ativo: true,
+  aula_duracao_max_meses: 6,
+  aula_aviso_dias: 30,
+  aula_max_contratos: 1
+};
+
+function carregarConfiguracoes() {
+  sb.from('configuracoes').select('*').limit(1).maybeSingle().then(function(res) {
+    if(res.data) {
+      Object.assign(appCfg, res.data);
+    }
+  });
+}
 
 function ts() { return new Date().toISOString().slice(0,10); }
 function fmtD(ds) { if(!ds) return ''; var p=ds.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
@@ -751,6 +787,7 @@ function iniciarApp(user) {
       });
     }
     carregarBloqueios();
+    carregarConfiguracoes();
     renderCal();
     renderAvisos();
     renderCheckin();
@@ -981,6 +1018,30 @@ function showStep(n) {
 
 function confirmarReserva() {
   if(!morador||!pendSlot||!pendMod||!pendDur) return;
+
+  // Verificar limite mensal (0 = ilimitado)
+  var maxMes = appCfg.max_reservas_mes;
+  if(maxMes > 0) {
+    var mesAtual = new Date().toISOString().slice(0,7); // YYYY-MM
+    sb.from('reservas')
+      .select('id', {count:'exact', head:true})
+      .eq('unidade_id', morador.unidade_id)
+      .eq('tipo_reserva','pontual')
+      .eq('status','confirmada')
+      .gte('data_reserva', mesAtual+'-01')
+      .lte('data_reserva', mesAtual+'-31')
+      .then(function(rc) {
+        if(rc.count >= maxMes) {
+          toast('Limite de '+maxMes+' reservas mensais atingido para este apartamento.');
+          return;
+        }
+        _fazerInsertReserva();
+      });
+  } else {
+    _fazerInsertReserva();
+  }
+
+  function _fazerInsertReserva() {
   var modNome = MODS.find(function(x){return x.id===pendMod;}).nome;
   sb.from('modalidades').select('id,nome').then(function(r) {
     var todas = r.data||[];
@@ -1000,6 +1061,7 @@ function confirmarReserva() {
       toast('Reserva confirmada!');
     });
   });
+  } // fim _fazerInsertReserva
 }
 
 // ── MODAL CANCELAR ─────────────────────────────────────────────
