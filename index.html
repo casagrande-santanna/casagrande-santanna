@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#27500A">
-<title>Casa Grande de Sant'Anna</title>
+<title>Casa Grande Sant'Anna</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <style>
 :root{
   --v:#27500A;--vl:#EAF3DE;--vm:#3B6D11;
@@ -169,8 +168,8 @@ textarea.form-in{resize:vertical}
 <body>
 
 <div class="login-wrap" id="login-screen">
-  <div class="login-logo">&#127970;&#127970;</div>
-  <div class="login-title">Casa Grande de Sant'Anna</div>
+  <div class="login-logo">&#127968;</div>
+  <div class="login-title">Casa Grande Sant'Anna</div>
   <div class="login-sub">Sistema de reserva da quadra</div>
   <div class="login-card">
     <label class="login-lbl">E-mail</label>
@@ -180,7 +179,7 @@ textarea.form-in{resize:vertical}
     <button class="login-btn" id="btn-entrar">Entrar</button>
     <div class="login-err" id="login-err"></div>
     <div style="text-align:center;margin-top:12px">
-      <span style="font-size:11px;color:#666;cursor:pointer;text-decoration:underline" id="link-cadastro">Não tem conta? Cadastre-se</span>
+      <span style="font-size:11px;color:#666;cursor:pointer;text-decoration:underline" id="link-cadastro">Nao tem conta? Cadastre-se</span>
     </div>
   </div>
 </div>
@@ -189,7 +188,7 @@ textarea.form-in{resize:vertical}
   <div class="hdr">
     <div class="hdr-row">
       <div>
-        <div class="hdr-title">Casa Grande de Sant'Anna</div>
+        <div class="hdr-title">Casa Grande Sant'Anna</div>
         <div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div>
       </div>
       <div class="hdr-right">
@@ -211,7 +210,6 @@ textarea.form-in{resize:vertical}
       <div id="fab-aviso"></div>
       <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
     </div>
-    
     <div class="screen" id="screen-reservar">
       <div class="card">
         <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Selecione uma data</div>
@@ -229,7 +227,7 @@ textarea.form-in{resize:vertical}
         </div>
       </div>
       <div class="card" id="slots-card" style="display:none">
-        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="slots-lbl">Horários</span></div>
+        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="slots-lbl">Horarios</span></div>
         <div class="slot-grid" id="slot-grid"></div>
       </div>
       <div class="card" id="card-reservas-dia" style="display:none">
@@ -237,7 +235,6 @@ textarea.form-in{resize:vertical}
         <div id="lista-reservas-dia"></div>
       </div>
     </div>
-
     <div class="screen" id="screen-minhas">
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <button class="btn-s" id="btn-cancelar-pontuais" style="flex:1;font-size:10.5px;color:var(--rdt);border-color:var(--rdb)">
@@ -247,34 +244,20 @@ textarea.form-in{resize:vertical}
           <i class="ti ti-repeat-off" aria-hidden="true"></i>Cancelar aulas
         </button>
       </div>
-      <button class="btn-s" id="btn-limpar-historico" style="width:100%; margin-bottom:10px; font-size:10.5px;">
-        <i class="ti ti-trash" aria-hidden="true"></i> Limpar histórico antigo
-      </button>
       <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
     </div>
-
     <div class="screen" id="screen-checkin">
-      <div class="card" style="background: var(--vl); border-color: #97C459;">
-        <div class="card-title"><i class="ti ti-qrcode" aria-hidden="true" style="color:var(--vm)"></i>Check-in por QR Code</div>
-        <div style="font-size:11px;color:var(--tx);margin-bottom:10px">
-          Aponte a câmera para o QR Code fixado na entrada da quadra. Se você tiver uma reserva, o check-in será feito. Se a quadra estiver livre, criaremos uma reserva de 1 hora pra você agora.
-        </div>
-        <div id="reader" style="width:100%; border-radius:8px; overflow:hidden; display:none; margin-bottom:10px; border: 1px solid var(--vm);"></div>
-        <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm)"><i class="ti ti-camera" aria-hidden="true"></i>Escanear QR da Quadra</button>
-        <button class="btn-s" id="btn-fechar-scanner" style="display:none; width:100%; border-color:var(--rdb); color:var(--rdt)"><i class="ti ti-x" aria-hidden="true"></i>Cancelar Leitura</button>
-      </div>
       <div id="ckin-main"></div>
-      <div class="sec-lbl">Histórico</div>
+      <div class="sec-lbl">Historico</div>
       <div id="ckin-hist"></div>
     </div>
-
     <div class="screen" id="screen-ocorrencias">
       <div class="card" style="background:var(--bl);border-color:var(--blb)">
         <div style="display:flex;align-items:flex-start;gap:8px">
           <i class="ti ti-clipboard-list" style="font-size:20px;color:var(--blt);flex-shrink:0;margin-top:2px" aria-hidden="true"></i>
           <div>
-            <div style="font-size:12px;font-weight:600;color:var(--blt);margin-bottom:3px">Relatório de Danos e Ocorrências</div>
-            <div style="font-size:11px;color:var(--t2);line-height:1.5">Canal direto para moradores e zelador reportarem problemas na área comum, quadra ou instalações. Registre danos, necessidades de manutenção ou qualquer irregularidade. A administração recebe o relato, acompanha o atendimento e responde diretamente por este canal.</div>
+            <div style="font-size:12px;font-weight:600;color:var(--blt);margin-bottom:3px">Relatorio de Danos e Ocorrencias</div>
+            <div style="font-size:11px;color:var(--t2);line-height:1.5">Canal direto para moradores e zelador reportarem problemas na area comum, quadra ou instalacoes. Registre danos, necessidades de manutencao ou qualquer irregularidade. A administracao recebe o relato, acompanha o atendimento e responde diretamente por este canal.</div>
           </div>
         </div>
       </div>
@@ -286,53 +269,43 @@ textarea.form-in{resize:vertical}
       </div>
       <div id="oco-list"></div>
       <div id="oco-detail"></div>
-      <button class="btn-p" id="btn-nova-oco" style="margin-top:6px;display:none"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrência</button>
+      <button class="btn-p" id="btn-nova-oco" style="margin-top:6px;display:none"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrencia</button>
     </div>
-
     <div class="screen" id="screen-config">
-      <div class="card" style="border:2px dashed var(--v)">
-        <div class="card-title"><i class="ti ti-printer" aria-hidden="true"></i>QR Code Fixo da Quadra</div>
-        <div style="font-size:11px;color:var(--t2);margin-bottom:10px">
-          Imprima este QR Code e fixe na parede da quadra. Os moradores vão escaneá-lo usando a aba "Check-in" do app para validar a entrada ou iniciar o "Uso livre".
-        </div>
-        <div style="text-align:center; padding:10px; background:#fff; border-radius:8px; border:0.5px solid var(--br)">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CG_QUADRA_01" alt="QR Quadra Fixo" style="width:150px; height:150px;">
-        </div>
-      </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i>Limites por apartamento</div>
-        <div class="form-row"><label class="form-lbl">Reservas máximas por mês (por apto)</label>
+        <div class="form-row"><label class="form-lbl">Reservas maximas por mes (por apto)</label>
           <select class="form-in" id="cfg-max-mes">
             <option value="1">1 reserva</option><option value="2">2 reservas</option>
             <option value="3">3 reservas</option><option value="4" selected>4 reservas</option>
             <option value="6">6 reservas</option><option value="8">8 reservas</option>
             <option value="10">10 reservas</option><option value="0">Ilimitada</option>
           </select>
-          <div style="font-size:10px;color:var(--t2);margin-top:3px">Aulas recorrentes têm cota separada e não contam neste limite.</div></div>
+          <div style="font-size:10px;color:var(--t2);margin-top:3px">Aulas recorrentes tem cota separada e nao contam neste limite.</div></div>
         <div class="form-row"><label class="form-lbl">Reservas pontuais abertas ao mesmo tempo (por apto)</label>
           <select class="form-in" id="cfg-max-simult">
             <option value="1">1 reserva por vez</option><option value="2" selected>2 reservas por vez</option>
             <option value="3">3 reservas por vez</option><option value="4">4 reservas por vez</option>
             <option value="0">Sem limite</option>
           </select></div>
-        <div class="form-row"><label class="form-lbl">Antecedência mínima para reservar</label>
+        <div class="form-row"><label class="form-lbl">Antecedencia minima para reservar</label>
           <select class="form-in" id="cfg-ant-min">
-            <option value="0">Sem restrição</option><option value="30">30 minutos</option>
+            <option value="0">Sem restricao</option><option value="30">30 minutos</option>
             <option value="60" selected>1 hora</option><option value="120">2 horas</option>
           </select></div>
-        <div class="form-row"><label class="form-lbl">Antecedência máxima para reservar</label>
+        <div class="form-row"><label class="form-lbl">Antecedencia maxima para reservar</label>
           <select class="form-in" id="cfg-ant-max">
             <option value="7">7 dias</option><option value="15" selected>15 dias</option><option value="30">30 dias</option>
           </select></div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</div>
-        <div class="form-row"><label class="form-lbl">Janela de check-in (minutos após o início)</label>
+        <div class="form-row"><label class="form-lbl">Janela de check-in (minutos apos o inicio)</label>
           <select class="form-in" id="cfg-ckin-janela">
             <option value="10">10 minutos</option><option value="15" selected>15 minutos</option>
             <option value="20">20 minutos</option><option value="30">30 minutos</option>
           </select></div>
-        <div class="form-row"><label class="form-lbl">Antecipação permitida para check-in</label>
+        <div class="form-row"><label class="form-lbl">Antecipacao permitida para check-in</label>
           <select class="form-in" id="cfg-ckin-ant">
             <option value="10" selected>10 minutos antes</option><option value="15">15 minutos antes</option>
             <option value="30">30 minutos antes</option>
@@ -340,26 +313,29 @@ textarea.form-in{resize:vertical}
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-shield-x" aria-hidden="true"></i>Regra de Fair Play</div>
-        <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Apartamentos que acumulam faltas são suspensos automaticamente. Configure as condições abaixo.</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Apartamentos que acumulam faltas sao suspensos automaticamente. Configure as condicoes abaixo.</div>
+
         <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br)">
           <div>
-            <div style="font-size:12px;font-weight:600">Ativar suspensão automática</div>
-            <div style="font-size:10.5px;color:var(--t2);margin-top:2px">Apartamentos com faltas acima do limite são suspensos automaticamente.</div>
+            <div style="font-size:12px;font-weight:600">Ativar suspensao automatica</div>
+            <div style="font-size:10.5px;color:var(--t2);margin-top:2px">Apartamentos com faltas acima do limite sao suspensos automaticamente.</div>
           </div>
           <div class="tgl on" id="tgl-fair-play" style="margin-left:12px;margin-top:2px"></div>
         </div>
+
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Faltas para suspensão automática</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Faltas para suspensao automatica</div>
           <select class="form-in" id="cfg-faltas-susp">
             <option value="1">1 falta</option>
             <option value="2" selected>2 faltas</option>
             <option value="3">3 faltas</option>
             <option value="5">5 faltas</option>
           </select>
-          <div style="font-size:10px;color:var(--t2);margin-top:3px">Conta apenas faltas no mês corrente. Zera no primeiro dia do mês seguinte.</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:3px">Conta apenas faltas no mes corrente. Zera no primeiro dia do mes seguinte.</div>
         </div>
+
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Cancelamento sem penalidade até</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Cancelamento sem penalidade ate</div>
           <select class="form-in" id="cfg-carencia">
             <option value="60">1 hora antes</option>
             <option value="120" selected>2 horas antes</option>
@@ -368,8 +344,9 @@ textarea.form-in{resize:vertical}
           </select>
           <div style="font-size:10px;color:var(--t2);margin-top:3px">Cancelamentos dentro deste prazo contam como falta.</div>
         </div>
+
         <div style="padding:9px 0">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Duração da suspensão</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Duracao da suspensao</div>
           <select class="form-in" id="cfg-susp-dias">
             <option value="7">7 dias</option>
             <option value="15" selected>15 dias</option>
@@ -383,14 +360,14 @@ textarea.form-in{resize:vertical}
         <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br)">
           <div>
             <div style="font-size:12px;font-weight:600">Bloquear aulas recorrentes nos fins de semana</div>
-            <div style="font-size:10.5px;color:var(--t2);margin-top:2px">Sábado e domingo permitem apenas reservas pontuais.</div>
+            <div style="font-size:10.5px;color:var(--t2);margin-top:2px">Sabado e domingo permitem apenas reservas pontuais.</div>
           </div>
           <div class="tgl on" id="tgl-blk-aulas-fds" style="margin-left:12px;margin-top:2px"></div>
         </div>
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Antecedência mínima para reservas pontuais no fim de semana</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Antecedencia minima para reservas pontuais no fim de semana</div>
           <select class="form-in" id="cfg-ant-fds">
-            <option value="0">Sem restrição</option><option value="1">1 hora antes</option>
+            <option value="0">Sem restricao</option><option value="1">1 hora antes</option>
             <option value="2">2 horas antes</option><option value="3">3 horas antes</option>
             <option value="4">4 horas antes</option><option value="24">1 dia antes</option>
             <option value="48">2 dias antes</option>
@@ -398,7 +375,7 @@ textarea.form-in{resize:vertical}
         </div>
         <div style="padding:9px 0">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="font-size:12px;font-weight:600">Bloquear sábados completamente</div>
+            <div style="font-size:12px;font-weight:600">Bloquear sabados completamente</div>
             <div class="tgl" id="tgl-blk-sab"></div>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between">
@@ -408,10 +385,11 @@ textarea.form-in{resize:vertical}
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-calendar-off" aria-hidden="true"></i>Bloquear período específico</div>
+        <div class="card-title"><i class="ti ti-calendar-off" aria-hidden="true"></i>Bloquear periodo especifico</div>
+
         <div class="form-row"><label class="form-lbl">Categoria do bloqueio</label>
           <select class="form-in" id="blk-tipo">
-            <option value="manutencao">🔧 Manutenção / Reforma</option>
+            <option value="manutencao">🔧 Manutencao / Reforma</option>
             <option value="limpeza">🧹 Limpeza profunda</option>
             <option value="evento">🎉 Evento condominial</option>
             <option value="vistoria">📋 Vistoria</option>
@@ -419,13 +397,13 @@ textarea.form-in{resize:vertical}
           </select></div>
         <div class="form-row"><label class="form-lbl">Data inicial</label><input type="date" class="form-in" id="blk-ini"></div>
         <div class="form-row"><label class="form-lbl">Data final</label><input type="date" class="form-in" id="blk-fim"></div>
-        <div class="form-row"><label class="form-lbl">Descrição</label><input type="text" class="form-in" id="blk-motivo" placeholder="Ex: Reforma do piso, Festa junina..."></div>
+        <div class="form-row"><label class="form-lbl">Descricao</label><input type="text" class="form-in" id="blk-motivo" placeholder="Ex: Reforma do piso, Festa junina..."></div>
         <div id="blk-checklist-wrap" style="display:none">
           <div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:6px">Checklist de vistoria</div>
           <div style="display:flex;flex-direction:column;gap:4px" id="blk-checklist-items">
             <label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" id="chk-piso"> Piso e revestimentos</label>
             <label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" id="chk-rede"> Rede e equipamentos esportivos</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" id="chk-ilum"> Iluminação</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" id="chk-ilum"> Iluminacao</label>
             <label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" id="chk-grad"> Grades e alambrado</label>
             <label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox" id="chk-limp"> Limpeza geral</label>
           </div>
@@ -434,7 +412,7 @@ textarea.form-in{resize:vertical}
         <div id="lista-bloqueios"></div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-user-check" aria-hidden="true"></i>Inscrições pendentes<span id="badge-pendentes" class="badge b-warn" style="margin-left:8px"></span></div>
+        <div class="card-title"><i class="ti ti-user-check" aria-hidden="true"></i>Inscricoes pendentes<span id="badge-pendentes" class="badge b-warn" style="margin-left:8px"></span></div>
         <div id="lista-pendentes"></div>
       </div>
       <div class="card">
@@ -450,15 +428,17 @@ textarea.form-in{resize:vertical}
         <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Agenda do dia</div>
         <div id="agenda-adm"></div>
       </div>
+
       <div class="card">
         <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard de uso</div>
         <div id="dashboard-uso">
-          <div style="font-size:11px;color:var(--t2)">Carregando estatísticas...</div>
+          <div style="font-size:11px;color:var(--t2)">Carregando estatisticas...</div>
         </div>
       </div>
+
       <div class="card">
         <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking de pontualidade</div>
-        <div style="font-size:11px;color:var(--t2);margin-bottom:8px">Apartamentos com maior taxa de check-in no mês corrente.</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:8px">Apartamentos com maior taxa de check-in no mes corrente.</div>
         <div id="ranking-pontualidade"></div>
       </div>
       <div class="card">
@@ -471,20 +451,20 @@ textarea.form-in{resize:vertical}
           <div class="tgl on" id="tgl-aulas-rec" style="margin-left:12px;margin-top:2px"></div>
         </div>
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Duração máxima do contrato de aula</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Duracao maxima do contrato de aula</div>
           <select class="form-in" id="cfg-aula-duracao">
-            <option value="1">1 mês</option><option value="2">2 meses</option><option value="3">3 meses</option>
+            <option value="1">1 mes</option><option value="2">2 meses</option><option value="3">3 meses</option>
             <option value="6" selected>6 meses</option><option value="12">12 meses</option>
           </select>
         </div>
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Aviso de renovação (antes do vencimento)</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Aviso de renovacao (antes do vencimento)</div>
           <select class="form-in" id="cfg-aula-aviso">
             <option value="15">15 dias antes</option><option value="30" selected>30 dias antes</option><option value="45">45 dias antes</option>
           </select>
         </div>
         <div style="padding:9px 0">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Máximo de contratos de aula por apartamento</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Maximo de contratos de aula por apartamento</div>
           <select class="form-in" id="cfg-aula-max-contr">
             <option value="1" selected>1 contrato ativo</option><option value="2">2 contratos</option><option value="3">3 contratos</option>
           </select>
@@ -495,9 +475,8 @@ textarea.form-in{resize:vertical}
         <div id="lista-contratos-aula"></div>
         <button class="btn-p" id="btn-novo-contrato" style="margin-top:10px"><i class="ti ti-plus" aria-hidden="true"></i>Criar contrato de aula</button>
       </div>
-      <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px"><i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar configurações</button>
+      <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px"><i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar configuracoes</button>
     </div>
-
     <div class="screen" id="screen-perfil">
       <div class="card">
         <div style="position:relative;display:inline-block;margin-bottom:10px">
@@ -519,15 +498,21 @@ textarea.form-in{resize:vertical}
         <div style="font-size:15px;font-weight:600" id="pf-nome">Carregando...</div>
         <div style="font-size:12px;color:var(--t2)" id="pf-apto"></div>
         <div style="margin-top:12px;border-top:0.5px solid var(--br);padding-top:10px">
-          <div class="p-row"><span>Notificações push</span><div class="tgl on" id="tgl-push"></div></div>
+          <div class="p-row"><span>Notificacoes push</span><div class="tgl on" id="tgl-push"></div></div>
           <div class="p-row"><span>Modo escuro</span><div class="tgl" id="tgl-dark"></div></div>
           <div class="p-row" style="border:none;padding-top:12px">
             <button class="btn-d" style="width:100%" id="btn-logout"><i class="ti ti-logout" aria-hidden="true"></i>Sair da conta</button>
           </div>
         </div>
       </div>
-      <div class="ib ib-amber" style="font-size:10.5px">LGPD: Seus dados são usados exclusivamente para gestão condominial. Controlador: Condomínio Casa Grande de Sant'Anna.</div>
+      <div class="ib ib-amber" style="font-size:10.5px">LGPD: Seus dados sao usados exclusivamente para gestao condominial. Controlador: Condominio Casa Grande Sant'Anna.</div>
       <button class="btn-s" id="btn-ver-regulamento" style="margin-top:6px;width:100%"><i class="ti ti-file-description" aria-hidden="true"></i>Ver regulamento da quadra</button>
+      <div id="qr-checkin-wrap" style="display:none;margin-top:10px;text-align:center">
+        <div style="font-size:11px;color:var(--t2);margin-bottom:6px">QR Code para check-in rapido — escaneie na entrada da quadra</div>
+        <div id="qr-code-display" style="background:#fff;padding:12px;border-radius:8px;border:0.5px solid var(--br);display:inline-block"></div>
+        <div style="font-size:10px;color:var(--t2);margin-top:5px" id="qr-apto-label"></div>
+      </div>
+      <button class="btn-s" id="btn-qr-checkin" style="margin-top:6px;width:100%"><i class="ti ti-qrcode" aria-hidden="true"></i>Meu QR Code de check-in</button>
     </div>
   </div>
 </div>
@@ -543,7 +528,7 @@ textarea.form-in{resize:vertical}
       <div class="macts"><button class="btn-s" id="btn-cancelar-res">Cancelar</button></div>
     </div>
     <div id="m-res-step2" style="display:none">
-      <div class="mtitle">Escolha a duração</div>
+      <div class="mtitle">Escolha a duracao</div>
       <div class="msub" id="m-res-mod-lbl"></div>
       <div class="dur-row" id="m-dur-row"></div>
       <div id="m-dur-info"></div>
@@ -568,11 +553,6 @@ textarea.form-in{resize:vertical}
     <div class="msub" id="mc-sub"></div>
     <div class="m-info-row"><i class="ti ti-calendar" aria-hidden="true"></i><span id="mc-dt"></span></div>
     <div class="m-info-row"><i class="ti ti-clock" aria-hidden="true"></i><span id="mc-hr"></span></div>
-    <div id="admin-isentar-wrap" style="display:none; padding: 10px 0; border-bottom: 0.5px solid var(--br);">
-      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--v);font-weight:600;cursor:pointer;">
-        <input type="checkbox" id="chk-isentar"> Isentar penalidade (Força maior / Chuva)
-      </label>
-    </div>
     <div class="macts">
       <button class="btn-s" id="btn-fechar-cancel">Voltar</button>
       <button class="btn-d" id="btn-exec-cancel"><i class="ti ti-x" aria-hidden="true"></i>Confirmar</button>
@@ -584,38 +564,38 @@ textarea.form-in{resize:vertical}
   <div class="modal-card center">
     <div class="mhandle"></div>
     <div class="mtitle">Criar contrato de aula recorrente</div>
-    <div class="msub">Reserva semanal automática por período fixo</div>
+    <div class="msub">Reserva semanal automatica por periodo fixo</div>
     <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="contr-apto"></select></div>
     <div class="form-row"><label class="form-lbl">Modalidade</label>
       <select class="form-in" id="contr-mod">
-        <option value="tenis1">Tênis simples (1x1)</option><option value="tenis2">Tênis duplas (2x2)</option>
+        <option value="tenis1">Tenis simples (1x1)</option><option value="tenis2">Tenis duplas (2x2)</option>
         <option value="basquete">Basquete</option><option value="futebol">Futebol</option>
-        <option value="volei">Vôlei</option><option value="livre">Uso livre</option>
+        <option value="volei">Volei</option><option value="livre">Uso livre</option>
       </select></div>
     <div class="form-row"><label class="form-lbl">Dias da semana</label>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="contr-dias">
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="1"> Seg</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="2"> Ter</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="3"> Qua</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="4"> Qui</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="5"> Sex</label>
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="6"> Sáb</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="1"> Segunda</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="2"> Terca</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="3"> Quarta</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="4"> Quinta</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="5"> Sexta</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" value="6"> Sabado</label>
       </div></div>
-    <div class="form-row"><label class="form-lbl">Horário de início</label>
+    <div class="form-row"><label class="form-lbl">Horario de inicio</label>
       <select class="form-in" id="contr-hora">
         <option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option>
         <option>11:00</option><option>13:00</option><option>14:00</option><option>15:00</option>
         <option>16:00</option><option selected>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option>
       </select></div>
-    <div class="form-row"><label class="form-lbl">Duração por aula</label>
+    <div class="form-row"><label class="form-lbl">Duracao por aula</label>
       <select class="form-in" id="contr-dur"><option value="60">1 hora</option><option value="120">2 horas</option></select></div>
-    <div class="form-row"><label class="form-lbl">Data de início do contrato</label><input type="date" class="form-in" id="contr-ini"></div>
-    <div class="form-row"><label class="form-lbl">Duração do contrato</label>
+    <div class="form-row"><label class="form-lbl">Data de inicio do contrato</label><input type="date" class="form-in" id="contr-ini"></div>
+    <div class="form-row"><label class="form-lbl">Duracao do contrato</label>
       <select class="form-in" id="contr-periodo">
-        <option value="1">1 mês</option><option value="2">2 meses</option><option value="3">3 meses</option>
+        <option value="1">1 mes</option><option value="2">2 meses</option><option value="3">3 meses</option>
         <option value="6" selected>6 meses</option><option value="12">12 meses</option>
       </select></div>
-    <div class="ib ib-blue" style="font-size:10.5px">As reservas serão criadas automaticamente para todo o período.</div>
+    <div class="ib ib-blue" style="font-size:10.5px">As reservas serao criadas automaticamente para todo o periodo.</div>
     <div class="macts">
       <button class="btn-s" id="btn-fechar-contrato">Cancelar</button>
       <button class="btn-p" id="btn-criar-contrato"><i class="ti ti-repeat" aria-hidden="true"></i>Criar contrato</button>
@@ -626,19 +606,19 @@ textarea.form-in{resize:vertical}
 <div class="modal-bg" id="m-nova-oco">
   <div class="modal-card center">
     <div class="mhandle"></div>
-    <div class="mtitle">Registrar ocorrência</div>
-    <div class="msub">Visível apenas para a administração</div>
+    <div class="mtitle">Registrar ocorrencia</div>
+    <div class="msub">Visivel apenas para a administracao</div>
     <div class="form-row"><label class="form-lbl">Categoria</label>
       <select class="form-in" id="oc-cat">
-        <option value="manutencao">Manutenção</option><option value="barulho">Barulho</option>
-        <option value="seguranca">Segurança</option><option value="limpeza">Limpeza</option><option value="outros">Outros</option>
+        <option value="manutencao">Manutencao</option><option value="barulho">Barulho</option>
+        <option value="seguranca">Seguranca</option><option value="limpeza">Limpeza</option><option value="outros">Outros</option>
       </select></div>
-    <div class="form-row"><label class="form-lbl">Título</label><input type="text" class="form-in" id="oc-tit" placeholder="Descreva o problema"></div>
-    <div class="form-row"><label class="form-lbl">Descrição</label><textarea class="form-in" id="oc-desc" rows="3"></textarea></div>
+    <div class="form-row"><label class="form-lbl">Titulo</label><input type="text" class="form-in" id="oc-tit" placeholder="Descreva o problema"></div>
+    <div class="form-row"><label class="form-lbl">Descricao</label><textarea class="form-in" id="oc-desc" rows="3"></textarea></div>
     <div class="form-row"><label class="form-lbl">Local</label>
       <select class="form-in" id="oc-loc">
         <option>Garagem - Bloco A</option><option>Garagem - Bloco B</option><option>Quadra poliesportiva</option>
-        <option>Elevador - Bloco A</option><option>Elevador - Bloco B</option><option>Portaria</option><option>Área externa</option>
+        <option>Elevador - Bloco A</option><option>Elevador - Bloco B</option><option>Portaria</option><option>Area externa</option>
       </select></div>
     <div class="form-row"><label class="form-lbl">Prioridade</label>
       <select class="form-in" id="oc-prio"><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div>
@@ -656,24 +636,24 @@ textarea.form-in{resize:vertical}
     <div class="form-row"><label class="form-lbl">Tipo</label>
       <select class="form-in" id="av-tipo">
         <option value="comunicado">Comunicado</option><option value="info">Informativo</option>
-        <option value="manutencao">Manutenção</option><option value="urgente">Urgente</option>
+        <option value="manutencao">Manutencao</option><option value="urgente">Urgente</option>
       </select></div>
-    <div class="form-row"><label class="form-lbl">Título</label><input type="text" class="form-in" id="av-tit" placeholder="Título do aviso"></div>
+    <div class="form-row"><label class="form-lbl">Titulo</label><input type="text" class="form-in" id="av-tit" placeholder="Titulo do aviso"></div>
     <div class="form-row"><label class="form-lbl">Mensagem</label><textarea class="form-in" id="av-corpo" rows="3"></textarea></div>
-    <div class="form-row"><label class="form-lbl">Destinatários</label>
+    <div class="form-row"><label class="form-lbl">Destinatarios</label>
       <select class="form-in" id="av-dest">
         <option value="todos">Todos os moradores</option><option value="blocoA">Somente Bloco A</option><option value="blocoB">Somente Bloco B</option>
       </select></div>
     <div class="form-row"><label class="form-lbl">Expira em (opcional)</label>
       <input type="date" class="form-in" id="av-expira">
-      <div style="font-size:10px;color:var(--t2);margin-top:2px">Aviso some automaticamente após esta data. Deixe em branco para não expirar.</div></div>
+      <div style="font-size:10px;color:var(--t2);margin-top:2px">Aviso some automaticamente apos esta data. Deixe em branco para nao expirar.</div></div>
     <div class="form-row">
-      <label class="form-lbl">Enquete rápida (opcional)</label>
+      <label class="form-lbl">Enquete rapida (opcional)</label>
       <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
         <div class="tgl" id="tgl-enquete" style="flex-shrink:0"></div>
-        <span style="font-size:11px;color:var(--t2)">Incluir votação Sim / Não</span>
+        <span style="font-size:11px;color:var(--t2)">Incluir votacao Sim / Nao</span>
       </div>
-      <input type="text" class="form-in" id="av-enquete-pergunta" placeholder="Ex: Mudar horário da reunião condominial?" style="display:none">
+      <input type="text" class="form-in" id="av-enquete-pergunta" placeholder="Ex: Mudar horario da reuniao condominial?" style="display:none">
     </div>
     <div class="macts">
       <button class="btn-s" id="btn-fechar-aviso">Cancelar</button>
@@ -686,9 +666,9 @@ textarea.form-in{resize:vertical}
   <div class="modal-card">
     <div class="mhandle"></div>
     <div class="mtitle"><i class="ti ti-clock-hour-4" style="color:var(--amb)"></i> Lista de espera</div>
-    <div class="msub" id="m-espera-sub">Horário ocupado</div>
+    <div class="msub" id="m-espera-sub">Horario ocupado</div>
     <div class="ib ib-amber" style="font-size:10.5px">
-      Se o morador que reservou cancelar, você será notificado automaticamente e terá prioridade para reservar este horário.
+      Se o morador que reservou cancelar, voce sera notificado automaticamente e tera prioridade para reservar este horario.
     </div>
     <div id="m-espera-info" style="font-size:11px;color:var(--t2);margin:8px 0"></div>
     <div class="macts">
@@ -704,19 +684,19 @@ textarea.form-in{resize:vertical}
     <div class="mtitle"><i class="ti ti-file-description" style="color:var(--v);margin-right:5px"></i>Regulamento da Quadra</div>
     <div style="font-size:11px;color:var(--t2);line-height:1.7;max-height:58vh;overflow-y:auto;padding-right:4px">
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">1. Uso e Reservas</div>
-      <div>A quadra poliesportiva é de uso exclusivo dos moradores do Condomínio Casa Grande de Sant'Anna e seus convidados, desde que acompanhados do morador responsável. Cada apartamento pode realizar até o limite mensal de reservas pontuais definido pela administração.</div>
-      <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">2. Check-in e Tolerância</div>
-      <div>O morador deve realizar o check-in pelo aplicativo (ou lendo o QR Code da quadra) até 15 minutos após o horário reservado. A ausência de check-in neste prazo resultará no cancelamento automático da reserva e registro de falta. Duas faltas no mês implicam suspensão temporária do direito de reserva.</div>
+      <div>A quadra poliesportiva e de uso exclusivo dos moradores do Condominio Casa Grande Sant Anna e seus convidados desde que acompanhados do morador responsavel. Cada apartamento pode realizar ate o limite mensal de reservas pontuais definido pela administracao.</div>
+      <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">2. Check-in e Tolerancia</div>
+      <div>O morador deve realizar o check-in pelo aplicativo ate 15 minutos apos o horario reservado. A ausencia de check-in neste prazo resultara no cancelamento automatico da reserva e registro de falta. Duas faltas no mes implicam suspensao temporaria do direito de reserva.</div>
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">3. Cancelamentos</div>
-      <div>Cancelamentos realizados com antecedência superior a 2 horas não geram penalidade. Cancelamentos tardios ou ausências sem cancelamento são registrados como falta.</div>
+      <div>Cancelamentos realizados com antecedencia superior a 2 horas nao geram penalidade. Cancelamentos tardios ou ausencias sem cancelamento sao registrados como falta.</div>
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">4. Conduta</div>
-      <div>É obrigatório: utilizar calçado esportivo adequado; manter o espaço limpo após o uso; respeitar os horários reservados; não consumir bebidas alcoólicas na área da quadra; manter volume de música compatível com o sossego do condomínio.</div>
-      <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">5. Manutenção e Conservação</div>
-      <div>Danos causados ao equipamento ou instalações serão de responsabilidade do apartamento que estava utilizando a quadra no momento da ocorrência. Qualquer avaria deve ser reportada imediatamente pelo canal de Ocorrências do aplicativo.</div>
+      <div>E obrigatorio: utilizar calcado esportivo adequado; manter o espaco limpo apos o uso; respeitar os horarios reservados; nao consumir bebidas alcoolicas na area da quadra; manter volume de musica compativel com o sossego do condominio.</div>
+      <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">5. Manutencao e Conservacao</div>
+      <div>Danos causados ao equipamento ou instalacoes serao de responsabilidade do apartamento que estava utilizando a quadra no momento da ocorrencia. Qualquer avaria deve ser reportada imediatamente pelo canal de Ocorrencias do aplicativo.</div>
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">6. Aulas e Contratos Recorrentes</div>
-      <div>Aulas com professores externos são permitidas mediante contrato de aula recorrente aprovado pela administração. O professor externo deve seguir as mesmas regras de uso e o morador responsável é o titular da reserva.</div>
-      <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">7. Horários de Funcionamento</div>
-      <div>Dias úteis: 07h00 às 22h00. Fins de semana e feriados: 07h00 às 20h00. Períodos bloqueados pela administração constam no calendário do aplicativo e devem ser respeitados.</div>
+      <div>Aulas com professores externos sao permitidas mediante contrato de aula recorrente aprovado pela administracao. O professor externo deve seguir as mesmas regras de uso e o morador responsavel e o titular da reserva.</div>
+      <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">7. Horarios de Funcionamento</div>
+      <div>Dias uteis: 07h00 as 22h00. Fins de semana e feriados: 07h00 as 20h00. Periodos bloqueados pela administracao constam no calendario do aplicativo e devem ser respeitados.</div>
     </div>
     <div class="macts">
       <button class="btn-p" id="btn-fechar-regulamento"><i class="ti ti-check" aria-hidden="true"></i>Li e entendi</button>
@@ -728,10 +708,10 @@ textarea.form-in{resize:vertical}
   <div class="modal-card center">
     <div class="mhandle"></div>
     <div class="mtitle">Criar conta</div>
-    <div class="msub">Morador do Casa Grande de Sant'Anna</div>
+    <div class="msub">Morador do Casa Grande Sant'Anna</div>
     <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="cad-nome" placeholder="Seu nome completo"></div>
     <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="cad-email"></div>
-    <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Mínimo 6 caracteres"></div>
+    <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Minimo 6 caracteres"></div>
     <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="cad-apto"></select></div>
     <div class="macts">
       <button class="btn-s" id="btn-fechar-cad">Cancelar</button>
@@ -748,20 +728,20 @@ var SURL = 'https://gkdwfntluopycapxyvfx.supabase.co';
 var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
 var sb = supabase.createClient(SURL, SKEY);
 
-var MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var MESES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 var DIAS_N = ['D','S','T','Q','Q','S','S'];
 var SLOTS = ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
 var MODS = [
-  {id:'tenis1',nome:'Tênis simples',sub:'1x1',icon:'🎾',fixo:true,durs:[60]},
-  {id:'tenis2',nome:'Tênis duplas',sub:'2x2',icon:'🎾',fixo:false,durs:[60,120]},
+  {id:'tenis1',nome:'Tenis simples',sub:'1x1',icon:'🎾',fixo:true,durs:[60]},
+  {id:'tenis2',nome:'Tenis duplas',sub:'2x2',icon:'🎾',fixo:false,durs:[60,120]},
   {id:'basquete',nome:'Basquete',sub:'coletivo',icon:'🏀',fixo:false,durs:[60,120]},
   {id:'futebol',nome:'Futebol',sub:'coletivo',icon:'⚽',fixo:false,durs:[60,120]},
-  {id:'volei',nome:'Vôlei',sub:'coletivo',icon:'🏐',fixo:false,durs:[60,120]},
+  {id:'volei',nome:'Volei',sub:'coletivo',icon:'🏐',fixo:false,durs:[60,120]},
   {id:'livre',nome:'Uso livre',sub:'treino',icon:'🏃',fixo:false,durs:[60,120]}
 ];
-var OCA = {manutencao:'Manutenção',barulho:'Barulho',seguranca:'Segurança',limpeza:'Limpeza',outros:'Outros'};
+var OCA = {manutencao:'Manutencao',barulho:'Barulho',seguranca:'Seguranca',limpeza:'Limpeza',outros:'Outros'};
 var STL = {aberta:'Aberta',andamento:'Em andamento',resolvida:'Resolvida',encerrada:'Encerrada'};
-var AVL = {urgente:'Urgente',info:'Informativo',manutencao:'Manutenção',comunicado:'Comunicado'};
+var AVL = {urgente:'Urgente',info:'Informativo',manutencao:'Manutencao',comunicado:'Comunicado'};
 
 var usuario = null, morador = null;
 var vY = new Date().getFullYear(), vM = new Date().getMonth();
@@ -796,19 +776,7 @@ function carregarConfiguracoes() {
   });
 }
 
-function ts() { 
-  var d = new Date(); 
-  var m = String(d.getMonth()+1).padStart(2,'0');
-  var day = String(d.getDate()).padStart(2,'0');
-  return d.getFullYear() + '-' + m + '-' + day; 
-}
-
-function getMesAtual() {
-  var d = new Date(); 
-  var m = String(d.getMonth()+1).padStart(2,'0');
-  return d.getFullYear() + '-' + m;
-}
-
+function ts() { return new Date().toISOString().slice(0,10); }
 function fmtD(ds) { if(!ds) return ''; var p=ds.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function addH(t,h) { var p=t.split(':').map(Number); return String(p[0]+h).padStart(2,'0')+':'+String(p[1]).padStart(2,'0'); }
 
@@ -851,11 +819,12 @@ function bloquearSessao(msg) {
   });
 }
 
+// Fechar modais clicando no fundo
 document.querySelectorAll('.modal-bg').forEach(function(m) {
   m.addEventListener('click', function(e) { if(e.target===m) fecharModal(m.id); });
 });
 
-// ── LOGIN E CADASTRO ──────────────────────────────────────────
+// ── LOGIN ──────────────────────────────────────────────────────
 document.getElementById('btn-entrar').addEventListener('click', function() {
   var email = document.getElementById('login-email').value.trim();
   var pass = document.getElementById('login-pass').value;
@@ -868,6 +837,7 @@ document.getElementById('btn-entrar').addEventListener('click', function() {
   });
 });
 
+// ── CADASTRO ───────────────────────────────────────────────────
 document.getElementById('link-cadastro').addEventListener('click', function() {
   var sel = document.getElementById('cad-apto');
   var opts = '';
@@ -886,6 +856,7 @@ document.getElementById('link-cadastro').addEventListener('click', function() {
 });
 
 document.getElementById('btn-fechar-cad').addEventListener('click', function() { fecharModal('m-cadastro'); });
+
 document.getElementById('btn-fazer-cad').addEventListener('click', function() {
   var nome = document.getElementById('cad-nome').value.trim();
   var email = document.getElementById('cad-email').value.trim();
@@ -900,7 +871,7 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
     var uid = res.data.user.id;
     sb.from('unidades').select('id').eq('codigo',aptoCod).single().then(function(r2) {
       var unidadeId = r2.data ? r2.data.id : null;
-      if(!unidadeId) { err.textContent='Apartamento não encontrado.'; err.style.display='block'; return; }
+      if(!unidadeId) { err.textContent='Apartamento nao encontrado.'; err.style.display='block'; return; }
       sb.from('moradores').insert({
         auth_user_id: uid, unidade_id: unidadeId,
         nome: nome, email: email,
@@ -909,12 +880,13 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
       }).then(function(r3) {
         if(r3.error) { err.textContent='Erro: '+r3.error.message; err.style.display='block'; return; }
         fecharModal('m-cadastro');
-        toast('Cadastro enviado para aprovação do administrador.');
+        toast('Cadastro enviado para aprovacao do administrador.');
       });
     });
   });
 });
 
+// ── LOGOUT ─────────────────────────────────────────────────────
 document.getElementById('btn-logout').addEventListener('click', function() {
   sb.auth.signOut().then(function() {
     resetPermissoesUI();
@@ -924,58 +896,20 @@ document.getElementById('btn-logout').addEventListener('click', function() {
   });
 });
 
+// ── INICIAR APP ────────────────────────────────────────────────
 function iniciarApp(user) {
-  // ... (código inicial da função)
-  
-  sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).maybeSingle().then(function(res) {
-    if(res.error || !res.data) { bloquearSessao('Cadastro não encontrado. Fale com a administração.'); return; }
-    morador = res.data;
-    if(morador.status === 'pendente') { bloquearSessao('Seu cadastro está aguardando aprovação do administrador.'); return; }
-    if(morador.status === 'inativo') { bloquearSessao('Seu cadastro está inativo. Fale com a administração.'); return; }
-    
-    // MUDANÇA: Morador suspenso NÃO é mais bloqueado de entrar no app
-    if(morador.status !== 'ativo' && morador.status !== 'suspenso') { bloquearSessao('Cadastro sem permissão de acesso.'); return; }
-
-    var n = morador.nome || '';
-    var partes = n.split(' ');
-    var ini = ((partes[0]||'')[0]||'') + ((partes[partes.length-1]||'')[0]||'');
-    ini = ini.toUpperCase();
-    document.getElementById('av-btn').textContent = ini;
-    document.getElementById('pf-av').textContent = ini;
-    document.getElementById('pf-nome').textContent = morador.nome;
-
-    var tipoTxt = {proprietario:'Proprietário',inquilino:'Inquilino',admin:'Administrador'}[morador.tipo] || morador.tipo;
-    var cod = morador.unidades ? morador.unidades.codigo : '';
-    var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : 'Administrador / Síndico';
-    document.getElementById('pf-apto').textContent = aptoLabel;
-    document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Síndico';
-    
-    // MUDANÇA: Mostrar visualmente que o morador está suspenso
-    var roleTag = document.getElementById('role-tag');
-    if (morador.status === 'suspenso') {
-      roleTag.textContent = 'Suspenso';
-      roleTag.style.background = 'var(--rd)';
-      roleTag.style.color = 'var(--rdt)';
-      toast('Atenção: Seu apartamento está suspenso para novas reservas.');
-    } else {
-      roleTag.textContent = isAdmin() ? 'Administrador' : 'Morador';
-      roleTag.style.background = 'rgba(255,255,255,.2)';
-      roleTag.style.color = '#fff';
-    }
-
-    // ... (o restante do código da função iniciarApp continua igual)
   usuario = user;
   resetPermissoesUI();
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-main').style.display = 'flex';
 
   sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).maybeSingle().then(function(res) {
-    if(res.error || !res.data) { bloquearSessao('Cadastro não encontrado. Fale com a administração.'); return; }
+    if(res.error || !res.data) { bloquearSessao('Cadastro nao encontrado. Fale com a administracao.'); return; }
     morador = res.data;
-    if(morador.status === 'pendente') { bloquearSessao('Seu cadastro está aguardando aprovação do administrador.'); return; }
-    if(morador.status === 'inativo') { bloquearSessao('Seu cadastro está inativo. Fale com a administração.'); return; }
-    if(morador.status === 'suspenso') { bloquearSessao('Seu cadastro está suspenso temporariamente.'); return; }
-    if(morador.status !== 'ativo') { bloquearSessao('Cadastro sem permissão de acesso.'); return; }
+    if(morador.status === 'pendente') { bloquearSessao('Seu cadastro esta aguardando aprovacao do administrador.'); return; }
+    if(morador.status === 'inativo') { bloquearSessao('Seu cadastro esta inativo. Fale com a administracao.'); return; }
+    if(morador.status === 'suspenso') { bloquearSessao('Seu cadastro esta suspenso temporariamente.'); return; }
+    if(morador.status !== 'ativo') { bloquearSessao('Cadastro sem permissao de acesso.'); return; }
 
     var n = morador.nome || '';
     var partes = n.split(' ');
@@ -985,13 +919,14 @@ function iniciarApp(user) {
     document.getElementById('pf-av').textContent = ini;
     document.getElementById('pf-nome').textContent = morador.nome;
 
-    var tipoTxt = {proprietario:'Proprietário',inquilino:'Inquilino',admin:'Administrador'}[morador.tipo] || morador.tipo;
+    var tipoTxt = {proprietario:'Proprietario',inquilino:'Inquilino',admin:'Administrador'}[morador.tipo] || morador.tipo;
     var cod = morador.unidades ? morador.unidades.codigo : '';
-    var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : 'Administrador / Síndico';
+    var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : 'Administrador / Sindico';
     document.getElementById('pf-apto').textContent = aptoLabel;
-    document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Síndico';
+    document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
     document.getElementById('role-tag').textContent = isAdmin() ? 'Administrador' : 'Morador';
 
+    // Foto de perfil
     if(morador.foto_url) {
       var fotoImg = document.getElementById('pf-foto');
       var fotoWrap = document.getElementById('pf-foto-wrap');
@@ -1013,7 +948,7 @@ function iniciarApp(user) {
       document.getElementById('btn-nova-oco').style.display = 'flex';
       sb.from('moradores').select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r) {
         var nd = document.getElementById('nd-config');
-        if(nd && r.count > 0) { nd.classList.add('show'); toast('Atenção: '+r.count+' inscrição(ões) pendente(s) de aprovação!'); }
+        if(nd && r.count > 0) { nd.classList.add('show'); toast('Atencao: '+r.count+' inscricao(oes) pendente(s) de aprovacao!'); }
       });
     }
     carregarBloqueios();
@@ -1024,11 +959,12 @@ function iniciarApp(user) {
   });
 }
 
+// Sessao persistente
 sb.auth.getSession().then(function(res) {
   if(res.data && res.data.session) iniciarApp(res.data.session.user);
 });
 
-// ── NAVEGAÇÃO ──────────────────────────────────────────────────
+// ── TABS ───────────────────────────────────────────────────────
 document.getElementById('tab-avisos').addEventListener('click', function() { goScreen('avisos'); renderAvisos(); });
 document.getElementById('tab-reservar').addEventListener('click', function() { goScreen('reservar'); renderCal(); });
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
@@ -1047,13 +983,9 @@ function goScreen(name) {
   document.getElementById('screen-'+name).classList.add('active');
   var tab = document.getElementById('tab-'+name);
   if(tab) tab.classList.add('active');
-
-  if(name !== 'checkin' && html5QrcodeScanner) {
-      fecharScannerEForcarParada();
-  }
 }
 
-// ── CALENDÁRIO ─────────────────────────────────────────────────
+// ── CALENDARIO ─────────────────────────────────────────────────
 document.getElementById('btn-prev-m').addEventListener('click', function() { vM--; if(vM<0){vM=11;vY--;} renderCal(); });
 document.getElementById('btn-next-m').addEventListener('click', function() { vM++; if(vM>11){vM=0;vY++;} renderCal(); });
 
@@ -1088,7 +1020,7 @@ function renderCal() {
 }
 
 function selData(ds) {
-  if(ds < ts()) { toast('Não é possível reservar datas passadas.'); return; }
+  if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
   selDate = ds;
   renderCal();
@@ -1097,7 +1029,7 @@ function selData(ds) {
   var blk = isBlocked(ds);
   var dow = new Date(ds+'T12:00:00').getDay();
   var maxH = (dow===0||dow===6) ? 20 : 22;
-  document.getElementById('slots-lbl').textContent = blk ? ('Bloqueado - '+fmtD(ds)) : ('Horários - '+fmtD(ds));
+  document.getElementById('slots-lbl').textContent = blk ? ('Bloqueado - '+fmtD(ds)) : ('Horarios - '+fmtD(ds));
   var sg = document.getElementById('slot-grid');
   if(blk) {
     var motivo = '';
@@ -1118,7 +1050,7 @@ function selData(ds) {
     SLOTS.forEach(function(slot) {
       if(parseInt(slot) >= maxH) return;
       var slotMin = parseInt(slot.split(':')[0])*60 + parseInt(slot.split(':')[1]);
-      if(ehHoje && slotMin <= agoraMin + 30) return; // bloqueia se estiver muito perto
+      if(ehHoje && slotMin <= agoraMin + 30) return;
       var r = null;
       reservasDia.forEach(function(x) {
         var iniMin = parseInt((x.slot_inicio||'00:00').slice(0,2))*60 + parseInt((x.slot_inicio||'00:00').slice(3,5));
@@ -1150,6 +1082,7 @@ function selData(ds) {
       });
     });
 
+    // ── Descritivo de reservas do dia ──────────────────────────────
     var cardDia = document.getElementById('card-reservas-dia');
     var listaDia = document.getElementById('lista-reservas-dia');
     if(reservasDia.length && cardDia && listaDia) {
@@ -1180,7 +1113,7 @@ function selData(ds) {
   });
 }
 
-// ── MODAL RESERVA E CONFIRMAÇÃO ────────────────────────────────
+// ── MODAL RESERVA ──────────────────────────────────────────────
 document.getElementById('btn-cancelar-res').addEventListener('click', function() { fecharModal('m-reserva'); });
 document.getElementById('btn-voltar-step1').addEventListener('click', function() { pendDur=null; showStep(1); renderModGrid(); });
 document.getElementById('btn-voltar-step2').addEventListener('click', function() { pendDur=null; var m=MODS.find(function(x){return x.id===pendMod;}); showStep(2); buildDurRow(m); });
@@ -1190,7 +1123,7 @@ function abrirModalReserva(date, slot) {
   if(!morador || !morador.unidade_id) { toast('Sem apartamento para reservar.'); return; }
   pendSlot = {date:date, slot:slot};
   pendMod = null; pendDur = null;
-  document.getElementById('m-res-date-lbl').textContent = fmtD(date)+' às '+slot;
+  document.getElementById('m-res-date-lbl').textContent = fmtD(date)+' as '+slot;
   renderModGrid(); showStep(1); abrirModal('m-reserva');
 }
 
@@ -1223,14 +1156,14 @@ function buildDurRow(m) {
     var cls = 'dur-btn'+(pendDur===d?' sel':'');
     html += '<div class="'+cls+'" data-dur="'+d+'">';
     html += '<div class="dt">'+(d===60?'1 hora':'2 horas')+'</div>';
-    html += '<div class="dl">Encerra às '+addH(pendSlot.slot, d/60)+'</div></div>';
+    html += '<div class="dl">Encerra as '+addH(pendSlot.slot, d/60)+'</div></div>';
   });
   var g = document.getElementById('m-dur-row');
   g.innerHTML = html;
   g.querySelectorAll('.dur-btn').forEach(function(el) {
     el.addEventListener('click', function() { selDur(parseInt(el.dataset.dur)); });
   });
-  document.getElementById('m-dur-info').innerHTML = '<div class="ib ib-amber" style="font-size:10.5px">Máximo: 2 horas para '+m.nome+'.</div>';
+  document.getElementById('m-dur-info').innerHTML = '<div class="ib ib-amber" style="font-size:10.5px">Maximo: 2 horas para '+m.nome+'.</div>';
 }
 
 function selDur(d) { pendDur=d; showStep(3); buildResumo(); }
@@ -1241,9 +1174,9 @@ function buildResumo() {
   var html = '';
   html += '<div class="resumo-row"><span class="resumo-lbl">Apartamento</span><span>'+cod+'</span></div>';
   html += '<div class="resumo-row"><span class="resumo-lbl">Data</span><span>'+fmtD(pendSlot.date)+'</span></div>';
-  html += '<div class="resumo-row"><span class="resumo-lbl">Horário</span><span>'+pendSlot.slot+' - '+addH(pendSlot.slot,pendDur/60)+'</span></div>';
+  html += '<div class="resumo-row"><span class="resumo-lbl">Horario</span><span>'+pendSlot.slot+' - '+addH(pendSlot.slot,pendDur/60)+'</span></div>';
   html += '<div class="resumo-row"><span class="resumo-lbl">Modalidade</span><span>'+m.icon+' '+m.nome+'</span></div>';
-  html += '<div class="resumo-row"><span class="resumo-lbl">Duração</span><span>'+(pendDur===60?'1 hora':'2 horas')+'</span></div>';
+  html += '<div class="resumo-row"><span class="resumo-lbl">Duracao</span><span>'+(pendDur===60?'1 hora':'2 horas')+'</span></div>';
   document.getElementById('m-resumo').innerHTML = html;
 }
 
@@ -1253,185 +1186,69 @@ function showStep(n) {
   });
 }
 
-
-var salvandoReserva = false;
-
 function confirmarReserva() {
+  if(!morador||!pendSlot||!pendMod||!pendDur) return;
 
-  if(salvandoReserva) return;
-
-  if(!morador || !pendSlot || !pendMod || !pendDur) {
-    toast('Dados inválidos da reserva');
-    return;
-  }
-
-  salvandoReserva = true;
-
-  var btn = document.getElementById('btn-confirmar-res');
-  var original = btn.innerHTML;
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader"></i> Salvando...';
-
+  // Verificar limite mensal (0 = ilimitado)
   var maxMes = appCfg.max_reservas_mes;
-
   if(maxMes > 0) {
-
-    var mesVigente = getMesAtual();
-
+    var mesAtual = new Date().toISOString().slice(0,7); // YYYY-MM
     sb.from('reservas')
       .select('id', {count:'exact', head:true})
       .eq('unidade_id', morador.unidade_id)
       .eq('tipo_reserva','pontual')
       .eq('status','confirmada')
-      .gte('data_reserva', mesVigente+'-01')
-      .lte('data_reserva', mesVigente+'-31')
+      .gte('data_reserva', mesAtual+'-01')
+      .lte('data_reserva', mesAtual+'-31')
       .then(function(rc) {
-
         if(rc.count >= maxMes) {
-
-          toast('Limite mensal atingido.');
-
-          resetReservaBtn();
-
+          toast('Limite de '+maxMes+' reservas mensais atingido para este apartamento.');
           return;
         }
-
         _fazerInsertReserva();
       });
-
   } else {
-
     _fazerInsertReserva();
   }
 
   function _fazerInsertReserva() {
-
-    var modNome = MODS.find(function(x){
-      return x.id === pendMod;
-    }).nome;
-
-    sb.from('modalidades')
-      .select('id,nome')
-      .then(function(r) {
-
-        var todas = r.data || [];
-
-        var semAcento = function(s){
-          return s
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g,'')
-            .toLowerCase();
-        };
-
-        var found = todas.find(function(m){
-          return semAcento(m.nome) === semAcento(modNome);
-        });
-
-        var mid = found ? found.id : null;
-
-        var inicio = pendSlot.slot + ':00';
-
-        var fim = addH(
-          pendSlot.slot,
-          pendDur/60
-        ) + ':00';
-
-        sb.from('reservas')
-          .insert({
-            unidade_id: morador.unidade_id,
-            morador_id: morador.id,
-            modalidade_id: mid,
-
-            data_reserva: pendSlot.date,
-
-            slot_inicio: inicio,
-            slot_fim: fim,
-
-            inicio_ts: '2000-01-01 ' + inicio,
-            fim_ts: '2000-01-01 ' + fim,
-
-            duracao_min: pendDur,
-
-            tipo_reserva: 'pontual',
-
-            status: 'confirmada'
-          })
-
-          .then(function(r2) {
-
-            if(r2.error) {
-
-              console.error(r2.error);
-
-              if(
-                r2.error.message &&
-                r2.error.message.includes('reservas_sem_sobreposicao')
-              ) {
-
-                toast('Este horário já está reservado.');
-
-              } else {
-
-                toast('Erro ao salvar reserva.');
-              }
-
-              resetReservaBtn();
-
-              return;
-            }
-
-            fecharModal('m-reserva');
-
-            Promise.all([
-              selData(pendSlot.date),
-              renderMinhas(),
-              renderCheckin()
-            ]).then(function(){
-
-              toast('Reserva confirmada!');
-
-              resetReservaBtn();
-            });
-          });
-      });
-  }
-
-  function resetReservaBtn() {
-
-    salvandoReserva = false;
-
-    btn.disabled = false;
-
-    btn.innerHTML = original;
-  }
+  var modNome = MODS.find(function(x){return x.id===pendMod;}).nome;
+  sb.from('modalidades').select('id,nome').then(function(r) {
+    var todas = r.data||[];
+    var semAcento = function(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
+    var found = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNome); });
+    var mid = found ? found.id : null;
+    sb.from('reservas').insert({
+      unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
+      data_reserva: pendSlot.date,
+      slot_inicio: pendSlot.slot+':00', slot_fim: addH(pendSlot.slot,pendDur/60)+':00',
+      duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
+    }).then(function(r2) {
+      if(r2.error) { toast('Erro: '+r2.error.message); return; }
+      fecharModal('m-reserva');
+      selData(pendSlot.date);
+      renderMinhas(); renderCheckin();
+      toast('Reserva confirmada!');
+    });
+  });
+  } // fim _fazerInsertReserva
 }
 
-// ── CANCELAR ───────────────────────────────────────────────────
+// ── MODAL CANCELAR ─────────────────────────────────────────────
 document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
 document.getElementById('btn-exec-cancel').addEventListener('click', function() {
   if(!cancelId) return;
-  var isentar = document.getElementById('chk-isentar').checked;
-  var statusUpdate = {
-      status: 'cancelada',
-      cancelado_por: isAdmin() ? 'admin' : 'morador',
-      isento_penalidade: isentar
-  };
-
-  sb.from('reservas').update(statusUpdate).eq('id',cancelId).then(function(r) {
+  sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',cancelId).then(function(r) {
     if(r.error) { toast('Erro ao cancelar'); return; }
     fecharModal('m-cancelar');
     if(selDate) selData(selDate);
     renderMinhas(); renderCheckin();
-    toast(isentar ? 'Reserva cancelada sem penalidade.' : 'Reserva cancelada.');
+    toast('Reserva cancelada.');
   });
 });
 
 function abrirModalCancelar(id) {
   cancelId = id;
-  document.getElementById('chk-isentar').checked = false;
-  document.getElementById('admin-isentar-wrap').style.display = isAdmin() ? 'block' : 'none';
-
   sb.from('reservas').select('*').eq('id',id).single().then(function(res) {
     var r = res.data; if(!r) return;
     document.getElementById('mc-sub').textContent = 'Apto '+(morador&&morador.unidades?morador.unidades.codigo:'');
@@ -1441,125 +1258,7 @@ function abrirModalCancelar(id) {
   });
 }
 
-// ── QR CODE SCANNER (NOVA LÓGICA DE CHECKIN / LIVRE) ───────────
-var html5QrcodeScanner = null;
-
-document.getElementById('btn-abrir-scanner').addEventListener('click', function() {
-  document.getElementById('reader').style.display = 'block';
-  document.getElementById('btn-abrir-scanner').style.display = 'none';
-  document.getElementById('btn-fechar-scanner').style.display = 'inline-flex';
-
-  html5QrcodeScanner = new Html5Qrcode("reader");
-  html5QrcodeScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 250, height: 250 } },
-    function(decodedText, decodedResult) {
-        if(decodedText === "CG_QUADRA_01" || decodedText.toLowerCase().includes("quadra")) {
-            fecharScannerEForcarParada();
-            processarQrQuadra();
-        } else {
-            toast("QR Code inválido para a quadra.");
-        }
-    },
-    function(error) {
-        // Ignora erros normais de quadros (frame loss)
-    }
-  ).catch(err => {
-      toast("Erro ao acessar câmera: " + err);
-      fecharScannerEForcarParada();
-  });
-});
-
-document.getElementById('btn-fechar-scanner').addEventListener('click', function() {
-    fecharScannerEForcarParada();
-});
-
-function fecharScannerEForcarParada() {
-    if(html5QrcodeScanner) {
-        html5QrcodeScanner.stop().then(() => {
-            html5QrcodeScanner.clear();
-            esconderElementosScanner();
-        }).catch(err => {
-            esconderElementosScanner();
-        });
-    } else {
-        esconderElementosScanner();
-    }
-}
-
-function esconderElementosScanner() {
-    document.getElementById('reader').style.display = 'none';
-    document.getElementById('btn-abrir-scanner').style.display = 'inline-flex';
-    document.getElementById('btn-fechar-scanner').style.display = 'none';
-    html5QrcodeScanner = null;
-}
-
-function processarQrQuadra() {
-    if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
-    
-    var hoje = ts();
-    var agora = new Date();
-    var h = agora.getHours();
-    var agoraMin = h * 60 + agora.getMinutes();
-    
-    var slotAtualStr = String(h).padStart(2,'0') + ':00';
-    var slotFimStr = String(h+1).padStart(2,'0') + ':00';
-
-    sb.from('reservas')
-      .select('id, unidade_id, checkin_feito, slot_inicio, slot_fim')
-      .eq('data_reserva', hoje)
-      .eq('status', 'confirmada')
-      .then(function(res) {
-          var reservasHoje = res.data || [];
-          var reservaAtiva = null;
-
-          for(var i=0; i<reservasHoje.length; i++) {
-              var r = reservasHoje[i];
-              var iniMin = parseInt((r.slot_inicio||'00:00').slice(0,2)) * 60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
-              var fimMin = parseInt((r.slot_fim||'00:00').slice(0,2)) * 60 + parseInt((r.slot_fim||'00:00').slice(3,5));
-              if(agoraMin >= iniMin && agoraMin < fimMin) {
-                  reservaAtiva = r;
-                  break;
-              }
-          }
-
-          if(reservaAtiva) {
-              if(reservaAtiva.unidade_id === morador.unidade_id) {
-                  if(!reservaAtiva.checkin_feito) {
-                      doCheckin(reservaAtiva.id);
-                  } else {
-                      toast('Você já havia feito o check-in nesta reserva!');
-                  }
-              } else {
-                  toast('A quadra está ocupada por outro apartamento agora.');
-              }
-          } else {
-              sb.from('modalidades').select('id').ilike('nome', '%livre%').limit(1).maybeSingle().then(function(mRes) {
-                  var mId = mRes.data ? mRes.data.id : null;
-                  sb.from('reservas').insert({
-                      unidade_id: morador.unidade_id,
-                      morador_id: morador.id,
-                      modalidade_id: mId,
-                      data_reserva: hoje,
-                      slot_inicio: slotAtualStr,
-                      slot_fim: slotFimStr,
-                      duracao_min: 60,
-                      tipo_reserva: 'pontual',
-                      status: 'confirmada',
-                      checkin_feito: true,
-                      checkin_em: new Date().toISOString()
-                  }).then(function(insRes) {
-                      if(insRes.error) { toast('Erro: ' + insRes.error.message); return; }
-                      toast('Quadra livre! Reserva automática de 1h criada e check-in realizado com sucesso.');
-                      renderCheckin();
-                      renderMinhas();
-                      renderCal();
-                  });
-              });
-          }
-      });
-}
-
+// ── CHECK-IN ───────────────────────────────────────────────────
 function doCheckin(id) {
   sb.from('reservas').update({checkin_feito:true,checkin_em:new Date().toISOString()}).eq('id',id).then(function(r) {
     if(r.error) { toast('Erro no check-in'); return; }
@@ -1589,16 +1288,16 @@ function renderCheckin() {
       var html = '<div class="ckin-hero">';
       html += '<div class="ckin-hero-title">Reserva de hoje</div>';
       html += '<div class="ckin-hero-sub">'+nomeMod+' - '+si+' a '+sf+'</div>';
-      html += '<button class="ckin-big-btn" id="btn-fazer-ckin"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in manual</button>';
-      html += '<div style="font-size:10px;opacity:.75;margin-top:10px">Disponível 10 min antes. Cancela após 15 min sem check-in.</div>';
+      html += '<button class="ckin-big-btn" id="btn-fazer-ckin"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>';
+      html += '<div style="font-size:10px;opacity:.75;margin-top:10px">Disponivel 10 min antes. Cancela apos 15 min sem check-in.</div>';
       html += '<button style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;margin-top:10px;width:100%" id="btn-cancelar-ckin">Cancelar minha reserva e liberar a quadra</button>';
       html += '</div>';
       main.innerHTML = html;
       document.getElementById('btn-fazer-ckin').addEventListener('click', function() { doCheckin(proxima.id); });
       document.getElementById('btn-cancelar-ckin').addEventListener('click', function() {
-        if(confirm('Cancelar sua reserva e liberar o horário para outros moradores?')) {
+        if(confirm('Cancelar sua reserva e liberar o horario para outros moradores?')) {
           sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',proxima.id).then(function() {
-            toast('Reserva cancelada. Horário liberado.');
+            toast('Reserva cancelada. Horario liberado.');
             renderCheckin(); renderMinhas();
           });
         }
@@ -1607,21 +1306,21 @@ function renderCheckin() {
       nd.classList.remove('show');
       sb.from('reservas').select('data_reserva,slot_inicio').eq('unidade_id',morador.unidade_id).gt('data_reserva',today).eq('status','confirmada').order('data_reserva').limit(1).maybeSingle().then(function(r2) {
         var prox = r2.data;
-        main.innerHTML = '<div class="ib ib-blue">'+(prox?'Próxima reserva: '+fmtD(prox.data_reserva)+' às '+(prox.slot_inicio||'').slice(0,5):'Nenhuma reserva pendente hoje.')+'</div>';
+        main.innerHTML = '<div class="ib ib-blue">'+(prox?'Proxima reserva: '+fmtD(prox.data_reserva)+' as '+(prox.slot_inicio||'').slice(0,5):'Nenhuma reserva ativa.')+'</div>';
       });
     }
   });
   sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(10).then(function(res) {
     var hist = res.data||[];
     var hel = document.getElementById('ckin-hist');
-    if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem histórico</div>'; return; }
+    if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
     var html = '';
     hist.forEach(function(r) {
       var dotC = r.checkin_feito ? '#3B6D11' : ((r.status==='cancelada'||r.status==='expirada')?'#E24B4A':'#EF9F27');
       var bl = '<span class="badge b-warn">Aguardando</span>';
       if(r.checkin_feito) bl='<span class="badge b-teal">Presente</span>';
-      else if(r.status==='cancelada') bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
-      else if(r.status==='expirada') bl='<span class="badge b-gray">Ausência</span>';
+      else if(r.status==='cancelada') bl='<span class="badge b-danger">Cancelada</span>';
+      else if(r.status==='expirada') bl='<span class="badge b-gray">Ausencia</span>';
       var m = r.modalidades;
       html += '<div class="ckin-row">';
       html += '<div class="ckin-dot" style="background:'+dotC+'"></div>';
@@ -1637,12 +1336,7 @@ function renderCheckin() {
 function renderMinhas() {
   if(!morador) return;
   if(!morador.unidade_id) { document.getElementById('minhas-list').innerHTML='<div class="empty"><i class="ti ti-user-check"></i>Administrador sem apartamento vinculado.</div>'; return; }
-  
-  sb.from('reservas').select('*,modalidades(nome,icone)')
-    .eq('unidade_id', morador.unidade_id)
-    .neq('oculto_morador', true)
-    .order('data_reserva', {ascending:false})
-    .then(function(res) {
+  sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(20).then(function(res) {
     var mine = res.data||[];
     var list = document.getElementById('minhas-list');
     if(!mine.length) { list.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>'; return; }
@@ -1652,26 +1346,23 @@ function renderMinhas() {
       if(r.checkin_feito) bc='b-teal';
       else if(r.status==='cancelada') bc='b-danger';
       else if(r.status==='expirada') bc='b-gray';
-      
       var bl = 'Confirmada';
       if(r.checkin_feito) bl='Check-in';
-      else if(r.status==='cancelada') bl = r.isento_penalidade ? 'Canc. (Isenta)' : 'Cancelada';
-      else if(r.status==='expirada') bl='Ausência';
-      
+      else if(r.status==='cancelada') bl='Cancelada';
+      else if(r.status==='expirada') bl='Ausencia';
       var m = r.modalidades;
       html += '<div class="res-card '+r.status+'">';
       html += '<div class="res-top"><div class="res-data">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
       html += '<div class="res-info">'+(m?m.icone+' '+m.nome:'---')+' - '+(r.duracao_min===60?'1 hora':'2 horas')+'</div>';
       if(r.status==='confirmada') {
         html += '<div class="res-acts">';
-        if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
+        if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>';
         html += '<button class="btn-sm r" data-cancel-id="'+r.id+'"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
         html += '</div>';
       }
       html += '</div>';
     });
     list.innerHTML = html;
-    
     list.querySelectorAll('[data-cancel-id]').forEach(function(btn) {
       btn.addEventListener('click', function() { abrirModalCancelar(btn.dataset.cancelId); });
     });
@@ -1679,14 +1370,20 @@ function renderMinhas() {
       btn.addEventListener('click', function() { doCheckin(btn.dataset.ckinId); });
     });
 
+    // Botões de cancelamento em lote
     var btnCancPont = document.getElementById('btn-cancelar-pontuais');
     if(btnCancPont) {
       btnCancPont.addEventListener('click', function() {
-        var ids = mine.filter(function(r){ return r.status==='confirmada' && r.tipo_reserva==='pontual'; }).map(function(r){ return r.id; });
+        var ids = mine
+          .filter(function(r){ return r.status==='confirmada' && r.tipo_reserva==='pontual'; })
+          .map(function(r){ return r.id; });
         if(!ids.length) { toast('Nenhuma reserva pontual ativa para cancelar.'); return; }
-        if(!confirm('Cancelar todas as '+ids.length+' reservas pontuais confirmadas?')) return;
-        Promise.all(ids.map(function(id){ return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id); })).then(function(res) {
-          toast(ids.length+' reservas canceladas.'); renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
+        if(!confirm('Cancelar todas as '+ids.length+' reservas pontuais confirmadas? Esta acao nao pode ser desfeita.')) return;
+        Promise.all(ids.map(function(id){
+          return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id);
+        })).then(function(res) {
+          toast(ids.length+' reservas pontuais canceladas.');
+          renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
         });
       });
     }
@@ -1694,30 +1391,17 @@ function renderMinhas() {
     var btnCancAulas = document.getElementById('btn-cancelar-aulas');
     if(btnCancAulas) {
       btnCancAulas.addEventListener('click', function() {
-        var ids = mine.filter(function(r){ return r.status==='confirmada' && r.tipo_reserva==='aula'; }).map(function(r){ return r.id; });
+        var ids = mine
+          .filter(function(r){ return r.status==='confirmada' && r.tipo_reserva==='aula'; })
+          .map(function(r){ return r.id; });
         if(!ids.length) { toast('Nenhuma aula recorrente ativa para cancelar.'); return; }
-        if(!confirm('Cancelar todas as '+ids.length+' aulas recorrentes confirmadas? Esta ação cancela o contrato inteiro.')) return;
-        Promise.all(ids.map(function(id){ return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id); })).then(function(res) {
-          toast(ids.length+' aulas canceladas.'); renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
+        if(!confirm('Cancelar todas as '+ids.length+' aulas recorrentes confirmadas? Esta acao cancela o contrato inteiro.')) return;
+        Promise.all(ids.map(function(id){
+          return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id);
+        })).then(function(res) {
+          toast(ids.length+' aulas canceladas.');
+          renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
         });
-      });
-    }
-
-    var btnLimpar = document.getElementById('btn-limpar-historico');
-    if(btnLimpar) {
-      var newBtn = btnLimpar.cloneNode(true);
-      btnLimpar.parentNode.replaceChild(newBtn, btnLimpar);
-      newBtn.addEventListener('click', function() {
-        if(!confirm('Ocultar reservas antigas (anteriores a hoje) da sua tela?')) return;
-        var hoje = ts();
-        sb.from('reservas').update({ oculto_morador: true })
-          .eq('unidade_id', morador.unidade_id)
-          .lt('data_reserva', hoje)
-          .then(function(r) {
-            if(r.error) { toast('Erro ao limpar histórico.'); return; }
-            toast('Histórico antigo ocultado.');
-            renderMinhas();
-          });
       });
     }
   });
@@ -1725,16 +1409,18 @@ function renderMinhas() {
 
 // ── AVISOS ─────────────────────────────────────────────────────
 function renderAvisos() {
-  if(!morador) return;
+  if(!morador) { document.getElementById('avisos-list').innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Faca login</div>'; return; }
   sb.from('avisos').select('*,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
     var avisos = res.data||[];
     var bloco = morador.unidades ? morador.unidades.bloco : '';
     var hoje = ts();
     var vistos = avisos.filter(function(a) {
-      if(a.expira_em && a.expira_em < hoje) return false;
+      if(a.expira_em && a.expira_em < hoje) return false; // expirado
       return a.destino==='todos' || (a.destino==='blocoA'&&bloco==='A') || (a.destino==='blocoB'&&bloco==='B');
     });
-    var naoLidos = vistos.filter(function(a) { return !(a.leituras_avisos||[]).find(function(l){return l.morador_id===morador.id;}); }).length;
+    var naoLidos = vistos.filter(function(a) {
+      return !(a.leituras_avisos||[]).find(function(l){return l.morador_id===morador.id;});
+    }).length;
     document.getElementById('nd-avisos').classList.toggle('show', naoLidos>0);
     var list = document.getElementById('avisos-list');
     if(!vistos.length) { list.innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Nenhum aviso</div>'; return; }
@@ -1755,10 +1441,10 @@ function renderAvisos() {
         if(!lido && morador.tipo !== 'admin') {
           html += '<div style="display:flex;gap:6px">';
           html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="flex:1;font-size:11px">👍 Sim</button>';
-          html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="flex:1;font-size:11px">👎 Não</button>';
+          html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="flex:1;font-size:11px">👎 Nao</button>';
           html += '</div>';
         } else {
-          html += '<div style="font-size:10.5px;color:var(--t2)">Sim: '+(av.enquete_sim||0)+' | Não: '+(av.enquete_nao||0)+(totalVotos?' ('+pctSim+'% sim)':'')+'</div>';
+          html += '<div style="font-size:10.5px;color:var(--t2)">Sim: '+(av.enquete_sim||0)+' | Nao: '+(av.enquete_nao||0)+(totalVotos?' ('+pctSim+'% sim)':'')+'</div>';
           html += '<div style="height:6px;background:var(--br);border-radius:3px;margin-top:4px;overflow:hidden"><div style="height:100%;background:var(--v);width:'+pctSim+'%;border-radius:3px"></div></div>';
         }
         html += '</div>';
@@ -1792,44 +1478,58 @@ function renderAvisos() {
           var atual = rv.data ? (rv.data[campo]||0) : 0;
           var upd = {}; upd[campo] = atual + 1;
           sb.from('avisos').update(upd).eq('id',avId).then(function() {
-            sb.from('leituras_avisos').upsert({aviso_id:avId, morador_id:morador.id}).then(function() { toast('Voto registrado!'); renderAvisos(); });
+            sb.from('leituras_avisos').upsert({aviso_id:avId, morador_id:morador.id}).then(function() {
+              toast('Voto registrado!'); renderAvisos();
+            });
           });
         });
       });
     });
     list.querySelectorAll('[data-del-av-id]').forEach(function(btn) {
       btn.addEventListener('click', function() {
+        if(!requireAdmin()) return;
         if(!confirm('Apagar este aviso para todos os moradores?')) return;
-        sb.from('avisos').update({ativo:false}).eq('id',btn.dataset.delAvId).then(function() { toast('Aviso apagado.'); renderAvisos(); });
+        sb.from('avisos').update({ativo:false}).eq('id',btn.dataset.delAvId).then(function() {
+          toast('Aviso apagado.'); renderAvisos();
+        });
       });
     });
     list.querySelectorAll('[data-leituras-av]').forEach(function(el) {
       el.addEventListener('click', function() {
-        sb.from('leituras_avisos').select('moradores(nome,unidades(codigo))').eq('aviso_id',el.dataset.leiturasAv).then(function(res) {
+        var avId = el.dataset.leiturasAv;
+        sb.from('leituras_avisos').select('moradores(nome,unidades(codigo))').eq('aviso_id',avId).then(function(res) {
           var lidos = (res.data||[]).map(function(l){ return l.moradores ? (l.moradores.nome + (l.moradores.unidades?' ('+l.moradores.unidades.codigo+')':'')) : '---'; });
           if(!lidos.length) { toast('Nenhum morador leu este aviso ainda.'); return; }
-          alert('Lido por '+lidos.length+' morador(es):\n\n'+lidos.join('\n'));
+          alert('Lido por '+lidos.length+' morador(es): '+lidos.join(', '));
         });
       });
     });
   });
 }
 
+// Publicar aviso
 document.getElementById('btn-fechar-aviso').addEventListener('click', function() { fecharModal('m-novo-aviso'); });
 document.getElementById('btn-pub-aviso').addEventListener('click', function() {
   if(!requireAdmin()) return;
   var t = document.getElementById('av-tit').value.trim();
   var c = document.getElementById('av-corpo').value.trim();
-  if(!t||!c) { toast('Preencha título e mensagem'); return; }
+  if(!t||!c) { toast('Preencha titulo e mensagem'); return; }
+  var expira = document.getElementById('av-expira').value || null;
+  var temEnquete = document.getElementById('tgl-enquete').classList.contains('on');
+  var pergunta = temEnquete ? (document.getElementById('av-enquete-pergunta').value.trim() || null) : null;
   sb.from('avisos').insert({
     tipo: document.getElementById('av-tipo').value,
-    titulo: t, corpo: c, destino: document.getElementById('av-dest').value,
-    publicado_por: morador.id, expira_em: document.getElementById('av-expira').value || null,
-    enquete_pergunta: document.getElementById('tgl-enquete').classList.contains('on') ? (document.getElementById('av-enquete-pergunta').value.trim() || null) : null,
-    enquete_sim: 0, enquete_nao: 0
+    titulo: t, corpo: c,
+    destino: document.getElementById('av-dest').value,
+    publicado_por: morador.id,
+    expira_em: expira,
+    enquete_pergunta: pergunta,
+    enquete_sim: 0,
+    enquete_nao: 0
   }).then(function(r) {
     if(r.error) { toast('Erro: '+r.error.message); return; }
-    document.getElementById('av-tit').value=''; document.getElementById('av-corpo').value='';
+    document.getElementById('av-tit').value='';
+    document.getElementById('av-corpo').value='';
     fecharModal('m-novo-aviso'); renderAvisos(); toast('Aviso publicado!');
   });
 });
@@ -1838,14 +1538,16 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
 function renderConfig() {
   if(!requireAdmin()) return;
 
+  // Pendentes
   sb.from('moradores').select('*,unidades(codigo)').eq('status','pendente').order('created_at',{ascending:false}).then(function(res) {
     var pends = res.data||[];
     var badge = document.getElementById('badge-pendentes');
     if(badge) badge.textContent = pends.length > 0 ? pends.length+' pendente(s)' : '';
-    document.getElementById('nd-config').classList.toggle('show', pends.length > 0);
-    var html = pends.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhuma inscrição pendente.</div>';
+    var ndC = document.getElementById('nd-config');
+    if(ndC) ndC.classList.toggle('show', pends.length > 0);
+    var html = pends.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhuma inscricao pendente.</div>';
     pends.forEach(function(m) {
-      var cod = m.unidades ? m.unidades.codigo : 'Síndico';
+      var cod = m.unidades ? m.unidades.codigo : 'Sindico';
       html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:7px">';
       html += '<div style="font-size:12px;font-weight:600">'+m.nome+'</div>';
       html += '<div style="font-size:10.5px;color:var(--t2)">'+m.email+' - Apto '+cod+'</div>';
@@ -1858,12 +1560,26 @@ function renderConfig() {
     var lp = document.getElementById('lista-pendentes');
     if(lp) {
       lp.innerHTML = html;
-      lp.querySelectorAll('[data-apr-id]').forEach(function(btn) { btn.addEventListener('click', function() { sb.from('moradores').update({status:'ativo'}).eq('id',btn.dataset.aprId).then(function() { toast('Inscrição aprovada!'); renderConfig(); }); }); });
-      lp.querySelectorAll('[data-adm-id]').forEach(function(btn) { btn.addEventListener('click', function() { sb.from('moradores').update({status:'ativo',tipo:'admin'}).eq('id',btn.dataset.admId).then(function() { toast('Aprovado como administrador!'); renderConfig(); }); }); });
-      lp.querySelectorAll('[data-rej-id]').forEach(function(btn) { btn.addEventListener('click', function() { if(!confirm('Rejeitar esta inscrição?')) return; sb.from('moradores').update({status:'inativo'}).eq('id',btn.dataset.rejId).then(function() { toast('Inscrição rejeitada.'); renderConfig(); }); }); });
+      lp.querySelectorAll('[data-apr-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('moradores').update({status:'ativo'}).eq('id',btn.dataset.aprId).then(function() { toast('Inscricao aprovada!'); renderConfig(); });
+        });
+      });
+      lp.querySelectorAll('[data-adm-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('moradores').update({status:'ativo',tipo:'admin'}).eq('id',btn.dataset.admId).then(function() { toast('Aprovado como administrador!'); renderConfig(); });
+        });
+      });
+      lp.querySelectorAll('[data-rej-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!confirm('Rejeitar esta inscricao?')) return;
+          sb.from('moradores').update({status:'inativo'}).eq('id',btn.dataset.rejId).then(function() { toast('Inscricao rejeitada.'); renderConfig(); });
+        });
+      });
     }
   });
 
+  // Bloqueios
   sb.from('bloqueios').select('*').order('data_inicio').then(function(res) {
     var blqs = res.data||[];
     var html = blqs.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum bloqueio cadastrado.</div>';
@@ -1886,10 +1602,17 @@ function renderConfig() {
     var lb = document.getElementById('lista-bloqueios');
     if(lb) {
       lb.innerHTML = html;
-      lb.querySelectorAll('[data-blk-id]').forEach(function(btn) { btn.addEventListener('click', function() { sb.from('bloqueios').delete().eq('id',btn.dataset.blkId).then(function() { toast('Bloqueio removido.'); renderConfig(); carregarBloqueios(); renderCal(); }); }); });
+      lb.querySelectorAll('[data-blk-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('bloqueios').delete().eq('id',btn.dataset.blkId).then(function() {
+            toast('Bloqueio removido.'); renderConfig(); carregarBloqueios(); renderCal();
+          });
+        });
+      });
     }
   });
 
+  // Suspensos
   sb.from('moradores').select('*,unidades(codigo)').eq('status','suspenso').then(function(res) {
     var susps = res.data||[];
     var html = susps.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum apartamento suspenso.</div>';
@@ -1902,15 +1625,22 @@ function renderConfig() {
     var ls = document.getElementById('lista-suspensos');
     if(ls) {
       ls.innerHTML = html;
-      ls.querySelectorAll('[data-susp-id]').forEach(function(btn) { btn.addEventListener('click', function() { sb.from('moradores').update({status:'ativo',suspenso_ate:null,faltas_mes:0}).eq('id',btn.dataset.suspId).then(function() { toast('Apartamento liberado!'); renderConfig(); }); }); });
+      ls.querySelectorAll('[data-susp-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('moradores').update({status:'ativo',suspenso_ate:null,faltas_mes:0}).eq('id',btn.dataset.suspId).then(function() {
+            toast('Apartamento liberado!'); renderConfig();
+          });
+        });
+      });
     }
   });
 
+  // Gerenciar admins
   sb.from('moradores').select('*,unidades(codigo)').eq('status','ativo').order('created_at').then(function(res) {
     var todos = res.data||[];
     var html = todos.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum morador ativo.</div>';
     todos.forEach(function(m) {
-      var cod = m.unidades ? m.unidades.codigo : 'Síndico';
+      var cod = m.unidades ? m.unidades.codigo : 'Sindico';
       var isAdm = m.tipo === 'admin';
       html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
       html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+m.nome+'</div>';
@@ -1918,21 +1648,36 @@ function renderConfig() {
       if(m.id !== morador.id) {
         if(!isAdm) html += '<button class="btn-sm b" data-prom-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Tornar admin</button>';
         else html += '<button class="btn-sm" data-rebx-id="'+m.id+'"><i class="ti ti-user" aria-hidden="true"></i>Tornar morador</button>';
-      } else { html += '<span style="font-size:10px;color:var(--t2)">Você</span>'; }
+      } else {
+        html += '<span style="font-size:10px;color:var(--t2)">Voce</span>';
+      }
       html += '</div>';
     });
     var la = document.getElementById('lista-admins');
     if(la) {
       la.innerHTML = html;
-      la.querySelectorAll('[data-prom-id]').forEach(function(btn) { btn.addEventListener('click', function() { sb.from('moradores').update({tipo:'admin'}).eq('id',btn.dataset.promId).then(function() { toast('Promovido a administrador!'); renderConfig(); }); }); });
-      la.querySelectorAll('[data-rebx-id]').forEach(function(btn) { btn.addEventListener('click', function() { if(!confirm('Rebaixar administrador?')) return; sb.from('moradores').update({tipo:'proprietario'}).eq('id',btn.dataset.rebxId).then(function() { toast('Revertido a morador.'); renderConfig(); }); }); });
+      la.querySelectorAll('[data-prom-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          sb.from('moradores').update({tipo:'admin'}).eq('id',btn.dataset.promId).then(function() { toast('Promovido a administrador!'); renderConfig(); });
+        });
+      });
+      la.querySelectorAll('[data-rebx-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!confirm('Rebaixar este administrador a morador comum?')) return;
+          sb.from('moradores').update({tipo:'proprietario'}).eq('id',btn.dataset.rebxId).then(function() { toast('Revertido a morador.'); renderConfig(); });
+        });
+      });
     }
   });
 
+  // Dashboard de uso
   renderDashboard();
   renderRanking();
+
+  // Contratos de aula
   renderContratosAula();
 
+  // Agenda do dia
   var hoje = ts();
   sb.from('reservas').select('*,unidades(codigo),modalidades(nome,icone)').eq('data_reserva',hoje).neq('status','cancelada').order('slot_inicio').then(function(res) {
     var ags = res.data||[];
@@ -1951,6 +1696,7 @@ function renderConfig() {
   });
 }
 
+// Salvar config + listeners
 document.addEventListener('DOMContentLoaded', function() {
   var btnSalvarCfg = document.getElementById('btn-salvar-config');
   if(btnSalvarCfg) {
@@ -1975,17 +1721,36 @@ document.addEventListener('DOMContentLoaded', function() {
         aula_aviso_dias: parseInt(document.getElementById('cfg-aula-aviso').value)||30,
         aula_max_contratos: parseInt(document.getElementById('cfg-aula-max-contr').value)||1
       };
+      // Verificar se já existe uma linha de configuração
       sb.from('configuracoes').select('id').limit(1).maybeSingle().then(function(rc) {
-        if(rc.data) { sb.from('configuracoes').update(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).eq('id', rc.data.id).then(function(r) { toast(r.error?'Erro ao salvar':'Configurações salvas!'); }); }
-        else { sb.from('configuracoes').insert(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).then(function(r) { toast(r.error?'Erro ao salvar':'Configurações salvas!'); }); }
+        if(rc.data) {
+          // Atualizar linha existente
+          sb.from('configuracoes').update(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).eq('id', rc.data.id).then(function(r) {
+            if(r.error) toast('Erro ao salvar: '+r.error.message);
+            else toast('Configuracoes salvas!');
+          });
+        } else {
+          // Inserir primeira linha
+          sb.from('configuracoes').insert(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).then(function(r) {
+            if(r.error) toast('Erro ao salvar: '+r.error.message);
+            else toast('Configuracoes salvas!');
+          });
+        }
       });
     });
   }
 
   var btnNC = document.getElementById('btn-novo-contrato');
-  if(btnNC) btnNC.addEventListener('click', function() { if(!requireAdmin()) return; abrirModalContrato(null, false); });
+  if(btnNC) {
+    btnNC.addEventListener('click', function() {
+      if(!requireAdmin()) return;
+      abrirModalContrato(null, false);
+    });
+  }
+
   var btnFechContr = document.getElementById('btn-fechar-contrato');
   if(btnFechContr) btnFechContr.addEventListener('click', function() { fecharModal('m-novo-contrato'); });
+
   var btnCriarContr = document.getElementById('btn-criar-contrato');
   if(btnCriarContr) btnCriarContr.addEventListener('click', criarContrato);
 
@@ -1994,37 +1759,63 @@ document.addEventListener('DOMContentLoaded', function() {
     if(el) el.addEventListener('click', function() { el.classList.toggle('on'); });
   });
 
+  // Toggle enquete
   var tglEnquete = document.getElementById('tgl-enquete');
   var enqueteInput = document.getElementById('av-enquete-pergunta');
-  if(tglEnquete) tglEnquete.addEventListener('click', function() { tglEnquete.classList.toggle('on'); if(enqueteInput) enqueteInput.style.display = tglEnquete.classList.contains('on') ? 'block' : 'none'; });
+  if(tglEnquete) {
+    tglEnquete.addEventListener('click', function() {
+      tglEnquete.classList.toggle('on');
+      if(enqueteInput) enqueteInput.style.display = tglEnquete.classList.contains('on') ? 'block' : 'none';
+    });
+  }
 
+  // Mostrar checklist quando tipo bloqueio for manutencao/vistoria/limpeza
   var blkTipoSel = document.getElementById('blk-tipo');
   var blkCkWrap = document.getElementById('blk-checklist-wrap');
-  if(blkTipoSel && blkCkWrap) blkTipoSel.addEventListener('change', function() { var exibe = ['manutencao','vistoria','limpeza'].indexOf(blkTipoSel.value) !== -1; blkCkWrap.style.display = exibe ? 'block' : 'none'; });
+  if(blkTipoSel && blkCkWrap) {
+    blkTipoSel.addEventListener('change', function() {
+      var exibe = ['manutencao','vistoria','limpeza'].indexOf(blkTipoSel.value) !== -1;
+      blkCkWrap.style.display = exibe ? 'block' : 'none';
+    });
+  }
 
+  // Foto de perfil
   var btnEditarFoto = document.getElementById('btn-editar-foto');
   var fotoWrapInput = document.getElementById('foto-input-wrap');
-  if(btnEditarFoto) btnEditarFoto.addEventListener('click', function() { if(fotoWrapInput) fotoWrapInput.style.display = fotoWrapInput.style.display==='none' ? 'block' : 'none'; if(morador && morador.foto_url) { var inp = document.getElementById('pf-foto-url'); if(inp) inp.value = morador.foto_url; } });
-  var btnSalvarFoto = document.getElementById('btn-salvar-foto');
-  if(btnSalvarFoto) btnSalvarFoto.addEventListener('click', function() {
-    var url = (document.getElementById('pf-foto-url').value||'').trim();
-    if(!url) { toast('Cole um link valido para a foto.'); return; }
-    sb.from('moradores').update({foto_url: url}).eq('id', morador.id).then(function(r) {
-      if(r.error) { toast('Erro ao salvar foto.'); return; }
-      morador.foto_url = url;
-      var fotoImg = document.getElementById('pf-foto');
-      var fotoWrap2 = document.getElementById('pf-foto-wrap');
-      var pfAvEl = document.getElementById('pf-av');
-      if(fotoImg) fotoImg.src = url;
-      if(fotoWrap2) fotoWrap2.style.display = 'block';
-      if(pfAvEl) pfAvEl.style.display = 'none';
-      if(fotoWrapInput) fotoWrapInput.style.display = 'none';
-      toast('Foto atualizada!');
+  if(btnEditarFoto) {
+    btnEditarFoto.addEventListener('click', function() {
+      if(fotoWrapInput) fotoWrapInput.style.display = fotoWrapInput.style.display==='none' ? 'block' : 'none';
+      if(morador && morador.foto_url) {
+        var inp = document.getElementById('pf-foto-url');
+        if(inp) inp.value = morador.foto_url;
+      }
     });
-  });
+  }
+  var btnSalvarFoto = document.getElementById('btn-salvar-foto');
+  if(btnSalvarFoto) {
+    btnSalvarFoto.addEventListener('click', function() {
+      var url = (document.getElementById('pf-foto-url').value||'').trim();
+      if(!url) { toast('Cole um link valido para a foto.'); return; }
+      sb.from('moradores').update({foto_url: url}).eq('id', morador.id).then(function(r) {
+        if(r.error) { toast('Erro ao salvar foto.'); return; }
+        morador.foto_url = url;
+        var fotoImg = document.getElementById('pf-foto');
+        var fotoWrap2 = document.getElementById('pf-foto-wrap');
+        var pfAvEl = document.getElementById('pf-av');
+        if(fotoImg) fotoImg.src = url;
+        if(fotoWrap2) fotoWrap2.style.display = 'block';
+        if(pfAvEl) pfAvEl.style.display = 'none';
+        if(fotoWrapInput) fotoWrapInput.style.display = 'none';
+        toast('Foto atualizada!');
+      });
+    });
+  }
   var btnCancelarFoto = document.getElementById('btn-cancelar-foto');
-  if(btnCancelarFoto) btnCancelarFoto.addEventListener('click', function() { if(fotoWrapInput) fotoWrapInput.style.display = 'none'; });
+  if(btnCancelarFoto) btnCancelarFoto.addEventListener('click', function() {
+    if(fotoWrapInput) fotoWrapInput.style.display = 'none';
+  });
 
+  // Toggle modo escuro
   var tglDark = document.getElementById('tgl-dark');
   if(tglDark) {
     var darkSaved = localStorage.getItem('cg_dark') === '1';
@@ -2036,17 +1827,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Toggle de notificações push
   var tglPush = document.getElementById('tgl-push');
   if(tglPush) {
-    if('Notification' in window) { if(Notification.permission === 'granted') { tglPush.classList.add('on'); } else { tglPush.classList.remove('on'); } }
-    tglPush.addEventListener('click', function() {
-      if(!('Notification' in window)) { toast('Navegador incompatível com notificações.'); return; }
+    // Verificar se já tem permissão
+    if('Notification' in window) {
       if(Notification.permission === 'granted') {
-        tglPush.classList.remove('on'); toast('Acesse as configurações do navegador para desativar.'); tglPush.classList.add('on');
+        tglPush.classList.add('on');
+      } else {
+        tglPush.classList.remove('on');
+      }
+    }
+    tglPush.addEventListener('click', function() {
+      if(!('Notification' in window)) {
+        toast('Notificacoes nao suportadas neste navegador.');
+        return;
+      }
+      if(Notification.permission === 'granted') {
+        // Desativar: não tem API para revogar, mostrar instrução
+        tglPush.classList.remove('on');
+        toast('Para desativar, acesse as configuracoes do navegador.');
+        tglPush.classList.add('on'); // manter on pois ainda tem permissão
       } else {
         Notification.requestPermission().then(function(perm) {
-          if(perm === 'granted') { tglPush.classList.add('on'); toast('Notificações ativadas!'); new Notification('Casa Grande de SantAnna', { body: 'Notificações ativadas com sucesso!', icon: '/favicon.ico' }); }
-          else { tglPush.classList.remove('on'); toast('Permissão negada.'); }
+          if(perm === 'granted') {
+            tglPush.classList.add('on');
+            toast('Notificacoes ativadas!');
+            new Notification('Casa Grande SantAnna', {
+              body: 'Notificacoes ativadas com sucesso!',
+              icon: '/favicon.ico'
+            });
+          } else {
+            tglPush.classList.remove('on');
+            toast('Permissao negada. Verifique as configuracoes do navegador.');
+          }
         });
       }
     });
@@ -2054,11 +1868,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var btnReg = document.getElementById('btn-ver-regulamento');
   if(btnReg) btnReg.addEventListener('click', function() { abrirModal('m-regulamento'); });
+
+  var btnQR = document.getElementById('btn-qr-checkin');
+  if(btnQR) {
+    btnQR.addEventListener('click', function() {
+      var wrap = document.getElementById('qr-checkin-wrap');
+      if(!wrap) return;
+      if(wrap.style.display !== 'none') { wrap.style.display = 'none'; return; }
+      if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
+      var cod = morador.unidades ? morador.unidades.codigo : '';
+      var label = document.getElementById('qr-apto-label');
+      if(label) label.textContent = 'Apto ' + cod;
+      // Gerar QR com dados do check-in
+      var qrData = encodeURIComponent('checkin|'+morador.unidade_id+'|'+cod);
+      var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data='+qrData;
+      var qrEl = document.getElementById('qr-code-display');
+      if(qrEl) qrEl.innerHTML = '<img src="'+qrUrl+'" style="width:150px;height:150px" alt="QR Code">';
+      wrap.style.display = 'block';
+    });
+  }
   var btnFechReg = document.getElementById('btn-fechar-regulamento');
   if(btnFechReg) btnFechReg.addEventListener('click', function() { fecharModal('m-regulamento'); });
 
   var btnFechEspera = document.getElementById('btn-fechar-espera');
   if(btnFechEspera) btnFechEspera.addEventListener('click', function() { fecharModal('m-espera'); });
+  var btnEntrarEspera = document.getElementById('btn-entrar-espera');
+  if(btnEntrarEspera) btnEntrarEspera.addEventListener('click', entrarListaEspera);
 
   var btnAddBlk = document.getElementById('btn-add-bloqueio');
   if(btnAddBlk) {
@@ -2067,18 +1902,24 @@ document.addEventListener('DOMContentLoaded', function() {
       var ini = document.getElementById('blk-ini').value;
       var fim = document.getElementById('blk-fim').value;
       var mot = document.getElementById('blk-motivo').value.trim();
-      if(!ini||!fim||!mot) { toast('Preencha data, e motivo.'); return; }
+      if(!ini||!fim||!mot) { toast('Preencha data inicial, final e motivo.'); return; }
       var tipoBlk = document.getElementById('blk-tipo').value;
       var checklistItens = [];
       if(['manutencao','vistoria','limpeza'].indexOf(tipoBlk) !== -1) {
         var ckMap = [{id:'chk-piso',nome:'Piso e revestimentos'},{id:'chk-rede',nome:'Rede e equipamentos'},{id:'chk-ilum',nome:'Iluminacao'},{id:'chk-grad',nome:'Grades e alambrado'},{id:'chk-limp',nome:'Limpeza geral'}];
-        ckMap.forEach(function(item) { var el = document.getElementById(item.id); if(el) checklistItens.push({nome:item.nome, ok: el.checked}); });
+        ckMap.forEach(function(item) {
+          var el = document.getElementById(item.id);
+          if(el) checklistItens.push({nome:item.nome, ok: el.checked});
+        });
       }
       var checklistStr = checklistItens.length ? JSON.stringify(checklistItens) : null;
       sb.from('bloqueios').insert({data_inicio:ini,data_fim:fim,motivo:mot,tipo:tipoBlk,checklist:checklistStr,criado_por:morador.id}).then(function(r) {
         if(r.error) { toast('Erro: '+r.error.message); return; }
-        document.getElementById('blk-ini').value=''; document.getElementById('blk-fim').value=''; document.getElementById('blk-motivo').value='';
-        toast('Período bloqueado!'); renderConfig(); carregarBloqueios(); renderCal();
+        document.getElementById('blk-ini').value='';
+        document.getElementById('blk-fim').value='';
+        document.getElementById('blk-motivo').value='';
+        toast('Periodo bloqueado!');
+        renderConfig(); carregarBloqueios(); renderCal();
       });
     });
   }
@@ -2093,18 +1934,33 @@ function renderContratosAula() {
     .gte('data_reserva', ts())
     .order('data_reserva',{ascending:true})
     .then(function(res) {
+      // Agrupar por unidade_id + slot_inicio + dia da semana
       var contratos = {};
       (res.data||[]).forEach(function(r) {
         var dow = new Date(r.data_reserva+'T12:00:00').getDay();
         var key = (r.unidade_id||'sem_unidade')+'|'+(r.slot_inicio||'')+'|'+dow+'|'+(r.modalidade_id||'');
         if(!contratos[key]) {
-          contratos[key] = { unidade: r.unidades, modalidade: r.modalidades, slot: r.slot_inicio, dow: dow, dur: r.duracao_min, inicio: r.data_reserva, fim: r.data_reserva, count: 0, unidade_id: r.unidade_id, modalidade_id: r.modalidade_id, morador_id: r.morador_id, ids: [] };
+          contratos[key] = {
+            unidade: r.unidades,
+            modalidade: r.modalidades,
+            slot: r.slot_inicio,
+            dow: dow,
+            dur: r.duracao_min,
+            inicio: r.data_reserva,
+            fim: r.data_reserva,
+            count: 0,
+            unidade_id: r.unidade_id,
+            modalidade_id: r.modalidade_id,
+            morador_id: r.morador_id,
+            ids: []
+          };
         }
         if(r.data_reserva > contratos[key].fim) contratos[key].fim = r.data_reserva;
-        contratos[key].count++; contratos[key].ids.push(r.id);
+        contratos[key].count++;
+        contratos[key].ids.push(r.id);
       });
 
-      var dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+      var dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
       var lista = Object.values(contratos);
       var html = lista.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum contrato ativo.</div>';
 
@@ -2116,117 +1972,245 @@ function renderContratosAula() {
         var icone = c.modalidade ? c.modalidade.icone : '';
         var mod = c.modalidade ? (icone+' '+c.modalidade.nome) : '---';
 
-        var dadosEditar = encodeURIComponent(JSON.stringify({ unidade_id: c.unidade_id||'', slot: c.slot||'', dow: c.dow, dur: c.dur, fim: c.fim, modalidade_id: c.modalidade_id||'', morador_id: c.morador_id||'', ids: c.ids }));
-        var dadosCancelar = encodeURIComponent(JSON.stringify({ ids: c.ids, cod: cod }));
+        // Dados para os botões — codificados como JSON
+        var dadosEditar = encodeURIComponent(JSON.stringify({
+          unidade_id: c.unidade_id||'',
+          slot: c.slot||'',
+          dow: c.dow,
+          dur: c.dur,
+          fim: c.fim,
+          modalidade_id: c.modalidade_id||'',
+          morador_id: c.morador_id||'',
+          ids: c.ids
+        }));
+        var dadosCancelar = encodeURIComponent(JSON.stringify({
+          ids: c.ids,
+          cod: cod
+        }));
 
         html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:8px">';
         html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
-        html += '<div><div style="font-size:12px;font-weight:600">Apto '+cod+' - '+mod+'</div><div style="font-size:10.5px;color:var(--t2)">'+dias[c.dow]+' - '+(c.slot||'').slice(0,5)+' - '+(c.dur===60?'1h':'2h')+'</div><div style="font-size:10.5px;color:var(--t2)">'+c.count+' aulas | '+fmtD(c.inicio)+' a '+fmtD(c.fim)+'</div></div>';
-        html += '<div style="text-align:right"><div style="font-size:10px;color:'+corV+'">Vence: '+fmtD(c.fim)+'</div>';
+        html += '<div>';
+        html += '<div style="font-size:12px;font-weight:600">Apto '+cod+' - '+mod+'</div>';
+        html += '<div style="font-size:10.5px;color:var(--t2)">'+dias[c.dow]+' - '+(c.slot||'').slice(0,5)+' - '+(c.dur===60?'1h':'2h')+'</div>';
+        html += '<div style="font-size:10.5px;color:var(--t2)">'+c.count+' aulas | '+fmtD(c.inicio)+' a '+fmtD(c.fim)+'</div>';
+        html += '</div>';
+        html += '<div style="text-align:right">';
+        html += '<div style="font-size:10px;color:'+corV+'">Vence: '+fmtD(c.fim)+'</div>';
         if(diasR <= 30) html += '<span class="badge b-danger" style="font-size:9px">Renovar</span>';
         else if(diasR <= 60) html += '<span class="badge b-warn" style="font-size:9px">'+diasR+'d</span>';
         html += '</div></div>';
-        html += '<div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn-sm b" data-editar-contr="'+dadosEditar+'" style="font-size:10px"><i class="ti ti-edit" aria-hidden="true"></i>Alterar</button><button class="btn-sm" style="background:var(--am);border-color:var(--amb);color:var(--amt);font-size:10px" data-renovar-contr="'+dadosEditar+'"><i class="ti ti-refresh" aria-hidden="true"></i>Renovar</button><button class="btn-sm r" data-cancelar-contr="'+dadosCancelar+'" style="font-size:10px"><i class="ti ti-trash" aria-hidden="true"></i>Cancelar</button></div></div>';
+        html += '<div style="display:flex;gap:5px;flex-wrap:wrap">';
+        html += '<button class="btn-sm b" data-editar-contr="'+dadosEditar+'" style="font-size:10px"><i class="ti ti-edit" aria-hidden="true"></i>Alterar</button>';
+        html += '<button class="btn-sm" style="background:var(--am);border-color:var(--amb);color:var(--amt);font-size:10px" data-renovar-contr="'+dadosEditar+'"><i class="ti ti-refresh" aria-hidden="true"></i>Renovar</button>';
+        html += '<button class="btn-sm r" data-cancelar-contr="'+dadosCancelar+'" style="font-size:10px"><i class="ti ti-trash" aria-hidden="true"></i>Cancelar</button>';
+        html += '</div></div>';
       });
 
       var lc = document.getElementById('lista-contratos-aula');
       if(!lc) return;
       lc.innerHTML = html;
 
-      lc.querySelectorAll('[data-editar-contr]').forEach(function(btn) { btn.addEventListener('click', function() { if(!requireAdmin()) return; var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-editar-contr'))); abrirModalContrato(d, false); }); });
-      lc.querySelectorAll('[data-renovar-contr]').forEach(function(btn) { btn.addEventListener('click', function() { if(!requireAdmin()) return; var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-renovar-contr'))); var novoIni = new Date(d.fim+'T12:00:00'); novoIni.setDate(novoIni.getDate()+1); d.novoIni = novoIni.toISOString().slice(0,10); abrirModalContrato(d, true); }); });
-      lc.querySelectorAll('[data-cancelar-contr]').forEach(function(btn) { btn.addEventListener('click', function() { if(!requireAdmin()) return; var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-cancelar-contr'))); if(!d.ids || !d.ids.length) return; if(!confirm('Cancelar contrato do Apto '+d.cod+'?')) return; var updates = d.ids.map(function(id) { return sb.from('reservas').update({status:'cancelada',cancelado_por:'admin'}).eq('id',id); }); Promise.all(updates).then(function(results) { toast('Contrato cancelado.'); renderContratosAula(); }); }); });
+      // ── ALTERAR contrato ─────────────────────────────────────────────────
+      lc.querySelectorAll('[data-editar-contr]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!requireAdmin()) return;
+          var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-editar-contr')));
+          abrirModalContrato(d, false);
+        });
+      });
+
+      // ── RENOVAR contrato (novo período a partir do dia seguinte ao fim) ───
+      lc.querySelectorAll('[data-renovar-contr]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!requireAdmin()) return;
+          var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-renovar-contr')));
+          var novoIni = new Date(d.fim+'T12:00:00');
+          novoIni.setDate(novoIni.getDate()+1);
+          d.novoIni = novoIni.toISOString().slice(0,10);
+          abrirModalContrato(d, true);
+        });
+      });
+
+      // ── CANCELAR contrato ────────────────────────────────────────────────
+      lc.querySelectorAll('[data-cancelar-contr]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!requireAdmin()) return;
+          var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-cancelar-contr')));
+          if(!d.ids || !d.ids.length) { toast('Nenhuma reserva encontrada para cancelar.'); return; }
+          if(!confirm('Cancelar todas as aulas futuras do contrato de '+d.cod+'? Esta acao nao pode ser desfeita.')) return;
+          // Cancelar em lote pelos IDs das reservas
+          var updates = d.ids.map(function(id) {
+            return sb.from('reservas').update({status:'cancelada',cancelado_por:'admin'}).eq('id',id);
+          });
+          Promise.all(updates).then(function(results) {
+            var erros = results.filter(function(r){ return r.error; });
+            if(erros.length) { toast('Erro ao cancelar: '+erros[0].error.message); return; }
+            toast('Contrato cancelado. '+d.ids.length+' aulas removidas.');
+            renderContratosAula();
+          });
+        });
+      });
     });
 }
 
+// Abrir modal de contrato (novo, alterar ou renovar)
 function abrirModalContrato(dadosExistentes, isRenovar) {
   sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
     var sel = document.getElementById('contr-apto');
     if(sel && res.data) {
-      sel.innerHTML = res.data.map(function(u) { return '<option value="'+u.id+'"'+(dadosExistentes && u.id === dadosExistentes.unidade_id ? ' selected' : '')+'>'+u.codigo+'</option>'; }).join('');
+      sel.innerHTML = res.data.map(function(u) {
+        var sel2 = (dadosExistentes && u.id === dadosExistentes.unidade_id) ? ' selected' : '';
+        return '<option value="'+u.id+'"'+sel2+'>'+u.codigo+'</option>';
+      }).join('');
     }
   });
 
   if(dadosExistentes) {
+    // Preencher hora
     var slotHora = (dadosExistentes.slot||'').slice(0,5);
     var horaEl = document.getElementById('contr-hora');
-    if(horaEl && slotHora) { for(var i=0; i<horaEl.options.length; i++) { if(horaEl.options[i].value === slotHora || horaEl.options[i].text === slotHora) { horaEl.selectedIndex = i; break; } } }
-    var durEl = document.getElementById('contr-dur'); if(durEl && dadosExistentes.dur) durEl.value = dadosExistentes.dur;
-    document.querySelectorAll('#contr-dias input').forEach(function(cb) { cb.checked = (parseInt(cb.value) === dadosExistentes.dow); });
-    var dIni = document.getElementById('contr-ini'); if(dIni) { dIni.min = ts(); dIni.value = (isRenovar && dadosExistentes.novoIni) ? dadosExistentes.novoIni : ts(); }
+    if(horaEl && slotHora) {
+      for(var i=0; i<horaEl.options.length; i++) {
+        if(horaEl.options[i].value === slotHora || horaEl.options[i].text === slotHora) {
+          horaEl.selectedIndex = i; break;
+        }
+      }
+    }
+    // Duração
+    var durEl = document.getElementById('contr-dur');
+    if(durEl && dadosExistentes.dur) durEl.value = dadosExistentes.dur;
+    // Dia da semana
+    document.querySelectorAll('#contr-dias input').forEach(function(cb) {
+      cb.checked = (parseInt(cb.value) === dadosExistentes.dow);
+    });
+    // Data de início
+    var dIni = document.getElementById('contr-ini');
+    if(dIni) {
+      dIni.min = ts();
+      if(isRenovar && dadosExistentes.novoIni) {
+        dIni.value = dadosExistentes.novoIni;
+      } else {
+        dIni.value = ts();
+      }
+    }
   } else {
+    // Novo contrato: limpar formulário
     document.querySelectorAll('#contr-dias input').forEach(function(cb){ cb.checked = false; });
-    var dIni = document.getElementById('contr-ini'); if(dIni) { dIni.value = ''; dIni.min = ts(); }
+    var dIni = document.getElementById('contr-ini');
+    if(dIni) { dIni.value = ''; dIni.min = ts(); }
   }
 
+  // Guardar dados de edição para uso no criarContrato
   document.getElementById('m-novo-contrato').dataset.editData = dadosExistentes ? JSON.stringify(dadosExistentes) : '';
   document.getElementById('m-novo-contrato').dataset.isRenovar = isRenovar ? '1' : '0';
-  var titulo = document.querySelector('#m-novo-contrato .mtitle'); var btnCriar = document.getElementById('btn-criar-contrato');
-  if(titulo) titulo.textContent = isRenovar ? 'Renovar contrato de aula' : (dadosExistentes ? 'Alterar contrato de aula' : 'Criar contrato de aula recorrente');
-  if(btnCriar) btnCriar.innerHTML = isRenovar ? '<i class="ti ti-refresh" aria-hidden="true"></i>Renovar' : (dadosExistentes ? '<i class="ti ti-edit" aria-hidden="true"></i>Salvar' : '<i class="ti ti-repeat" aria-hidden="true"></i>Criar');
+
+  var titulo = document.querySelector('#m-novo-contrato .mtitle');
+  var btnCriar = document.getElementById('btn-criar-contrato');
+  if(titulo) {
+    titulo.textContent = isRenovar ? 'Renovar contrato de aula' : (dadosExistentes ? 'Alterar contrato de aula' : 'Criar contrato de aula recorrente');
+  }
+  if(btnCriar) {
+    if(isRenovar) {
+      btnCriar.innerHTML = '<i class="ti ti-refresh" aria-hidden="true"></i>Renovar contrato';
+    } else if(dadosExistentes) {
+      btnCriar.innerHTML = '<i class="ti ti-edit" aria-hidden="true"></i>Salvar alteracoes';
+    } else {
+      btnCriar.innerHTML = '<i class="ti ti-repeat" aria-hidden="true"></i>Criar contrato';
+    }
+  }
+
   abrirModal('m-novo-contrato');
 }
 
 function criarContrato() {
   if(!requireAdmin()) return;
-  var aptoId = document.getElementById('contr-apto').value; var hora = document.getElementById('contr-hora').value;
-  var dur = parseInt(document.getElementById('contr-dur').value); var iniStr = document.getElementById('contr-ini').value;
-  var meses = parseInt(document.getElementById('contr-periodo').value); var modId = document.getElementById('contr-mod').value;
-  var diasSel = []; document.querySelectorAll('#contr-dias input:checked').forEach(function(cb) { diasSel.push(parseInt(cb.value)); });
-  if(!aptoId||!hora||!iniStr||!diasSel.length) { toast('Preencha os campos e selecione os dias.'); return; }
+  var aptoId = document.getElementById('contr-apto').value;
+  var hora = document.getElementById('contr-hora').value;
+  var dur = parseInt(document.getElementById('contr-dur').value);
+  var iniStr = document.getElementById('contr-ini').value;
+  var meses = parseInt(document.getElementById('contr-periodo').value);
+  var modId = document.getElementById('contr-mod').value;
+  var diasSel = [];
+  document.querySelectorAll('#contr-dias input:checked').forEach(function(cb) { diasSel.push(parseInt(cb.value)); });
 
-  var editDataStr = document.getElementById('m-novo-contrato').dataset.editData;
+  if(!aptoId||!hora||!iniStr||!diasSel.length) { toast('Preencha todos os campos e selecione ao menos um dia.'); return; }
+
+  var modalEl = document.getElementById('m-novo-contrato');
+  var editDataStr = modalEl ? modalEl.dataset.editData : '';
   var editData = editDataStr ? JSON.parse(editDataStr) : null;
   var isEdicao = !!(editData && editData.ids && editData.ids.length);
-  
-  var curParts = iniStr.split('-');
-  var dataFim = new Date(parseInt(curParts[0]), parseInt(curParts[1])-1, parseInt(curParts[2]), 12, 0, 0);
-  dataFim.setMonth(dataFim.getMonth() + meses);
-  
-  var modNomes = {tenis1:'Tênis simples',tenis2:'Tênis duplas',basquete:'Basquete',futebol:'Futebol',volei:'Vôlei',livre:'Uso livre'};
 
-  Promise.all([sb.from('modalidades').select('id,nome'), sb.from('moradores').select('id').eq('unidade_id',aptoId).eq('status','ativo').limit(1)]).then(function(results) {
-    var todas = results[0].data||[]; var morList = results[1].data||[];
+  var dataFim = new Date(iniStr+'T12:00:00');
+  dataFim.setMonth(dataFim.getMonth() + meses);
+
+  var modNomes = {tenis1:'Tenis simples',tenis2:'Tenis duplas',basquete:'Basquete',futebol:'Futebol',volei:'Volei',livre:'Uso livre'};
+
+  Promise.all([
+    sb.from('modalidades').select('id,nome'),
+    sb.from('moradores').select('id').eq('unidade_id',aptoId).eq('status','ativo').limit(1)
+  ]).then(function(results) {
+    var todas = results[0].data||[];
+    var morList = results[1].data||[];
     var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); };
     var modObj = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNomes[modId]||''); });
     var modDbId = modObj ? modObj.id : (editData ? editData.modalidade_id : null);
     var moradorId = morList.length > 0 ? morList[0].id : (editData ? editData.morador_id : null);
     if(!moradorId && morador) moradorId = morador.id;
 
-    var reservas = []; 
-    var cur = new Date(parseInt(curParts[0]), parseInt(curParts[1])-1, parseInt(curParts[2]), 12, 0, 0); 
+    // Gerar novas reservas
+    var reservas = [];
+    var cur = new Date(iniStr+'T12:00:00');
     var horaFim = addH(hora, dur/60);
-    
     while(cur <= dataFim) {
-      if(diasSel.indexOf(cur.getDay()) !== -1) {
-        var y = cur.getFullYear();
-        var m = String(cur.getMonth()+1).padStart(2,'0');
-        var d = String(cur.getDate()).padStart(2,'0');
-        var dataFormatada = y + '-' + m + '-' + d;
-
-        reservas.push({ 
-            unidade_id: aptoId, 
-            morador_id: moradorId, 
-            modalidade_id: modDbId, 
-            data_reserva: dataFormatada, 
-            slot_inicio: hora+':00', 
-            slot_fim: horaFim+':00', 
-            duracao_min: dur, 
-            tipo_reserva: 'aula', 
-            status: 'confirmada' 
+      var dow = cur.getDay();
+      if(diasSel.indexOf(dow) !== -1) {
+        var ds = cur.toISOString().slice(0,10);
+        reservas.push({
+          unidade_id: aptoId,
+          morador_id: moradorId,
+          modalidade_id: modDbId,
+          data_reserva: ds,
+          slot_inicio: hora+':00',
+          slot_fim: horaFim+':00',
+          duracao_min: dur,
+          tipo_reserva: 'aula',
+          status: 'confirmada'
         });
       }
       cur.setDate(cur.getDate()+1);
     }
+
     if(!reservas.length) { toast('Nenhuma data gerada para os dias selecionados.'); return; }
 
-    var promiseCancelar = isEdicao ? Promise.all(editData.ids.filter(function(id){ return !!id; }).map(function(id){ return sb.from('reservas').update({status:'cancelada',cancelado_por:'admin'}).eq('id',id); })) : Promise.resolve([]);
-    promiseCancelar.then(function() {
-      var lotes = []; for(var i=0; i<reservas.length; i+=100) lotes.push(reservas.slice(i,i+100));
+    // Se for edição: cancelar reservas antigas FUTURAS antes de inserir as novas
+    var promiseCancelar = isEdicao
+      ? Promise.all(editData.ids
+          .filter(function(id){ return !!id; })
+          .map(function(id){
+            return sb.from('reservas').update({status:'cancelada',cancelado_por:'admin'}).eq('id',id);
+          }))
+      : Promise.resolve([]);
+
+    promiseCancelar.then(function(cancelResults) {
+      var cancelErros = cancelResults.filter(function(r){ return r && r.error; });
+      if(cancelErros.length) {
+        toast('Aviso: erro ao cancelar reservas antigas. Prosseguindo com criacao.');
+      }
+
+      // Inserir novas reservas em lotes de 100
+      var lotes = [];
+      for(var i=0; i<reservas.length; i+=100) lotes.push(reservas.slice(i,i+100));
+
       Promise.all(lotes.map(function(lote){ return sb.from('reservas').insert(lote); })).then(function(results2) {
         var erros = results2.filter(function(r){ return r.error; });
         if(erros.length) { toast('Erro: '+erros[0].error.message); return; }
-        fecharModal('m-novo-contrato'); toast(reservas.length+' aulas salvas!'); renderConfig();
+        fecharModal('m-novo-contrato');
+        var msg = isEdicao
+          ? 'Contrato alterado! '+reservas.length+' novas aulas criadas.'
+          : reservas.length+' aulas criadas!';
+        toast(msg);
+        renderConfig();
       });
     });
   });
@@ -2234,8 +2218,9 @@ function criarContrato() {
 
 // ── DASHBOARD DE USO ─────────────────────────────────────────────
 function renderDashboard() {
-  var mesVigente = getMesAtual();
-  var ini = mesVigente + '-01'; var fim = mesVigente + '-31';
+  var mesAtual = new Date().toISOString().slice(0,7);
+  var ini = mesAtual + '-01';
+  var fim = mesAtual + '-31';
 
   sb.from('reservas').select('status,checkin_feito,tipo_reserva,slot_inicio').gte('data_reserva',ini).lte('data_reserva',fim).then(function(res) {
     var todas = res.data||[];
@@ -2247,7 +2232,9 @@ function renderDashboard() {
     var pontuais = todas.filter(function(r){ return r.tipo_reserva==='pontual'; }).length;
     var taxaCheckin = confirmadas > 0 ? Math.round(checkins/(checkins+ausencias||1)*100) : 0;
 
-    var slots = {}; todas.forEach(function(r){ if(r.slot_inicio) { var h=(r.slot_inicio||'').slice(0,5); slots[h]=(slots[h]||0)+1; } });
+    // Horário mais popular
+    var slots = {};
+    todas.forEach(function(r){ if(r.slot_inicio) { var h=(r.slot_inicio||'').slice(0,5); slots[h]=(slots[h]||0)+1; } });
     var topSlot = Object.entries(slots).sort(function(a,b){return b[1]-a[1];})[0];
 
     var el = document.getElementById('dashboard-uso');
@@ -2257,19 +2244,20 @@ function renderDashboard() {
       '<div style="background:var(--vl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--v)">'+(confirmadas+checkins+ausencias)+'</div><div style="font-size:10px;color:var(--t2)">Total reservas</div></div>',
       '<div style="background:var(--bl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blt)">'+taxaCheckin+'%</div><div style="font-size:10px;color:var(--t2)">Taxa check-in</div></div>',
       '<div style="background:var(--am);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--amt)">'+canceladas+'</div><div style="font-size:10px;color:var(--t2)">Canceladas</div></div>',
-      '<div style="background:var(--rd);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--rdt)">'+ausencias+'</div><div style="font-size:10px;color:var(--t2)">Ausências</div></div>',
+      '<div style="background:var(--rd);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--rdt)">'+ausencias+'</div><div style="font-size:10px;color:var(--t2)">Ausencias</div></div>',
       '</div>',
       '<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:0.5px solid var(--br)"><span style="color:var(--t2)">Reservas pontuais</span><span style="font-weight:600">'+pontuais+'</span></div>',
       '<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:0.5px solid var(--br)"><span style="color:var(--t2)">Aulas recorrentes</span><span style="font-weight:600">'+aulas+'</span></div>',
-      topSlot ? '<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--t2)">Horário mais reservado</span><span style="font-weight:600">'+topSlot[0]+' ('+topSlot[1]+'x)</span></div>' : ''
+      topSlot ? '<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--t2)">Horario mais reservado</span><span style="font-weight:600">'+topSlot[0]+' ('+topSlot[1]+'x)</span></div>' : ''
     ].join('');
   });
 }
 
 function renderRanking() {
-  var mesVigente = getMesAtual();
-  sb.from('reservas').select('unidade_id,checkin_feito,status,unidades(codigo)').gte('data_reserva',mesVigente+'-01').lte('data_reserva',mesVigente+'-31').then(function(res) {
-    var todas = res.data||[]; var aptos = {};
+  var mesAtual = new Date().toISOString().slice(0,7);
+  sb.from('reservas').select('unidade_id,checkin_feito,status,unidades(codigo)').gte('data_reserva',mesAtual+'-01').lte('data_reserva',mesAtual+'-31').then(function(res) {
+    var todas = res.data||[];
+    var aptos = {};
     todas.forEach(function(r) {
       var cod = r.unidades ? r.unidades.codigo : (r.unidade_id ? r.unidade_id.slice(0,8) : '---');
       if(!aptos[cod]) aptos[cod] = {total:0,checkin:0,falta:0};
@@ -2285,7 +2273,7 @@ function renderRanking() {
 
     var el = document.getElementById('ranking-pontualidade');
     if(!el) return;
-    if(!lista.length) { el.innerHTML='<div style="font-size:11px;color:var(--t2)">Sem dados este mês.</div>'; return; }
+    if(!lista.length) { el.innerHTML='<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>'; return; }
     var medals = ['🥇','🥈','🥉'];
     el.innerHTML = lista.map(function(a,i){
       var medal = medals[i] || (i+1+'.').toString();
@@ -2297,6 +2285,153 @@ function renderRanking() {
         +'<div style="font-size:13px;font-weight:700;color:'+cor+'">'+a.taxa+'%</div>'
         +'</div>';
     }).join('');
+  });
+}
+
+// ── LISTA DE ESPERA ──────────────────────────────────────────────
+var pendEspera = null;
+
+function abrirListaEspera(ds, slot, reservaId) {
+  if(!morador || !morador.unidade_id) return;
+  pendEspera = {ds: ds, slot: slot, reservaId: reservaId};
+  document.getElementById('m-espera-sub').textContent = fmtD(ds) + ' as ' + slot;
+
+  // Verificar se já está na lista
+  sb.from('lista_espera')
+    .select('id')
+    .eq('data_reserva', ds)
+    .eq('slot_inicio', slot+':00')
+    .eq('unidade_id', morador.unidade_id)
+    .eq('status', 'aguardando')
+    .maybeSingle()
+    .then(function(res) {
+      var infoEl = document.getElementById('m-espera-info');
+      var btnEntrar = document.getElementById('btn-entrar-espera');
+      if(res.data) {
+        if(infoEl) infoEl.textContent = 'Voce ja esta na lista de espera para este horario.';
+        if(btnEntrar) { btnEntrar.textContent = 'Ja na lista'; btnEntrar.disabled = true; }
+      } else {
+        if(infoEl) infoEl.textContent = 'Voce ainda nao esta na lista. Clique para entrar.';
+        if(btnEntrar) { btnEntrar.innerHTML = '<i class="ti ti-bell-plus" aria-hidden="true"></i>Entrar na lista'; btnEntrar.disabled = false; }
+      }
+    });
+
+  abrirModal('m-espera');
+}
+
+function entrarListaEspera() {
+  if(!pendEspera || !morador) return;
+  sb.from('lista_espera').insert({
+    data_reserva: pendEspera.ds,
+    slot_inicio: pendEspera.slot+':00',
+    unidade_id: morador.unidade_id,
+    morador_id: morador.id,
+    reserva_original_id: pendEspera.reservaId,
+    status: 'aguardando'
+  }).then(function(r) {
+    if(r.error) { toast('Erro: '+r.error.message); return; }
+    fecharModal('m-espera');
+    toast('Voce entrou na lista de espera! Sera notificado se o horario abrir.');
+  });
+}
+
+// ── OCORRENCIAS ────────────────────────────────────────────────
+document.getElementById('btn-nova-oco').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  abrirModal('m-nova-oco');
+});
+document.getElementById('btn-fechar-oco').addEventListener('click', function() { fecharModal('m-nova-oco'); });
+document.getElementById('btn-salvar-oco').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  var t = document.getElementById('oc-tit').value.trim();
+  if(!t) { toast('Informe o titulo'); return; }
+  sb.from('ocorrencias').insert({
+    unidade_id: morador.unidade_id, morador_id: morador.id,
+    categoria: document.getElementById('oc-cat').value,
+    titulo: t, descricao: document.getElementById('oc-desc').value||t,
+    local: document.getElementById('oc-loc').value,
+    prioridade: document.getElementById('oc-prio').value,
+    status: 'aberta'
+  }).then(function(r) {
+    if(r.error) { toast('Erro: '+r.error.message); return; }
+    document.getElementById('oc-tit').value='';
+    document.getElementById('oc-desc').value='';
+    fecharModal('m-nova-oco'); renderOco(); toast('Ocorrencia registrada.');
+  });
+});
+
+document.getElementById('fpill-todos').addEventListener('click', function() { setFiltro('todos',this); });
+document.getElementById('fpill-aberta').addEventListener('click', function() { setFiltro('aberta',this); });
+document.getElementById('fpill-andamento').addEventListener('click', function() { setFiltro('andamento',this); });
+document.getElementById('fpill-resolvida').addEventListener('click', function() { setFiltro('resolvida',this); });
+
+function setFiltro(f, el) {
+  ocoFiltro=f; ocoDetalhe=null;
+  document.querySelectorAll('.fpill').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  renderOco();
+}
+
+function renderOco() {
+  if(!requireAdmin()) return;
+  var q = sb.from('ocorrencias').select('*,mensagens_ocorrencia(*)');
+  if(ocoFiltro!=='todos') q = q.eq('status',ocoFiltro);
+  q.order('created_at',{ascending:false}).limit(20).then(function(res) {
+    var ocos = res.data||[];
+    var list = document.getElementById('oco-list');
+    var det = document.getElementById('oco-detail');
+    if(ocoDetalhe) {
+      var o = ocos.find(function(x){return x.id===ocoDetalhe;});
+      list.innerHTML='';
+      if(!o) { det.innerHTML=''; return; }
+      var html = '<div class="card">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">';
+      html += '<div style="font-size:13px;font-weight:600;flex:1">'+o.titulo+'</div>';
+      html += '<span class="badge '+(o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray')+'">'+STL[o.status]+'</span></div>';
+      html += '<div style="font-size:10.5px;color:var(--t2);margin-bottom:8px">'+(o.local||'')+' - <span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span></div>';
+      html += '<div style="font-size:11px;color:var(--t2);margin-bottom:10px">'+(o.descricao||'')+'</div>';
+      html += '<div class="sec-lbl">Timeline</div>';
+      (o.mensagens_ocorrencia||[]).forEach(function(msg) {
+        var cor = msg.origem==='admin' ? '#27500A' : '#378ADD';
+        html += '<div style="display:flex;gap:8px;margin-bottom:9px">';
+        html += '<div style="width:8px;height:8px;border-radius:50%;background:'+cor+';flex-shrink:0;margin-top:3px"></div>';
+        html += '<div><div style="font-size:11px;font-weight:600">'+(msg.origem==='admin'?'Administracao':'Morador')+'</div>';
+        html += '<div style="font-size:10px;color:var(--t2)">'+fmtD((msg.created_at||'').slice(0,10))+'</div>';
+        html += '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+msg.mensagem+'</div></div></div>';
+      });
+      html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">';
+      html += '<button class="btn-sm" id="btn-voltar-oco">Voltar</button>';
+      if(o.status==='aberta'||o.status==='andamento') html += '<button class="btn-sm b" id="btn-resp-oco">Responder</button>';
+      html += '</div></div>';
+      det.innerHTML = html;
+      document.getElementById('btn-voltar-oco').addEventListener('click', function() { ocoDetalhe=null; renderOco(); });
+      var btnResp = document.getElementById('btn-resp-oco');
+      if(btnResp) {
+        btnResp.addEventListener('click', function() {
+          var msg = prompt('Mensagem de atualizacao:');
+          if(!msg) return;
+          sb.from('mensagens_ocorrencia').insert({ocorrencia_id:o.id,autor_id:morador.id,origem:'admin',mensagem:msg}).then(function() {
+            sb.from('ocorrencias').update({status:'andamento'}).eq('id',o.id).then(function() { renderOco(); toast('Resposta enviada.'); });
+          });
+        });
+      }
+      return;
+    }
+    det.innerHTML='';
+    if(!ocos.length) { list.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma ocorrencia</div>'; return; }
+    var html = '';
+    ocos.forEach(function(o) {
+      var bc = o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray';
+      html += '<div class="oco-card '+o.status+'" data-oco-id="'+o.id+'">';
+      html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'⚠ ':'')+o.titulo+'</div>';
+      html += '<span class="badge '+bc+'">'+STL[o.status]+'</span></div>';
+      html += '<div class="oco-meta"><span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span>';
+      html += '<span>'+(o.local||'')+'</span><span>'+fmtD((o.created_at||'').slice(0,10))+'</span></div></div>';
+    });
+    list.innerHTML = html;
+    list.querySelectorAll('[data-oco-id]').forEach(function(el) {
+      el.addEventListener('click', function() { ocoDetalhe=el.dataset.ocoId; renderOco(); });
+    });
   });
 }
 </script>
