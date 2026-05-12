@@ -1252,30 +1252,93 @@ function showStep(n) {
     document.getElementById('m-res-step'+i).style.display = (i===n?'block':'none');
   });
 }
+let salvandoReserva = false;
 
-function confirmarReserva() {
-  if(!morador||!pendSlot||!pendMod||!pendDur) return;
+async function confirmarReserva() {
 
-  var maxMes = appCfg.max_reservas_mes;
-  if(maxMes > 0) {
-    var mesVigente = getMesAtual(); 
-    sb.from('reservas')
-      .select('id', {count:'exact', head:true})
-      .eq('unidade_id', morador.unidade_id)
-      .eq('tipo_reserva','pontual')
-      .eq('status','confirmada')
-      .gte('data_reserva', mesVigente+'-01')
-      .lte('data_reserva', mesVigente+'-31')
-      .then(function(rc) {
-        if(rc.count >= maxMes) {
-          toast('Limite de '+maxMes+' reservas mensais atingido para este apartamento.');
-          return;
-        }
-        _fazerInsertReserva();
-      });
-  } else {
-    _fazerInsertReserva();
+  if (salvandoReserva) return;
+
+  if (!morador || !pendSlot || !pendMod || !pendDur) {
+    toast('Dados inválidos');
+    return;
   }
+
+  salvandoReserva = true;
+
+  const btn = document.getElementById('btn-confirmar-res');
+
+  const textoOriginal = btn.innerHTML;
+
+  btn.disabled = true;
+
+  btn.innerHTML = 'Salvando...';
+
+  try {
+
+    const inicio = pendSlot.slot + ':00';
+
+    const fim = addH(
+      pendSlot.slot,
+      pendDur / 60
+    ) + ':00';
+
+    const { error } = await sb
+      .from('reservas')
+      .insert({
+        unidade_id: morador.unidade_id,
+        morador_id: morador.id,
+        data_reserva: pendSlot.date,
+        slot_inicio: inicio,
+        slot_fim: fim,
+        modalidade_id: pendMod,
+        duracao_min: pendDur,
+        status: 'confirmada'
+      });
+
+    if (error) {
+
+      console.error(error);
+
+      if (
+        error.message.includes('reservas_sem_sobreposicao')
+      ) {
+
+        toast('Horário já reservado');
+
+      } else {
+
+        toast('Erro ao salvar reserva');
+      }
+
+      return;
+    }
+
+    toast('Reserva criada com sucesso');
+
+    fecharModal('m-reserva');
+
+    await Promise.all([
+      renderMinhas(),
+      renderCheckin(),
+      selData(pendSlot.date)
+    ]);
+
+  } catch (e) {
+
+    console.error(e);
+
+    toast('Erro inesperado');
+
+  } finally {
+
+    salvandoReserva = false;
+
+    btn.disabled = false;
+
+    btn.innerHTML = textoOriginal;
+  }
+}
+
 
   function _fazerInsertReserva() {
     var modNome = MODS.find(function(x){return x.id===pendMod;}).nome;
