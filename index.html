@@ -925,6 +925,45 @@ document.getElementById('btn-logout').addEventListener('click', function() {
 });
 
 function iniciarApp(user) {
+  // ... (código inicial da função)
+  
+  sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).maybeSingle().then(function(res) {
+    if(res.error || !res.data) { bloquearSessao('Cadastro não encontrado. Fale com a administração.'); return; }
+    morador = res.data;
+    if(morador.status === 'pendente') { bloquearSessao('Seu cadastro está aguardando aprovação do administrador.'); return; }
+    if(morador.status === 'inativo') { bloquearSessao('Seu cadastro está inativo. Fale com a administração.'); return; }
+    
+    // MUDANÇA: Morador suspenso NÃO é mais bloqueado de entrar no app
+    if(morador.status !== 'ativo' && morador.status !== 'suspenso') { bloquearSessao('Cadastro sem permissão de acesso.'); return; }
+
+    var n = morador.nome || '';
+    var partes = n.split(' ');
+    var ini = ((partes[0]||'')[0]||'') + ((partes[partes.length-1]||'')[0]||'');
+    ini = ini.toUpperCase();
+    document.getElementById('av-btn').textContent = ini;
+    document.getElementById('pf-av').textContent = ini;
+    document.getElementById('pf-nome').textContent = morador.nome;
+
+    var tipoTxt = {proprietario:'Proprietário',inquilino:'Inquilino',admin:'Administrador'}[morador.tipo] || morador.tipo;
+    var cod = morador.unidades ? morador.unidades.codigo : '';
+    var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : 'Administrador / Síndico';
+    document.getElementById('pf-apto').textContent = aptoLabel;
+    document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Síndico';
+    
+    // MUDANÇA: Mostrar visualmente que o morador está suspenso
+    var roleTag = document.getElementById('role-tag');
+    if (morador.status === 'suspenso') {
+      roleTag.textContent = 'Suspenso';
+      roleTag.style.background = 'var(--rd)';
+      roleTag.style.color = 'var(--rdt)';
+      toast('Atenção: Seu apartamento está suspenso para novas reservas.');
+    } else {
+      roleTag.textContent = isAdmin() ? 'Administrador' : 'Morador';
+      roleTag.style.background = 'rgba(255,255,255,.2)';
+      roleTag.style.color = '#fff';
+    }
+
+    // ... (o restante do código da função iniciarApp continua igual)
   usuario = user;
   resetPermissoesUI();
   document.getElementById('login-screen').style.display = 'none';
