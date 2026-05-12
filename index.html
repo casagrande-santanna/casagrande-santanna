@@ -7,6 +7,7 @@
 <title>Casa Grande Sant'Anna</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{
   --v:#27500A;--vl:#EAF3DE;--vm:#3B6D11;
@@ -244,9 +245,19 @@ textarea.form-in{resize:vertical}
           <i class="ti ti-repeat-off" aria-hidden="true"></i>Cancelar aulas
         </button>
       </div>
+      <button class="btn-s" id="btn-limpar-historico" style="width:100%;margin-bottom:8px;font-size:10.5px;color:var(--gyt)">
+        <i class="ti ti-trash" aria-hidden="true"></i>Limpar historico antigo
+      </button>
       <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
     </div>
     <div class="screen" id="screen-checkin">
+      <div class="card" style="background:var(--vl);border-color:#97C459;margin-bottom:10px">
+        <div class="card-title"><i class="ti ti-qrcode" aria-hidden="true" style="color:var(--vm)"></i>Check-in por QR Code</div>
+        <div style="font-size:11px;color:var(--tx);margin-bottom:10px">Aponte a camera para o QR Code fixado na entrada da quadra. Se voce tiver uma reserva, o check-in sera feito automaticamente.</div>
+        <div id="reader" style="width:100%;border-radius:8px;overflow:hidden;display:none;margin-bottom:10px;border:1px solid var(--vm)"></div>
+        <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm)"><i class="ti ti-camera" aria-hidden="true"></i>Escanear QR da Quadra</button>
+        <button class="btn-s" id="btn-fechar-scanner" style="display:none;width:100%;border-color:var(--rdb);color:var(--rdt);margin-top:6px"><i class="ti ti-x" aria-hidden="true"></i>Cancelar Leitura</button>
+      </div>
       <div id="ckin-main"></div>
       <div class="sec-lbl">Historico</div>
       <div id="ckin-hist"></div>
@@ -272,6 +283,14 @@ textarea.form-in{resize:vertical}
       <button class="btn-p" id="btn-nova-oco" style="margin-top:6px;display:none"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrencia</button>
     </div>
     <div class="screen" id="screen-config">
+      <div class="card" style="border:2px dashed var(--v)">
+        <div class="card-title"><i class="ti ti-printer" aria-hidden="true"></i>QR Code Fixo da Quadra</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Imprima e fixe na parede da quadra. Os moradores escaneiam para fazer check-in ou criar uso livre.</div>
+        <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:0.5px solid var(--br)">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CG_QUADRA_01" alt="QR Quadra" style="width:150px;height:150px">
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i>Limites por apartamento</div>
         <div class="form-row"><label class="form-lbl">Reservas maximas por mes (por apto)</label>
@@ -553,6 +572,11 @@ textarea.form-in{resize:vertical}
     <div class="msub" id="mc-sub"></div>
     <div class="m-info-row"><i class="ti ti-calendar" aria-hidden="true"></i><span id="mc-dt"></span></div>
     <div class="m-info-row"><i class="ti ti-clock" aria-hidden="true"></i><span id="mc-hr"></span></div>
+    <div id="admin-isentar-wrap" style="display:none;padding:10px 0;border-bottom:0.5px solid var(--br)">
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--v);font-weight:600;cursor:pointer">
+        <input type="checkbox" id="chk-isentar"> Isentar penalidade (Forca maior / Chuva)
+      </label>
+    </div>
     <div class="macts">
       <button class="btn-s" id="btn-fechar-cancel">Voltar</button>
       <button class="btn-d" id="btn-exec-cancel"><i class="ti ti-x" aria-hidden="true"></i>Confirmar</button>
@@ -765,7 +789,8 @@ var appCfg = {
   aulas_rec_ativo: true,
   aula_duracao_max_meses: 6,
   aula_aviso_dias: 30,
-  aula_max_contratos: 1
+  aula_max_contratos: 1,
+  fair_play_ativo: true
 };
 
 function carregarConfiguracoes() {
@@ -908,8 +933,7 @@ function iniciarApp(user) {
     morador = res.data;
     if(morador.status === 'pendente') { bloquearSessao('Seu cadastro esta aguardando aprovacao do administrador.'); return; }
     if(morador.status === 'inativo') { bloquearSessao('Seu cadastro esta inativo. Fale com a administracao.'); return; }
-    if(morador.status === 'suspenso') { bloquearSessao('Seu cadastro esta suspenso temporariamente.'); return; }
-    if(morador.status !== 'ativo') { bloquearSessao('Cadastro sem permissao de acesso.'); return; }
+    if(morador.status !== 'ativo' && morador.status !== 'suspenso') { bloquearSessao('Cadastro sem permissao de acesso.'); return; }
 
     var n = morador.nome || '';
     var partes = n.split(' ');
@@ -924,7 +948,15 @@ function iniciarApp(user) {
     var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : 'Administrador / Sindico';
     document.getElementById('pf-apto').textContent = aptoLabel;
     document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
-    document.getElementById('role-tag').textContent = isAdmin() ? 'Administrador' : 'Morador';
+    var roleTagEl = document.getElementById('role-tag');
+    if(morador.status === 'suspenso') {
+      roleTagEl.textContent = 'Suspenso';
+      roleTagEl.style.background = 'rgba(162,45,45,0.7)';
+      roleTagEl.style.color = '#fff';
+      toast('Atencao: seu apartamento esta suspenso para novas reservas.');
+    } else {
+      roleTagEl.textContent = isAdmin() ? 'Administrador' : 'Morador';
+    }
 
     // Foto de perfil
     if(morador.foto_url) {
@@ -973,6 +1005,77 @@ document.getElementById('tab-ocorrencias').addEventListener('click', function() 
 document.getElementById('tab-config').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('config'); renderConfig(); });
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
+var html5QrcodeScanner = null;
+
+function fecharScannerEForcarParada() {
+  if(html5QrcodeScanner) {
+    html5QrcodeScanner.stop().then(function() {
+      html5QrcodeScanner.clear();
+      _esconderScanner();
+    }).catch(function() { _esconderScanner(); });
+  } else { _esconderScanner(); }
+}
+
+function _esconderScanner() {
+  var r = document.getElementById('reader');
+  var ba = document.getElementById('btn-abrir-scanner');
+  var bf = document.getElementById('btn-fechar-scanner');
+  if(r) r.style.display = 'none';
+  if(ba) ba.style.display = 'inline-flex';
+  if(bf) bf.style.display = 'none';
+  html5QrcodeScanner = null;
+}
+
+function processarQrQuadra() {
+  if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
+  if(morador.status === 'suspenso') { toast('Apartamento suspenso. Reservas bloqueadas.'); return; }
+  var hoje = ts();
+  var agora = new Date();
+  var h = agora.getHours();
+  var agoraMin = h * 60 + agora.getMinutes();
+  var slotAtual = String(h).padStart(2,'0') + ':00';
+  var slotFim   = String(h+1).padStart(2,'0') + ':00';
+
+  sb.from('reservas')
+    .select('id,unidade_id,checkin_feito,slot_inicio,slot_fim')
+    .eq('data_reserva', hoje)
+    .eq('status', 'confirmada')
+    .then(function(res) {
+      var reservas = res.data || [];
+      var ativa = null;
+      reservas.forEach(function(r) {
+        var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
+        var fim = parseInt((r.slot_fim||'00:00').slice(0,2))*60   + parseInt((r.slot_fim||'00:00').slice(3,5));
+        if(agoraMin >= ini && agoraMin < fim) ativa = r;
+      });
+
+      if(ativa) {
+        if(ativa.unidade_id === morador.unidade_id) {
+          if(!ativa.checkin_feito) { doCheckin(ativa.id); }
+          else { toast('Check-in ja realizado nesta reserva!'); }
+        } else {
+          toast('A quadra esta ocupada por outro apartamento agora.');
+        }
+      } else {
+        // Quadra livre: criar reserva de uso livre com check-in
+        sb.from('modalidades').select('id').ilike('nome','%livre%').limit(1).maybeSingle().then(function(mRes) {
+          var mId = mRes.data ? mRes.data.id : null;
+          sb.from('reservas').insert({
+            unidade_id: morador.unidade_id, morador_id: morador.id,
+            modalidade_id: mId, data_reserva: hoje,
+            slot_inicio: slotAtual+':00', slot_fim: slotFim+':00',
+            duracao_min: 60, tipo_reserva: 'pontual', status: 'confirmada',
+            checkin_feito: true, checkin_em: new Date().toISOString()
+          }).then(function(ins) {
+            if(ins.error) { toast('Erro: ' + ins.error.message); return; }
+            toast('Quadra livre! Reserva automatica criada e check-in realizado.');
+            renderCheckin(); renderMinhas(); renderCal();
+          });
+        });
+      }
+    });
+}
+
 function goScreen(name) {
   var telas = ['avisos','reservar','minhas','checkin','ocorrencias','config','perfil'];
   telas.forEach(function(t) {
@@ -983,6 +1086,8 @@ function goScreen(name) {
   document.getElementById('screen-'+name).classList.add('active');
   var tab = document.getElementById('tab-'+name);
   if(tab) tab.classList.add('active');
+  // Fechar scanner ao mudar de tela
+  if(name !== 'checkin') fecharScannerEForcarParada();
 }
 
 // ── CALENDARIO ─────────────────────────────────────────────────
@@ -1022,6 +1127,7 @@ function renderCal() {
 function selData(ds) {
   if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
+  if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
   selDate = ds;
   renderCal();
   var sc = document.getElementById('slots-card');
@@ -1188,6 +1294,7 @@ function showStep(n) {
 
 function confirmarReserva() {
   if(!morador||!pendSlot||!pendMod||!pendDur) return;
+  if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
 
   // Verificar limite mensal (0 = ilimitado)
   var maxMes = appCfg.max_reservas_mes;
@@ -1238,17 +1345,25 @@ function confirmarReserva() {
 document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
 document.getElementById('btn-exec-cancel').addEventListener('click', function() {
   if(!cancelId) return;
-  sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',cancelId).then(function(r) {
+  var chkIsentar = document.getElementById('chk-isentar');
+  var isentar = chkIsentar ? chkIsentar.checked : false;
+  var upd = {status:'cancelada', cancelado_por: isAdmin() ? 'admin' : 'morador'};
+  if(isentar) upd.isento_penalidade = true;
+  sb.from('reservas').update(upd).eq('id',cancelId).then(function(r) {
     if(r.error) { toast('Erro ao cancelar'); return; }
     fecharModal('m-cancelar');
     if(selDate) selData(selDate);
     renderMinhas(); renderCheckin();
-    toast('Reserva cancelada.');
+    toast(isentar ? 'Reserva cancelada sem penalidade.' : 'Reserva cancelada.');
   });
 });
 
 function abrirModalCancelar(id) {
   cancelId = id;
+  var chkIsentar = document.getElementById('chk-isentar');
+  if(chkIsentar) chkIsentar.checked = false;
+  var wrapIsentar = document.getElementById('admin-isentar-wrap');
+  if(wrapIsentar) wrapIsentar.style.display = isAdmin() ? 'block' : 'none';
   sb.from('reservas').select('*').eq('id',id).single().then(function(res) {
     var r = res.data; if(!r) return;
     document.getElementById('mc-sub').textContent = 'Apto '+(morador&&morador.unidades?morador.unidades.codigo:'');
@@ -1319,7 +1434,7 @@ function renderCheckin() {
       var dotC = r.checkin_feito ? '#3B6D11' : ((r.status==='cancelada'||r.status==='expirada')?'#E24B4A':'#EF9F27');
       var bl = '<span class="badge b-warn">Aguardando</span>';
       if(r.checkin_feito) bl='<span class="badge b-teal">Presente</span>';
-      else if(r.status==='cancelada') bl='<span class="badge b-danger">Cancelada</span>';
+      else if(r.status==='cancelada') bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
       else if(r.status==='expirada') bl='<span class="badge b-gray">Ausencia</span>';
       var m = r.modalidades;
       html += '<div class="ckin-row">';
@@ -1336,7 +1451,11 @@ function renderCheckin() {
 function renderMinhas() {
   if(!morador) return;
   if(!morador.unidade_id) { document.getElementById('minhas-list').innerHTML='<div class="empty"><i class="ti ti-user-check"></i>Administrador sem apartamento vinculado.</div>'; return; }
-  sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(20).then(function(res) {
+  sb.from('reservas').select('*,modalidades(nome,icone)')
+    .eq('unidade_id', morador.unidade_id)
+    .neq('oculto_morador', true)
+    .order('data_reserva', {ascending:false})
+    .then(function(res) {
     var mine = res.data||[];
     var list = document.getElementById('minhas-list');
     if(!mine.length) { list.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>'; return; }
@@ -1348,7 +1467,7 @@ function renderMinhas() {
       else if(r.status==='expirada') bc='b-gray';
       var bl = 'Confirmada';
       if(r.checkin_feito) bl='Check-in';
-      else if(r.status==='cancelada') bl='Cancelada';
+      else if(r.status==='cancelada') bl = r.isento_penalidade ? 'Canc. (Isenta)' : 'Cancelada';
       else if(r.status==='expirada') bl='Ausencia';
       var m = r.modalidades;
       html += '<div class="res-card '+r.status+'">';
@@ -1356,7 +1475,7 @@ function renderMinhas() {
       html += '<div class="res-info">'+(m?m.icone+' '+m.nome:'---')+' - '+(r.duracao_min===60?'1 hora':'2 horas')+'</div>';
       if(r.status==='confirmada') {
         html += '<div class="res-acts">';
-        if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>';
+        if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
         html += '<button class="btn-sm r" data-cancel-id="'+r.id+'"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
         html += '</div>';
       }
@@ -1369,6 +1488,23 @@ function renderMinhas() {
     list.querySelectorAll('[data-ckin-id]').forEach(function(btn) {
       btn.addEventListener('click', function() { doCheckin(btn.dataset.ckinId); });
     });
+
+    // Limpar histórico antigo
+    var btnLimpar = document.getElementById('btn-limpar-historico');
+    if(btnLimpar) {
+      var newLimpar = btnLimpar.cloneNode(true);
+      btnLimpar.parentNode.replaceChild(newLimpar, btnLimpar);
+      newLimpar.addEventListener('click', function() {
+        if(!confirm('Ocultar reservas anteriores a hoje da sua tela? Esta acao nao exclui dados.')) return;
+        sb.from('reservas').update({oculto_morador: true})
+          .eq('unidade_id', morador.unidade_id)
+          .lt('data_reserva', ts())
+          .then(function(r) {
+            if(r.error) { toast('Erro: ' + r.error.message); return; }
+            toast('Historico antigo ocultado.'); renderMinhas();
+          });
+      });
+    }
 
     // Botões de cancelamento em lote
     var btnCancPont = document.getElementById('btn-cancelar-pontuais');
@@ -1538,6 +1674,39 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
 function renderConfig() {
   if(!requireAdmin()) return;
 
+  // Popular selects e toggles com valores salvos no banco
+  var sl = function(id, val) {
+    var el = document.getElementById(id);
+    if(!el) return;
+    var s = String(val);
+    for(var i=0; i<el.options.length; i++) {
+      if(el.options[i].value === s) { el.selectedIndex = i; return; }
+    }
+  };
+  var stg = function(id, val) {
+    var el = document.getElementById(id);
+    if(!el) return;
+    if(val) el.classList.add('on'); else el.classList.remove('on');
+  };
+  sl('cfg-max-mes',        appCfg.max_reservas_mes);
+  sl('cfg-max-simult',     appCfg.max_reservas_simult);
+  sl('cfg-ant-min',        appCfg.antecedencia_min_h);
+  sl('cfg-ant-max',        appCfg.antecedencia_max_dias);
+  sl('cfg-ckin-janela',    appCfg.checkin_janela_min);
+  sl('cfg-ckin-ant',       appCfg.checkin_ant_min);
+  sl('cfg-faltas-susp',    appCfg.faltas_suspensao);
+  sl('cfg-carencia',       appCfg.carencia_cancel_min);
+  sl('cfg-susp-dias',      appCfg.suspensao_dias);
+  sl('cfg-ant-fds',        appCfg.ant_fds_h !== undefined ? appCfg.ant_fds_h : 0);
+  sl('cfg-aula-duracao',   appCfg.aula_duracao_max_meses);
+  sl('cfg-aula-aviso',     appCfg.aula_aviso_dias);
+  sl('cfg-aula-max-contr', appCfg.aula_max_contratos);
+  stg('tgl-blk-aulas-fds', appCfg.blk_aulas_fds);
+  stg('tgl-blk-sab',       appCfg.blk_sabado);
+  stg('tgl-blk-dom',       appCfg.blk_domingo);
+  stg('tgl-aulas-rec',     appCfg.aulas_rec_ativo);
+  stg('tgl-fair-play',     appCfg.fair_play_ativo !== false);
+
   // Pendentes
   sb.from('moradores').select('*,unidades(codigo)').eq('status','pendente').order('created_at',{ascending:false}).then(function(res) {
     var pends = res.data||[];
@@ -1702,24 +1871,35 @@ document.addEventListener('DOMContentLoaded', function() {
   if(btnSalvarCfg) {
     btnSalvarCfg.addEventListener('click', function() {
       if(!requireAdmin()) return;
+      // li(): lê inteiro; trata 0 como válido (ex: "Ilimitada")
+      var li = function(id, def) {
+        var el = document.getElementById(id);
+        if(!el) return def;
+        var v = parseInt(el.value, 10);
+        return isNaN(v) ? def : v;
+      };
+      var tg = function(id) {
+        var el = document.getElementById(id);
+        return el ? el.classList.contains('on') : false;
+      };
       var cfg = {
-        max_reservas_mes: parseInt(document.getElementById('cfg-max-mes').value)||4,
-        max_reservas_simult: parseInt(document.getElementById('cfg-max-simult').value)||2,
-        antecedencia_min_h: parseInt(document.getElementById('cfg-ant-min').value)||1,
-        antecedencia_max_dias: parseInt(document.getElementById('cfg-ant-max').value)||15,
-        checkin_janela_min: parseInt(document.getElementById('cfg-ckin-janela').value)||15,
-        checkin_ant_min: parseInt(document.getElementById('cfg-ckin-ant').value)||10,
-        faltas_suspensao: parseInt(document.getElementById('cfg-faltas-susp').value)||2,
-        carencia_cancel_min: parseInt(document.getElementById('cfg-carencia').value)||120,
-        suspensao_dias: parseInt(document.getElementById('cfg-susp-dias').value)||15,
-        blk_aulas_fds: document.getElementById('tgl-blk-aulas-fds').classList.contains('on'),
-        blk_sabado: document.getElementById('tgl-blk-sab').classList.contains('on'),
-        blk_domingo: document.getElementById('tgl-blk-dom').classList.contains('on'),
-        ant_fds_h: parseInt(document.getElementById('cfg-ant-fds').value)||0,
-        aulas_rec_ativo: document.getElementById('tgl-aulas-rec').classList.contains('on'),
-        aula_duracao_max_meses: parseInt(document.getElementById('cfg-aula-duracao').value)||6,
-        aula_aviso_dias: parseInt(document.getElementById('cfg-aula-aviso').value)||30,
-        aula_max_contratos: parseInt(document.getElementById('cfg-aula-max-contr').value)||1
+        max_reservas_mes:       li('cfg-max-mes', 4),
+        max_reservas_simult:    li('cfg-max-simult', 2),
+        antecedencia_min_h:     li('cfg-ant-min', 1),
+        antecedencia_max_dias:  li('cfg-ant-max', 15),
+        checkin_janela_min:     li('cfg-ckin-janela', 15),
+        checkin_ant_min:        li('cfg-ckin-ant', 10),
+        faltas_suspensao:       li('cfg-faltas-susp', 2),
+        carencia_cancel_min:    li('cfg-carencia', 120),
+        suspensao_dias:         li('cfg-susp-dias', 15),
+        blk_aulas_fds:  tg('tgl-blk-aulas-fds'),
+        blk_sabado:     tg('tgl-blk-sab'),
+        blk_domingo:    tg('tgl-blk-dom'),
+        ant_fds_h:              li('cfg-ant-fds', 0),
+        aulas_rec_ativo: tg('tgl-aulas-rec'),
+        aula_duracao_max_meses: li('cfg-aula-duracao', 6),
+        aula_aviso_dias:        li('cfg-aula-aviso', 30),
+        aula_max_contratos:     li('cfg-aula-max-contr', 1)
       };
       // Verificar se já existe uma linha de configuração
       sb.from('configuracoes').select('id').limit(1).maybeSingle().then(function(rc) {
@@ -1738,6 +1918,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
     });
+  }
+
+  // Listeners QR Scanner
+  var btnAbrirScanner = document.getElementById('btn-abrir-scanner');
+  if(btnAbrirScanner) {
+    btnAbrirScanner.addEventListener('click', function() {
+      var reader = document.getElementById('reader');
+      var ba = document.getElementById('btn-abrir-scanner');
+      var bf = document.getElementById('btn-fechar-scanner');
+      if(reader) reader.style.display = 'block';
+      if(ba) ba.style.display = 'none';
+      if(bf) bf.style.display = 'inline-flex';
+
+      html5QrcodeScanner = new Html5Qrcode('reader');
+      html5QrcodeScanner.start(
+        {facingMode: 'environment'},
+        {fps: 10, qrbox: {width:250, height:250}},
+        function(decoded) {
+          if(decoded === 'CG_QUADRA_01' || decoded.toLowerCase().includes('quadra')) {
+            fecharScannerEForcarParada();
+            processarQrQuadra();
+          } else {
+            toast('QR Code invalido para esta quadra.');
+          }
+        },
+        function() {}
+      ).catch(function(err) {
+        toast('Erro ao acessar camera: ' + err);
+        fecharScannerEForcarParada();
+      });
+    });
+  }
+
+  var btnFecharScanner = document.getElementById('btn-fechar-scanner');
+  if(btnFecharScanner) {
+    btnFecharScanner.addEventListener('click', function() { fecharScannerEForcarParada(); });
   }
 
   var btnNC = document.getElementById('btn-novo-contrato');
