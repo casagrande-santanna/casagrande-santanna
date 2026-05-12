@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#27500A">
-<title> Casa Grande de Sant'Anna</title>
+<title>Casa Grande de Sant'Anna</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<!-- Biblioteca para o Leitor de QR Code -->
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <style>
 :root{
@@ -171,7 +170,7 @@ textarea.form-in{resize:vertical}
 
 <div class="login-wrap" id="login-screen">
   <div class="login-logo">&#127970;&#127970;</div>
-  <div class="login-title"> Casa Grande de Sant'Anna</div>
+  <div class="login-title">Casa Grande de Sant'Anna</div>
   <div class="login-sub">Sistema de reserva da quadra</div>
   <div class="login-card">
     <label class="login-lbl">E-mail</label>
@@ -212,6 +211,7 @@ textarea.form-in{resize:vertical}
       <div id="fab-aviso"></div>
       <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
     </div>
+    
     <div class="screen" id="screen-reservar">
       <div class="card">
         <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Selecione uma data</div>
@@ -237,6 +237,7 @@ textarea.form-in{resize:vertical}
         <div id="lista-reservas-dia"></div>
       </div>
     </div>
+
     <div class="screen" id="screen-minhas">
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <button class="btn-s" id="btn-cancelar-pontuais" style="flex:1;font-size:10.5px;color:var(--rdt);border-color:var(--rdb)">
@@ -246,11 +247,13 @@ textarea.form-in{resize:vertical}
           <i class="ti ti-repeat-off" aria-hidden="true"></i>Cancelar aulas
         </button>
       </div>
+      <button class="btn-s" id="btn-limpar-historico" style="width:100%; margin-bottom:10px; font-size:10.5px;">
+        <i class="ti ti-trash" aria-hidden="true"></i> Limpar histórico antigo
+      </button>
       <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
     </div>
+
     <div class="screen" id="screen-checkin">
-      
-      <!-- NOVA ÁREA DE ESCÂNER DE QR CODE -->
       <div class="card" style="background: var(--vl); border-color: #97C459;">
         <div class="card-title"><i class="ti ti-qrcode" aria-hidden="true" style="color:var(--vm)"></i>Check-in por QR Code</div>
         <div style="font-size:11px;color:var(--tx);margin-bottom:10px">
@@ -260,11 +263,11 @@ textarea.form-in{resize:vertical}
         <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm)"><i class="ti ti-camera" aria-hidden="true"></i>Escanear QR da Quadra</button>
         <button class="btn-s" id="btn-fechar-scanner" style="display:none; width:100%; border-color:var(--rdb); color:var(--rdt)"><i class="ti ti-x" aria-hidden="true"></i>Cancelar Leitura</button>
       </div>
-
       <div id="ckin-main"></div>
       <div class="sec-lbl">Histórico</div>
       <div id="ckin-hist"></div>
     </div>
+
     <div class="screen" id="screen-ocorrencias">
       <div class="card" style="background:var(--bl);border-color:var(--blb)">
         <div style="display:flex;align-items:flex-start;gap:8px">
@@ -285,9 +288,8 @@ textarea.form-in{resize:vertical}
       <div id="oco-detail"></div>
       <button class="btn-p" id="btn-nova-oco" style="margin-top:6px;display:none"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrência</button>
     </div>
+
     <div class="screen" id="screen-config">
-      
-      <!-- QUADRO PARA IMPRESSÃO DO QR CODE PARA O SÍNDICO -->
       <div class="card" style="border:2px dashed var(--v)">
         <div class="card-title"><i class="ti ti-printer" aria-hidden="true"></i>QR Code Fixo da Quadra</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:10px">
@@ -297,7 +299,6 @@ textarea.form-in{resize:vertical}
           <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CG_QUADRA_01" alt="QR Quadra Fixo" style="width:150px; height:150px;">
         </div>
       </div>
-
       <div class="card">
         <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i>Limites por apartamento</div>
         <div class="form-row"><label class="form-lbl">Reservas máximas por mês (por apto)</label>
@@ -340,7 +341,6 @@ textarea.form-in{resize:vertical}
       <div class="card">
         <div class="card-title"><i class="ti ti-shield-x" aria-hidden="true"></i>Regra de Fair Play</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Apartamentos que acumulam faltas são suspensos automaticamente. Configure as condições abaixo.</div>
-
         <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br)">
           <div>
             <div style="font-size:12px;font-weight:600">Ativar suspensão automática</div>
@@ -348,7 +348,6 @@ textarea.form-in{resize:vertical}
           </div>
           <div class="tgl on" id="tgl-fair-play" style="margin-left:12px;margin-top:2px"></div>
         </div>
-
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
           <div style="font-size:12px;font-weight:600;margin-bottom:6px">Faltas para suspensão automática</div>
           <select class="form-in" id="cfg-faltas-susp">
@@ -359,7 +358,6 @@ textarea.form-in{resize:vertical}
           </select>
           <div style="font-size:10px;color:var(--t2);margin-top:3px">Conta apenas faltas no mês corrente. Zera no primeiro dia do mês seguinte.</div>
         </div>
-
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
           <div style="font-size:12px;font-weight:600;margin-bottom:6px">Cancelamento sem penalidade até</div>
           <select class="form-in" id="cfg-carencia">
@@ -370,7 +368,6 @@ textarea.form-in{resize:vertical}
           </select>
           <div style="font-size:10px;color:var(--t2);margin-top:3px">Cancelamentos dentro deste prazo contam como falta.</div>
         </div>
-
         <div style="padding:9px 0">
           <div style="font-size:12px;font-weight:600;margin-bottom:6px">Duração da suspensão</div>
           <select class="form-in" id="cfg-susp-dias">
@@ -412,7 +409,6 @@ textarea.form-in{resize:vertical}
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-calendar-off" aria-hidden="true"></i>Bloquear período específico</div>
-
         <div class="form-row"><label class="form-lbl">Categoria do bloqueio</label>
           <select class="form-in" id="blk-tipo">
             <option value="manutencao">🔧 Manutenção / Reforma</option>
@@ -454,14 +450,12 @@ textarea.form-in{resize:vertical}
         <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Agenda do dia</div>
         <div id="agenda-adm"></div>
       </div>
-
       <div class="card">
         <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard de uso</div>
         <div id="dashboard-uso">
           <div style="font-size:11px;color:var(--t2)">Carregando estatísticas...</div>
         </div>
       </div>
-
       <div class="card">
         <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking de pontualidade</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:8px">Apartamentos com maior taxa de check-in no mês corrente.</div>
@@ -503,6 +497,7 @@ textarea.form-in{resize:vertical}
       </div>
       <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px"><i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar configurações</button>
     </div>
+
     <div class="screen" id="screen-perfil">
       <div class="card">
         <div style="position:relative;display:inline-block;margin-bottom:10px">
@@ -573,6 +568,11 @@ textarea.form-in{resize:vertical}
     <div class="msub" id="mc-sub"></div>
     <div class="m-info-row"><i class="ti ti-calendar" aria-hidden="true"></i><span id="mc-dt"></span></div>
     <div class="m-info-row"><i class="ti ti-clock" aria-hidden="true"></i><span id="mc-hr"></span></div>
+    <div id="admin-isentar-wrap" style="display:none; padding: 10px 0; border-bottom: 0.5px solid var(--br);">
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--v);font-weight:600;cursor:pointer;">
+        <input type="checkbox" id="chk-isentar"> Isentar penalidade (Força maior / Chuva)
+      </label>
+    </div>
     <div class="macts">
       <button class="btn-s" id="btn-fechar-cancel">Voltar</button>
       <button class="btn-d" id="btn-exec-cancel"><i class="ti ti-x" aria-hidden="true"></i>Confirmar</button>
@@ -796,7 +796,6 @@ function carregarConfiguracoes() {
   });
 }
 
-// CORREÇÃO CRÍTICA DO FUSO HORÁRIO (Usa o horário local do dispositivo)
 function ts() { 
   var d = new Date(); 
   var m = String(d.getMonth()+1).padStart(2,'0');
@@ -852,7 +851,6 @@ function bloquearSessao(msg) {
   });
 }
 
-// Fechar modais clicando no fundo
 document.querySelectorAll('.modal-bg').forEach(function(m) {
   m.addEventListener('click', function(e) { if(e.target===m) fecharModal(m.id); });
 });
@@ -955,7 +953,6 @@ function iniciarApp(user) {
     document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Síndico';
     document.getElementById('role-tag').textContent = isAdmin() ? 'Administrador' : 'Morador';
 
-    // Foto de perfil
     if(morador.foto_url) {
       var fotoImg = document.getElementById('pf-foto');
       var fotoWrap = document.getElementById('pf-foto-wrap');
@@ -1012,7 +1009,6 @@ function goScreen(name) {
   var tab = document.getElementById('tab-'+name);
   if(tab) tab.classList.add('active');
 
-  // Forçar encerramento do escâner se mudar de tela
   if(name !== 'checkin' && html5QrcodeScanner) {
       fecharScannerEForcarParada();
   }
@@ -1269,17 +1265,27 @@ function confirmarReserva() {
 document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
 document.getElementById('btn-exec-cancel').addEventListener('click', function() {
   if(!cancelId) return;
-  sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',cancelId).then(function(r) {
+  var isentar = document.getElementById('chk-isentar').checked;
+  var statusUpdate = {
+      status: 'cancelada',
+      cancelado_por: isAdmin() ? 'admin' : 'morador',
+      isento_penalidade: isentar
+  };
+
+  sb.from('reservas').update(statusUpdate).eq('id',cancelId).then(function(r) {
     if(r.error) { toast('Erro ao cancelar'); return; }
     fecharModal('m-cancelar');
     if(selDate) selData(selDate);
     renderMinhas(); renderCheckin();
-    toast('Reserva cancelada.');
+    toast(isentar ? 'Reserva cancelada sem penalidade.' : 'Reserva cancelada.');
   });
 });
 
 function abrirModalCancelar(id) {
   cancelId = id;
+  document.getElementById('chk-isentar').checked = false;
+  document.getElementById('admin-isentar-wrap').style.display = isAdmin() ? 'block' : 'none';
+
   sb.from('reservas').select('*').eq('id',id).single().then(function(res) {
     var r = res.data; if(!r) return;
     document.getElementById('mc-sub').textContent = 'Apto '+(morador&&morador.unidades?morador.unidades.codigo:'');
@@ -1302,7 +1308,6 @@ document.getElementById('btn-abrir-scanner').addEventListener('click', function(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 250, height: 250 } },
     function(decodedText, decodedResult) {
-        // Verifica se leu o QR Code da Quadra
         if(decodedText === "CG_QUADRA_01" || decodedText.toLowerCase().includes("quadra")) {
             fecharScannerEForcarParada();
             processarQrQuadra();
@@ -1343,7 +1348,6 @@ function esconderElementosScanner() {
     html5QrcodeScanner = null;
 }
 
-// Lógica mágica que o app faz quando o morador escaneia o QR da quadra
 function processarQrQuadra() {
     if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
     
@@ -1367,7 +1371,6 @@ function processarQrQuadra() {
               var r = reservasHoje[i];
               var iniMin = parseInt((r.slot_inicio||'00:00').slice(0,2)) * 60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
               var fimMin = parseInt((r.slot_fim||'00:00').slice(0,2)) * 60 + parseInt((r.slot_fim||'00:00').slice(3,5));
-              // Verifica se a reserva está ativa no momento exato do scan
               if(agoraMin >= iniMin && agoraMin < fimMin) {
                   reservaAtiva = r;
                   break;
@@ -1385,7 +1388,6 @@ function processarQrQuadra() {
                   toast('A quadra está ocupada por outro apartamento agora.');
               }
           } else {
-              // Quadra está totalmente livre neste slot. Cria reserva de uso livre de 1 hora!
               sb.from('modalidades').select('id').ilike('nome', '%livre%').limit(1).maybeSingle().then(function(mRes) {
                   var mId = mRes.data ? mRes.data.id : null;
                   sb.from('reservas').insert({
@@ -1472,7 +1474,7 @@ function renderCheckin() {
       var dotC = r.checkin_feito ? '#3B6D11' : ((r.status==='cancelada'||r.status==='expirada')?'#E24B4A':'#EF9F27');
       var bl = '<span class="badge b-warn">Aguardando</span>';
       if(r.checkin_feito) bl='<span class="badge b-teal">Presente</span>';
-      else if(r.status==='cancelada') bl='<span class="badge b-danger">Cancelada</span>';
+      else if(r.status==='cancelada') bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
       else if(r.status==='expirada') bl='<span class="badge b-gray">Ausência</span>';
       var m = r.modalidades;
       html += '<div class="ckin-row">';
@@ -1489,7 +1491,12 @@ function renderCheckin() {
 function renderMinhas() {
   if(!morador) return;
   if(!morador.unidade_id) { document.getElementById('minhas-list').innerHTML='<div class="empty"><i class="ti ti-user-check"></i>Administrador sem apartamento vinculado.</div>'; return; }
-  sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(20).then(function(res) {
+  
+  sb.from('reservas').select('*,modalidades(nome,icone)')
+    .eq('unidade_id', morador.unidade_id)
+    .neq('oculto_morador', true)
+    .order('data_reserva', {ascending:false})
+    .then(function(res) {
     var mine = res.data||[];
     var list = document.getElementById('minhas-list');
     if(!mine.length) { list.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>'; return; }
@@ -1499,23 +1506,26 @@ function renderMinhas() {
       if(r.checkin_feito) bc='b-teal';
       else if(r.status==='cancelada') bc='b-danger';
       else if(r.status==='expirada') bc='b-gray';
+      
       var bl = 'Confirmada';
       if(r.checkin_feito) bl='Check-in';
-      else if(r.status==='cancelada') bl='Cancelada';
+      else if(r.status==='cancelada') bl = r.isento_penalidade ? 'Canc. (Isenta)' : 'Cancelada';
       else if(r.status==='expirada') bl='Ausência';
+      
       var m = r.modalidades;
       html += '<div class="res-card '+r.status+'">';
       html += '<div class="res-top"><div class="res-data">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
       html += '<div class="res-info">'+(m?m.icone+' '+m.nome:'---')+' - '+(r.duracao_min===60?'1 hora':'2 horas')+'</div>';
       if(r.status==='confirmada') {
         html += '<div class="res-acts">';
-        if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>';
+        if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
         html += '<button class="btn-sm r" data-cancel-id="'+r.id+'"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
         html += '</div>';
       }
       html += '</div>';
     });
     list.innerHTML = html;
+    
     list.querySelectorAll('[data-cancel-id]').forEach(function(btn) {
       btn.addEventListener('click', function() { abrirModalCancelar(btn.dataset.cancelId); });
     });
@@ -1544,6 +1554,24 @@ function renderMinhas() {
         Promise.all(ids.map(function(id){ return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id); })).then(function(res) {
           toast(ids.length+' aulas canceladas.'); renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
         });
+      });
+    }
+
+    var btnLimpar = document.getElementById('btn-limpar-historico');
+    if(btnLimpar) {
+      var newBtn = btnLimpar.cloneNode(true);
+      btnLimpar.parentNode.replaceChild(newBtn, btnLimpar);
+      newBtn.addEventListener('click', function() {
+        if(!confirm('Ocultar reservas antigas (anteriores a hoje) da sua tela?')) return;
+        var hoje = ts();
+        sb.from('reservas').update({ oculto_morador: true })
+          .eq('unidade_id', morador.unidade_id)
+          .lt('data_reserva', hoje)
+          .then(function(r) {
+            if(r.error) { toast('Erro ao limpar histórico.'); return; }
+            toast('Histórico antigo ocultado.');
+            renderMinhas();
+          });
       });
     }
   });
@@ -1885,8 +1913,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var btnFechEspera = document.getElementById('btn-fechar-espera');
   if(btnFechEspera) btnFechEspera.addEventListener('click', function() { fecharModal('m-espera'); });
-  var btnEntrarEspera = document.getElementById('btn-entrar-espera');
-  if(btnEntrarEspera) btnEntrarEspera.addEventListener('click', entrarListaEspera);
 
   var btnAddBlk = document.getElementById('btn-add-bloqueio');
   if(btnAddBlk) {
@@ -2006,7 +2032,11 @@ function criarContrato() {
   var editDataStr = document.getElementById('m-novo-contrato').dataset.editData;
   var editData = editDataStr ? JSON.parse(editDataStr) : null;
   var isEdicao = !!(editData && editData.ids && editData.ids.length);
-  var dataFim = new Date(iniStr+'T12:00:00'); dataFim.setMonth(dataFim.getMonth() + meses);
+  
+  var curParts = iniStr.split('-');
+  var dataFim = new Date(parseInt(curParts[0]), parseInt(curParts[1])-1, parseInt(curParts[2]), 12, 0, 0);
+  dataFim.setMonth(dataFim.getMonth() + meses);
+  
   var modNomes = {tenis1:'Tênis simples',tenis2:'Tênis duplas',basquete:'Basquete',futebol:'Futebol',volei:'Vôlei',livre:'Uso livre'};
 
   Promise.all([sb.from('modalidades').select('id,nome'), sb.from('moradores').select('id').eq('unidade_id',aptoId).eq('status','ativo').limit(1)]).then(function(results) {
@@ -2017,10 +2047,28 @@ function criarContrato() {
     var moradorId = morList.length > 0 ? morList[0].id : (editData ? editData.morador_id : null);
     if(!moradorId && morador) moradorId = morador.id;
 
-    var reservas = []; var cur = new Date(iniStr+'T12:00:00'); var horaFim = addH(hora, dur/60);
+    var reservas = []; 
+    var cur = new Date(parseInt(curParts[0]), parseInt(curParts[1])-1, parseInt(curParts[2]), 12, 0, 0); 
+    var horaFim = addH(hora, dur/60);
+    
     while(cur <= dataFim) {
       if(diasSel.indexOf(cur.getDay()) !== -1) {
-        reservas.push({ unidade_id: aptoId, morador_id: moradorId, modalidade_id: modDbId, data_reserva: cur.toISOString().slice(0,10), slot_inicio: hora+':00', slot_fim: horaFim+':00', duracao_min: dur, tipo_reserva: 'aula', status: 'confirmada' });
+        var y = cur.getFullYear();
+        var m = String(cur.getMonth()+1).padStart(2,'0');
+        var d = String(cur.getDate()).padStart(2,'0');
+        var dataFormatada = y + '-' + m + '-' + d;
+
+        reservas.push({ 
+            unidade_id: aptoId, 
+            morador_id: moradorId, 
+            modalidade_id: modDbId, 
+            data_reserva: dataFormatada, 
+            slot_inicio: hora+':00', 
+            slot_fim: horaFim+':00', 
+            duracao_min: dur, 
+            tipo_reserva: 'aula', 
+            status: 'confirmada' 
+        });
       }
       cur.setDate(cur.getDate()+1);
     }
@@ -2105,7 +2153,6 @@ function renderRanking() {
     }).join('');
   });
 }
-
 </script>
 </body>
 </html>
