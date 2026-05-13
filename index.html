@@ -1542,7 +1542,13 @@ function renderCheckin() {
     }
   });
 
-  sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).order('data_reserva',{ascending:false}).limit(10).then(function(res) {
+  sb.from('reservas').select('*,modalidades(nome,icone)')
+    .eq('unidade_id',morador.unidade_id)
+    .neq('oculto_morador', true)
+    .order('data_reserva',{ascending:true})
+    .order('slot_inicio',{ascending:true})
+    .limit(20)
+    .then(function(res) {
     var hist = res.data||[];
     var hel = document.getElementById('ckin-hist');
     if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
@@ -1569,13 +1575,21 @@ function renderCheckin() {
       btnLimCkin.parentNode.replaceChild(newBtnLimCkin, btnLimCkin);
       newBtnLimCkin.addEventListener('click', function() {
         if(!confirm('Ocultar todo o historico de check-in antigo?')) return;
-        sb.from('reservas').update({oculto_morador: true})
+        // Marca oculto_morador apenas em registros passados, cancelados ou expirados
+        sb.from('reservas')
+          .update({oculto_morador: true})
           .eq('unidade_id', morador.unidade_id)
-          .or('data_reserva.lt.'+ts()+',status.eq.cancelada,status.eq.expirada')
-          .then(function(r) {
-            if(r.error) { toast('Erro: '+r.error.message); return; }
-            toast('Historico de check-in limpo.');
-            renderCheckin();
+          .lt('data_reserva', ts())
+          .then(function(r1) {
+            sb.from('reservas')
+              .update({oculto_morador: true})
+              .eq('unidade_id', morador.unidade_id)
+              .in('status', ['cancelada','expirada'])
+              .then(function(r2) {
+                if((r1&&r1.error)||(r2&&r2.error)) { toast('Erro ao limpar historico.'); return; }
+                toast('Historico de check-in limpo.');
+                renderCheckin();
+              });
           });
       });
     }
@@ -1592,8 +1606,8 @@ function renderMinhas() {
   sb.from('reservas').select('*,modalidades(nome,icone)')
     .eq('unidade_id', morador.unidade_id)
     .neq('oculto_morador', true)
-    .order('data_reserva', {ascending:false})
-    .order('slot_inicio', {ascending:false})
+    .order('data_reserva', {ascending:true})
+    .order('slot_inicio', {ascending:true})
     .then(function(res) {
       var mine = res.data||[];
       var list = document.getElementById('minhas-list');
@@ -1635,13 +1649,20 @@ function renderMinhas() {
         btnLimpar.parentNode.replaceChild(newLimpar, btnLimpar);
         newLimpar.addEventListener('click', function() {
           if(!confirm('Deseja ocultar reservas passadas e canceladas?')) return;
-          sb.from('reservas').update({oculto_morador: true})
+          sb.from('reservas')
+            .update({oculto_morador: true})
             .eq('unidade_id', morador.unidade_id)
-            .or('data_reserva.lt.'+ts()+',status.eq.cancelada,status.eq.expirada')
-            .then(function(r) {
-              if(r.error) { toast('Erro: '+r.error.message); return; }
-              toast('Historico limpo.');
-              renderMinhas();
+            .lt('data_reserva', ts())
+            .then(function(r1) {
+              sb.from('reservas')
+                .update({oculto_morador: true})
+                .eq('unidade_id', morador.unidade_id)
+                .in('status', ['cancelada','expirada'])
+                .then(function(r2) {
+                  if((r1&&r1.error)||(r2&&r2.error)) { toast('Erro ao limpar historico.'); return; }
+                  toast('Historico limpo.');
+                  renderMinhas();
+                });
             });
         });
       }
@@ -2707,9 +2728,9 @@ function renderCalendario() {
                 ? '<span class="badge b-info" style="font-size:9px">Aula</span>'
                 : '<span class="badge b-ok" style="font-size:9px">Pontual</span>';
               return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">'
-                +'<div style="width:36px;height:36px;border-radius:8px;background:var(--vl);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:var(--v)">'+cod.slice(-3)+'</div>'
+                +'<div style="min-width:44px;height:36px;border-radius:8px;background:var(--vl);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:700;color:var(--v);padding:0 4px;white-space:nowrap">'+cod+'</div>'
                 +'<div style="flex:1;min-width:0">'
-                  +'<div style="font-size:12px;font-weight:600">Apto '+cod+' &middot; '+si+' &ndash; '+sf+'</div>'
+                  +'<div style="font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+si+' &ndash; '+sf+'</div>'
                   +'<div style="font-size:10.5px;color:var(--t2)">'+mod+'</div>'
                 +'</div>'
                 +tipoBadge
@@ -2724,13 +2745,28 @@ function renderCalendario() {
       var aptosUnicos = {};
       reservasMes.forEach(function(r){ if(r.unidades) aptosUnicos[r.unidades.codigo] = (aptosUnicos[r.unidades.codigo]||0)+1; });
       var rankApto = Object.entries(aptosUnicos).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
-      var diasComRes = Object.keys(porData).length;
+
+      // Calcula total de horas reservadas somando duração de cada reserva
+      var totalMinutos = 0;
+      reservasMes.forEach(function(r) {
+        if(r.slot_inicio && r.slot_fim) {
+          var hIni = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
+          var hFim = parseInt((r.slot_fim||'00:00').slice(0,2))*60   + parseInt((r.slot_fim||'00:00').slice(3,5));
+          if(hFim > hIni) totalMinutos += (hFim - hIni);
+        }
+      });
+      var totalHoras = (totalMinutos / 60).toFixed(1).replace('.0','');
+      // Capacidade mensal: 16 slots/dia × dias do mês
       var diasMes = new Date(calVY,calVM+1,0).getDate();
-      var ocupacao = Math.round(diasComRes/diasMes*100);
+      var slotsDisp = 16 * diasMes; // 06:00–21:00 = 16 slots de 1h
+      var slotsUsados = reservasMes.length;
+      var taxaOcup = Math.round(slotsUsados / slotsDisp * 100);
+
       var el = document.getElementById('cal-resumo-mes');
       var resumoHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
         +'<div style="background:var(--vl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--v)">'+totalRes+'</div><div style="font-size:10px;color:var(--t2)">Reservas no mes</div></div>'
-        +'<div style="background:var(--bl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blt)">'+ocupacao+'%</div><div style="font-size:10px;color:var(--t2)">Dias com reserva</div></div>'
+        +'<div style="background:var(--bl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blt)">'+totalHoras+'h</div><div style="font-size:10px;color:var(--t2)">Horas reservadas</div></div>'
+        +'<div style="background:var(--am);border-radius:8px;padding:10px;text-align:center;grid-column:span 2"><div style="font-size:18px;font-weight:700;color:var(--amt)">'+taxaOcup+'%</div><div style="font-size:10px;color:var(--t2)">dos horarios disponiveis reservados</div></div>'
         +'</div>';
       if(rankApto.length) {
         resumoHtml += '<div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Apartamentos mais ativos</div>';
