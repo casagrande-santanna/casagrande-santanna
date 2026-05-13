@@ -1238,9 +1238,29 @@ function selData(ds) {
 
       SLOTS.forEach(function(slot) {
         if(parseInt(slot) >= maxH) return;
+// INSIRA ESTE BLOCO:
+var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
 
-        var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
-        if(ehHoje && slotMin <= agoraMin + 30) return;
+// 1. Primeiro, verificamos se existe QUALQUER reserva para este horário
+var r = reservasDia.find(function(x) {
+  var ini = (x.slot_inicio || '').substring(0,5);
+  var fim = (x.slot_fim || '').substring(0,5);
+  var sStr = slot.substring(0,5);
+  return sStr >= ini && sStr < fim;
+});
+
+// 2. Se NÃO houver reserva E o horário já passou (ou falta pouco), aí sim ignoramos o slot
+if(!r && ehHoje && slotMin <= agoraMin + 15) return; 
+
+// 3. Ajuste visual para identificar "Aulas" de outros moradores explicitamente
+var cls, lbl, action;
+if(!r) {
+  cls = 'slot livre'; lbl = 'Livre'; action = 'livre';
+} else if(morador && r.unidade_id === morador.unidade_id) {
+  cls = 'slot meu'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : 'Minha'); action = 'meu_' + r.id;
+} else {
+  cls = 'slot ocupado'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : (r.modalidades ? r.modalidades.icone : 'Ocupado')); action = 'espera_' + r.id;
+}
 
         // Verificar bloqueio para este slot específico
         var bloqueioInfo = isBlocked(ds, slot);
@@ -1250,13 +1270,7 @@ function selData(ds) {
           return;
         }
 
-        var r = reservasDia.find(function(x) {
-          var ini = (x.slot_inicio || '').substring(0,5);
-          var fim = (x.slot_fim || '').substring(0,5);
-          var sStr = slot.substring(0,5);
-          return sStr >= ini && sStr < fim;
-        });
-
+      
         var cls, lbl, action;
         if(!r) {
           cls = 'slot livre'; lbl = 'Livre'; action = 'livre';
@@ -1396,29 +1410,48 @@ function confirmarReserva() {
   } else {
     _fazerInsertReserva();
   }
+function _fazerInsertReserva() {
+  var horaInicio = pendSlot.slot + ':00';
+  var horaFim = addH(pendSlot.slot, pendDur / 60) + ':00';
 
-  function _fazerInsertReserva() {
-    var modNome = MODS.find(function(x){return x.id===pendMod;}).nome;
-    sb.from('modalidades').select('id,nome').then(function(r) {
-      var todas = r.data||[];
-      var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
-      var found = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNome); });
-      var mid = found ? found.id : null;
-      sb.from('reservas').insert({
-        unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
-        data_reserva: pendSlot.date,
-        slot_inicio: pendSlot.slot+':00', slot_fim: addH(pendSlot.slot,pendDur/60)+':00',
-        duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
-      }).then(function(r2) {
-        if(r2.error) { toast('Erro: '+r2.error.message); return; }
+  // NOVA TRAVA: Verifica se o horário foi ocupado enquanto o usuário decidia
+  sb.from('reservas')
+    .select('id')
+    .eq('data_reserva', pendSlot.date)
+    .neq('status', 'cancelada')
+    .or('and(slot_inicio.gte.' + horaInicio + ',slot_inicio.lt.' + horaFim + '),and(slot_fim.gt.' + horaInicio + ',slot_fim.lte.' + horaFim + ')')
+    .then(function(conflito) {
+      if (conflito.data && conflito.data.length > 0) {
+        toast('Horário indisponível (conflito com aula ou reserva).');
+        selData(pendSlot.date); // Atualiza a tela para mostrar o ocupante
         fecharModal('m-reserva');
-        selData(pendSlot.date);
-        renderMinhas(); renderCheckin();
-        toast('Reserva confirmada!');
+        return;
+      }
+
+      // Se passou pela trava, executa o seu código original de insert abaixo:
+      var modNome = MODS.find(function(x){return x.id===pendMod;}).nome;
+      sb.from('modalidades').select('id,nome').then(function(r) {
+        var todas = r.data||[];
+        var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
+        var found = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNome); });
+        var mid = found ? found.id : null;
+        
+        sb.from('reservas').insert({
+          unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
+          data_reserva: pendSlot.date,
+          slot_inicio: horaInicio, slot_fim: horaFim,
+          duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
+        }).then(function(r2) {
+          if(r2.error) { toast('Erro: '+r2.error.message); return; }
+          fecharModal('m-reserva');
+          selData(pendSlot.date);
+          renderMinhas(); renderCheckin();
+          toast('Reserva confirmada!');
+        });
       });
     });
-  }
 }
+  
 
 // ── MODAL CANCELAR ─────────────────────────────────────────────
 document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
