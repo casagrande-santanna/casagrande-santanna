@@ -1148,7 +1148,7 @@ function selData(ds) {
     return;
   }
 
-  // Busca as reservas do dia ignorando as canceladas
+  // Busca reservas ignorando as canceladas para liberar o espaço visualmente
   sb.from('reservas')
     .select('id, unidade_id, slot_inicio, slot_fim, status, tipo_reserva, modalidades(nome, icone), unidades(codigo)')
     .eq('data_reserva', ds)
@@ -1166,11 +1166,12 @@ function selData(ds) {
         var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
         if (ehHoje && slotMin <= agoraMin + 30) return;
 
-        // CORREÇÃO CRÍTICA: substring(0,5) ignora os segundos que o banco envia
+        // CORREÇÃO DO BUG: substring(0,5) garante que "18:00:00" do banco seja lido como "18:00"
         var r = reservasDia.find(function(x) {
           var ini = (x.slot_inicio || "").substring(0, 5);
           var fim = (x.slot_fim || "").substring(0, 5);
-          return slot >= ini && slot < fim;
+          var sStr = slot.substring(0, 5);
+          return sStr >= ini && sStr < fim;
         });
 
         var cls, lbl, action;
@@ -1196,15 +1197,14 @@ function selData(ds) {
         });
       });
       
-      // Atualiza a lista descritiva abaixo dos slots
-      var listaDia = document.getElementById('lista-reservas-dia');
       var cardDia = document.getElementById('card-reservas-dia');
+      var listaDia = document.getElementById('lista-reservas-dia');
       if (reservasDia.length > 0) {
         cardDia.style.display = 'block';
         listaDia.innerHTML = reservasDia.map(function(r) {
           return '<div style="font-size:11px; padding:4px 0; border-bottom:0.5px solid var(--br)">' +
-                 '<b>' + r.slot_inicio.substring(0,5) + '</b> - ' + (r.unidades ? r.unidades.codigo : 'Reserva') + 
-                 ' (' + (r.modalidades ? r.modalidades.nome : 'Uso') + ')</div>';
+                 '<b>' + r.slot_inicio.substring(0,5) + '</b> - ' + (r.unidades ? r.unidades.codigo : '---') + 
+                 ' (' + (r.modalidades ? r.modalidades.nome : 'Uso Livre') + ')</div>';
         }).join('');
       } else {
         cardDia.style.display = 'none';
