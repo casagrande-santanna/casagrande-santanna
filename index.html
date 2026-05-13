@@ -1559,12 +1559,21 @@ function renderCheckin() {
 
   sb.from('reservas').select('*,modalidades(nome,icone)')
     .eq('unidade_id',morador.unidade_id)
-    .neq('oculto_morador', true)
     .order('data_reserva',{ascending:true})
     .order('slot_inicio',{ascending:true})
-    .limit(20)
+    .limit(30)
     .then(function(res) {
-    var hist = res.data||[];
+    var todosHist = res.data||[];
+    // Filtra ocultos localmente (tolerante a coluna inexistente)
+    var hist = todosHist.filter(function(r){ return !r.oculto_morador; });
+    // Ordena: futuras/hoje primeiro (ASC), passadas depois (DESC mais recente)
+    var hojeH = ts();
+    var futurasH = hist.filter(function(r){ return r.data_reserva >= hojeH; });
+    var passadasH = hist.filter(function(r){ return r.data_reserva < hojeH; });
+    futurasH.sort(function(a,b){ return a.data_reserva < b.data_reserva ? -1 : a.data_reserva > b.data_reserva ? 1 : (a.slot_inicio||'') < (b.slot_inicio||'') ? -1 : 1; });
+    passadasH.sort(function(a,b){ return a.data_reserva > b.data_reserva ? -1 : a.data_reserva < b.data_reserva ? 1 : (a.slot_inicio||'') > (b.slot_inicio||'') ? -1 : 1; });
+    hist = futurasH.concat(passadasH);
+
     var hel = document.getElementById('ckin-hist');
     if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
     var html = '';
@@ -1575,7 +1584,7 @@ function renderCheckin() {
       else if(r.status==='cancelada') bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
       else if(r.status==='expirada') bl='<span class="badge b-gray">Ausencia</span>';
       var m = r.modalidades;
-      html += '<div class="ckin-row">';
+      html += '<div class="ckin-row" data-rid="'+r.id+'" data-dt="'+r.data_reserva+'" data-st="'+(r.status||'')+'">';
       html += '<div class="ckin-dot" style="background:'+dotC+'"></div>';
       html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div>';
       html += '<div style="font-size:10.5px;color:var(--t2)">'+(m?m.icone+' '+m.nome:'---')+'</div></div>';
@@ -1589,28 +1598,28 @@ function renderCheckin() {
       var newBtnLimCkin = btnLimCkin.cloneNode(true);
       btnLimCkin.parentNode.replaceChild(newBtnLimCkin, btnLimCkin);
       newBtnLimCkin.addEventListener('click', function() {
-        if(!confirm('Ocultar historico de check-in passado?')) return;
-        var hoje = ts();
-        // Tenta marcar oculto_morador = true (requer coluna — rodar SQL de migração)
-        // Faz dois updates separados para evitar problemas com .or() do Supabase JS v2
-        var p1 = sb.from('reservas').update({oculto_morador: true})
-          .eq('unidade_id', morador.unidade_id)
-          .lt('data_reserva', hoje);
-        var p2 = sb.from('reservas').update({oculto_morador: true})
-          .eq('unidade_id', morador.unidade_id)
-          .eq('status', 'cancelada');
-        var p3 = sb.from('reservas').update({oculto_morador: true})
-          .eq('unidade_id', morador.unidade_id)
-          .eq('status', 'expirada');
-        Promise.all([p1, p2, p3]).then(function(results) {
-          var erros = results.filter(function(r){ return r && r.error; });
-          if(erros.length) {
-            // Se falhou (coluna não existe), avisa sobre SQL
-            toast('Execute o SQL de migracao para habilitar esta funcao.');
-          } else {
-            toast('Historico de check-in limpo.');
-            renderCheckin();
+        if(!confirm('Ocultar historico de check-in passado e cancelados?')) return;
+        var hojeL = ts();
+        // IDs a ocultar: passados, cancelados ou expirados
+        var idsOcultar = todosHist
+          .filter(function(r){ return r.data_reserva < hojeL || r.status==='cancelada' || r.status==='expirada'; })
+          .map(function(r){ return r.id; });
+        if(!idsOcultar.length) { toast('Nada para limpar.'); return; }
+        // Oculta imediatamente no DOM (funciona mesmo sem a coluna)
+        hel.querySelectorAll('.ckin-row').forEach(function(row) {
+          var dt = row.dataset.dt;
+          var st = row.dataset.st;
+          if(dt < hojeL || st === 'cancelada' || st === 'expirada') {
+            row.style.transition = 'opacity .3s';
+            row.style.opacity = '0';
+            setTimeout(function(){ row.style.display='none'; }, 300);
           }
+        });
+        // Persiste no banco se coluna existir
+        Promise.all(idsOcultar.map(function(id){
+          return sb.from('reservas').update({oculto_morador: true}).eq('id', id);
+        })).then(function() {
+          toast('Historico de check-in limpo.');
         });
       });
     }
@@ -1631,6 +1640,13 @@ function renderMinhas() {
     .order('slot_inicio', {ascending:true})
     .then(function(res) {
       var mine = res.data||[];
+      // Ordena: futuras primeiro (mais próxima no topo), passadas depois (mais recente no topo)
+      var hoje = ts();
+      var futuras = mine.filter(function(r){ return r.data_reserva >= hoje; });
+      var passadas = mine.filter(function(r){ return r.data_reserva < hoje; });
+      futuras.sort(function(a,b){ return a.data_reserva < b.data_reserva ? -1 : a.data_reserva > b.data_reserva ? 1 : (a.slot_inicio||'') < (b.slot_inicio||'') ? -1 : 1; });
+      passadas.sort(function(a,b){ return a.data_reserva > b.data_reserva ? -1 : a.data_reserva < b.data_reserva ? 1 : (a.slot_inicio||'') > (b.slot_inicio||'') ? -1 : 1; });
+      mine = futuras.concat(passadas);
       var list = document.getElementById('minhas-list');
       if(!mine.length) { list.innerHTML='<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>'; return; }
       var today = ts(), html = '';
@@ -1757,20 +1773,17 @@ function renderAvisos() {
         // Suporta tanto colunas dedicadas (novo) quanto formato || (legado)
         var enqueteTipo, enqueteCustomA, enqueteCustomB, enquetePergunta;
         if(av.enquete_tipo) {
-          // Novo formato: colunas separadas
-          enqueteTipo   = av.enquete_tipo;
+          enqueteTipo    = av.enquete_tipo;
           enqueteCustomA = av.enquete_label_a || '';
           enqueteCustomB = av.enquete_label_b || '';
           enquetePergunta = av.enquete_pergunta;
         } else if(av.enquete_pergunta.indexOf('||') !== -1) {
-          // Formato legado codificado
           var partes = av.enquete_pergunta.split('||');
           enqueteTipo    = partes[0];
           enqueteCustomA = partes[1] || '';
           enqueteCustomB = partes[2] || '';
           enquetePergunta = partes[3] || av.enquete_pergunta;
         } else {
-          // Formato antigo sem tipo: assume sim_nao
           enqueteTipo    = 'sim_nao';
           enqueteCustomA = '';
           enqueteCustomB = '';
@@ -1790,21 +1803,30 @@ function renderAvisos() {
         var totalVotos = (av.enquete_sim||0) + (av.enquete_nao||0);
         var pctSim = totalVotos > 0 ? Math.round((av.enquete_sim||0)/totalVotos*100) : 0;
         var pctNao = totalVotos > 0 ? (100 - pctSim) : 0;
-        html += '<div style="background:var(--bg);border-radius:8px;padding:9px 11px;margin:4px 11px 6px">';
-        html += '<div style="font-size:11px;font-weight:600;margin-bottom:8px">'+enquetePergunta+'</div>';
-        if(!lido && morador.tipo !== 'admin') {
-          html += '<div style="display:flex;gap:6px">';
-          html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="flex:1;font-size:11px;padding:8px 4px">'+rotulos.a+'</button>';
-          html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="flex:1;font-size:11px;padding:8px 4px">'+rotulos.b+'</button>';
+
+        // Verifica se este morador JÁ VOTOU (campo voto salvo no aviso como flag local)
+        // Usamos leituras_avisos: se tem registro COM voto, esconde botões
+        // Estratégia: admin sempre vê resultado; morador vê botões ATÉ marcar lido via voto
+        var jaVotou = !!(lido);  // lido só é setado após votar ou clicar "marcar lido"
+        var podeVotar = !jaVotou && morador.tipo !== 'admin';
+
+        html += '<div style="background:var(--bg);border-radius:8px;padding:10px 11px;margin:4px 11px 8px;border:0.5px solid var(--br)">';
+        html += '<div style="font-size:11.5px;font-weight:600;margin-bottom:8px;color:var(--tx)">📊 '+enquetePergunta+'</div>';
+        if(podeVotar) {
+          html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+          html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="font-size:11.5px;padding:10px 6px;font-weight:600">'+rotulos.a+'</button>';
+          html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="font-size:11.5px;padding:10px 6px;font-weight:600">'+rotulos.b+'</button>';
           html += '</div>';
+          html += '<div style="font-size:10px;color:var(--t2);margin-top:5px;text-align:center">'+totalVotos+' voto(s) registrado(s) — clique para participar</div>';
         } else {
-          html += '<div style="margin-bottom:4px">';
-          html += '<div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:2px"><span style="color:var(--v);font-weight:600">'+rotulos.a+'</span><span style="font-weight:600">'+(av.enquete_sim||0)+' votos ('+pctSim+'%)</span></div>';
-          html += '<div style="height:8px;background:var(--br);border-radius:4px;overflow:hidden;margin-bottom:6px"><div style="height:100%;background:var(--v);width:'+pctSim+'%;border-radius:4px"></div></div>';
-          html += '<div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:2px"><span style="color:var(--rdt);font-weight:600">'+rotulos.b+'</span><span style="font-weight:600">'+(av.enquete_nao||0)+' votos ('+pctNao+'%)</span></div>';
-          html += '<div style="height:8px;background:var(--br);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--rdt);width:'+pctNao+'%;border-radius:4px"></div></div>';
+          // Resultado com barras de progresso
+          html += '<div>';
+          html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--v)">'+rotulos.a+'</span><span style="font-weight:700">'+(av.enquete_sim||0)+' ('+pctSim+'%)</span></div>';
+          html += '<div style="height:10px;background:var(--br);border-radius:5px;overflow:hidden;margin-bottom:8px"><div style="height:100%;background:var(--v);width:'+pctSim+'%;border-radius:5px"></div></div>';
+          html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--rdt)">'+rotulos.b+'</span><span style="font-weight:700">'+(av.enquete_nao||0)+' ('+pctNao+'%)</span></div>';
+          html += '<div style="height:10px;background:var(--br);border-radius:5px;overflow:hidden"><div style="height:100%;background:var(--rdt);width:'+pctNao+'%;border-radius:5px"></div></div>';
           html += '</div>';
-          if(totalVotos>0) html += '<div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:right">'+totalVotos+' voto(s) registrado(s)</div>';
+          if(totalVotos>0) html += '<div style="font-size:10px;color:var(--t2);margin-top:6px;text-align:right">'+totalVotos+' voto(s) registrado(s)</div>';
         }
         html += '</div>';
       }
@@ -2815,9 +2837,9 @@ function renderCalendario() {
                 ? '<span class="badge b-info" style="font-size:9px">Aula</span>'
                 : '<span class="badge b-ok" style="font-size:9px">Pontual</span>';
               return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">'
-                +'<div style="min-width:44px;height:36px;border-radius:8px;background:var(--vl);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:700;color:var(--v);padding:0 4px;white-space:nowrap">'+cod+'</div>'
+                +'<div style="min-width:52px;max-width:56px;height:36px;border-radius:8px;background:var(--vl);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:700;color:var(--v);padding:0 5px;white-space:nowrap;letter-spacing:-0.3px">'+cod+'</div>'
                 +'<div style="flex:1;min-width:0">'
-                  +'<div style="font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+si+' &ndash; '+sf+'</div>'
+                  +'<div style="font-size:11.5px;font-weight:600">'+si+' &ndash; '+sf+'</div>'
                   +'<div style="font-size:10.5px;color:var(--t2)">'+mod+'</div>'
                 +'</div>'
                 +tipoBadge
@@ -2833,27 +2855,40 @@ function renderCalendario() {
       reservasMes.forEach(function(r){ if(r.unidades) aptosUnicos[r.unidades.codigo] = (aptosUnicos[r.unidades.codigo]||0)+1; });
       var rankApto = Object.entries(aptosUnicos).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
 
-      // Calcula total de horas reservadas somando duração de cada reserva
+      // Total de horas: usa slot_fim se disponível, senão duracao_min, senão 60min
       var totalMinutos = 0;
       reservasMes.forEach(function(r) {
         if(r.slot_inicio && r.slot_fim) {
           var hIni = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
           var hFim = parseInt((r.slot_fim||'00:00').slice(0,2))*60   + parseInt((r.slot_fim||'00:00').slice(3,5));
-          if(hFim > hIni) totalMinutos += (hFim - hIni);
+          if(hFim > hIni) { totalMinutos += (hFim - hIni); return; }
         }
+        totalMinutos += (r.duracao_min || 60);
       });
       var totalHoras = (totalMinutos / 60).toFixed(1).replace('.0','');
-      // Capacidade mensal: 16 slots/dia × dias do mês
+
+      // Taxa de ocupação baseada em SLOTS (horários de 1h disponíveis no mês)
+      // 06:00 a 21:00 = 16 slots por dia × dias do mês
       var diasMes = new Date(calVY,calVM+1,0).getDate();
-      var slotsDisp = 16 * diasMes; // 06:00–21:00 = 16 slots de 1h
-      var slotsUsados = reservasMes.length;
-      var taxaOcup = Math.round(slotsUsados / slotsDisp * 100);
+      var slotsDisponiveis = 16 * diasMes;
+      // Conta slots efetivamente ocupados (cada hora reservada = 1 slot)
+      var slotsOcupados = Math.round(totalMinutos / 60);
+      var taxaSlots = Math.min(100, Math.round(slotsOcupados / slotsDisponiveis * 100));
 
       var el = document.getElementById('cal-resumo-mes');
       var resumoHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
         +'<div style="background:var(--vl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--v)">'+totalRes+'</div><div style="font-size:10px;color:var(--t2)">Reservas no mes</div></div>'
         +'<div style="background:var(--bl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blt)">'+totalHoras+'h</div><div style="font-size:10px;color:var(--t2)">Horas reservadas</div></div>'
-        +'<div style="background:var(--am);border-radius:8px;padding:10px;text-align:center;grid-column:span 2"><div style="font-size:18px;font-weight:700;color:var(--amt)">'+taxaOcup+'%</div><div style="font-size:10px;color:var(--t2)">dos horarios disponiveis reservados</div></div>'
+        +'</div>'
+        +'<div style="background:var(--am);border-radius:8px;padding:10px;margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
+        +'<span style="font-size:11px;font-weight:600;color:var(--amt)">Ocupacao dos slots do mes</span>'
+        +'<span style="font-size:16px;font-weight:700;color:var(--amt)">'+taxaSlots+'%</span>'
+        +'</div>'
+        +'<div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden">'
+        +'<div style="height:100%;background:var(--amb);width:'+taxaSlots+'%;border-radius:4px"></div>'
+        +'</div>'
+        +'<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponiveis+' slots de 1h reservados</div>'
         +'</div>';
       if(rankApto.length) {
         resumoHtml += '<div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Apartamentos mais ativos</div>';
