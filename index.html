@@ -1210,7 +1210,7 @@ function renderCal() {
 }
 
 // ── SELECIONAR DATA E SLOTS ────────────────────────────────────
-function selData(ds) {
+ffunction selData(ds) {
   if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
   if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
@@ -1238,31 +1238,21 @@ function selData(ds) {
 
       SLOTS.forEach(function(slot) {
         if(parseInt(slot) >= maxH) return;
-// INSIRA ESTE BLOCO:
-var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
+        
+        var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
 
-// 1. Primeiro, verificamos se existe QUALQUER reserva para este horário
-var r = reservasDia.find(function(x) {
-  var ini = (x.slot_inicio || '').substring(0,5);
-  var fim = (x.slot_fim || '').substring(0,5);
-  var sStr = slot.substring(0,5);
-  return sStr >= ini && sStr < fim;
-});
+        // 1. Verifica se existe reserva (Individual ou Aula)
+        var r = reservasDia.find(function(x) {
+          var ini = (x.slot_inicio || '').substring(0,5);
+          var fim = (x.slot_fim || '').substring(0,5);
+          var sStr = slot.substring(0,5);
+          return sStr >= ini && sStr < fim;
+        });
 
-// 2. Se NÃO houver reserva E o horário já passou (ou falta pouco), aí sim ignoramos o slot
-if(!r && ehHoje && slotMin <= agoraMin + 15) return; 
+        // 2. Se NÃO tem reserva e o horário já passou, esconde o slot
+        if(!r && ehHoje && slotMin <= agoraMin + 15) return; 
 
-// 3. Ajuste visual para identificar "Aulas" de outros moradores explicitamente
-var cls, lbl, action;
-if(!r) {
-  cls = 'slot livre'; lbl = 'Livre'; action = 'livre';
-} else if(morador && r.unidade_id === morador.unidade_id) {
-  cls = 'slot meu'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : 'Minha'); action = 'meu_' + r.id;
-} else {
-  cls = 'slot ocupado'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : (r.modalidades ? r.modalidades.icone : 'Ocupado')); action = 'espera_' + r.id;
-}
-
-        // Verificar bloqueio para este slot específico
+        // 3. Verifica bloqueios manuais/reformas
         var bloqueioInfo = isBlocked(ds, slot);
         if(bloqueioInfo) {
           html += '<div class="slot bloq" title="'+bloqueioInfo.motivo+'">';
@@ -1270,14 +1260,16 @@ if(!r) {
           return;
         }
 
-      
         var cls, lbl, action;
         if(!r) {
           cls = 'slot livre'; lbl = 'Livre'; action = 'livre';
         } else if(morador && r.unidade_id === morador.unidade_id) {
           cls = 'slot meu'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : 'Minha'); action = 'meu_' + r.id;
         } else {
-          cls = 'slot ocupado'; lbl = r.modalidades ? r.modalidades.icone : 'Ocupado'; action = 'espera_' + r.id;
+          // Exibe "Aula" se for contrato de outro morador, senão o ícone da modalidade
+          cls = 'slot ocupado'; 
+          lbl = (r.tipo_reserva === 'aula' ? 'Aula' : (r.modalidades ? r.modalidades.icone : 'Ocupado')); 
+          action = 'espera_' + r.id;
         }
 
         html += '<div class="'+cls+'" data-action="'+action+'" data-slot="'+slot+'" data-ds="'+ds+'">';
