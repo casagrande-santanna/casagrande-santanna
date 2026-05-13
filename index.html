@@ -1115,19 +1115,81 @@ function isBlocked(ds, slot) {
   var blkManual = bloquCache.find(function(b) {
     var naData = ds >= b.data_inicio && ds <= b.data_fim;
     if (!naData) return false;
-    
-    // Se passamos um slot (ex: "08:00"), verificamos se ele está dentro da janela de hora
     if (slot) {
       var s = slot.substring(0, 5);
       var hI = (b.hora_inicio || "00:00").substring(0, 5);
       var hF = (b.hora_fim || "23:59").substring(0, 5);
       return s >= hI && s < hF;
     }
-    // Se não tem slot (uso no calendário), bloqueia o dia se houver QUALQUER bloqueio nele
     return true; 
   });
-
   return blkManual ? { motivo: blkManual.motivo } : null;
+}
+
+function selData(ds) {
+  if (ds < ts()) { toast('Não é possível reservar datas passadas.'); return; }
+  if (!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
+  if (morador.status === 'suspenso') { toast('Apartamento suspenso.'); return; }
+
+  selDate = ds;
+  renderCal();
+  document.getElementById('slots-card').style.display = 'block';
+  var dow = new Date(ds + 'T12:00:00').getDay();
+  var maxH = (dow === 0 || dow === 6) ? 20 : 22;
+  document.getElementById('slots-lbl').textContent = 'Horários - ' + fmtD(ds);
+  var sg = document.getElementById('slot-grid');
+
+  sb.from('reservas')
+    .select('id, unidade_id, slot_inicio, slot_fim, status, tipo_reserva, modalidades(nome, icone), unidades(codigo)')
+    .eq('data_reserva', ds)
+    .neq('status', 'cancelada')
+    .then(function(res) {
+      var reservasDia = res.data || [];
+      var agora = new Date();
+      var agoraMin = agora.getHours() * 60 + agora.getMinutes();
+      var ehHoje = (ds === ts());
+      var html = '';
+
+      SLOTS.forEach(function(slot) {
+        if (parseInt(slot) >= maxH) return;
+        var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
+        if (ehHoje && slotMin <= agoraMin + 30) return;
+
+        // Verifica Bloqueio Administrativo primeiro
+        var bloqueio = isBlocked(ds, slot);
+        if (bloqueio) {
+          html += '<div class="slot bloq" title="' + bloqueio.motivo + '"><div class="sh">' + slot + '</div><div class="sl">Bloq.</div></div>';
+          return;
+        }
+
+        // Verifica Reservas de moradores
+        var r = reservasDia.find(function(x) {
+          var ini = (x.slot_inicio || "").substring(0, 5);
+          var fim = (x.slot_fim || "").substring(0, 5);
+          return slot >= ini && slot < fim;
+        });
+
+        var cls = 'slot livre', lbl = 'Livre', action = 'livre';
+        if (r) {
+          if (morador && r.unidade_id === morador.unidade_id) {
+            cls = 'slot meu'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : 'Minha'); action = 'meu_' + r.id;
+          } else {
+            cls = 'slot ocupado'; lbl = r.modalidades ? r.modalidades.icone : 'Ocupado'; action = 'espera_' + r.id;
+          }
+        }
+        html += '<div class="' + cls + '" data-action="' + action + '" data-slot="' + slot + '" data-ds="' + ds + '"><div class="sh">' + slot + '</div><div class="sl">' + lbl + '</div></div>';
+      });
+
+      sg.innerHTML = html;
+      sg.querySelectorAll('.slot').forEach(function(el) {
+        el.addEventListener('click', function() {
+          var act = el.dataset.action;
+          if (act === 'livre') abrirModalReserva(el.dataset.ds, el.dataset.slot);
+          else if (act.indexOf('meu_') === 0) abrirModalCancelar(act.replace('meu_', ''));
+          else if (act.indexOf('espera_') === 0) abrirListaEspera(el.dataset.ds, el.dataset.slot, act.replace('espera_', ''));
+        });
+      });
+    });
 }
 
 function renderCal() {
@@ -1525,17 +1587,13 @@ function renderMinhas() {
       var newLimpar = btnLimpar.cloneNode(true);
       btnLimpar.parentNode.replaceChild(newLimpar, btnLimpar);
       newLimpar.addEventListener('click', function() {
-        if(!confirm('Deseja ocultar reservas passadas e canceladas da sua visualização?')) return;
-        
-        // A lógica abaixo oculta:
-        // 1. Qualquer reserva com data anterior a hoje (lt.ts)
-        // 2. OU reservas com status cancelada ou expirada (mesmo que futuras)
+        if(!confirm('Deseja ocultar reservas passadas e canceladas?')) return;
         sb.from('reservas').update({oculto_morador: true})
           .eq('unidade_id', morador.unidade_id)
           .or('data_reserva.lt.' + ts() + ',status.eq.cancelada,status.eq.expirada')
           .then(function(r) {
             if(r.error) { toast('Erro: ' + r.error.message); return; }
-            toast('Histórico limpo com sucesso.'); 
+            toast('Histórico limpo.'); 
             renderMinhas();
           });
       });
@@ -2207,22 +2265,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-  var btnAddBlk = document.getElementById('btn-add-bloqueio');
-  if(btnAddBlk) {
-    
-      var checklistStr = checklistItens.length ? JSON.stringify(checklistItens) : null;
-      sb.from('bloqueios').insert({data_inicio:ini,data_fim:fim,motivo:mot,tipo:tipoBlk,checklist:checklistStr,criado_por:morador.id}).then(function(r) {
-        if(r.error) { toast('Erro: '+r.error.message); return; }
-        document.getElementById('blk-ini').value='';
-        document.getElementById('blk-fim').value='';
-        document.getElementById('blk-motivo').value='';
-        toast('Periodo bloqueado!');
-        renderConfig(); carregarBloqueios(); renderCal();
-      });
-    });
-  }
-});
-
+  
 // ── CONTRATOS DE AULA ──────────────────────────────────────────
 function renderContratosAula() {
   sb.from('reservas')
