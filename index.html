@@ -414,8 +414,14 @@ textarea.form-in{resize:vertical}
             <option value="vistoria">📋 Vistoria</option>
             <option value="outro">📌 Outro</option>
           </select></div>
-        <div class="form-row"><label class="form-lbl">Data inicial</label><input type="date" class="form-in" id="blk-ini"></div>
-        <div class="form-row"><label class="form-lbl">Data final</label><input type="date" class="form-in" id="blk-fim"></div>
+        <div style="display:flex; gap:8px">
+  <div class="form-row" style="flex:1"><label class="form-lbl">Data inicial</label><input type="date" class="form-in" id="blk-ini"></div>
+  <div class="form-row" style="flex:1"><label class="form-lbl">Hora inicial</label><input type="time" class="form-in" id="blk-hora-ini" value="07:00"></div>
+</div>
+<div style="display:flex; gap:8px">
+  <div class="form-row" style="flex:1"><label class="form-lbl">Data final</label><input type="date" class="form-in" id="blk-fim"></div>
+  <div class="form-row" style="flex:1"><label class="form-lbl">Hora final</label><input type="time" class="form-in" id="blk-hora-fim" value="22:00"></div>
+</div>
         <div class="form-row"><label class="form-lbl">Descricao</label><input type="text" class="form-in" id="blk-motivo" placeholder="Ex: Reforma do piso, Festa junina..."></div>
         <div id="blk-checklist-wrap" style="display:none">
           <div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:6px">Checklist de vistoria</div>
@@ -1098,18 +1104,30 @@ function carregarBloqueios() {
   sb.from('bloqueios').select('*').then(function(res) { bloquCache = res.data||[]; });
 }
 
-function isBlocked(ds) {
-  // 1. Verifica bloqueio por dia da semana (Configurações)
+function isBlocked(ds, slot) {
+  // 1. Bloqueio fixo de fins de semana (Configurações)
   var dataObj = new Date(ds + 'T12:00:00');
-  var dow = dataObj.getDay(); // 0 = Domingo, 6 = Sábado
-  
-  if (appCfg.blk_sabado && dow === 6) return true;
-  if (appCfg.blk_domingo && dow === 0) return true;
+  var dow = dataObj.getDay();
+  if (appCfg.blk_sabado && dow === 6) return { motivo: 'Sábado Bloqueado' };
+  if (appCfg.blk_domingo && dow === 0) return { motivo: 'Domingo Bloqueado' };
 
-  // 2. Verifica bloqueios manuais (Tabela de bloqueios)
-  return bloquCache.some(function(b) { 
-    return ds >= b.data_inicio && ds <= b.data_fim; 
+  // 2. Bloqueios manuais (Tabela de bloqueios)
+  var blkManual = bloquCache.find(function(b) {
+    var naData = ds >= b.data_inicio && ds <= b.data_fim;
+    if (!naData) return false;
+    
+    // Se passamos um slot (ex: "08:00"), verificamos se ele está dentro da janela de hora
+    if (slot) {
+      var s = slot.substring(0, 5);
+      var hI = (b.hora_inicio || "00:00").substring(0, 5);
+      var hF = (b.hora_fim || "23:59").substring(0, 5);
+      return s >= hI && s < hF;
+    }
+    // Se não tem slot (uso no calendário), bloqueia o dia se houver QUALQUER bloqueio nele
+    return true; 
   });
+
+  return blkManual ? { motivo: blkManual.motivo } : null;
 }
 
 function renderCal() {
@@ -1151,12 +1169,21 @@ function selData(ds) {
   document.getElementById('slots-lbl').textContent = blk ? ('Bloqueado - ' + fmtD(ds)) : ('Horários - ' + fmtD(ds));
   var sg = document.getElementById('slot-grid');
 
-  if (blk) {
-    var motivo = '';
-    bloquCache.forEach(function(b) { if (ds >= b.data_inicio && ds <= b.data_fim) motivo = b.motivo || 'Bloqueado'; });
-    sg.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;font-size:11px;color:var(--rdt)">🚫 ' + motivo + '</div>';
-    return;
+  // Dentro do SLOTS.forEach na função selData:
+SLOTS.forEach(function(slot) {
+  if (parseInt(slot) >= maxH) return;
+  
+  // VERIFICA SE O SLOT ESPECÍFICO ESTÁ BLOQUEADO
+  var bloqueioInfo = isBlocked(ds, slot);
+  
+  if (bloqueioInfo) {
+    html += '<div class="slot bloq" title="' + bloqueioInfo.motivo + '">';
+    html += '<div class="sh">' + slot + '</div><div class="sl">Bloq.</div></div>';
+    return; // Pula para o próximo slot
   }
+  
+  // ... resto da lógica de busca de reservas confirmadas (o find que já existe)
+});
 
   // Busca reservas ignorando as canceladas para liberar o espaço visualmente
   sb.from('reservas')
@@ -2118,24 +2145,71 @@ document.addEventListener('DOMContentLoaded', function() {
   if(btnFechEspera) btnFechEspera.addEventListener('click', function() { fecharModal('m-espera'); });
   var btnEntrarEspera = document.getElementById('btn-entrar-espera');
   if(btnEntrarEspera) btnEntrarEspera.addEventListener('click', entrarListaEspera);
-
-  var btnAddBlk = document.getElementById('btn-add-bloqueio');
-  if(btnAddBlk) {
+// --- FUNÇÃO DE SALVAR BLOQUEIO ATUALIZADA ---
+  var btnAddBlk = document.getElementById('btnAddBlk') || document.getElementById('btn-add-bloqueio');
+  if (btnAddBlk) {
     btnAddBlk.addEventListener('click', function() {
       if(!requireAdmin()) return;
+
       var ini = document.getElementById('blk-ini').value;
       var fim = document.getElementById('blk-fim').value;
+      var hIni = document.getElementById('blk-hora-ini').value; // CAPTURA HORA INICIAL
+      var hFim = document.getElementById('blk-hora-fim').value; // CAPTURA HORA FINAL
       var mot = document.getElementById('blk-motivo').value.trim();
-      if(!ini||!fim||!mot) { toast('Preencha data inicial, final e motivo.'); return; }
+
+      if(!ini || !fim || !mot) { 
+        toast('Preencha data inicial, final e motivo.'); 
+        return; 
+      }
+
       var tipoBlk = document.getElementById('blk-tipo').value;
       var checklistItens = [];
+      
+      // Lógica do Checklist
       if(['manutencao','vistoria','limpeza'].indexOf(tipoBlk) !== -1) {
-        var ckMap = [{id:'chk-piso',nome:'Piso e revestimentos'},{id:'chk-rede',nome:'Rede e equipamentos'},{id:'chk-ilum',nome:'Iluminacao'},{id:'chk-grad',nome:'Grades e alambrado'},{id:'chk-limp',nome:'Limpeza geral'}];
+        var ckMap = [
+          {id:'chk-piso',nome:'Piso e revestimentos'},
+          {id:'chk-rede',nome:'Rede e equipamentos'},
+          {id:'chk-ilum',nome:'Iluminacao'},
+          {id:'chk-grad',nome:'Grades e alambrado'},
+          {id:'chk-limp',nome:'Limpeza geral'}
+        ];
         ckMap.forEach(function(item) {
           var el = document.getElementById(item.id);
           if(el) checklistItens.push({nome:item.nome, ok: el.checked});
         });
       }
+      
+      var checklistStr = checklistItens.length ? JSON.stringify(checklistItens) : null;
+
+      // SALVAR NO SUPABASE
+      sb.from('bloqueios').insert({
+        data_inicio: ini,
+        data_fim: fim,
+        hora_inicio: hIni, // SALVA HORA NO BANCO
+        hora_fim: hFim,    // SALVA HORA NO BANCO
+        motivo: mot,
+        tipo: tipoBlk,
+        checklist: checklistStr,
+        criado_por: morador.id
+      }).then(function(r) {
+        if(r.error) { toast('Erro: '+r.error.message); return; }
+        
+        // Limpar os campos após o sucesso
+        document.getElementById('blk-ini').value='';
+        document.getElementById('blk-fim').value='';
+        document.getElementById('blk-motivo').value='';
+        
+        toast('Período bloqueado com sucesso!');
+        renderConfig(); 
+        carregarBloqueios(); 
+        renderCal();
+      });
+    });
+  }
+  var btnAddBlk = document.getElementById('btn-add-bloqueio');
+  if(btnAddBlk) {
+    
       var checklistStr = checklistItens.length ? JSON.stringify(checklistItens) : null;
       sb.from('bloqueios').insert({data_inicio:ini,data_fim:fim,motivo:mot,tipo:tipoBlk,checklist:checklistStr,criado_por:morador.id}).then(function(r) {
         if(r.error) { toast('Erro: '+r.error.message); return; }
