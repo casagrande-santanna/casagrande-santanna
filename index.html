@@ -1099,7 +1099,17 @@ function carregarBloqueios() {
 }
 
 function isBlocked(ds) {
-  return bloquCache.some(function(b) { return ds>=b.data_inicio && ds<=b.data_fim; });
+  // 1. Verifica bloqueio por dia da semana (Configurações)
+  var dataObj = new Date(ds + 'T12:00:00');
+  var dow = dataObj.getDay(); // 0 = Domingo, 6 = Sábado
+  
+  if (appCfg.blk_sabado && dow === 6) return true;
+  if (appCfg.blk_domingo && dow === 0) return true;
+
+  // 2. Verifica bloqueios manuais (Tabela de bloqueios)
+  return bloquCache.some(function(b) { 
+    return ds >= b.data_inicio && ds <= b.data_fim; 
+  });
 }
 
 function renderCal() {
@@ -1482,19 +1492,24 @@ function renderMinhas() {
       btn.addEventListener('click', function() { doCheckin(btn.dataset.ckinId); });
     });
 
-    // Limpar histórico antigo
+  // Limpar histórico antigo e cancelados
     var btnLimpar = document.getElementById('btn-limpar-historico');
     if(btnLimpar) {
       var newLimpar = btnLimpar.cloneNode(true);
       btnLimpar.parentNode.replaceChild(newLimpar, btnLimpar);
       newLimpar.addEventListener('click', function() {
-        if(!confirm('Ocultar reservas anteriores a hoje da sua tela? Esta acao nao exclui dados.')) return;
+        if(!confirm('Deseja ocultar reservas passadas e canceladas da sua visualização?')) return;
+        
+        // A lógica abaixo oculta:
+        // 1. Qualquer reserva com data anterior a hoje (lt.ts)
+        // 2. OU reservas com status cancelada ou expirada (mesmo que futuras)
         sb.from('reservas').update({oculto_morador: true})
           .eq('unidade_id', morador.unidade_id)
-          .lt('data_reserva', ts())
+          .or('data_reserva.lt.' + ts() + ',status.eq.cancelada,status.eq.expirada')
           .then(function(r) {
             if(r.error) { toast('Erro: ' + r.error.message); return; }
-            toast('Historico antigo ocultado.'); renderMinhas();
+            toast('Histórico limpo com sucesso.'); 
+            renderMinhas();
           });
       });
     }
