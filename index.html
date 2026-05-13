@@ -1589,23 +1589,29 @@ function renderCheckin() {
       var newBtnLimCkin = btnLimCkin.cloneNode(true);
       btnLimCkin.parentNode.replaceChild(newBtnLimCkin, btnLimCkin);
       newBtnLimCkin.addEventListener('click', function() {
-        if(!confirm('Ocultar todo o historico de check-in antigo?')) return;
-        // Marca oculto_morador apenas em registros passados, cancelados ou expirados
-        sb.from('reservas')
-          .update({oculto_morador: true})
+        if(!confirm('Ocultar historico de check-in passado?')) return;
+        var hoje = ts();
+        // Tenta marcar oculto_morador = true (requer coluna — rodar SQL de migração)
+        // Faz dois updates separados para evitar problemas com .or() do Supabase JS v2
+        var p1 = sb.from('reservas').update({oculto_morador: true})
           .eq('unidade_id', morador.unidade_id)
-          .lt('data_reserva', ts())
-          .then(function(r1) {
-            sb.from('reservas')
-              .update({oculto_morador: true})
-              .eq('unidade_id', morador.unidade_id)
-              .in('status', ['cancelada','expirada'])
-              .then(function(r2) {
-                if((r1&&r1.error)||(r2&&r2.error)) { toast('Erro ao limpar historico.'); return; }
-                toast('Historico de check-in limpo.');
-                renderCheckin();
-              });
-          });
+          .lt('data_reserva', hoje);
+        var p2 = sb.from('reservas').update({oculto_morador: true})
+          .eq('unidade_id', morador.unidade_id)
+          .eq('status', 'cancelada');
+        var p3 = sb.from('reservas').update({oculto_morador: true})
+          .eq('unidade_id', morador.unidade_id)
+          .eq('status', 'expirada');
+        Promise.all([p1, p2, p3]).then(function(results) {
+          var erros = results.filter(function(r){ return r && r.error; });
+          if(erros.length) {
+            // Se falhou (coluna não existe), avisa sobre SQL
+            toast('Execute o SQL de migracao para habilitar esta funcao.');
+          } else {
+            toast('Historico de check-in limpo.');
+            renderCheckin();
+          }
+        });
       });
     }
   });
@@ -1664,21 +1670,22 @@ function renderMinhas() {
         btnLimpar.parentNode.replaceChild(newLimpar, btnLimpar);
         newLimpar.addEventListener('click', function() {
           if(!confirm('Deseja ocultar reservas passadas e canceladas?')) return;
-          sb.from('reservas')
-            .update({oculto_morador: true})
-            .eq('unidade_id', morador.unidade_id)
-            .lt('data_reserva', ts())
-            .then(function(r1) {
-              sb.from('reservas')
-                .update({oculto_morador: true})
-                .eq('unidade_id', morador.unidade_id)
-                .in('status', ['cancelada','expirada'])
-                .then(function(r2) {
-                  if((r1&&r1.error)||(r2&&r2.error)) { toast('Erro ao limpar historico.'); return; }
-                  toast('Historico limpo.');
-                  renderMinhas();
-                });
-            });
+          var hoje = ts();
+          var p1 = sb.from('reservas').update({oculto_morador: true})
+            .eq('unidade_id', morador.unidade_id).lt('data_reserva', hoje);
+          var p2 = sb.from('reservas').update({oculto_morador: true})
+            .eq('unidade_id', morador.unidade_id).eq('status', 'cancelada');
+          var p3 = sb.from('reservas').update({oculto_morador: true})
+            .eq('unidade_id', morador.unidade_id).eq('status', 'expirada');
+          Promise.all([p1, p2, p3]).then(function(results) {
+            var erros = results.filter(function(r){ return r && r.error; });
+            if(erros.length) {
+              toast('Execute o SQL de migracao para habilitar esta funcao.');
+            } else {
+              toast('Historico limpo.');
+              renderMinhas();
+            }
+          });
         });
       }
 
@@ -1723,7 +1730,7 @@ function renderMinhas() {
 // ── AVISOS ─────────────────────────────────────────────────────
 function renderAvisos() {
   if(!morador) { document.getElementById('avisos-list').innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Faca login</div>'; return; }
-  sb.from('avisos').select('*,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
+  sb.from('avisos').select('*,enquete_tipo,enquete_label_a,enquete_label_b,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
     var avisos = res.data||[];
     var bloco = morador.unidades ? morador.unidades.bloco : '';
     var hoje = ts();
@@ -1747,22 +1754,36 @@ function renderAvisos() {
       html += '<span class="badge '+bcls+'" style="margin-left:8px;flex-shrink:0">'+AVL[av.tipo]+'</span></div>';
       html += '<div class="av-corpo">'+av.corpo+'</div>';
       if(av.enquete_pergunta) {
-        // Decodifica o formato: tipo||labelA||labelB||pergunta
-        // Compatível também com formato antigo (só pergunta, sem ||)
-        var partes = av.enquete_pergunta.split('||');
-        var enqueteTipo = partes.length >= 4 ? partes[0] : 'sim_nao';
-        var enqueteCustomA = partes.length >= 4 ? partes[1] : '';
-        var enqueteCustomB = partes.length >= 4 ? partes[2] : '';
-        var enquetePergunta = partes.length >= 4 ? partes[3] : av.enquete_pergunta;
+        // Suporta tanto colunas dedicadas (novo) quanto formato || (legado)
+        var enqueteTipo, enqueteCustomA, enqueteCustomB, enquetePergunta;
+        if(av.enquete_tipo) {
+          // Novo formato: colunas separadas
+          enqueteTipo   = av.enquete_tipo;
+          enqueteCustomA = av.enquete_label_a || '';
+          enqueteCustomB = av.enquete_label_b || '';
+          enquetePergunta = av.enquete_pergunta;
+        } else if(av.enquete_pergunta.indexOf('||') !== -1) {
+          // Formato legado codificado
+          var partes = av.enquete_pergunta.split('||');
+          enqueteTipo    = partes[0];
+          enqueteCustomA = partes[1] || '';
+          enqueteCustomB = partes[2] || '';
+          enquetePergunta = partes[3] || av.enquete_pergunta;
+        } else {
+          // Formato antigo sem tipo: assume sim_nao
+          enqueteTipo    = 'sim_nao';
+          enqueteCustomA = '';
+          enqueteCustomB = '';
+          enquetePergunta = av.enquete_pergunta;
+        }
 
-        // Define os rótulos dos botões conforme o tipo
         var TIPOS_ENQUETE = {
-          sim_nao:            {a:'👍 Sim',          b:'👎 Nao'},
-          concordo_discordo:  {a:'✅ Concordo',     b:'❌ Discordo'},
-          aprovado_reprovado: {a:'✔️ Aprovado',     b:'✖️ Reprovado'},
-          favoravel_contrario:{a:'🟢 Favoravel',    b:'🔴 Contrario'},
-          gostei_nao_gostei:  {a:'😀 Gostei',       b:'😕 Nao gostei'},
-          personalizado:      {a: enqueteCustomA || 'Opcao A', b: enqueteCustomB || 'Opcao B'}
+          sim_nao:            {a:'👍 Sim',        b:'👎 Nao'},
+          concordo_discordo:  {a:'✅ Concordo',   b:'❌ Discordo'},
+          aprovado_reprovado: {a:'✔️ Aprovado',   b:'✖️ Reprovado'},
+          favoravel_contrario:{a:'🟢 Favoravel',  b:'🔴 Contrario'},
+          gostei_nao_gostei:  {a:'😀 Gostei',     b:'😕 Nao gostei'},
+          personalizado:      {a: enqueteCustomA||'Opcao A', b: enqueteCustomB||'Opcao B'}
         };
         var rotulos = TIPOS_ENQUETE[enqueteTipo] || TIPOS_ENQUETE['sim_nao'];
 
@@ -1772,20 +1793,18 @@ function renderAvisos() {
         html += '<div style="background:var(--bg);border-radius:8px;padding:9px 11px;margin:4px 11px 6px">';
         html += '<div style="font-size:11px;font-weight:600;margin-bottom:8px">'+enquetePergunta+'</div>';
         if(!lido && morador.tipo !== 'admin') {
-          // Mostra botões de voto com os rótulos corretos
           html += '<div style="display:flex;gap:6px">';
           html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="flex:1;font-size:11px;padding:8px 4px">'+rotulos.a+'</button>';
           html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="flex:1;font-size:11px;padding:8px 4px">'+rotulos.b+'</button>';
           html += '</div>';
         } else {
-          // Mostra resultado com barras
           html += '<div style="margin-bottom:4px">';
-          html += '<div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:2px"><span style="color:var(--v);font-weight:600">'+rotulos.a+'</span><span style="font-weight:600">'+( av.enquete_sim||0)+' votos ('+pctSim+'%)</span></div>';
-          html += '<div style="height:8px;background:var(--br);border-radius:4px;overflow:hidden;margin-bottom:6px"><div style="height:100%;background:var(--v);width:'+pctSim+'%;border-radius:4px;transition:width .3s"></div></div>';
+          html += '<div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:2px"><span style="color:var(--v);font-weight:600">'+rotulos.a+'</span><span style="font-weight:600">'+(av.enquete_sim||0)+' votos ('+pctSim+'%)</span></div>';
+          html += '<div style="height:8px;background:var(--br);border-radius:4px;overflow:hidden;margin-bottom:6px"><div style="height:100%;background:var(--v);width:'+pctSim+'%;border-radius:4px"></div></div>';
           html += '<div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:2px"><span style="color:var(--rdt);font-weight:600">'+rotulos.b+'</span><span style="font-weight:600">'+(av.enquete_nao||0)+' votos ('+pctNao+'%)</span></div>';
-          html += '<div style="height:8px;background:var(--br);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--rdt);width:'+pctNao+'%;border-radius:4px;transition:width .3s"></div></div>';
+          html += '<div style="height:8px;background:var(--br);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--rdt);width:'+pctNao+'%;border-radius:4px"></div></div>';
           html += '</div>';
-          if(totalVotos > 0) html += '<div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:right">'+totalVotos+' voto(s) registrado(s)</div>';
+          if(totalVotos>0) html += '<div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:right">'+totalVotos+' voto(s) registrado(s)</div>';
         }
         html += '</div>';
       }
@@ -1856,26 +1875,28 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
   if(!t||!c) { toast('Preencha titulo e mensagem'); return; }
   var expira = document.getElementById('av-expira').value || null;
   var temEnquete = document.getElementById('tgl-enquete').classList.contains('on');
-  var perguntaFinal = null;
+
+  var pergunta = null, enqueteTipo = null, labelA = null, labelB = null;
   if(temEnquete) {
-    var pergRaw = document.getElementById('av-enquete-pergunta').value.trim();
-    if(!pergRaw) { toast('Informe a pergunta da enquete.'); return; }
-    var tipo = document.getElementById('av-enquete-tipo').value;
-    var labelA = '', labelB = '';
-    if(tipo === 'personalizado') {
-      labelA = (document.getElementById('av-enquete-opcao-a').value.trim()) || 'Opcao A';
-      labelB = (document.getElementById('av-enquete-opcao-b').value.trim()) || 'Opcao B';
+    pergunta = document.getElementById('av-enquete-pergunta').value.trim();
+    if(!pergunta) { toast('Informe a pergunta da enquete.'); return; }
+    enqueteTipo = document.getElementById('av-enquete-tipo').value;
+    if(enqueteTipo === 'personalizado') {
+      labelA = document.getElementById('av-enquete-opcao-a').value.trim() || 'Opcao A';
+      labelB = document.getElementById('av-enquete-opcao-b').value.trim() || 'Opcao B';
     }
-    // Codifica tipo e labels junto com a pergunta usando separador especial
-    perguntaFinal = tipo + '||' + labelA + '||' + labelB + '||' + pergRaw;
   }
+
   sb.from('avisos').insert({
     tipo: document.getElementById('av-tipo').value,
     titulo: t, corpo: c,
     destino: document.getElementById('av-dest').value,
     publicado_por: morador.id,
     expira_em: expira,
-    enquete_pergunta: perguntaFinal,
+    enquete_pergunta: pergunta,
+    enquete_tipo: enqueteTipo,
+    enquete_label_a: labelA,
+    enquete_label_b: labelB,
     enquete_sim: 0,
     enquete_nao: 0
   }).then(function(r) {
