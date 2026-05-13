@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -511,7 +510,6 @@ textarea.form-in{resize:vertical}
 </div>
 
 <!-- MODAIS -->
-
 <div class="modal-bg" id="m-reserva">
   <div class="modal-card">
     <div class="mhandle"></div>
@@ -856,7 +854,6 @@ document.getElementById('btn-entrar').addEventListener('click', function() {
 
 // ── RECUPERAÇÃO DE SENHA ───────────────────────────────────────
 document.getElementById('link-esqueci').addEventListener('click', function() {
-  // Pré-preenche com o e-mail digitado no login, se houver
   var emailLogin = document.getElementById('login-email').value.trim();
   if(emailLogin) document.getElementById('esqueci-email').value = emailLogin;
   document.getElementById('esqueci-err').style.display = 'none';
@@ -876,7 +873,6 @@ document.getElementById('btn-enviar-reset').addEventListener('click', function()
   var btn = document.getElementById('btn-enviar-reset');
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i>Enviando...';
-  // Supabase envia e-mail de reset; a URL de redirecionamento é a própria página
   var redirectTo = window.location.origin + window.location.pathname;
   sb.auth.resetPasswordForEmail(email, { redirectTo: redirectTo }).then(function(res) {
     btn.disabled = false;
@@ -886,7 +882,6 @@ document.getElementById('btn-enviar-reset').addEventListener('click', function()
       errEl.style.display = 'block';
     } else {
       okEl.style.display = 'block';
-      // Desabilita o botão por 60s para evitar spam
       btn.disabled = true;
       btn.innerHTML = '<i class="ti ti-clock" aria-hidden="true"></i>Aguarde 60s';
       var t = 60;
@@ -904,7 +899,7 @@ document.getElementById('btn-enviar-reset').addEventListener('click', function()
   });
 });
 
-// Detecta retorno do link de reset (hash #type=recovery no URL)
+// Detecta retorno do link de reset
 sb.auth.onAuthStateChange(function(event, session) {
   if(event === 'PASSWORD_RECOVERY') {
     var novaSenha = prompt('Digite sua nova senha (minimo 6 caracteres):');
@@ -937,9 +932,7 @@ document.getElementById('link-cadastro').addEventListener('click', function() {
   sel.innerHTML = opts;
   abrirModal('m-cadastro');
 });
-
 document.getElementById('btn-fechar-cad').addEventListener('click', function() { fecharModal('m-cadastro'); });
-
 document.getElementById('btn-fazer-cad').addEventListener('click', function() {
   var nome = document.getElementById('cad-nome').value.trim();
   var email = document.getElementById('cad-email').value.trim();
@@ -1157,30 +1150,23 @@ function carregarBloqueios() {
 function isBlocked(ds, slot) {
   var dataObj = new Date(ds + 'T12:00:00');
   var dow = dataObj.getDay();
-  // Bloqueio de dia inteiro via configuração (sábado/domingo)
   if(appCfg.blk_sabado && dow === 6) return { motivo: 'Sabado Bloqueado' };
   if(appCfg.blk_domingo && dow === 0) return { motivo: 'Domingo Bloqueado' };
 
   if(slot) {
-    // Modo slot: verifica se este slot específico está bloqueado por algum bloqueio manual
     var s = slot.substring(0,5);
     var blkSlot = bloquCache.find(function(b) {
       if(ds < b.data_inicio || ds > b.data_fim) return false;
       var hI = (b.hora_inicio || '00:00').substring(0,5);
       var hF = (b.hora_fim   || '23:59').substring(0,5);
-      // O slot começa dentro da janela de bloqueio
       return s >= hI && s < hF;
     });
     return blkSlot ? { motivo: blkSlot.motivo } : null;
   } else {
-    // Modo calendário (sem slot): pinta o dia de vermelho apenas se
-    // existir um bloqueio que cubra o dia inteiro (hora_inicio <= '07:00'
-    // e hora_fim >= '22:00') OU que seja flag de dia completo (sem horas definidas).
     var blkDia = bloquCache.find(function(b) {
       if(ds < b.data_inicio || ds > b.data_fim) return false;
       var hI = (b.hora_inicio || '00:00').substring(0,5);
       var hF = (b.hora_fim   || '23:59').substring(0,5);
-      // Considera dia inteiro se cobre toda a faixa de funcionamento
       return hI <= '07:00' && hF >= '22:00';
     });
     return blkDia ? { motivo: blkDia.motivo } : null;
@@ -1210,7 +1196,7 @@ function renderCal() {
 }
 
 // ── SELECIONAR DATA E SLOTS ────────────────────────────────────
-ffunction selData(ds) {
+function selData(ds) {
   if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
   if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
@@ -1238,21 +1224,10 @@ ffunction selData(ds) {
 
       SLOTS.forEach(function(slot) {
         if(parseInt(slot) >= maxH) return;
-        
+
         var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
 
-        // 1. Verifica se existe reserva (Individual ou Aula)
-        var r = reservasDia.find(function(x) {
-          var ini = (x.slot_inicio || '').substring(0,5);
-          var fim = (x.slot_fim || '').substring(0,5);
-          var sStr = slot.substring(0,5);
-          return sStr >= ini && sStr < fim;
-        });
-
-        // 2. Se NÃO tem reserva e o horário já passou, esconde o slot
-        if(!r && ehHoje && slotMin <= agoraMin + 15) return; 
-
-        // 3. Verifica bloqueios manuais/reformas
+        // Verificar bloqueio para este slot específico
         var bloqueioInfo = isBlocked(ds, slot);
         if(bloqueioInfo) {
           html += '<div class="slot bloq" title="'+bloqueioInfo.motivo+'">';
@@ -1260,16 +1235,24 @@ ffunction selData(ds) {
           return;
         }
 
+        // Verificar se existe reserva cobrindo este slot
+        var r = reservasDia.find(function(x) {
+          var ini = (x.slot_inicio || '').substring(0,5);
+          var fim = (x.slot_fim || '').substring(0,5);
+          var sStr = slot.substring(0,5);
+          return sStr >= ini && sStr < fim;
+        });
+
+        // Se não há reserva e o horário já passou, ocultar o slot
+        if(!r && ehHoje && slotMin <= agoraMin + 15) return;
+
         var cls, lbl, action;
         if(!r) {
           cls = 'slot livre'; lbl = 'Livre'; action = 'livre';
         } else if(morador && r.unidade_id === morador.unidade_id) {
           cls = 'slot meu'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : 'Minha'); action = 'meu_' + r.id;
         } else {
-          // Exibe "Aula" se for contrato de outro morador, senão o ícone da modalidade
-          cls = 'slot ocupado'; 
-          lbl = (r.tipo_reserva === 'aula' ? 'Aula' : (r.modalidades ? r.modalidades.icone : 'Ocupado')); 
-          action = 'espera_' + r.id;
+          cls = 'slot ocupado'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : (r.modalidades ? r.modalidades.icone : 'Ocupado')); action = 'espera_' + r.id;
         }
 
         html += '<div class="'+cls+'" data-action="'+action+'" data-slot="'+slot+'" data-ds="'+ds+'">';
@@ -1281,8 +1264,8 @@ ffunction selData(ds) {
         el.addEventListener('click', function() {
           var act = el.dataset.action;
           if(act === 'livre') abrirModalReserva(el.dataset.ds, el.dataset.slot);
-          else if(act.indexOf('meu_') === 0) abrirModalCancelar(act.replace('meu_',''));
-          else if(act.indexOf('espera_') === 0) abrirListaEspera(el.dataset.ds, el.dataset.slot, act.replace('espera_',''));
+          else if(act && act.indexOf('meu_') === 0) abrirModalCancelar(act.replace('meu_',''));
+          else if(act && act.indexOf('espera_') === 0) abrirListaEspera(el.dataset.ds, el.dataset.slot, act.replace('espera_',''));
         });
       });
 
@@ -1378,8 +1361,9 @@ function showStep(n) {
   });
 }
 
+// ── CONFIRMAR RESERVA ──────────────────────────────────────────
 function confirmarReserva() {
-  if(!morador||!pendSlot||!pendMod||!pendDur) return;
+  if(!morador || !pendSlot || !pendMod || !pendDur) return;
   if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
 
   var maxMes = appCfg.max_reservas_mes;
@@ -1402,32 +1386,33 @@ function confirmarReserva() {
   } else {
     _fazerInsertReserva();
   }
+}
+
 function _fazerInsertReserva() {
   var horaInicio = pendSlot.slot + ':00';
   var horaFim = addH(pendSlot.slot, pendDur / 60) + ':00';
 
-  // NOVA TRAVA: Verifica se o horário foi ocupado enquanto o usuário decidia
+  // Verifica conflito de horário antes de inserir
   sb.from('reservas')
     .select('id')
     .eq('data_reserva', pendSlot.date)
     .neq('status', 'cancelada')
-    .or('and(slot_inicio.gte.' + horaInicio + ',slot_inicio.lt.' + horaFim + '),and(slot_fim.gt.' + horaInicio + ',slot_fim.lte.' + horaFim + ')')
+    .or('and(slot_inicio.gte.'+horaInicio+',slot_inicio.lt.'+horaFim+'),and(slot_fim.gt.'+horaInicio+',slot_fim.lte.'+horaFim+')')
     .then(function(conflito) {
-      if (conflito.data && conflito.data.length > 0) {
-        toast('Horário indisponível (conflito com aula ou reserva).');
-        selData(pendSlot.date); // Atualiza a tela para mostrar o ocupante
+      if(conflito.data && conflito.data.length > 0) {
+        toast('Horario indisponivel. Por favor, escolha outro.');
+        selData(pendSlot.date);
         fecharModal('m-reserva');
         return;
       }
 
-      // Se passou pela trava, executa o seu código original de insert abaixo:
-      var modNome = MODS.find(function(x){return x.id===pendMod;}).nome;
+      var modNome = MODS.find(function(x){ return x.id===pendMod; }).nome;
       sb.from('modalidades').select('id,nome').then(function(r) {
         var todas = r.data||[];
         var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
         var found = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNome); });
         var mid = found ? found.id : null;
-        
+
         sb.from('reservas').insert({
           unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
           data_reserva: pendSlot.date,
@@ -1443,7 +1428,6 @@ function _fazerInsertReserva() {
       });
     });
 }
-  
 
 // ── MODAL CANCELAR ─────────────────────────────────────────────
 document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
@@ -1606,9 +1590,9 @@ function renderMinhas() {
           if(!confirm('Deseja ocultar reservas passadas e canceladas?')) return;
           sb.from('reservas').update({oculto_morador: true})
             .eq('unidade_id', morador.unidade_id)
-            .or('data_reserva.lt.' + ts() + ',status.eq.cancelada,status.eq.expirada')
+            .or('data_reserva.lt.'+ts()+',status.eq.cancelada,status.eq.expirada')
             .then(function(r) {
-              if(r.error) { toast('Erro: ' + r.error.message); return; }
+              if(r.error) { toast('Erro: '+r.error.message); return; }
               toast('Historico limpo.');
               renderMinhas();
             });
@@ -2613,6 +2597,5 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
   wrap.style.display = 'block';
 });
 </script>
-
 </body>
 </html>
