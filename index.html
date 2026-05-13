@@ -1125,100 +1125,93 @@ function renderCal() {
 }
 
 function selData(ds) {
-  if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
-  if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
-  if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
+  if (ds < ts()) { toast('Não é possível reservar datas passadas.'); return; }
+  if (!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
+  if (morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
+
   selDate = ds;
   renderCal();
+  
   var sc = document.getElementById('slots-card');
   sc.style.display = 'block';
   var blk = isBlocked(ds);
-  var dow = new Date(ds+'T12:00:00').getDay();
-  var maxH = (dow===0||dow===6) ? 20 : 22;
-  document.getElementById('slots-lbl').textContent = blk ? ('Bloqueado - '+fmtD(ds)) : ('Horarios - '+fmtD(ds));
+  var dow = new Date(ds + 'T12:00:00').getDay();
+  var maxH = (dow === 0 || dow === 6) ? 20 : 22;
+  
+  document.getElementById('slots-lbl').textContent = blk ? ('Bloqueado - ' + fmtD(ds)) : ('Horários - ' + fmtD(ds));
   var sg = document.getElementById('slot-grid');
-  if(blk) {
+
+  if (blk) {
     var motivo = '';
-    bloquCache.forEach(function(b) { if(ds>=b.data_inicio&&ds<=b.data_fim) motivo=b.motivo||'Bloqueado'; });
-    var blkTipoCal = '';
-    bloquCache.forEach(function(b) { if(ds>=b.data_inicio&&ds<=b.data_fim && b.tipo) blkTipoCal=b.tipo; });
-    var blkIconsCal = {manutencao:'🔧',limpeza:'🧹',evento:'🎉',vistoria:'📋',outro:'📌'};
-    var blkIcoCal = blkIconsCal[blkTipoCal] || '🚫';
-    sg.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;font-size:11px;color:var(--rdt)">'+blkIcoCal+' '+motivo+'</div>';
+    bloquCache.forEach(function(b) { if (ds >= b.data_inicio && ds <= b.data_fim) motivo = b.motivo || 'Bloqueado'; });
+    sg.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:14px;font-size:11px;color:var(--rdt)">🚫 ' + motivo + '</div>';
     return;
   }
-  sb.from('reservas').select('id,unidade_id,slot_inicio,slot_fim,duracao_min,status,tipo_reserva,modalidades(nome,icone),unidades(codigo)').eq('data_reserva',ds).neq('status','cancelada').neq('status','expirada').then(function(res) {
-    var reservasDia = res.data||[];
-    var agora = new Date();
-    var agoraMin = agora.getHours()*60 + agora.getMinutes();
-    var ehHoje = (ds === ts());
-    var html = '';
-    SLOTS.forEach(function(slot) {
-      if(parseInt(slot) >= maxH) return;
-      var slotMin = parseInt(slot.split(':')[0])*60 + parseInt(slot.split(':')[1]);
-      if(ehHoje && slotMin <= agoraMin + 30) return;
-      var r = null;
-      reservasDia.forEach(function(x) {
-        var iniMin = parseInt((x.slot_inicio||'00:00').slice(0,2))*60 + parseInt((x.slot_inicio||'00:00').slice(3,5));
-        var fimMin = parseInt((x.slot_fim||'00:00').slice(0,2))*60 + parseInt((x.slot_fim||'00:00').slice(3,5));
-        if(slotMin >= iniMin && slotMin < fimMin) r=x;
-      });
-      var cls, lbl, action;
-      if(!r) { cls='slot livre'; lbl='Livre'; action='livre'; }
-      else if(morador && r.unidade_id===morador.unidade_id) {
-        cls='slot meu';
-        lbl = r.tipo_reserva==='aula' ? 'Aula' : 'Minha';
-        action='meu_'+r.id;
-      }
-      else {
-        cls='slot ocupado';
-        lbl = r.modalidades ? r.modalidades.icone : 'Ocupado';
-        action='espera_'+r.id;
-      }
-      html += '<div class="'+cls+'" data-action="'+action+'" data-slot="'+slot+'" data-ds="'+ds+'">';
-      html += '<div class="sh">'+slot+'</div><div class="sl">'+lbl+'</div></div>';
-    });
-    sg.innerHTML = html;
-    sg.querySelectorAll('.slot').forEach(function(el) {
-      el.addEventListener('click', function() {
-        var action = el.dataset.action;
-        if(action==='livre') { abrirModalReserva(el.dataset.ds, el.dataset.slot); }
-        else if(action && action.indexOf('meu_')===0) { abrirModalCancelar(action.replace('meu_','')); }
-        else if(action && action.indexOf('espera_')===0) { abrirListaEspera(el.dataset.ds, el.dataset.slot, action.replace('espera_','')); }
-      });
-    });
 
-    // ── Descritivo de reservas do dia ──────────────────────────────
-    var cardDia = document.getElementById('card-reservas-dia');
-    var listaDia = document.getElementById('lista-reservas-dia');
-    if(reservasDia.length && cardDia && listaDia) {
-      cardDia.style.display = 'block';
-      var htmlDia = '';
-      reservasDia.forEach(function(r) {
-        var m = r.modalidades;
-        var modTxt = m ? (m.icone + ' ' + m.nome) : 'Uso livre';
-        var isMeu = morador && r.unidade_id === morador.unidade_id;
-        var tipo = r.tipo_reserva === 'aula' ? '<span class="badge b-info" style="font-size:9px">Aula</span>' : '<span class="badge b-ok" style="font-size:9px">Pontual</span>';
-        var aptoStr = r.unidades ? r.unidades.codigo : '';
-        var quem = isMeu ? '<span class="badge b-teal" style="font-size:9px">'+aptoStr+'</span>' : (isAdmin() && aptoStr ? '<span class="badge b-gray" style="font-size:9px">'+aptoStr+'</span>' : '');
-        var slotI = (r.slot_inicio||'').slice(0,5);
-        var slotF = (r.slot_fim||'').slice(0,5);
-        htmlDia += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
-        htmlDia += '<div style="font-size:12px;font-weight:600;min-width:88px">'+slotI+' - '+slotF+'</div>';
-        htmlDia += '<div style="flex:1;min-width:0">';
-        htmlDia += '<div style="font-size:11px;font-weight:600">'+modTxt+'</div>';
-        htmlDia += '<div style="font-size:10px;color:var(--t2)">'+(r.duracao_min===60?'1 hora':'2 horas')+'</div>';
-        htmlDia += '</div>';
-        htmlDia += '<div style="display:flex;gap:3px;flex-wrap:wrap">'+tipo+quem+'</div>';
-        htmlDia += '</div>';
+  // Busca as reservas do dia ignorando as canceladas
+  sb.from('reservas')
+    .select('id, unidade_id, slot_inicio, slot_fim, status, tipo_reserva, modalidades(nome, icone), unidades(codigo)')
+    .eq('data_reserva', ds)
+    .neq('status', 'cancelada')
+    .then(function(res) {
+      var reservasDia = res.data || [];
+      var agora = new Date();
+      var agoraMin = agora.getHours() * 60 + agora.getMinutes();
+      var ehHoje = (ds === ts());
+      var html = '';
+
+      SLOTS.forEach(function(slot) {
+        if (parseInt(slot) >= maxH) return;
+        
+        var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
+        if (ehHoje && slotMin <= agoraMin + 30) return;
+
+        // CORREÇÃO CRÍTICA: substring(0,5) ignora os segundos que o banco envia
+        var r = reservasDia.find(function(x) {
+          var ini = (x.slot_inicio || "").substring(0, 5);
+          var fim = (x.slot_fim || "").substring(0, 5);
+          return slot >= ini && slot < fim;
+        });
+
+        var cls, lbl, action;
+        if (!r) { 
+          cls = 'slot livre'; lbl = 'Livre'; action = 'livre'; 
+        } else if (morador && r.unidade_id === morador.unidade_id) {
+          cls = 'slot meu'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : 'Minha'); action = 'meu_' + r.id;
+        } else {
+          cls = 'slot ocupado'; lbl = r.modalidades ? r.modalidades.icone : 'Ocupado'; action = 'espera_' + r.id;
+        }
+
+        html += '<div class="' + cls + '" data-action="' + action + '" data-slot="' + slot + '" data-ds="' + ds + '">';
+        html += '<div class="sh">' + slot + '</div><div class="sl">' + lbl + '</div></div>';
       });
-      listaDia.innerHTML = htmlDia;
-    } else if(cardDia) {
-      cardDia.style.display = 'none';
-    }
-  });
+      
+      sg.innerHTML = html;
+      sg.querySelectorAll('.slot').forEach(function(el) {
+        el.addEventListener('click', function() {
+          var act = el.dataset.action;
+          if (act === 'livre') abrirModalReserva(el.dataset.ds, el.dataset.slot);
+          else if (act.indexOf('meu_') === 0) abrirModalCancelar(act.replace('meu_', ''));
+          else if (act.indexOf('espera_') === 0) abrirListaEspera(el.dataset.ds, el.dataset.slot, act.replace('espera_', ''));
+        });
+      });
+      
+      // Atualiza a lista descritiva abaixo dos slots
+      var listaDia = document.getElementById('lista-reservas-dia');
+      var cardDia = document.getElementById('card-reservas-dia');
+      if (reservasDia.length > 0) {
+        cardDia.style.display = 'block';
+        listaDia.innerHTML = reservasDia.map(function(r) {
+          return '<div style="font-size:11px; padding:4px 0; border-bottom:0.5px solid var(--br)">' +
+                 '<b>' + r.slot_inicio.substring(0,5) + '</b> - ' + (r.unidades ? r.unidades.codigo : 'Reserva') + 
+                 ' (' + (r.modalidades ? r.modalidades.nome : 'Uso') + ')</div>';
+        }).join('');
+      } else {
+        cardDia.style.display = 'none';
+      }
+    });
 }
-
+  
 // ── MODAL RESERVA ──────────────────────────────────────────────
 document.getElementById('btn-cancelar-res').addEventListener('click', function() { fecharModal('m-reserva'); });
 document.getElementById('btn-voltar-step1').addEventListener('click', function() { pendDur=null; showStep(1); renderModGrid(); });
