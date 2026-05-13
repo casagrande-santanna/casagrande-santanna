@@ -206,6 +206,7 @@ textarea.form-in{resize:vertical}
     <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
     <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
+    <button class="tab" id="tab-calendario"><i class="ti ti-calendar-month" aria-hidden="true"></i>Calendario</button>
     <button class="tab" id="tab-ocorrencias" style="display:none"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
     <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config<span class="ndot" id="nd-config"></span></button>
   </div>
@@ -262,8 +263,35 @@ textarea.form-in{resize:vertical}
         <button class="btn-s" id="btn-fechar-scanner" style="display:none;width:100%;border-color:var(--rdb);color:var(--rdt);margin-top:6px"><i class="ti ti-x" aria-hidden="true"></i>Cancelar Leitura</button>
       </div>
       <div id="ckin-main"></div>
-      <div class="sec-lbl">Historico</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;margin-bottom:2px">
+        <div class="sec-lbl" style="padding:0">Historico</div>
+        <button class="btn-sm r" id="btn-limpar-hist-ckin" style="font-size:10px"><i class="ti ti-trash" aria-hidden="true"></i>Limpar historico</button>
+      </div>
       <div id="ckin-hist"></div>
+    </div>
+    <div class="screen" id="screen-calendario">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar-month" aria-hidden="true"></i>Calendario de Reservas</div>
+        <div class="cal-hdr">
+          <button class="cal-nav" id="btn-prev-m-cal"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+          <span class="cal-month" id="cal-lbl-cal"></span>
+          <button class="cal-nav" id="btn-next-m-cal"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+        </div>
+        <div class="cal-grid" id="cal-grid-cal"></div>
+        <div class="leg-row">
+          <div class="leg"><div class="leg-dot" style="background:#EAF3DE;border:1px solid #97C459"></div>Livre</div>
+          <div class="leg"><div class="leg-dot" style="background:#FCEBEB;border:1px solid #F09595"></div>Com reserva</div>
+          <div class="leg"><div class="leg-dot" style="background:#F1EFE8;border:1px solid #B4B2A9"></div>Bloqueado</div>
+        </div>
+      </div>
+      <div class="card" id="cal-detalhe-card" style="display:none">
+        <div class="card-title"><i class="ti ti-list-details" aria-hidden="true"></i><span id="cal-detalhe-lbl">Reservas do dia</span></div>
+        <div id="cal-detalhe-lista"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-pie" aria-hidden="true"></i>Resumo do mes</div>
+        <div id="cal-resumo-mes"><div style="font-size:11px;color:var(--t2)">Carregando...</div></div>
+      </div>
     </div>
     <div class="screen" id="screen-ocorrencias">
       <div class="card" style="background:var(--bl);border-color:var(--blb)">
@@ -743,7 +771,7 @@ var sb = supabase.createClient(SURL, SKEY);
 
 var MESES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 var DIAS_N = ['D','S','T','Q','Q','S','S'];
-var SLOTS = ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+var SLOTS = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
 var MODS = [
   {id:'tenis1',nome:'Tenis simples',sub:'1x1',icon:'🎾',fixo:true,durs:[60]},
   {id:'tenis2',nome:'Tenis duplas',sub:'2x2',icon:'🎾',fixo:false,durs:[60,120]},
@@ -1053,12 +1081,13 @@ document.getElementById('tab-avisos').addEventListener('click', function() { goS
 document.getElementById('tab-reservar').addEventListener('click', function() { goScreen('reservar'); renderCal(); });
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
 document.getElementById('tab-checkin').addEventListener('click', function() { goScreen('checkin'); renderCheckin(); });
+document.getElementById('tab-calendario').addEventListener('click', function() { goScreen('calendario'); renderCalendario(); });
 document.getElementById('tab-ocorrencias').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('ocorrencias'); renderOco(); });
 document.getElementById('tab-config').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('config'); renderConfig(); });
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
 function goScreen(name) {
-  var telas = ['avisos','reservar','minhas','checkin','ocorrencias','config','perfil'];
+  var telas = ['avisos','reservar','minhas','checkin','calendario','ocorrencias','config','perfil'];
   telas.forEach(function(t) {
     document.getElementById('screen-'+t).classList.remove('active');
     var tab = document.getElementById('tab-'+t);
@@ -1206,8 +1235,7 @@ function selData(ds) {
 
   var sc = document.getElementById('slots-card');
   sc.style.display = 'block';
-  var dow = new Date(ds + 'T12:00:00').getDay();
-  var maxH = (dow === 0 || dow === 6) ? 20 : 22;
+  var maxH = 22; // slots de 06:00 ate 21:00 (encerra as 22:00), valido para todos os dias
   document.getElementById('slots-lbl').textContent = 'Horarios - ' + fmtD(ds);
   var sg = document.getElementById('slot-grid');
 
@@ -1533,6 +1561,24 @@ function renderCheckin() {
       html += bl+'</div>';
     });
     hel.innerHTML = html;
+
+    // Botão limpar histórico check-in
+    var btnLimCkin = document.getElementById('btn-limpar-hist-ckin');
+    if(btnLimCkin) {
+      var newBtnLimCkin = btnLimCkin.cloneNode(true);
+      btnLimCkin.parentNode.replaceChild(newBtnLimCkin, btnLimCkin);
+      newBtnLimCkin.addEventListener('click', function() {
+        if(!confirm('Ocultar todo o historico de check-in antigo?')) return;
+        sb.from('reservas').update({oculto_morador: true})
+          .eq('unidade_id', morador.unidade_id)
+          .or('data_reserva.lt.'+ts()+',status.eq.cancelada,status.eq.expirada')
+          .then(function(r) {
+            if(r.error) { toast('Erro: '+r.error.message); return; }
+            toast('Historico de check-in limpo.');
+            renderCheckin();
+          });
+      });
+    }
   });
 }
 
@@ -1547,6 +1593,7 @@ function renderMinhas() {
     .eq('unidade_id', morador.unidade_id)
     .neq('oculto_morador', true)
     .order('data_reserva', {ascending:false})
+    .order('slot_inicio', {ascending:false})
     .then(function(res) {
       var mine = res.data||[];
       var list = document.getElementById('minhas-list');
@@ -2575,6 +2622,132 @@ if(tglPush) {
       });
     }
   });
+}
+
+// ── CALENDÁRIO DE RESERVAS ─────────────────────────────────────
+var calVY = new Date().getFullYear(), calVM = new Date().getMonth();
+var calSelDate = null;
+
+document.getElementById('btn-prev-m-cal').addEventListener('click', function() {
+  calVM--; if(calVM<0){calVM=11;calVY--;} renderCalendario();
+});
+document.getElementById('btn-next-m-cal').addEventListener('click', function() {
+  calVM++; if(calVM>11){calVM=0;calVY++;} renderCalendario();
+});
+
+function renderCalendario() {
+  document.getElementById('cal-lbl-cal').textContent = MESES[calVM]+' '+calVY;
+  var ini = calVY+'-'+String(calVM+1).padStart(2,'0')+'-01';
+  var fim = calVY+'-'+String(calVM+1).padStart(2,'0')+'-31';
+
+  // Busca todas as reservas confirmadas do mês
+  sb.from('reservas')
+    .select('data_reserva,slot_inicio,slot_fim,tipo_reserva,unidades(codigo),modalidades(nome,icone)')
+    .neq('status','cancelada')
+    .gte('data_reserva', ini)
+    .lte('data_reserva', fim)
+    .order('slot_inicio',{ascending:true})
+    .then(function(res) {
+      var reservasMes = res.data || [];
+
+      // Agrupa por data
+      var porData = {};
+      reservasMes.forEach(function(r) {
+        var d = r.data_reserva;
+        if(!porData[d]) porData[d] = [];
+        porData[d].push(r);
+      });
+
+      // Monta o grid do calendário
+      var g = document.getElementById('cal-grid-cal');
+      var html = DIAS_N.map(function(d){ return '<div class="cal-dn">'+d+'</div>'; }).join('');
+      var first = new Date(calVY,calVM,1).getDay();
+      var days = new Date(calVY,calVM+1,0).getDate();
+      var today = ts();
+      for(var i=0; i<first; i++) html += '<div></div>';
+      for(var d=1; d<=days; d++) {
+        var ds = calVY+'-'+String(calVM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        var blk = isBlocked(ds);
+        var temReserva = porData[ds] && porData[ds].length > 0;
+        var cls = 'cal-d';
+        if(ds === today) cls += ' today';
+        if(ds === calSelDate) cls += ' sel';
+        if(blk) cls += ' blk';
+        else if(temReserva) {
+          // Dia com reserva: fundo vermelho claro (ocupado)
+          html += '<div class="'+cls+'" data-cds="'+ds+'" style="background:#FCEBEB;color:var(--rdt);font-weight:600;cursor:pointer" title="'+porData[ds].length+' reserva(s)">'+d+'<span style="display:block;font-size:7px;line-height:1">'+porData[ds].length+'x</span></div>';
+          continue;
+        }
+        html += '<div class="'+cls+'" data-cds="'+ds+'">'+d+'</div>';
+      }
+      g.innerHTML = html;
+
+      // Eventos de clique nos dias
+      g.querySelectorAll('[data-cds]').forEach(function(el) {
+        el.addEventListener('click', function() {
+          calSelDate = el.dataset.cds;
+          renderCalendario(); // re-render para marcar selecionado
+          var ds = el.dataset.cds;
+          var detalheCard = document.getElementById('cal-detalhe-card');
+          var detalheLbl = document.getElementById('cal-detalhe-lbl');
+          var detalheLista = document.getElementById('cal-detalhe-lista');
+          detalheLbl.textContent = 'Reservas em ' + fmtD(ds);
+          var ress = porData[ds] || [];
+          if(!ress.length) {
+            detalheCard.style.display = 'block';
+            detalheLista.innerHTML = '<div style="font-size:11px;color:var(--t2);padding:6px 0">Nenhuma reserva neste dia.</div>';
+          } else {
+            detalheCard.style.display = 'block';
+            detalheLista.innerHTML = ress.map(function(r) {
+              var cod = r.unidades ? r.unidades.codigo : '---';
+              var mod = r.modalidades ? (r.modalidades.icone+' '+r.modalidades.nome) : 'Uso Livre';
+              var si = (r.slot_inicio||'').slice(0,5);
+              var sf = (r.slot_fim||'').slice(0,5);
+              var tipoBadge = r.tipo_reserva === 'aula'
+                ? '<span class="badge b-info" style="font-size:9px">Aula</span>'
+                : '<span class="badge b-ok" style="font-size:9px">Pontual</span>';
+              return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">'
+                +'<div style="width:36px;height:36px;border-radius:8px;background:var(--vl);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:var(--v)">'+cod.slice(-3)+'</div>'
+                +'<div style="flex:1;min-width:0">'
+                  +'<div style="font-size:12px;font-weight:600">Apto '+cod+' &middot; '+si+' &ndash; '+sf+'</div>'
+                  +'<div style="font-size:10.5px;color:var(--t2)">'+mod+'</div>'
+                +'</div>'
+                +tipoBadge
+                +'</div>';
+            }).join('');
+          }
+        });
+      });
+
+      // Resumo do mês
+      var totalRes = reservasMes.length;
+      var aptosUnicos = {};
+      reservasMes.forEach(function(r){ if(r.unidades) aptosUnicos[r.unidades.codigo] = (aptosUnicos[r.unidades.codigo]||0)+1; });
+      var rankApto = Object.entries(aptosUnicos).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+      var diasComRes = Object.keys(porData).length;
+      var diasMes = new Date(calVY,calVM+1,0).getDate();
+      var ocupacao = Math.round(diasComRes/diasMes*100);
+      var el = document.getElementById('cal-resumo-mes');
+      var resumoHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+        +'<div style="background:var(--vl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--v)">'+totalRes+'</div><div style="font-size:10px;color:var(--t2)">Reservas no mes</div></div>'
+        +'<div style="background:var(--bl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blt)">'+ocupacao+'%</div><div style="font-size:10px;color:var(--t2)">Dias com reserva</div></div>'
+        +'</div>';
+      if(rankApto.length) {
+        resumoHtml += '<div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Apartamentos mais ativos</div>';
+        rankApto.forEach(function(a, i) {
+          var medals = ['🥇','🥈','🥉'];
+          var medal = medals[i] || (i+1+'.');
+          resumoHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--br)">'
+            +'<span style="font-size:13px">'+medal+'</span>'
+            +'<span style="flex:1;font-size:12px;font-weight:600">Apto '+a[0]+'</span>'
+            +'<span class="badge b-ok">'+a[1]+' reserva(s)</span>'
+            +'</div>';
+        });
+      } else {
+        resumoHtml += '<div style="font-size:11px;color:var(--t2)">Nenhuma reserva neste mes.</div>';
+      }
+      el.innerHTML = resumoHtml;
+    });
 }
 
 // ── REGULAMENTO ────────────────────────────────────────────────
