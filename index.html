@@ -1562,7 +1562,12 @@ function renderCheckin() {
     return;
   }
   var today = ts();
-  sb.from('reservas').select('*,modalidades(nome,icone)').eq('unidade_id',morador.unidade_id).eq('data_reserva',today).eq('status','confirmada').eq('checkin_feito',false).limit(1).maybeSingle().then(function(res) {
+  sb.from('reservas').select('*,modalidades(nome,icone)')
+    .eq('unidade_id',morador.unidade_id)
+    .eq('data_reserva',today)
+    .eq('status','confirmada')
+    .neq('checkin_feito',true)
+    .limit(1).maybeSingle().then(function(res) {
     var proxima = res.data;
     var main = document.getElementById('ckin-main');
     var nd = document.getElementById('nd-ckin');
@@ -1619,12 +1624,24 @@ function renderCheckin() {
     if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
     var html = '';
     hist.forEach(function(r) {
-      var fezCheckin = (r.checkin_feito === true);
-      var dotC = fezCheckin ? '#3B6D11' : ((r.status==='cancelada'||r.status==='expirada')?'#E24B4A':'#EF9F27');
-      var bl = '<span class="badge b-warn">Aguardando</span>';
-      if(fezCheckin) bl='<span class="badge b-teal">✓ Check-in feito</span>';
-      else if(r.status==='cancelada') bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
-      else if(r.status==='expirada') bl='<span class="badge b-gray">Ausencia</span>';
+      var fezCheckin = !!r.checkin_feito; // !! converte null/undefined para false
+      var cancelada  = r.status === 'cancelada';
+      var expirada   = r.status === 'expirada';
+      var confirmada = r.status === 'confirmada';
+
+      var dotC;
+      if(fezCheckin)          dotC = '#3B6D11';        // verde
+      else if(cancelada)      dotC = '#F09595';        // vermelho claro
+      else if(expirada)       dotC = '#B4B2A9';        // cinza
+      else                    dotC = '#EF9F27';        // amarelo (aguardando)
+
+      var bl;
+      if(fezCheckin)          bl = '<span class="badge b-teal">✓ Check-in feito</span>';
+      else if(cancelada)      bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
+      else if(expirada)       bl = '<span class="badge b-gray">Ausencia</span>';
+      else if(confirmada)     bl = '<span class="badge b-warn">Confirmada</span>';
+      else                    bl = '<span class="badge b-gray">'+(r.status||'---')+'</span>';
+
       var m = r.modalidades;
       html += '<div class="ckin-row" data-rid="'+r.id+'" data-dt="'+r.data_reserva+'" data-st="'+(r.status||'')+'">';
       html += '<div class="ckin-dot" style="background:'+dotC+'"></div>';
@@ -1846,29 +1863,29 @@ function renderAvisos() {
         var pctSim = totalVotos > 0 ? Math.round((av.enquete_sim||0)/totalVotos*100) : 0;
         var pctNao = totalVotos > 0 ? (100 - pctSim) : 0;
 
-        // Verifica se este morador JÁ VOTOU (campo voto salvo no aviso como flag local)
-        // Usamos leituras_avisos: se tem registro COM voto, esconde botões
-        // Estratégia: admin sempre vê resultado; morador vê botões ATÉ marcar lido via voto
-        var jaVotou = !!(lido);  // lido só é setado após votar ou clicar "marcar lido"
-        var podeVotar = !jaVotou && morador.tipo !== 'admin';
+        // Todos (morador e admin) podem votar.
+        // Considera "já votou" quem tem entrada em leituras_avisos
+        // (votar registra leitura; mas admin não marca lido automaticamente,
+        //  então admin vê botões a menos que tenha votado explicitamente)
+        var jaVotou = !!(lido);
+        var podeVotar = !jaVotou; // todos podem votar enquanto não votaram
 
         html += '<div style="background:var(--bg);border-radius:8px;padding:10px 11px;margin:4px 11px 8px;border:0.5px solid var(--br)">';
         html += '<div style="font-size:11.5px;font-weight:600;margin-bottom:8px;color:var(--tx)">📊 '+enquetePergunta+'</div>';
         if(podeVotar) {
           html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
-          html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="font-size:11.5px;padding:10px 6px;font-weight:600">'+rotulos.a+'</button>';
-          html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="font-size:11.5px;padding:10px 6px;font-weight:600">'+rotulos.b+'</button>';
+          html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="font-size:12px;padding:11px 6px;font-weight:600;border-radius:8px">'+rotulos.a+'</button>';
+          html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="font-size:12px;padding:11px 6px;font-weight:600;border-radius:8px">'+rotulos.b+'</button>';
           html += '</div>';
-          html += '<div style="font-size:10px;color:var(--t2);margin-top:5px;text-align:center">'+totalVotos+' voto(s) registrado(s) — clique para participar</div>';
+          if(totalVotos > 0) html += '<div style="font-size:10px;color:var(--t2);margin-top:6px;text-align:center">'+totalVotos+' voto(s) ja registrado(s)</div>';
         } else {
-          // Resultado com barras de progresso
           html += '<div>';
           html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--v)">'+rotulos.a+'</span><span style="font-weight:700">'+(av.enquete_sim||0)+' ('+pctSim+'%)</span></div>';
           html += '<div style="height:10px;background:var(--br);border-radius:5px;overflow:hidden;margin-bottom:8px"><div style="height:100%;background:var(--v);width:'+pctSim+'%;border-radius:5px"></div></div>';
           html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--rdt)">'+rotulos.b+'</span><span style="font-weight:700">'+(av.enquete_nao||0)+' ('+pctNao+'%)</span></div>';
           html += '<div style="height:10px;background:var(--br);border-radius:5px;overflow:hidden"><div style="height:100%;background:var(--rdt);width:'+pctNao+'%;border-radius:5px"></div></div>';
           html += '</div>';
-          if(totalVotos>0) html += '<div style="font-size:10px;color:var(--t2);margin-top:6px;text-align:right">'+totalVotos+' voto(s) registrado(s)</div>';
+          html += '<div style="font-size:10px;color:var(--t2);margin-top:6px;text-align:right">'+totalVotos+' voto(s) registrado(s) — voce ja votou</div>';
         }
         html += '</div>';
       }
