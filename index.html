@@ -1513,6 +1513,47 @@ function doCheckin(id) {
   });
 }
 
+// Verifica e aplica suspensão por fair play após uma falta (reserva expirada)
+function verificarFairPlay(unidadeId) {
+  if(!appCfg.fair_play_ativo) return;
+  // Sempre busca configuração atualizada do banco antes de verificar
+  sb.from('configuracoes').select('faltas_suspensao,suspensao_dias,fair_play_ativo').limit(1).maybeSingle().then(function(cfgRes) {
+    var cfg = cfgRes.data || {};
+    var ativo = cfg.fair_play_ativo !== false && appCfg.fair_play_ativo !== false;
+    if(!ativo) return;
+    var limiteFaltas = parseInt(cfg.faltas_suspensao || appCfg.faltas_suspensao) || 2;
+    var diasSusp = parseInt(cfg.suspensao_dias || appCfg.suspensao_dias) || 15;
+    // Sincroniza appCfg com valor real do banco
+    if(cfg.faltas_suspensao) appCfg.faltas_suspensao = limiteFaltas;
+    if(cfg.suspensao_dias) appCfg.suspensao_dias = diasSusp;
+
+    var mesAtual = new Date().toISOString().slice(0,7);
+    sb.from('reservas')
+      .select('id', {count:'exact', head:true})
+      .eq('unidade_id', unidadeId)
+      .eq('status', 'expirada')
+      .gte('data_reserva', mesAtual+'-01')
+      .lte('data_reserva', mesAtual+'-31')
+      .then(function(rc) {
+        var totalFaltas = rc.count || 0;
+        if(totalFaltas >= limiteFaltas) {
+          var ate = new Date();
+          ate.setDate(ate.getDate() + diasSusp);
+          var ateStr = ate.toISOString().slice(0,10);
+          sb.from('moradores')
+            .update({status:'suspenso', suspenso_ate: ateStr, faltas_mes: totalFaltas})
+            .eq('unidade_id', unidadeId)
+            .eq('status', 'ativo')
+            .then(function(upd) {
+              if(!upd.error) {
+                toast('Atencao: apartamento suspenso por '+diasSusp+' dias ('+totalFaltas+'/'+limiteFaltas+' faltas este mes).');
+              }
+            });
+        }
+      });
+  });
+}
+
 function renderCheckin() {
   if(!morador) return;
   if(!morador.unidade_id) {
@@ -1578,9 +1619,10 @@ function renderCheckin() {
     if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
     var html = '';
     hist.forEach(function(r) {
-      var dotC = r.checkin_feito ? '#3B6D11' : ((r.status==='cancelada'||r.status==='expirada')?'#E24B4A':'#EF9F27');
+      var fezCheckin = (r.checkin_feito === true);
+      var dotC = fezCheckin ? '#3B6D11' : ((r.status==='cancelada'||r.status==='expirada')?'#E24B4A':'#EF9F27');
       var bl = '<span class="badge b-warn">Aguardando</span>';
-      if(r.checkin_feito) bl='<span class="badge b-teal">Presente</span>';
+      if(fezCheckin) bl='<span class="badge b-teal">✓ Check-in feito</span>';
       else if(r.status==='cancelada') bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
       else if(r.status==='expirada') bl='<span class="badge b-gray">Ausencia</span>';
       var m = r.modalidades;
@@ -2882,13 +2924,13 @@ function renderCalendario() {
         +'</div>'
         +'<div style="background:var(--am);border-radius:8px;padding:10px;margin-bottom:10px">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
-        +'<span style="font-size:11px;font-weight:600;color:var(--amt)">Ocupacao dos slots do mes</span>'
+        +'<span style="font-size:11px;font-weight:600;color:var(--amt)">Ocupacao dos horarios disponiveis do mes</span>'
         +'<span style="font-size:16px;font-weight:700;color:var(--amt)">'+taxaSlots+'%</span>'
         +'</div>'
         +'<div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden">'
         +'<div style="height:100%;background:var(--amb);width:'+taxaSlots+'%;border-radius:4px"></div>'
         +'</div>'
-        +'<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponiveis+' slots de 1h reservados</div>'
+        +'<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponiveis+' horarios de 1h reservados</div>'
         +'</div>';
       if(rankApto.length) {
         resumoHtml += '<div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Apartamentos mais ativos</div>';
