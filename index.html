@@ -1460,7 +1460,35 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${texto}&dates=${dtStart}/${dtEnd}&location=${local}&details=${details}`;
 }
 // ── CONFIRMAR RESERVA ──────────────────────────────────────────
-function confirmarReserva() {
+function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
+
+  const dtStart =
+    date.replace(/-/g,'') +
+    'T' +
+    slotInicio.replace(':','') +
+    '00';
+
+  const dtEnd =
+    date.replace(/-/g,'') +
+    'T' +
+    slotFim.replace(':','') +
+    '00';
+
+  const texto = encodeURIComponent(
+    `🎾 Reserva da Quadra — ${modalidade}`
+  );
+
+  const local = encodeURIComponent(
+    "Quadra Poliesportiva — Casa Grande Sant'Anna"
+  );
+
+  const details = encodeURIComponent(
+    `Apartamento ${apto}`
+  );
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${texto}&dates=${dtStart}/${dtEnd}&location=${local}&details=${details}`;
+}
+  function confirmarReserva() {
   if(!morador || !pendSlot || !pendMod || !pendDur) return;
   if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
 
@@ -1522,6 +1550,23 @@ function _fazerInsertReserva() {
           selData(pendSlot.date);
           renderMinhas(); renderCheckin();
           toast('Reserva confirmada!');
+          var linkCalendar = gerarLinkGoogleCalendar(
+  pendSlot.date,
+  slotInicio,
+  slotFim,
+  mod.nome,
+  morador.unidades ? morador.unidades.codigo : ''
+);
+
+setTimeout(function(){
+
+  if(confirm('Deseja adicionar esta reserva ao Google Calendar?')){
+
+    window.open(linkCalendar,'_blank');
+
+  }
+
+},500);
           var linkCalendar = gerarLinkGoogleCalendar(
   pendSlot.date,
   slotInicio,
