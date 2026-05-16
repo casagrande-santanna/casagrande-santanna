@@ -1215,6 +1215,7 @@ function processarQrQuadra() {
             checkin_feito: true, checkin_em: new Date().toISOString()
           }).then(function(ins) {
             if(ins.error) { toast('Erro: ' + ins.error.message); return; }
+           alert('RESERVA OK');
             toast('Quadra livre! Reserva criada e check-in realizado.');
             renderCheckin(); renderMinhas(); renderCal();
           });
