@@ -359,6 +359,20 @@ textarea.form-in{resize:vertical}
         <button class="btn-d" id="btn-blk-emergencial" style="width:100%"><i class="ti ti-lock" aria-hidden="true"></i>Bloquear quadra agora</button>
         <button class="btn-s" id="btn-desblk-emergencial" style="width:100%;margin-top:6px;display:none;border-color:var(--rdb);color:var(--rdt)"><i class="ti ti-lock-open" aria-hidden="true"></i>Remover bloqueio emergencial</button>
       </div>
+      <div class="card" style="background:var(--rd);border-color:var(--rdb)">
+        <div class="card-title" style="color:var(--rdt)"><i class="ti ti-trash" aria-hidden="true" style="color:var(--rdt)"></i>Cancelamento em massa</div>
+        <div style="font-size:11px;color:var(--rdt);margin-bottom:12px;line-height:1.5">Cancela todas as reservas confirmadas no periodo selecionado. Esta acao nao pode ser desfeita.</div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;color:var(--rdt);display:block;margin-bottom:5px;font-weight:600">Periodo</label>
+          <select class="form-in" id="cancel-massa-periodo" style="font-size:12px;border-color:var(--rdb);color:var(--rdt);background:var(--cd)">
+            <option value="mes">Mes corrente</option>
+            <option value="semestre">Semestre atual (6 meses)</option>
+            <option value="todas">Todas as reservas futuras</option>
+          </select>
+        </div>
+        <div id="cancel-massa-preview" style="font-size:11px;color:var(--rdt);margin-bottom:10px;min-height:16px"></div>
+        <button class="btn-d" id="btn-cancel-massa" style="width:100%"><i class="ti ti-trash" aria-hidden="true"></i>Cancelar reservas</button>
+      </div>
       <div class="card" style="border:2px dashed var(--v)">
         <div class="card-title"><i class="ti ti-printer" aria-hidden="true"></i>QR Code Fixo da Quadra</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Imprima e fixe na parede da quadra.</div>
@@ -3091,6 +3105,92 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
     renderWidgetStatus();
   });
 });
+
+// ── CANCELAMENTO EM MASSA ──────────────────────────────────────
+(function() {
+  var selPeriodo = document.getElementById('cancel-massa-periodo');
+  var preview    = document.getElementById('cancel-massa-preview');
+
+  function getRange() {
+    var hoje = new Date();
+    var ini, fim;
+    var periodo = selPeriodo ? selPeriodo.value : 'mes';
+    if(periodo === 'mes') {
+      ini = hoje.toISOString().slice(0,7) + '-01';
+      var ult = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0);
+      fim = ult.toISOString().slice(0,10);
+    } else if(periodo === 'semestre') {
+      ini = hoje.toISOString().slice(0,10);
+      var semFim = new Date(hoje);
+      semFim.setMonth(semFim.getMonth() + 6);
+      fim = semFim.toISOString().slice(0,10);
+    } else {
+      ini = hoje.toISOString().slice(0,10);
+      fim = '2099-12-31';
+    }
+    return {ini: ini, fim: fim};
+  }
+
+  function atualizarPreview() {
+    if(!preview) return;
+    var r = getRange();
+    sb.from('reservas')
+      .select('id', {count: 'exact', head: true})
+      .eq('status', 'confirmada')
+      .gte('data_reserva', r.ini)
+      .lte('data_reserva', r.fim)
+      .then(function(res) {
+        var n = res.count || 0;
+        preview.textContent = n > 0
+          ? n + ' reserva(s) confirmada(s) serao canceladas.'
+          : 'Nenhuma reserva confirmada neste periodo.';
+      });
+  }
+
+  if(selPeriodo) {
+    selPeriodo.addEventListener('change', atualizarPreview);
+  }
+
+  document.getElementById('btn-cancel-massa').addEventListener('click', function() {
+    if(!requireAdmin()) return;
+    var periodo = selPeriodo ? selPeriodo.value : 'mes';
+    var labelMap = {mes: 'mes corrente', semestre: 'proximo semestre', todas: 'todas as reservas futuras'};
+    var label = labelMap[periodo] || periodo;
+    var r = getRange();
+
+    sb.from('reservas')
+      .select('id')
+      .eq('status', 'confirmada')
+      .gte('data_reserva', r.ini)
+      .lte('data_reserva', r.fim)
+      .then(function(res) {
+        var ids = (res.data || []).map(function(x) { return x.id; });
+        if(!ids.length) { toast('Nenhuma reserva confirmada neste periodo.'); return; }
+        if(!confirm('Cancelar ' + ids.length + ' reserva(s) do ' + label + '? Esta acao nao pode ser desfeita.')) return;
+        var lotes = [];
+        for(var i = 0; i < ids.length; i += 50) {
+          lotes.push(ids.slice(i, i + 50));
+        }
+        Promise.all(lotes.map(function(lote) {
+          return sb.from('reservas')
+            .update({status: 'cancelada', cancelado_por: 'admin'})
+            .in('id', lote);
+        })).then(function(results) {
+          var erros = results.filter(function(r) { return r && r.error; });
+          if(erros.length) { toast('Erro ao cancelar algumas reservas.'); return; }
+          toast(ids.length + ' reserva(s) cancelada(s) com sucesso.');
+          atualizarPreview();
+          renderCal();
+          if(selDate) selData(selDate);
+        });
+      });
+  });
+
+  // Carrega preview ao abrir a aba Config
+  document.getElementById('tab-config').addEventListener('click', function() {
+    setTimeout(atualizarPreview, 400);
+  });
+})();
 
 document.getElementById('btn-add-bloqueio').addEventListener('click', function() {
   if(!requireAdmin()) return;
