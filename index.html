@@ -1110,13 +1110,13 @@ function iniciarApp(user) {
         abrirModal('m-novo-aviso');
       });
       document.getElementById('tab-config').style.display = 'flex';
-      document.getElementById('tab-ocorrencias').style.display = 'flex';
       document.getElementById('btn-nova-oco').style.display = 'flex';
       sb.from('moradores').select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r) {
         var nd = document.getElementById('nd-config');
         if(nd && r.count > 0) { nd.classList.add('show'); toast('Atencao: '+r.count+' inscricao(oes) pendente(s)!'); }
       });
     }
+    document.getElementById('tab-ocorrencias').style.display = 'flex';
 
     carregarBloqueios();
     carregarConfiguracoes();
@@ -1137,7 +1137,7 @@ document.getElementById('tab-reservar').addEventListener('click', function() { g
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
 document.getElementById('tab-checkin').addEventListener('click', function() { goScreen('checkin'); renderCheckin(); });
 document.getElementById('tab-calendario').addEventListener('click', function() { goScreen('calendario'); renderCalendario(); });
-document.getElementById('tab-ocorrencias').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('ocorrencias'); renderOco(); });
+document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); });
 document.getElementById('tab-config').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('config'); renderConfig(); });
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
@@ -1176,7 +1176,7 @@ function _esconderScanner() {
 
 function processarQrQuadra() {
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
-  if(morador.status === 'suspenso') { toast('Apartamento suspenso. Reservas bloqueadas.'); return; }
+  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Reservas bloqueadas.'); return; }
   var hoje = ts();
   var agora = new Date();
   var h = agora.getHours();
@@ -1284,9 +1284,7 @@ function renderCal() {
 function selData(ds) {
   if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
-  if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
-
-  selDate = ds;
+  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
   renderCal();
 
   var sc = document.getElementById('slots-card');
@@ -1444,54 +1442,18 @@ function showStep(n) {
     document.getElementById('m-res-step'+i).style.display = (i===n?'block':'none');
   });
 }
-function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
-
-  const dtStart = date.replace(/-/g,'') + 'T' + slotInicio.replace(':','') + '00';
-
-  const dtEnd = date.replace(/-/g,'') + 'T' + slotFim.replace(':','') + '00';
-
-  const texto = encodeURIComponent(`🎾 Reserva da Quadra — ${modalidade}`);
-
-  const local = encodeURIComponent('Quadra Poliesportiva — Casa Grande de Sant\'Anna');
-
-  const details = encodeURIComponent(
-    `Apto ${apto} • Lembre-se do check-in até 15 min após o início.`
-  );
-
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${texto}&dates=${dtStart}/${dtEnd}&location=${local}&details=${details}`;
-}
 // ── CONFIRMAR RESERVA ──────────────────────────────────────────
 function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
-
-  const dtStart =
-    date.replace(/-/g,'') +
-    'T' +
-    slotInicio.replace(':','') +
-    '00';
-
-  const dtEnd =
-    date.replace(/-/g,'') +
-    'T' +
-    slotFim.replace(':','') +
-    '00';
-
-  const texto = encodeURIComponent(
-    `🎾 Reserva da Quadra — ${modalidade}`
-  );
-
-  const local = encodeURIComponent(
-    "Quadra Poliesportiva — Casa Grande Sant'Anna"
-  );
-
-  const details = encodeURIComponent(
-    `Apartamento ${apto}`
-  );
-
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${texto}&dates=${dtStart}/${dtEnd}&location=${local}&details=${details}`;
+  var dtStart = date.replace(/-/g,'') + 'T' + slotInicio.replace(':','') + '00';
+  var dtEnd   = date.replace(/-/g,'') + 'T' + slotFim.replace(':','') + '00';
+  var texto   = encodeURIComponent('🎾 Reserva da Quadra — ' + modalidade);
+  var local   = encodeURIComponent("Quadra Poliesportiva — Casa Grande Sant'Anna");
+  var details = encodeURIComponent('Apto ' + apto + ' • Lembre-se do check-in até 15 min após o início.');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + texto + '&dates=' + dtStart + '/' + dtEnd + '&location=' + local + '&details=' + details;
 }
   function confirmarReserva() {
   if(!morador || !pendSlot || !pendMod || !pendDur) return;
-  if(morador.status === 'suspenso') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
+  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
 
   var maxMes = appCfg.max_reservas_mes;
   if(maxMes > 0) {
@@ -1551,39 +1513,19 @@ function _fazerInsertReserva() {
           selData(pendSlot.date);
           renderMinhas(); renderCheckin();
           toast('Reserva confirmada!');
+          var modNomeCalendar = MODS.find(function(x){ return x.id===pendMod; });
           var linkCalendar = gerarLinkGoogleCalendar(
-  pendSlot.date,
-  slotInicio,
-  slotFim,
-  m.nome,
-  morador.unidades ? morador.unidades.codigo : ''
-);
-
-alert(linkCalendar);
-  mod.nome,
-  morador.unidades ? morador.unidades.codigo : ''
-);
-
-setTimeout(function(){
-
-  if(confirm('Deseja adicionar esta reserva ao Google Calendar?')){
-
-    window.open(linkCalendar,'_blank');
-
-  }
-
-},500);
-          var linkCalendar = gerarLinkGoogleCalendar(
-  pendSlot.date,
-  slotInicio,
-  slotFim,
-  mod.nome,
-  morador.unidades ? morador.unidades.codigo : ''
-);
-
-setTimeout(function(){
-  window.open(linkCalendar,'_blank');
-},500);
+            pendSlot.date,
+            horaInicio.slice(0,5),
+            horaFim.slice(0,5),
+            modNomeCalendar ? modNomeCalendar.nome : '',
+            morador.unidades ? morador.unidades.codigo : ''
+          );
+          setTimeout(function(){
+            if(confirm('Deseja adicionar esta reserva ao Google Calendar?')){
+              window.open(linkCalendar, '_blank');
+            }
+          }, 500);
         });
       });
     });
