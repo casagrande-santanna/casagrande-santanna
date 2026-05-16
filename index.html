@@ -216,6 +216,16 @@ textarea.form-in{resize:vertical}
   </div>
   <div class="content">
     <div class="screen active" id="screen-avisos">
+      <div id="widget-status-quadra" style="border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:0.5px solid var(--br)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="wsq-dot" style="width:10px;height:10px;border-radius:50%;background:#B4B2A9;flex-shrink:0"></div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--t1)" id="wsq-status">Verificando...</div>
+            <div style="font-size:11px;color:var(--t2)" id="wsq-sub"></div>
+          </div>
+        </div>
+        <button class="btn-sm" id="btn-wsq-reservar" style="display:none;font-size:11px"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
+      </div>
       <div id="fab-aviso"></div>
       <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
     </div>
@@ -298,6 +308,11 @@ textarea.form-in{resize:vertical}
       </div>
     </div>
     <div class="screen" id="screen-ocorrencias">
+      <div id="sec-dispensas-wrap" style="display:none">
+        <div class="card-title" style="margin-bottom:8px"><i class="ti ti-hand-stop" aria-hidden="true" style="color:var(--amb)"></i> Solicitacoes de dispensa</div>
+        <div id="lista-dispensas"></div>
+        <div style="height:1px;background:var(--br);margin:12px 0"></div>
+      </div>
       <div class="card" style="background:var(--bl);border-color:var(--blb)">
         <div style="display:flex;align-items:flex-start;gap:8px">
           <i class="ti ti-clipboard-list" style="font-size:20px;color:var(--blt);flex-shrink:0;margin-top:2px" aria-hidden="true"></i>
@@ -521,6 +536,16 @@ textarea.form-in{resize:vertical}
         </div>
         <div style="font-size:15px;font-weight:600" id="pf-nome">Carregando...</div>
         <div style="font-size:12px;color:var(--t2)" id="pf-apto"></div>
+        <div id="pf-faltas-wrap" style="display:none;margin-top:10px;padding:10px;background:var(--am);border-radius:8px;border-left:3px solid var(--amb)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:11px;font-weight:600;color:var(--amt)"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Faltas este mes</span>
+            <span style="font-size:11px;font-weight:600;color:var(--amt)" id="pf-faltas-txt">0 / 2</span>
+          </div>
+          <div style="background:rgba(0,0,0,0.1);border-radius:20px;height:6px;overflow:hidden">
+            <div id="pf-faltas-bar" style="height:100%;border-radius:20px;background:var(--amb);transition:width .4s;width:0%"></div>
+          </div>
+          <div style="font-size:10px;color:var(--amt);margin-top:5px" id="pf-faltas-msg"></div>
+        </div>
         <div style="margin-top:12px;border-top:0.5px solid var(--br);padding-top:10px">
           <div class="p-row"><span>Notificacoes push</span><div class="tgl on" id="tgl-push"></div></div>
           <div class="p-row"><span>Modo escuro</span><div class="tgl" id="tgl-dark"></div></div>
@@ -577,6 +602,20 @@ textarea.form-in{resize:vertical}
     <div class="msub" id="mc-sub"></div>
     <div class="m-info-row"><i class="ti ti-calendar" aria-hidden="true"></i><span id="mc-dt"></span></div>
     <div class="m-info-row"><i class="ti ti-clock" aria-hidden="true"></i><span id="mc-hr"></span></div>
+    <div style="padding:10px 0;border-bottom:0.5px solid var(--br)">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:5px">Motivo do cancelamento</label>
+      <select class="form-in" id="mc-motivo" style="font-size:12px">
+        <option value="">Selecione um motivo</option>
+        <option value="chuva">Chuva / Mau tempo</option>
+        <option value="imprevisto">Imprevisto pessoal</option>
+        <option value="viagem">Viagem</option>
+        <option value="saude">Saude / Doenca</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+    <div id="mc-aviso-penalidade" class="ib ib-amber" style="display:none;margin:8px 0 0;font-size:11px">
+      <i class="ti ti-alert-triangle" aria-hidden="true"></i> Este cancelamento esta fora do prazo de carencia e gerara uma falta.
+    </div>
     <div id="admin-isentar-wrap" style="display:none;padding:10px 0;border-bottom:0.5px solid var(--br)">
       <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--v);font-weight:600;cursor:pointer">
         <input type="checkbox" id="chk-isentar"> Isentar penalidade (Forca maior / Chuva)
@@ -584,7 +623,24 @@ textarea.form-in{resize:vertical}
     </div>
     <div class="macts">
       <button class="btn-s" id="btn-fechar-cancel">Voltar</button>
-      <button class="btn-d" id="btn-exec-cancel"><i class="ti ti-x" aria-hidden="true"></i>Confirmar</button>
+      <button class="btn-d" id="btn-exec-cancel"><i class="ti ti-x" aria-hidden="true"></i>Cancelar reserva</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-dispensa">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle"><i class="ti ti-hand-stop" style="color:var(--amb)"></i> Solicitar dispensa</div>
+    <div class="msub">Explique o motivo para o administrador avaliar</div>
+    <div style="padding:10px 0">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:5px">Justificativa</label>
+      <textarea class="form-in" id="disp-texto" rows="3" placeholder="Ex: Estava doente, chuva forte, emergencia familiar..." style="resize:none;font-size:12px"></textarea>
+    </div>
+    <div class="ib ib-blue" style="font-size:10.5px">O administrador analisara sua solicitacao e respondera em breve.</div>
+    <div class="macts" style="margin-top:10px">
+      <button class="btn-s" id="btn-fechar-dispensa">Agora nao</button>
+      <button class="btn-p" id="btn-enviar-dispensa"><i class="ti ti-send" aria-hidden="true"></i>Enviar pedido</button>
     </div>
   </div>
 </div>
@@ -1087,6 +1143,24 @@ function iniciarApp(user) {
     document.getElementById('pf-apto').textContent = aptoLabel;
     document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
 
+    // Indicador de faltas
+    if(!isAdmin() && morador.tipo !== 'admin') {
+      var faltas = morador.faltas_mes || 0;
+      var limite = appCfg.faltas_suspensao || 2;
+      var wrapFaltas = document.getElementById('pf-faltas-wrap');
+      if(wrapFaltas && faltas > 0) {
+        wrapFaltas.style.display = 'block';
+        document.getElementById('pf-faltas-txt').textContent = faltas + ' / ' + limite;
+        var pct = Math.min(Math.round(faltas / limite * 100), 100);
+        document.getElementById('pf-faltas-bar').style.width = pct + '%';
+        var faltando = limite - faltas;
+        var msg = faltando > 0
+          ? 'Mais ' + faltando + ' falta(s) resultara em suspensao de ' + (appCfg.suspensao_dias||15) + ' dias.'
+          : 'Limite atingido. Novas reservas estao bloqueadas.';
+        document.getElementById('pf-faltas-msg').textContent = msg;
+      }
+    }
+
     var roleTagEl = document.getElementById('role-tag');
     if(morador.status === 'suspenso' && morador.tipo !== 'admin') {
   toast('Apartamento suspenso. Reservas bloqueadas.');
@@ -1117,6 +1191,12 @@ function iniciarApp(user) {
       });
     }
     document.getElementById('tab-ocorrencias').style.display = 'flex';
+
+    // Mostra seção de dispensas só para admin
+    if(isAdmin()) {
+      var secDisp = document.getElementById('sec-dispensas-wrap');
+      if(secDisp) secDisp.style.display = 'block';
+    }
 
     carregarBloqueios();
     carregarConfiguracoes();
@@ -1539,28 +1619,52 @@ document.getElementById('btn-exec-cancel').addEventListener('click', function() 
   if(!cancelId) return;
   var chkIsentar = document.getElementById('chk-isentar');
   var isentar = chkIsentar ? chkIsentar.checked : false;
+  var mcMotivo = document.getElementById('mc-motivo');
+  var motivo = mcMotivo ? mcMotivo.value : '';
   var upd = {status:'cancelada', cancelado_por: isAdmin() ? 'admin' : 'morador'};
   if(isentar) upd.isento_penalidade = true;
+  if(motivo) upd.motivo_cancelamento = motivo;
+  var temDispensa = !!dispensaReservaId && !isAdmin() && !isentar;
   sb.from('reservas').update(upd).eq('id',cancelId).then(function(r) {
     if(r.error) { toast('Erro ao cancelar'); return; }
     fecharModal('m-cancelar');
     if(selDate) selData(selDate);
     renderMinhas(); renderCheckin();
-    toast(isentar ? 'Reserva cancelada sem penalidade.' : 'Reserva cancelada.');
+    if(temDispensa) {
+      setTimeout(function() { abrirModal('m-dispensa'); }, 350);
+    } else {
+      toast(isentar ? 'Reserva cancelada sem penalidade.' : 'Reserva cancelada.');
+    }
   });
 });
 
 function abrirModalCancelar(id) {
   cancelId = id;
+  dispensaReservaId = null;
   var chkIsentar = document.getElementById('chk-isentar');
   if(chkIsentar) chkIsentar.checked = false;
   var wrapIsentar = document.getElementById('admin-isentar-wrap');
   if(wrapIsentar) wrapIsentar.style.display = isAdmin() ? 'block' : 'none';
+  var mcMotivo = document.getElementById('mc-motivo');
+  if(mcMotivo) mcMotivo.value = '';
   sb.from('reservas').select('*').eq('id',id).single().then(function(res) {
     var r = res.data; if(!r) return;
     document.getElementById('mc-sub').textContent = 'Apto '+(morador&&morador.unidades?morador.unidades.codigo:'');
     document.getElementById('mc-dt').textContent = fmtD(r.data_reserva);
     document.getElementById('mc-hr').textContent = (r.slot_inicio||'').slice(0,5)+' - '+(r.slot_fim||'').slice(0,5);
+    // Verifica carência
+    var avisoPen = document.getElementById('mc-aviso-penalidade');
+    var foraCarencia = false;
+    if(!isAdmin() && r.slot_inicio) {
+      var agora = new Date();
+      var dtStr = r.data_reserva + 'T' + r.slot_inicio;
+      var dtReserva = new Date(dtStr);
+      var diffMin = (dtReserva - agora) / 60000;
+      var carenciaMin = appCfg.carencia_cancel_min || 120;
+      foraCarencia = diffMin < carenciaMin;
+    }
+    if(avisoPen) avisoPen.style.display = foraCarencia ? 'block' : 'none';
+    dispensaReservaId = foraCarencia ? id : null;
     abrirModal('m-cancelar');
   });
 }
@@ -1868,7 +1972,66 @@ function renderMinhas() {
 }
 
 // ── AVISOS ─────────────────────────────────────────────────────
+function renderWidgetStatus() {
+  var dot = document.getElementById('wsq-dot');
+  var statusEl = document.getElementById('wsq-status');
+  var subEl = document.getElementById('wsq-sub');
+  var btnRes = document.getElementById('btn-wsq-reservar');
+  var widget = document.getElementById('widget-status-quadra');
+  if(!dot || !statusEl) return;
+  var agora = new Date();
+  var h = agora.getHours();
+  var agoraMin = h * 60 + agora.getMinutes();
+  var hoje = agora.toISOString().slice(0,10);
+  sb.from('reservas')
+    .select('slot_inicio, slot_fim, status, unidades(codigo)')
+    .eq('data_reserva', hoje)
+    .eq('status', 'confirmada')
+    .then(function(res) {
+      var reservasHoje = res.data || [];
+      var ocupadaAgora = reservasHoje.find(function(r) {
+        var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
+        var fim = parseInt((r.slot_fim||'00:00').slice(0,2))*60 + parseInt((r.slot_fim||'00:00').slice(3,5));
+        return agoraMin >= ini && agoraMin < fim;
+      });
+      var proximaHoje = reservasHoje.filter(function(r) {
+        var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
+        return ini > agoraMin;
+      }).sort(function(a,b){ return a.slot_inicio > b.slot_inicio ? 1 : -1; })[0];
+
+      if(ocupadaAgora) {
+        dot.style.background = '#E24B4A';
+        widget.style.background = 'var(--rd)';
+        widget.style.borderColor = 'var(--rdb)';
+        statusEl.style.color = 'var(--rdt)';
+        statusEl.textContent = 'Quadra ocupada';
+        subEl.style.color = 'var(--rdt)';
+        subEl.textContent = 'Libera as ' + (ocupadaAgora.slot_fim||'').slice(0,5) + (ocupadaAgora.unidades ? ' • Apto ' + ocupadaAgora.unidades.codigo : '');
+        if(btnRes) btnRes.style.display = 'none';
+      } else if(proximaHoje) {
+        dot.style.background = '#EF9F27';
+        widget.style.background = 'var(--am)';
+        widget.style.borderColor = 'var(--amb)';
+        statusEl.style.color = 'var(--amt)';
+        statusEl.textContent = 'Quadra livre agora';
+        subEl.style.color = 'var(--amt)';
+        subEl.textContent = 'Proxima reserva as ' + (proximaHoje.slot_inicio||'').slice(0,5);
+        if(btnRes) { btnRes.style.display = 'flex'; btnRes.onclick = function(){ document.getElementById('tab-reservar').click(); }; }
+      } else {
+        dot.style.background = '#639922';
+        widget.style.background = 'var(--vl)';
+        widget.style.borderColor = '#97C459';
+        statusEl.style.color = 'var(--v)';
+        statusEl.textContent = 'Quadra livre';
+        subEl.style.color = 'var(--v)';
+        subEl.textContent = h < 6 ? 'Abre as 06:00' : h >= 22 ? 'Encerrada por hoje' : 'Sem mais reservas hoje';
+        if(btnRes) { btnRes.style.display = 'flex'; btnRes.onclick = function(){ document.getElementById('tab-reservar').click(); }; }
+      }
+    });
+}
+
 function renderAvisos() {
+  renderWidgetStatus();
   if(!morador) { document.getElementById('avisos-list').innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Faca login</div>'; return; }
   sb.from('avisos').select('*,enquete_tipo,enquete_label_a,enquete_label_b,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
     var avisos = res.data||[];
@@ -2138,8 +2301,66 @@ function setFiltro(f, el) {
   renderOco();
 }
 
+function renderDispensas() {
+  if(!isAdmin()) return;
+  sb.from('solicitacoes_dispensa')
+    .select('*,moradores(nome,unidades(codigo)),reservas(data_reserva,slot_inicio,slot_fim)')
+    .eq('status','pendente')
+    .order('created_at',{ascending:false})
+    .then(function(res) {
+      var lista = res.data || [];
+      var el = document.getElementById('lista-dispensas');
+      if(!el) return;
+      if(!lista.length) { el.innerHTML='<div style="font-size:11px;color:var(--t2)">Nenhuma solicitacao pendente.</div>'; return; }
+      var html = '';
+      lista.forEach(function(s) {
+        var m = s.moradores; var r = s.reservas;
+        var apto = m && m.unidades ? m.unidades.codigo : '---';
+        var nome = m ? m.nome : '---';
+        var dtRes = r ? fmtD(r.data_reserva) + ' ' + (r.slot_inicio||'').slice(0,5) : '---';
+        html += '<div class="oco-card aberta" style="margin-bottom:8px">';
+        html += '<div class="oco-top"><div class="oco-titulo">Apto ' + apto + ' • ' + nome + '</div>';
+        html += '<span class="badge b-warn" style="font-size:10px">Pendente</span></div>';
+        html += '<div class="oco-meta" style="margin-bottom:6px">Reserva: ' + dtRes + '</div>';
+        html += '<div style="font-size:11px;color:var(--t1);margin-bottom:8px;padding:6px 8px;background:var(--bg);border-radius:6px">' + (s.motivo||'') + '</div>';
+        html += '<div style="display:flex;gap:6px">';
+        html += '<button class="btn-sm g" data-disp-id="'+s.id+'" data-disp-acao="aprovar"><i class="ti ti-check" aria-hidden="true"></i>Dispensar falta</button>';
+        html += '<button class="btn-sm r" data-disp-id="'+s.id+'" data-disp-acao="rejeitar"><i class="ti ti-x" aria-hidden="true"></i>Indeferir</button>';
+        html += '</div></div>';
+      });
+      el.innerHTML = html;
+      el.querySelectorAll('[data-disp-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var sid = btn.dataset.dispId;
+          var acao = btn.dataset.dispAcao;
+          var novoStatus = acao === 'aprovar' ? 'aprovada' : 'rejeitada';
+          var disp = lista.find(function(x){ return x.id === sid; });
+          sb.from('solicitacoes_dispensa').update({status: novoStatus}).eq('id', sid).then(function(r) {
+            if(r.error) { toast('Erro ao processar.'); return; }
+            if(acao === 'aprovar' && disp && disp.reserva_id) {
+              sb.from('reservas').update({isento_penalidade: true}).eq('id', disp.reserva_id).then(function() {
+                if(disp.morador_id) {
+                  sb.from('moradores').select('faltas_mes').eq('id', disp.morador_id).single().then(function(mr) {
+                    var f = Math.max(0, (mr.data ? mr.data.faltas_mes || 0 : 0) - 1);
+                    sb.from('moradores').update({faltas_mes: f}).eq('id', disp.morador_id).then(function(){});
+                  });
+                }
+                toast('Falta dispensada com sucesso.');
+                renderDispensas();
+              });
+            } else {
+              toast('Solicitacao indeferida.');
+              renderDispensas();
+            }
+          });
+        });
+      });
+    });
+}
+
 function renderOco() {
   if(!requireAdmin()) return;
+  renderDispensas();
   var q = sb.from('ocorrencias').select('*,mensagens_ocorrencia(*)');
   if(ocoFiltro!=='todos') q = q.eq('status',ocoFiltro);
   q.order('created_at',{ascending:false}).limit(20).then(function(res) {
@@ -3071,6 +3292,31 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
 </div>
 <script>
 document.getElementById('btn-fechar-reserva-ok').addEventListener('click', function() { fecharModal('m-reserva-ok'); });
+
+var dispensaReservaId = null;
+
+document.getElementById('btn-fechar-dispensa').addEventListener('click', function() {
+  fecharModal('m-dispensa');
+  toast('Reserva cancelada.');
+});
+
+document.getElementById('btn-enviar-dispensa').addEventListener('click', function() {
+  if(!dispensaReservaId || !morador) return;
+  var texto = (document.getElementById('disp-texto').value || '').trim();
+  if(!texto) { toast('Descreva o motivo da solicitacao.'); return; }
+  sb.from('solicitacoes_dispensa').insert({
+    reserva_id: dispensaReservaId,
+    morador_id: morador.id,
+    unidade_id: morador.unidade_id,
+    motivo: texto,
+    status: 'pendente'
+  }).then(function(r) {
+    if(r.error) { toast('Erro ao enviar solicitacao.'); return; }
+    document.getElementById('disp-texto').value = '';
+    fecharModal('m-dispensa');
+    toast('Solicitacao enviada! O administrador analisara em breve.');
+  });
+});
 </script>
 
 </body>
