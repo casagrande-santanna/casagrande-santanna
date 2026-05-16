@@ -1532,7 +1532,6 @@ function _fazerInsertReserva() {
 }
 
 // ── MODAL CANCELAR ─────────────────────────────────────────────
-document.getElementById('btn-fechar-reserva-ok').addEventListener('click', function() { fecharModal('m-reserva-ok'); });
 document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
 document.getElementById('btn-exec-cancel').addEventListener('click', function() {
   if(!cancelId) return;
@@ -1626,9 +1625,9 @@ function renderCheckin() {
     .eq('unidade_id',morador.unidade_id)
     .eq('data_reserva',today)
     .eq('status','confirmada')
-    .neq('checkin_feito',true)
-    .limit(1).maybeSingle().then(function(res) {
-    var proxima = res.data;
+    .limit(5).then(function(res) {
+    var lista = (res.data||[]).filter(function(r){ return !r.checkin_feito; });
+    var proxima = lista.length ? lista[0] : null;
     var main = document.getElementById('ckin-main');
     var nd = document.getElementById('nd-ckin');
     if(proxima) {
@@ -1754,11 +1753,10 @@ function renderMinhas() {
   }
   sb.from('reservas').select('*,modalidades(nome,icone)')
     .eq('unidade_id', morador.unidade_id)
-    .neq('oculto_morador', true)
     .order('data_reserva', {ascending:true})
     .order('slot_inicio', {ascending:true})
     .then(function(res) {
-      var mine = res.data||[];
+      var mine = (res.data||[]).filter(function(r){ return !r.oculto_morador; });
       // Ordena: futuras primeiro (mais próxima no topo), passadas depois (mais recente no topo)
       var hoje = ts();
       var futuras = mine.filter(function(r){ return r.data_reserva >= hoje; });
@@ -3064,6 +3062,9 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
     </button>
   </div>
 </div>
+<script>
+document.getElementById('btn-fechar-reserva-ok').addEventListener('click', function() { fecharModal('m-reserva-ok'); });
+</script>
 
 </body>
 </html>
