@@ -211,6 +211,7 @@ textarea.form-in{resize:vertical}
     <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
     <button class="tab" id="tab-calendario"><i class="ti ti-calendar-month" aria-hidden="true"></i>Calendario</button>
+    <button class="tab" id="tab-quadra"><i class="ti ti-trophy" aria-hidden="true"></i>Quadra</button>
     <button class="tab" id="tab-ocorrencias" style="display:none"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
     <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config<span class="ndot" id="nd-config"></span></button>
   </div>
@@ -308,6 +309,23 @@ textarea.form-in{resize:vertical}
         <div id="cal-resumo-mes"><div style="font-size:11px;color:var(--t2)">Carregando...</div></div>
       </div>
     </div>
+    <div class="screen" id="screen-quadra">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-search" aria-hidden="true"></i>Achados e perdidos</div>
+        <div id="achados-list"><div class="empty"><i class="ti ti-search"></i>Nenhum item cadastrado</div></div>
+        <button class="btn-p" id="btn-novo-achado" style="margin-top:10px"><i class="ti ti-plus" aria-hidden="true"></i>Registrar item encontrado</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Placar e ranking</div>
+        <div class="filter-bar" style="margin-bottom:8px">
+          <button class="fpill active" id="rpill-ranking">Ranking</button>
+          <button class="fpill" id="rpill-historico">Historico</button>
+        </div>
+        <div id="ranking-list"><div class="empty"><i class="ti ti-trophy"></i>Sem partidas registradas</div></div>
+        <button class="btn-p" id="btn-novo-placar" style="margin-top:10px"><i class="ti ti-plus" aria-hidden="true"></i>Registrar placar</button>
+      </div>
+    </div>
+
     <div class="screen" id="screen-ocorrencias">
       <div id="sec-dispensas-wrap" style="display:none">
         <div class="card-title" style="margin-bottom:8px"><i class="ti ti-hand-stop" aria-hidden="true" style="color:var(--amb)"></i> Solicitacoes de dispensa</div>
@@ -1223,6 +1241,10 @@ function iniciarApp(user) {
     renderCal();
     renderAvisos();
     renderCheckin();
+
+    if(!morador.onboarding_visto && morador.tipo !== 'admin') {
+      setTimeout(function() { abrirModal('m-onboarding'); }, 900);
+    }
   });
 }
 
@@ -1237,12 +1259,13 @@ document.getElementById('tab-reservar').addEventListener('click', function() { g
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
 document.getElementById('tab-checkin').addEventListener('click', function() { goScreen('checkin'); renderCheckin(); });
 document.getElementById('tab-calendario').addEventListener('click', function() { goScreen('calendario'); renderCalendario(); });
+document.getElementById('tab-quadra').addEventListener('click', function() { goScreen('quadra'); renderAchados(); renderRanking('ranking'); });
 document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); });
 document.getElementById('tab-config').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('config'); renderConfig(); verificarBloqueioEmergencial(); });
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
 function goScreen(name) {
-  var telas = ['avisos','reservar','minhas','checkin','calendario','ocorrencias','config','perfil'];
+  var telas = ['avisos','reservar','minhas','checkin','calendario','quadra','ocorrencias','config','perfil'];
   telas.forEach(function(t) {
     document.getElementById('screen-'+t).classList.remove('active');
     var tab = document.getElementById('tab-'+t);
@@ -1909,6 +1932,7 @@ function renderMinhas() {
         if(r.status==='confirmada') {
           html += '<div class="res-acts">';
           if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
+          html += '<button class="btn-sm" data-share-dt="'+r.data_reserva+'" data-share-ini="'+(r.slot_inicio||'').slice(0,5)+'" data-share-fim="'+(r.slot_fim||'').slice(0,5)+'" data-share-mod="'+(r.modalidades?r.modalidades.nome:'')+'" data-share-apto="" style="color:#25D366;border-color:#25D366"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></button>';
           html += '<button class="btn-sm r" data-cancel-id="'+r.id+'"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
           html += '</div>';
         }
@@ -1920,6 +1944,21 @@ function renderMinhas() {
       });
       list.querySelectorAll('[data-ckin-id]').forEach(function(btn) {
         btn.addEventListener('click', function() { doCheckin(btn.dataset.ckinId); });
+      });
+      list.querySelectorAll('[data-share-dt]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var apto = morador.unidades ? morador.unidades.codigo : '';
+          var mod = btn.dataset.shareMod ? 'Modalidade: ' + btn.dataset.shareMod + '\n' : '';
+          var txt = encodeURIComponent(
+            'Reserva da Quadra - Casa Grande Sant'Anna\n'
+            + 'Apto ' + apto + '\n'
+            + 'Data: ' + fmtD(btn.dataset.shareDt) + '\n'
+            + 'Horario: ' + btn.dataset.shareIni + '-' + btn.dataset.shareFim + '\n'
+            + mod
+            + '\nVejo voce la!'
+          );
+          window.open('https://wa.me/?text=' + txt, '_blank');
+        });
       });
 
       // Limpar histórico
@@ -2630,7 +2669,7 @@ function renderConfig() {
   });
 
   renderDashboard();
-  renderRanking();
+  renderRankingPontualidade();
   renderContratosAula();
 
   // Agenda do dia
@@ -2685,7 +2724,7 @@ function renderDashboard() {
   });
 }
 
-function renderRanking() {
+function renderRankingPontualidade() {
   var mesAtual = new Date().toISOString().slice(0,7);
   sb.from('reservas').select('unidade_id,checkin_feito,status,unidades(codigo)').gte('data_reserva',mesAtual+'-01').lte('data_reserva',mesAtual+'-31').then(function(res) {
     var todas = res.data||[];
@@ -3393,6 +3432,103 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
 </script>
 
 <!-- MODAL SUCESSO RESERVA -->
+<div class="modal-bg" id="m-novo-achado">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Registrar item encontrado</div>
+    <div class="msub">Descreva o objeto para que o dono possa reclamar</div>
+    <div style="padding:10px 0">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Descricao do objeto</label>
+      <input type="text" class="form-in" id="achado-desc" placeholder="Ex: Raquete azul, garrafa preta...">
+    </div>
+    <div style="padding:0 0 10px">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Local onde foi encontrado</label>
+      <select class="form-in" id="achado-local">
+        <option value="Quadra poliesportiva">Quadra poliesportiva</option>
+        <option value="Entrada da quadra">Entrada da quadra</option>
+        <option value="Vestiario">Vestiario</option>
+        <option value="Area externa">Area externa</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div class="macts">
+      <button class="btn-s" id="btn-fechar-achado">Cancelar</button>
+      <button class="btn-p" id="btn-salvar-achado"><i class="ti ti-check" aria-hidden="true"></i>Registrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-novo-placar">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Registrar placar</div>
+    <div style="padding:10px 0">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Modalidade</label>
+      <select class="form-in" id="placar-mod">
+        <option value="Tenis simples">Tenis simples</option>
+        <option value="Tenis duplas">Tenis duplas</option>
+        <option value="Futebol">Futebol</option>
+        <option value="Basquete">Basquete</option>
+        <option value="Volei">Volei</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 24px 1fr;gap:8px;align-items:end;padding-bottom:10px">
+      <div>
+        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Meu placar</label>
+        <input type="number" class="form-in" id="placar-casa" placeholder="0" min="0" style="text-align:center;font-size:20px;font-weight:600">
+      </div>
+      <div style="font-size:14px;color:var(--t2);text-align:center;padding-bottom:8px">x</div>
+      <div>
+        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Placar adversario</label>
+        <input type="number" class="form-in" id="placar-visitante" placeholder="0" min="0" style="text-align:center;font-size:20px;font-weight:600">
+      </div>
+    </div>
+    <div style="padding-bottom:12px">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Apto adversario (opcional)</label>
+      <input type="text" class="form-in" id="placar-adversario" placeholder="Ex: B-202">
+    </div>
+    <div class="macts">
+      <button class="btn-s" id="btn-fechar-placar">Cancelar</button>
+      <button class="btn-p" id="btn-salvar-placar"><i class="ti ti-check" aria-hidden="true"></i>Salvar placar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-onboarding" style="align-items:center;justify-content:center">
+  <div class="modal" style="max-width:340px;padding:0;overflow:hidden;border-radius:16px;background:var(--cd)">
+    <div id="onb-step-1" style="padding:28px 24px;text-align:center">
+      <div style="font-size:44px;margin-bottom:12px">&#127934;</div>
+      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Bem-vindo ao app da quadra!</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Aqui voce reserva a quadra poliesportiva, faz check-in e acompanha seu historico, tudo pelo celular.</div>
+      <button class="btn-p" onclick="onbStep(2)" style="width:100%">Proximo <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    </div>
+    <div id="onb-step-2" style="display:none;padding:28px 24px;text-align:center">
+      <div style="font-size:44px;margin-bottom:12px">&#9971;</div>
+      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Regras do fair play</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Cada apartamento tem limite mensal de reservas. Cancelamentos fora do prazo ou ausencias sem check-in geram faltas. Com 2 faltas no mes, o apartamento fica suspenso por 15 dias.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" onclick="onbStep(1)" style="flex:1">Voltar</button>
+        <button class="btn-p" onclick="onbStep(3)" style="flex:2">Proximo <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div id="onb-step-3" style="display:none;padding:28px 24px;text-align:center">
+      <div style="font-size:44px;margin-bottom:12px">&#9989;</div>
+      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Check-in obrigatorio</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">No dia da sua reserva, faca o check-in pela aba Check-in ou escaneando o QR Code na entrada da quadra. Voce tem ate 15 minutos apos o inicio do horario.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" onclick="onbStep(2)" style="flex:1">Voltar</button>
+        <button class="btn-p" id="btn-fechar-onboarding" style="flex:2"><i class="ti ti-check" aria-hidden="true"></i>Entendido!</button>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:6px;padding:0 0 16px">
+      <div id="onb-dot-1" style="width:6px;height:6px;border-radius:50%;background:var(--v)"></div>
+      <div id="onb-dot-2" style="width:6px;height:6px;border-radius:50%;background:var(--br)"></div>
+      <div id="onb-dot-3" style="width:6px;height:6px;border-radius:50%;background:var(--br)"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="m-reserva-ok">
   <div class="modal" style="max-width:320px;text-align:center;padding:24px 20px">
     <div style="font-size:36px;margin-bottom:8px">✅</div>
@@ -3435,6 +3571,217 @@ document.getElementById('btn-enviar-dispensa').addEventListener('click', functio
     toast('Solicitacao enviada! O administrador analisara em breve.');
   });
 });
+
+// ── ONBOARDING ─────────────────────────────────────────────────
+function onbStep(n) {
+  [1,2,3].forEach(function(i) {
+    var el = document.getElementById('onb-step-'+i);
+    var dot = document.getElementById('onb-dot-'+i);
+    if(el) el.style.display = (i===n) ? 'block' : 'none';
+    if(dot) dot.style.background = (i===n) ? 'var(--v)' : 'var(--br)';
+  });
+}
+
+document.getElementById('btn-fechar-onboarding').addEventListener('click', function() {
+  fecharModal('m-onboarding');
+  if(morador) {
+    sb.from('moradores').update({onboarding_visto: true}).eq('id', morador.id).then(function(){});
+  }
+});
+
+// ── ACHADOS E PERDIDOS ─────────────────────────────────────────
+document.getElementById('btn-novo-achado').addEventListener('click', function() {
+  var inp = document.getElementById('achado-desc');
+  if(inp) inp.value = '';
+  abrirModal('m-novo-achado');
+});
+
+document.getElementById('btn-fechar-achado').addEventListener('click', function() {
+  fecharModal('m-novo-achado');
+});
+
+document.getElementById('btn-salvar-achado').addEventListener('click', function() {
+  if(!morador) return;
+  var desc = (document.getElementById('achado-desc').value || '').trim();
+  if(!desc) { toast('Descreva o objeto encontrado.'); return; }
+  var local = document.getElementById('achado-local').value;
+  sb.from('achados_perdidos').insert({
+    descricao: desc,
+    local: local,
+    status: 'encontrado',
+    criado_por: morador.id
+  }).then(function(r) {
+    if(r.error) { toast('Erro: ' + r.error.message); return; }
+    document.getElementById('achado-desc').value = '';
+    fecharModal('m-novo-achado');
+    toast('Item registrado com sucesso!');
+    renderAchados();
+  });
+});
+
+function renderAchados() {
+  var el = document.getElementById('achados-list');
+  if(!el) return;
+  sb.from('achados_perdidos')
+    .select('*,moradores!criado_por(nome,unidades(codigo))')
+    .neq('status', 'entregue')
+    .order('created_at', {ascending: false})
+    .limit(20)
+    .then(function(res) {
+      var items = res.data || [];
+      if(!items.length) { el.innerHTML = '<div class="empty"><i class="ti ti-search"></i>Nenhum item cadastrado</div>'; return; }
+      var html = '';
+      items.forEach(function(item) {
+        var m = item.moradores;
+        var quem = m ? (m.unidades ? 'Apto ' + m.unidades.codigo : m.nome) : 'Administracao';
+        var isEncontrado = item.status === 'encontrado';
+        var bgColor = isEncontrado ? 'var(--am)' : 'var(--vl)';
+        var brdColor = isEncontrado ? 'var(--amb)' : '#97C459';
+        var statusTxt = isEncontrado ? 'Aguardando dono' : 'Reclamado';
+        html += '<div style="border:0.5px solid ' + brdColor + ';border-radius:8px;padding:10px 12px;margin-bottom:7px;background:' + bgColor + '">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
+        html += '<div style="font-size:12px;font-weight:600;color:var(--t1)">' + item.descricao + '</div>';
+        html += '<span class="badge ' + (isEncontrado ? 'b-warn' : 'b-ok') + '" style="flex-shrink:0;margin-left:6px">' + statusTxt + '</span>';
+        html += '</div>';
+        html += '<div style="font-size:10.5px;color:var(--t2)">' + item.local + ' &bull; Encontrado por ' + quem + '</div>';
+        if(isEncontrado) {
+          html += '<button class="btn-sm g" data-achado-id="' + item.id + '" style="margin-top:6px;font-size:10px"><i class="ti ti-check" aria-hidden="true"></i>Este e meu objeto</button>';
+        }
+        html += '</div>';
+      });
+      el.innerHTML = html;
+      el.querySelectorAll('[data-achado-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!morador) return;
+          if(!confirm('Confirmar que este objeto e seu?')) return;
+          sb.from('achados_perdidos').update({status: 'reclamado', reclamado_por: morador.id})
+            .eq('id', btn.dataset.achadoId).then(function(r) {
+              if(r.error) { toast('Erro ao reclamar item.'); return; }
+              toast('Item reclamado! Retire com o zelador.');
+              renderAchados();
+            });
+        });
+      });
+    });
+}
+
+// ── PLACAR E RANKING ───────────────────────────────────────────
+var rankingModo = 'ranking';
+
+document.getElementById('rpill-ranking').addEventListener('click', function() {
+  rankingModo = 'ranking';
+  document.getElementById('rpill-ranking').classList.add('active');
+  document.getElementById('rpill-historico').classList.remove('active');
+  renderRanking('ranking');
+});
+
+document.getElementById('rpill-historico').addEventListener('click', function() {
+  rankingModo = 'historico';
+  document.getElementById('rpill-historico').classList.add('active');
+  document.getElementById('rpill-ranking').classList.remove('active');
+  renderRanking('historico');
+});
+
+document.getElementById('btn-novo-placar').addEventListener('click', function() {
+  if(!morador || !morador.unidade_id) { toast('Necessario ter apartamento vinculado.'); return; }
+  document.getElementById('placar-casa').value = '';
+  document.getElementById('placar-visitante').value = '';
+  document.getElementById('placar-adversario').value = '';
+  abrirModal('m-novo-placar');
+});
+
+document.getElementById('btn-fechar-placar').addEventListener('click', function() {
+  fecharModal('m-novo-placar');
+});
+
+document.getElementById('btn-salvar-placar').addEventListener('click', function() {
+  if(!morador) return;
+  var casa = parseInt(document.getElementById('placar-casa').value);
+  var visitante = parseInt(document.getElementById('placar-visitante').value);
+  var mod = document.getElementById('placar-mod').value;
+  var adversario = (document.getElementById('placar-adversario').value || '').trim();
+  if(isNaN(casa) || isNaN(visitante)) { toast('Informe o placar dos dois lados.'); return; }
+  var vencedor = casa > visitante ? 'casa' : casa < visitante ? 'visitante' : 'empate';
+  sb.from('placares').insert({
+    unidade_id: morador.unidade_id,
+    modalidade: mod,
+    placar_casa: String(casa),
+    placar_visitante: String(visitante),
+    vencedor: vencedor,
+    adversario_apto: adversario || null
+  }).then(function(r) {
+    if(r.error) { toast('Erro: ' + r.error.message); return; }
+    fecharModal('m-novo-placar');
+    toast('Placar registrado!');
+    renderRanking(rankingModo);
+  });
+});
+
+function renderRanking(modo) {
+  var el = document.getElementById('ranking-list');
+  if(!el) return;
+  if(modo === 'ranking') {
+    sb.from('placares')
+      .select('unidade_id, vencedor, modalidade, unidades(codigo)')
+      .then(function(res) {
+        var dados = res.data || [];
+        var aptos = {};
+        dados.forEach(function(p) {
+          var cod = p.unidades ? p.unidades.codigo : p.unidade_id;
+          if(!aptos[cod]) aptos[cod] = {vitorias: 0, derrotas: 0, empates: 0, total: 0};
+          aptos[cod].total++;
+          if(p.vencedor === 'casa') aptos[cod].vitorias++;
+          else if(p.vencedor === 'visitante') aptos[cod].derrotas++;
+          else aptos[cod].empates++;
+        });
+        var lista = Object.keys(aptos).map(function(k) {
+          var a = aptos[k];
+          var pts = a.vitorias * 3 + a.empates;
+          return {apto: k, pts: pts, v: a.vitorias, e: a.empates, d: a.derrotas, total: a.total};
+        }).sort(function(a, b) { return b.pts - a.pts || b.v - a.v; });
+        if(!lista.length) { el.innerHTML = '<div class="empty"><i class="ti ti-trophy"></i>Sem partidas registradas</div>'; return; }
+        var html = '<div style="font-size:10px;color:var(--t2);display:grid;grid-template-columns:24px 1fr 32px 32px 32px 32px;gap:4px;padding:0 4px 6px;border-bottom:0.5px solid var(--br);margin-bottom:6px">'
+          + '<div></div><div>Apartamento</div><div style="text-align:center">Pts</div><div style="text-align:center">V</div><div style="text-align:center">E</div><div style="text-align:center">D</div></div>';
+        lista.forEach(function(a, i) {
+          var medalha = i === 0 ? '&#127947;' : i === 1 ? '&#129352;' : i === 2 ? '&#129353;' : String(i+1);
+          var isMeu = morador && morador.unidades && morador.unidades.codigo === a.apto;
+          html += '<div style="display:grid;grid-template-columns:24px 1fr 32px 32px 32px 32px;gap:4px;padding:5px 4px;align-items:center;border-radius:6px;background:' + (isMeu ? 'var(--vl)' : 'transparent') + ';border-bottom:0.5px solid var(--br)">';
+          html += '<div style="font-size:11px;text-align:center">' + medalha + '</div>';
+          html += '<div style="font-size:12px;font-weight:' + (isMeu ? '600' : '400') + ';color:' + (isMeu ? 'var(--v)' : 'var(--t1)') + '">Apto ' + a.apto + '</div>';
+          html += '<div style="font-size:12px;font-weight:600;text-align:center;color:var(--v)">' + a.pts + '</div>';
+          html += '<div style="font-size:11px;text-align:center;color:var(--t2)">' + a.v + '</div>';
+          html += '<div style="font-size:11px;text-align:center;color:var(--t2)">' + a.e + '</div>';
+          html += '<div style="font-size:11px;text-align:center;color:var(--t2)">' + a.d + '</div>';
+          html += '</div>';
+        });
+        el.innerHTML = html;
+      });
+  } else {
+    sb.from('placares')
+      .select('*,unidades(codigo)')
+      .order('created_at', {ascending: false})
+      .limit(20)
+      .then(function(res) {
+        var dados = res.data || [];
+        if(!dados.length) { el.innerHTML = '<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
+        var html = '';
+        dados.forEach(function(p) {
+          var cod = p.unidades ? p.unidades.codigo : '---';
+          var isMeu = morador && morador.unidades && morador.unidades.codigo === cod;
+          var venceu = p.vencedor === 'casa';
+          var empatou = p.vencedor === 'empate';
+          var bcls = venceu ? 'b-teal' : empatou ? 'b-warn' : 'b-danger';
+          var btxt = venceu ? 'Vitoria' : empatou ? 'Empate' : 'Derrota';
+          html += '<div class="res-card confirmada" style="' + (isMeu ? 'background:var(--vl)' : '') + '">';
+          html += '<div class="res-top"><div class="res-data">Apto ' + cod + (p.adversario_apto ? ' x ' + p.adversario_apto : '') + '</div><span class="badge ' + bcls + '">' + btxt + '</span></div>';
+          html += '<div class="res-info">' + p.placar_casa + ' x ' + p.placar_visitante + ' &bull; ' + (p.modalidade || '---') + '</div>';
+          html += '</div>';
+        });
+        el.innerHTML = html;
+      });
+  }
+}
+
 </script>
 
 </body>
