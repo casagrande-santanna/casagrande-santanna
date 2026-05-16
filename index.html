@@ -1554,6 +1554,11 @@ function _fazerInsertReserva() {
   pendSlot.date,
   slotInicio,
   slotFim,
+  m.nome,
+  morador.unidades ? morador.unidades.codigo : ''
+);
+
+window.open(linkCalendar,'_blank');
   mod.nome,
   morador.unidades ? morador.unidades.codigo : ''
 );
