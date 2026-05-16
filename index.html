@@ -2060,7 +2060,7 @@ function renderWidgetStatus() {
               lembreteEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
                 + '<div><div style="font-size:12px;font-weight:600;color:var(--v)"><i class="ti ti-bell-ringing" aria-hidden="true"></i> Sua reserva começa ' + diffTxt + '</div>'
                 + '<div style="font-size:11px;color:var(--t2)">' + (pr.slot_inicio||'').slice(0,5) + '–' + (pr.slot_fim||'').slice(0,5) + (modNome ? ' • ' + modNome : '') + '</div></div>'
-                + '<button class="btn-sm b" onclick="document.getElementById('tab-checkin').click()" style="flex-shrink:0;font-size:11px"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>'
+                + '<button class="btn-sm b" onclick="document.getElementById(&quot;tab-checkin&quot;).click()" style="flex-shrink:0;font-size:11px"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>'
                 + '</div>';
             } else {
               lembreteEl.style.display = 'none';
