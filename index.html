@@ -1480,6 +1480,8 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
 function _fazerInsertReserva() {
   var horaInicio = pendSlot.slot + ':00';
   var horaFim = addH(pendSlot.slot, pendDur / 60) + ':00';
+  var _date = pendSlot.date;
+  var _mod  = pendMod;
 
   // Verifica conflito de horário antes de inserir
   sb.from('reservas')
@@ -1490,7 +1492,7 @@ function _fazerInsertReserva() {
     .then(function(conflito) {
       if(conflito.data && conflito.data.length > 0) {
         toast('Horario indisponivel. Por favor, escolha outro.');
-        selData(pendSlot.date);
+        selData(_date);
         fecharModal('m-reserva');
         return;
       }
@@ -1510,22 +1512,22 @@ function _fazerInsertReserva() {
         }).then(function(r2) {
           if(r2.error) { toast('Erro: '+r2.error.message); return; }
           fecharModal('m-reserva');
-          var modNomeCalendar = MODS.find(function(x){ return x.id===pendMod; });
+          var modNomeCalendar = MODS.find(function(x){ return x.id===_mod; });
           var nomeModal = modNomeCalendar ? modNomeCalendar.nome : '';
           var apto = morador.unidades ? morador.unidades.codigo : '';
           var linkCalendar = gerarLinkGoogleCalendar(
-            pendSlot.date,
+            _date,
             horaInicio.slice(0,5),
             horaFim.slice(0,5),
             nomeModal,
             apto
           );
           var det = document.getElementById('m-reserva-ok-detalhe');
-          if(det) det.textContent = (apto ? 'Apto '+apto+' • ' : '') + fmtD(pendSlot.date) + ' • ' + horaInicio.slice(0,5) + '–' + horaFim.slice(0,5) + (nomeModal ? ' • '+nomeModal : '');
+          if(det) det.textContent = (apto ? 'Apto '+apto+' • ' : '') + fmtD(_date) + ' • ' + horaInicio.slice(0,5) + '–' + horaFim.slice(0,5) + (nomeModal ? ' • '+nomeModal : '');
           var btnCal = document.getElementById('btn-calendar-link');
           if(btnCal) btnCal.href = linkCalendar;
           abrirModal('m-reserva-ok');
-          setTimeout(function(){ selData(pendSlot.date); renderMinhas(); renderCheckin(); }, 300);
+          setTimeout(function(){ selData(_date); renderMinhas(); renderCheckin(); }, 300);
         });
       });
     });
@@ -1777,7 +1779,7 @@ function renderMinhas() {
         else if(r.status==='cancelada') bl = r.isento_penalidade ? 'Canc. (Isenta)' : 'Cancelada';
         else if(r.status==='expirada') bl='Ausencia';
         var m = r.modalidades;
-        html += '<div class="res-card '+r.status+'">';
+        html += '<div class="res-card '+r.status+'" data-reserva-row="1" data-dt="'+r.data_reserva+'" data-st="'+(r.status||'')+'">';
         html += '<div class="res-top"><div class="res-data">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
         html += '<div class="res-info">'+(m?m.icone+' '+m.nome:'---')+' - '+(r.duracao_min===60?'1 hora':'2 horas')+'</div>';
         if(r.status==='confirmada') {
@@ -1804,21 +1806,26 @@ function renderMinhas() {
         newLimpar.addEventListener('click', function() {
           if(!confirm('Deseja ocultar reservas passadas e canceladas?')) return;
           var hoje = ts();
-          var p1 = sb.from('reservas').update({oculto_morador: true})
-            .eq('unidade_id', morador.unidade_id).lt('data_reserva', hoje);
-          var p2 = sb.from('reservas').update({oculto_morador: true})
-            .eq('unidade_id', morador.unidade_id).eq('status', 'cancelada');
-          var p3 = sb.from('reservas').update({oculto_morador: true})
-            .eq('unidade_id', morador.unidade_id).eq('status', 'expirada');
-          Promise.all([p1, p2, p3]).then(function(results) {
-            var erros = results.filter(function(r){ return r && r.error; });
-            if(erros.length) {
-              toast('Execute o SQL de migracao para habilitar esta funcao.');
-            } else {
-              toast('Historico limpo.');
-              renderMinhas();
+          // Oculta visualmente no DOM imediatamente
+          list.querySelectorAll('[data-reserva-row]').forEach(function(row) {
+            var dt = row.dataset.dt;
+            var st = row.dataset.st;
+            if(dt < hoje || st === 'cancelada' || st === 'expirada') {
+              row.style.transition = 'opacity .3s';
+              row.style.opacity = '0';
+              setTimeout(function(){ row.style.display = 'none'; }, 300);
             }
           });
+          toast('Historico limpo.');
+          // Tenta persistir no banco silenciosamente (falha sem impacto se coluna nao existir)
+          var ids = mine.filter(function(r){
+            return r.data_reserva < hoje || r.status === 'cancelada' || r.status === 'expirada';
+          }).map(function(r){ return r.id; });
+          if(ids.length) {
+            ids.forEach(function(id){
+              sb.from('reservas').update({oculto_morador: true}).eq('id', id).then(function(){});
+            });
+          }
         });
       }
 
