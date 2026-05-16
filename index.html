@@ -1170,10 +1170,22 @@ function iniciarApp(user) {
     }
 
     var roleTagEl = document.getElementById('role-tag');
+    if(roleTagEl) {
+      if(morador.tipo === 'admin') {
+        roleTagEl.textContent = 'Administrador';
+        roleTagEl.style.background = 'rgba(255,255,255,.35)';
+        roleTagEl.style.fontWeight = '600';
+      } else if(morador.status === 'suspenso') {
+        roleTagEl.textContent = 'Suspenso';
+        roleTagEl.style.background = 'rgba(226,75,74,.5)';
+      } else {
+        roleTagEl.textContent = morador.tipo === 'inquilino' ? 'Inquilino' : 'Morador';
+      }
+    }
     if(morador.status === 'suspenso' && morador.tipo !== 'admin') {
-  toast('Apartamento suspenso. Reservas bloqueadas.');
-  return;
-}
+      toast('Apartamento suspenso. Reservas bloqueadas.');
+      return;
+    }
 
     if(morador.foto_url) {
       var fotoImg = document.getElementById('pf-foto');
