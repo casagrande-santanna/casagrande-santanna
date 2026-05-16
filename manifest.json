@@ -1,13 +1,23 @@
 {
-  "name": "Casa Grande Sant'Anna",
-  "short_name": "CasaGrande",
+  "name": "Casa Grande de Sant'Anna",
+  "short_name": "CG Quadra",
   "description": "Sistema de reserva da quadra poliesportiva",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#27500A",
   "theme_color": "#27500A",
+  "orientation": "portrait",
+  "scope": "/",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
