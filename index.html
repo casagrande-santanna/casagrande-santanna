@@ -209,11 +209,11 @@ textarea.form-in{resize:vertical}
     <button class="tab active" id="tab-avisos"><i class="ti ti-bell" aria-hidden="true"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
     <button class="tab" id="tab-dashboard"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard</button>
     <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
-    <button class="tab" id="tab-academia" style="display:none"><i class="ti ti-barbell" aria-hidden="true"></i>Academia</button>
     <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
     <button class="tab" id="tab-calendario"><i class="ti ti-calendar-month" aria-hidden="true"></i>Calendario</button>
     <button class="tab" id="tab-quadra"><i class="ti ti-trophy" aria-hidden="true"></i>Quadra</button>
+    <button class="tab" id="tab-academia" style="display:none"><i class="ti ti-barbell" aria-hidden="true"></i>Academia</button>
     <button class="tab" id="tab-ocorrencias" style="display:none"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorr.</button>
     <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config<span class="ndot" id="nd-config"></span></button>
   </div>
@@ -586,6 +586,28 @@ textarea.form-in{resize:vertical}
         <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking de pontualidade</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:8px">Apartamentos com maior taxa de check-in no mes corrente.</div>
         <div id="ranking-pontualidade"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-barbell" aria-hidden="true"></i>Academia</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0">
+          <div>
+            <div style="font-size:12px;font-weight:600">Exibir aba Academia para moradores</div>
+            <div style="font-size:10px;color:var(--t2);margin-top:2px">Ativa o agendamento da academia no app</div>
+          </div>
+          <div class="tgl" id="tgl-academia" style="margin-left:12px;margin-top:2px"></div>
+        </div>
+        <div id="academia-cfg-wrap" style="display:none;padding:9px 0 0;border-top:0.5px solid var(--br)">
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Limite de pessoas simultaneas</div>
+          <select class="form-in" id="cfg-academia-simult">
+            <option value="1">1 pessoa</option>
+            <option value="2">2 pessoas</option>
+            <option value="3" selected>3 pessoas</option>
+            <option value="4">4 pessoas</option>
+            <option value="5">5 pessoas</option>
+            <option value="8">8 pessoas</option>
+            <option value="10">10 pessoas</option>
+          </select>
+        </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-repeat" aria-hidden="true"></i>Aulas recorrentes — regras</div>
@@ -1421,7 +1443,6 @@ function processarQrQuadra() {
             checkin_feito: true, checkin_em: new Date().toISOString()
           }).then(function(ins) {
             if(ins.error) { toast('Erro: ' + ins.error.message); return; }
-           alert('RESERVA OK');
             toast('Quadra livre! Reserva criada e check-in realizado.');
             renderCheckin(); renderMinhas(); renderCal();
           });
@@ -1714,8 +1735,7 @@ function _fazerInsertReserva() {
           unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
           data_reserva: pendSlot.date,
           slot_inicio: horaInicio, slot_fim: horaFim,
-          duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada',
-          espaco_id: espacoQuadraId
+          duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
         }).then(function(r2) {
           if(r2.error) { toast('Erro: '+r2.error.message); return; }
           fecharModal('m-reserva');
@@ -2627,6 +2647,17 @@ function renderConfig() {
   stg('tgl-blk-dom',       appCfg.blk_domingo);
   stg('tgl-aulas-rec',     appCfg.aulas_rec_ativo);
   stg('tgl-fair-play',     appCfg.fair_play_ativo !== false);
+  // Estado da academia
+  var tglAc2 = document.getElementById('tgl-academia');
+  var wrapAc2 = document.getElementById('academia-cfg-wrap');
+  var acEspaco = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+  if(tglAc2) {
+    if(acEspaco && acEspaco.ativo) tglAc2.classList.add('on');
+    else tglAc2.classList.remove('on');
+  }
+  if(wrapAc2) wrapAc2.style.display = (acEspaco && acEspaco.ativo) ? 'block' : 'none';
+  var selSim2 = document.getElementById('cfg-academia-simult');
+  if(selSim2 && acEspaco) selSim2.value = String(acEspaco.max_simult || 3);
 
   // Pendentes
   sb.from('moradores').select('*,unidades(codigo)').eq('status','pendente').order('created_at',{ascending:false}).then(function(res) {
@@ -3268,6 +3299,50 @@ document.getElementById('btn-add-bloqueio').addEventListener('click', function()
 });
 
 // ── TOGGLES ────────────────────────────────────────────────────
+// Toggle academia
+(function() {
+  var tglAc = document.getElementById('tgl-academia');
+  var wrapAc = document.getElementById('academia-cfg-wrap');
+  function syncAcademiaCfg() {
+    if(!tglAc || !wrapAc) return;
+    wrapAc.style.display = tglAc.classList.contains('on') ? 'block' : 'none';
+  }
+  if(tglAc) {
+    tglAc.addEventListener('click', function() {
+      tglAc.classList.toggle('on');
+      syncAcademiaCfg();
+      // Atualiza no banco
+      var ativo = tglAc.classList.contains('on');
+      if(espacoAcademiaId) {
+        sb.from('espacos').update({ativo: ativo}).eq('id', espacoAcademiaId).then(function() {
+          atualizarTabAcademia();
+          toast(ativo ? 'Academia ativada.' : 'Academia desativada.');
+          // Atualiza max_simult se necessario
+          var sel = document.getElementById('cfg-academia-simult');
+          if(sel && ativo) {
+            sb.from('espacos').update({max_simult: parseInt(sel.value)}).eq('id', espacoAcademiaId).then(function(){});
+          }
+        });
+      }
+    });
+    syncAcademiaCfg();
+  }
+  var selSimult = document.getElementById('cfg-academia-simult');
+  if(selSimult) {
+    selSimult.addEventListener('change', function() {
+      if(espacoAcademiaId) {
+        sb.from('espacos').update({max_simult: parseInt(selSimult.value)}).eq('id', espacoAcademiaId).then(function() {
+          espacos = espacos.map(function(e) {
+            if(e.id === espacoAcademiaId) e.max_simult = parseInt(selSimult.value);
+            return e;
+          });
+          toast('Limite atualizado.');
+        });
+      }
+    });
+  }
+})();
+
 ['tgl-blk-aulas-fds','tgl-blk-sab','tgl-blk-dom','tgl-aulas-rec','tgl-fair-play'].forEach(function(id) {
   var el = document.getElementById(id);
   if(el) el.addEventListener('click', function() { el.classList.toggle('on'); });
@@ -3692,7 +3767,7 @@ document.getElementById('btn-fechar-dispensa').addEventListener('click', functio
 
 // ── ESPACOS ────────────────────────────────────────────────────
 function carregarEspacos() {
-  sb.from('espacos').select('*').eq('ativo', true).order('criado_at').then(function(res) {
+  sb.from('espacos').select('*').order('criado_at').then(function(res) {
     espacos = res.data || [];
     espacoQuadraId = null;
     espacoAcademiaId = null;
@@ -3701,10 +3776,16 @@ function carregarEspacos() {
       if(n.indexOf('quadra') >= 0) espacoQuadraId = e.id;
       if(n.indexOf('academia') >= 0) espacoAcademiaId = e.id;
     });
-    // Mostra aba academia apenas se espaco existir
-    var tabAc = document.getElementById('tab-academia');
-    if(tabAc) tabAc.style.display = espacoAcademiaId ? 'flex' : 'none';
+    atualizarTabAcademia();
   });
+}
+
+function atualizarTabAcademia() {
+  var tabAc = document.getElementById('tab-academia');
+  if(!tabAc) return;
+  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+  var ativo = ac ? ac.ativo : false;
+  tabAc.style.display = (espacoAcademiaId && ativo) ? 'flex' : 'none';
 }
 
 // ── DASHBOARD ──────────────────────────────────────────────────
@@ -3918,8 +3999,7 @@ function selDataAcademia(ds) {
             slot_fim: horaFim,
             duracao_min: 60,
             tipo_reserva: 'pontual',
-            status: 'confirmada',
-            espaco_id: espacoAcademiaId
+            status: 'confirmada'
           }).then(function(r) {
             if(r.error) { toast('Erro: ' + r.error.message); return; }
             toast('Academia reservada!');
