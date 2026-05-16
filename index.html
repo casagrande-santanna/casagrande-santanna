@@ -207,7 +207,9 @@ textarea.form-in{resize:vertical}
   </div>
   <div class="tab-bar">
     <button class="tab active" id="tab-avisos"><i class="ti ti-bell" aria-hidden="true"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
+    <button class="tab" id="tab-dashboard"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard</button>
     <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
+    <button class="tab" id="tab-academia" style="display:none"><i class="ti ti-barbell" aria-hidden="true"></i>Academia</button>
     <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
     <button class="tab" id="tab-calendario"><i class="ti ti-calendar-month" aria-hidden="true"></i>Calendario</button>
@@ -231,6 +233,39 @@ textarea.form-in{resize:vertical}
       <div id="fab-aviso"></div>
       <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
     </div>
+    <div class="screen" id="screen-dashboard">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="card" style="padding:12px;text-align:center">
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Reservas este mes</div>
+          <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-total-mes">--</div>
+        </div>
+        <div class="card" style="padding:12px;text-align:center">
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Taxa de check-in</div>
+          <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-taxa-checkin">--%</div>
+        </div>
+        <div class="card" style="padding:12px;text-align:center">
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Horario mais reservado</div>
+          <div style="font-size:18px;font-weight:600;color:var(--v)" id="dash-top-slot">--:--</div>
+        </div>
+        <div class="card" style="padding:12px;text-align:center">
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Ocupacao media</div>
+          <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-ocupacao">--%</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Ocupacao por dia da semana</div>
+        <div id="dash-heatmap" style="margin-top:6px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking do mes</div>
+        <div id="dash-ranking" style="margin-top:4px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-pie" aria-hidden="true"></i>Reservas por modalidade</div>
+        <div id="dash-modalidades" style="margin-top:4px"></div>
+      </div>
+    </div>
+
     <div class="screen" id="screen-reservar">
       <div class="card">
         <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Selecione uma data</div>
@@ -256,6 +291,32 @@ textarea.form-in{resize:vertical}
         <div id="lista-reservas-dia"></div>
       </div>
     </div>
+    <div class="screen" id="screen-academia">
+      <div class="card" style="background:var(--bl);border-color:var(--blb);margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:28px">&#127947;</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--blt)">Academia</div>
+            <div style="font-size:11px;color:var(--t2)" id="ac-info-simult">Carregando...</div>
+          </div>
+          <div id="ac-status-dot" style="width:10px;height:10px;border-radius:50%;background:#B4B2A9;flex-shrink:0;margin-left:auto"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Selecione uma data</div>
+        <div class="cal-hdr">
+          <button class="cal-nav" id="btn-prev-m-ac"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+          <span class="cal-month" id="cal-lbl-ac"></span>
+          <button class="cal-nav" id="btn-next-m-ac"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+        </div>
+        <div class="cal-grid" id="cal-grid-ac"></div>
+      </div>
+      <div class="card" id="ac-slots-card" style="display:none">
+        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="ac-slots-lbl">Horarios disponiveis</span></div>
+        <div class="slot-grid" id="ac-slot-grid"></div>
+      </div>
+    </div>
+
     <div class="screen" id="screen-minhas">
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <button class="btn-s" id="btn-cancelar-pontuais" style="flex:1;font-size:10.5px;color:var(--rdt);border-color:var(--rdb)">
@@ -940,6 +1001,11 @@ var STL = {aberta:'Aberta',andamento:'Em andamento',resolvida:'Resolvida',encerr
 var AVL = {urgente:'Urgente',info:'Informativo',manutencao:'Manutencao',comunicado:'Comunicado'};
 
 var usuario = null, morador = null;
+var espacos = [];
+var espacoQuadraId = null;
+var espacoAcademiaId = null;
+var acVY = new Date().getFullYear(), acVM = new Date().getMonth();
+var acSelDate = null;
 var vY = new Date().getFullYear(), vM = new Date().getMonth();
 var selDate = null, pendSlot = null, pendMod = null, pendDur = null;
 var cancelId = null, ocoFiltro = 'todos', ocoDetalhe = null;
@@ -1252,6 +1318,7 @@ function iniciarApp(user) {
 
     carregarBloqueios();
     carregarConfiguracoes();
+    carregarEspacos();
     renderCal();
     renderAvisos();
     renderCheckin();
@@ -1269,7 +1336,9 @@ sb.auth.getSession().then(function(res) {
 
 // ── TABS ───────────────────────────────────────────────────────
 document.getElementById('tab-avisos').addEventListener('click', function() { goScreen('avisos'); renderAvisos(); });
+document.getElementById('tab-dashboard').addEventListener('click', function() { goScreen('dashboard'); renderDashboard(); });
 document.getElementById('tab-reservar').addEventListener('click', function() { goScreen('reservar'); renderCal(); });
+document.getElementById('tab-academia').addEventListener('click', function() { goScreen('academia'); renderAcademia(); });
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
 document.getElementById('tab-checkin').addEventListener('click', function() { goScreen('checkin'); renderCheckin(); });
 document.getElementById('tab-calendario').addEventListener('click', function() { goScreen('calendario'); renderCalendario(); });
@@ -1279,7 +1348,7 @@ document.getElementById('tab-config').addEventListener('click', function() { if(
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
 function goScreen(name) {
-  var telas = ['avisos','reservar','minhas','checkin','calendario','quadra','ocorrencias','config','perfil'];
+  var telas = ['avisos','dashboard','reservar','academia','minhas','checkin','calendario','quadra','ocorrencias','config','perfil'];
   telas.forEach(function(t) {
     document.getElementById('screen-'+t).classList.remove('active');
     var tab = document.getElementById('tab-'+t);
@@ -1645,7 +1714,8 @@ function _fazerInsertReserva() {
           unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
           data_reserva: pendSlot.date,
           slot_inicio: horaInicio, slot_fim: horaFim,
-          duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
+          duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada',
+          espaco_id: espacoQuadraId
         }).then(function(r2) {
           if(r2.error) { toast('Erro: '+r2.error.message); return; }
           fecharModal('m-reserva');
@@ -2682,7 +2752,6 @@ function renderConfig() {
     }
   });
 
-  renderDashboard();
   renderRankingPontualidade();
   renderContratosAula();
 
@@ -2702,39 +2771,6 @@ function renderConfig() {
     });
     var ag = document.getElementById('agenda-adm');
     if(ag) ag.innerHTML = html;
-  });
-}
-
-// ── DASHBOARD ──────────────────────────────────────────────────
-function renderDashboard() {
-  var mesAtual = new Date().toISOString().slice(0,7);
-  var ini = mesAtual + '-01';
-  var fim = mesAtual + '-31';
-  sb.from('reservas').select('status,checkin_feito,tipo_reserva,slot_inicio').gte('data_reserva',ini).lte('data_reserva',fim).then(function(res) {
-    var todas = res.data||[];
-    var confirmadas = todas.filter(function(r){ return r.status==='confirmada'; }).length;
-    var checkins = todas.filter(function(r){ return r.checkin_feito; }).length;
-    var canceladas = todas.filter(function(r){ return r.status==='cancelada'; }).length;
-    var ausencias = todas.filter(function(r){ return r.status==='expirada'; }).length;
-    var aulas = todas.filter(function(r){ return r.tipo_reserva==='aula'; }).length;
-    var pontuais = todas.filter(function(r){ return r.tipo_reserva==='pontual'; }).length;
-    var taxaCheckin = (checkins+ausencias) > 0 ? Math.round(checkins/(checkins+ausencias)*100) : 0;
-    var slots = {};
-    todas.forEach(function(r){ if(r.slot_inicio){ var h=(r.slot_inicio||'').slice(0,5); slots[h]=(slots[h]||0)+1; } });
-    var topSlot = Object.entries(slots).sort(function(a,b){return b[1]-a[1];})[0];
-    var el = document.getElementById('dashboard-uso');
-    if(!el) return;
-    el.innerHTML = [
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">',
-      '<div style="background:var(--vl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--v)">'+(confirmadas+checkins+ausencias)+'</div><div style="font-size:10px;color:var(--t2)">Total reservas</div></div>',
-      '<div style="background:var(--bl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blt)">'+taxaCheckin+'%</div><div style="font-size:10px;color:var(--t2)">Taxa check-in</div></div>',
-      '<div style="background:var(--am);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--amt)">'+canceladas+'</div><div style="font-size:10px;color:var(--t2)">Canceladas</div></div>',
-      '<div style="background:var(--rd);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--rdt)">'+ausencias+'</div><div style="font-size:10px;color:var(--t2)">Ausencias</div></div>',
-      '</div>',
-      '<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:0.5px solid var(--br)"><span style="color:var(--t2)">Reservas pontuais</span><span style="font-weight:600">'+pontuais+'</span></div>',
-      '<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:0.5px solid var(--br)"><span style="color:var(--t2)">Aulas recorrentes</span><span style="font-weight:600">'+aulas+'</span></div>',
-      topSlot ? '<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--t2)">Horario mais reservado</span><span style="font-weight:600">'+topSlot[0]+' ('+topSlot[1]+'x)</span></div>' : ''
-    ].join('');
   });
 }
 
@@ -3652,6 +3688,255 @@ var dispensaReservaId = null;
 document.getElementById('btn-fechar-dispensa').addEventListener('click', function() {
   fecharModal('m-dispensa');
   toast('Reserva cancelada.');
+});
+
+// ── ESPACOS ────────────────────────────────────────────────────
+function carregarEspacos() {
+  sb.from('espacos').select('*').eq('ativo', true).order('criado_at').then(function(res) {
+    espacos = res.data || [];
+    espacoQuadraId = null;
+    espacoAcademiaId = null;
+    espacos.forEach(function(e) {
+      var n = (e.nome || '').toLowerCase();
+      if(n.indexOf('quadra') >= 0) espacoQuadraId = e.id;
+      if(n.indexOf('academia') >= 0) espacoAcademiaId = e.id;
+    });
+    // Mostra aba academia apenas se espaco existir
+    var tabAc = document.getElementById('tab-academia');
+    if(tabAc) tabAc.style.display = espacoAcademiaId ? 'flex' : 'none';
+  });
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────
+function renderDashboard() {
+  var mesIni = new Date().toISOString().slice(0,7) + '-01';
+  var hoje = new Date();
+  var mesFim = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).toISOString().slice(0,10);
+  var totalSlotsDia = 16;
+  var diasMes = parseInt(mesFim.slice(8));
+
+  sb.from('reservas')
+    .select('data_reserva, slot_inicio, status, checkin_feito, modalidades(nome), unidades(codigo)')
+    .gte('data_reserva', mesIni)
+    .lte('data_reserva', mesFim)
+    .then(function(res) {
+      var todas = res.data || [];
+      var confirmadas = todas.filter(function(r){ return r.status === 'confirmada' || r.checkin_feito; });
+      var comCheckin = todas.filter(function(r){ return r.checkin_feito; });
+      var total = confirmadas.length;
+      var taxa = total > 0 ? Math.round(comCheckin.length / total * 100) : 0;
+      var totalSlotsMes = totalSlotsDia * diasMes;
+      var ocupacao = Math.round(total / totalSlotsMes * 100);
+
+      // Top slot
+      var slotCount = {};
+      confirmadas.forEach(function(r) {
+        var s = (r.slot_inicio || '').slice(0,5);
+        if(s) slotCount[s] = (slotCount[s] || 0) + 1;
+      });
+      var topSlot = Object.keys(slotCount).sort(function(a,b){ return slotCount[b]-slotCount[a]; })[0] || '--:--';
+
+      document.getElementById('dash-total-mes').textContent = total;
+      document.getElementById('dash-taxa-checkin').textContent = taxa + '%';
+      document.getElementById('dash-ocupacao').textContent = ocupacao + '%';
+      document.getElementById('dash-top-slot').textContent = topSlot;
+
+      // Heatmap por dia da semana
+      var diasNome = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+      var diaCount = [0,0,0,0,0,0,0];
+      var diaMax = 1;
+      confirmadas.forEach(function(r) {
+        if(!r.data_reserva) return;
+        var d = new Date(r.data_reserva + 'T12:00:00').getDay();
+        diaCount[d]++;
+        if(diaCount[d] > diaMax) diaMax = diaCount[d];
+      });
+      var hmHtml = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">';
+      diasNome.forEach(function(d){ hmHtml += '<div style="font-size:9px;color:var(--t2);text-align:center">' + d + '</div>'; });
+      hmHtml += '</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
+      diaCount.forEach(function(cnt) {
+        var pct = Math.round(cnt / diaMax * 100);
+        var bg = pct >= 75 ? '#27500A' : pct >= 40 ? '#639922' : pct >= 15 ? '#C0DD97' : '#EAF3DE';
+        hmHtml += '<div style="height:32px;border-radius:6px;background:' + bg + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:' + (pct>=40?'#fff':'var(--t2)') + '">' + cnt + '</div>';
+      });
+      hmHtml += '</div>';
+      var hmEl = document.getElementById('dash-heatmap');
+      if(hmEl) hmEl.innerHTML = hmHtml;
+
+      // Ranking por apartamento
+      var aptoMap = {};
+      confirmadas.forEach(function(r) {
+        var cod = r.unidades ? r.unidades.codigo : null;
+        if(!cod) return;
+        if(!aptoMap[cod]) aptoMap[cod] = {total:0, checkin:0};
+        aptoMap[cod].total++;
+        if(r.checkin_feito) aptoMap[cod].checkin++;
+      });
+      var rankList = Object.keys(aptoMap).map(function(k) {
+        return {apto:k, total:aptoMap[k].total, taxa: aptoMap[k].total > 0 ? Math.round(aptoMap[k].checkin/aptoMap[k].total*100) : 0};
+      }).sort(function(a,b){ return b.total - a.total || b.taxa - a.taxa; }).slice(0,8);
+      var rkHtml = rankList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>';
+      rankList.forEach(function(a, i) {
+        var cor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 60 ? 'var(--amb)' : 'var(--rdt)';
+        var isMeu = morador && morador.unidades && morador.unidades.codigo === a.apto;
+        rkHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--br)">';
+        rkHtml += '<div style="font-size:12px;width:20px;text-align:center;color:var(--t2)">' + (i+1) + '</div>';
+        rkHtml += '<div style="flex:1;font-size:12px;font-weight:' + (isMeu?'600':'400') + ';color:' + (isMeu?'var(--v)':'var(--t1)') + '">Apto ' + a.apto + '</div>';
+        rkHtml += '<div style="font-size:11px;color:var(--t2)">' + a.total + ' reserva(s)</div>';
+        rkHtml += '<div style="font-size:12px;font-weight:600;color:' + cor + ';min-width:32px;text-align:right">' + a.taxa + '%</div>';
+        rkHtml += '</div>';
+      });
+      var rkEl = document.getElementById('dash-ranking');
+      if(rkEl) rkEl.innerHTML = rkHtml;
+
+      // Modalidades
+      var modMap = {};
+      confirmadas.forEach(function(r) {
+        var nome = r.modalidades ? r.modalidades.nome : 'Uso livre';
+        modMap[nome] = (modMap[nome] || 0) + 1;
+      });
+      var modList = Object.keys(modMap).sort(function(a,b){ return modMap[b]-modMap[a]; });
+      var modMax = modList.length ? modMap[modList[0]] : 1;
+      var modHtml = modList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados.</div>';
+      var modCores = ['#27500A','#185FA5','#854F0B','#A32D2D','#534AB7','#0F6E56'];
+      modList.forEach(function(nome, i) {
+        var cnt = modMap[nome];
+        var pct = Math.round(cnt / modMax * 100);
+        var cor = modCores[i % modCores.length];
+        modHtml += '<div style="margin-bottom:8px">';
+        modHtml += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--t1)">' + nome + '</span><span style="color:var(--t2)">' + cnt + '</span></div>';
+        modHtml += '<div style="background:var(--bg);border-radius:20px;height:6px;overflow:hidden"><div style="height:100%;border-radius:20px;background:' + cor + ';width:' + pct + '%"></div></div>';
+        modHtml += '</div>';
+      });
+      var modEl = document.getElementById('dash-modalidades');
+      if(modEl) modEl.innerHTML = modHtml;
+    });
+}
+
+// ── ACADEMIA ───────────────────────────────────────────────────
+function renderAcademia() {
+  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+  var maxSimult = ac ? (ac.max_simult || 3) : 3;
+  var infoEl = document.getElementById('ac-info-simult');
+  if(infoEl) infoEl.textContent = 'Ate ' + maxSimult + ' pessoa(s) simultaneamente';
+
+  document.getElementById('cal-lbl-ac').textContent = MESES[acVM] + ' ' + acVY;
+  var g = document.getElementById('cal-grid-ac');
+  var html = DIAS_N.map(function(d){ return '<div class="cal-dn">' + d + '</div>'; }).join('');
+  var first = new Date(acVY, acVM, 1).getDay();
+  var days = new Date(acVY, acVM+1, 0).getDate();
+  var today = ts();
+  for(var i=0; i<first; i++) html += '<div></div>';
+  for(var d=1; d<=days; d++) {
+    var ds = acVY + '-' + String(acVM+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var cls = 'cal-d';
+    if(ds === today) cls += ' today';
+    if(ds === acSelDate) cls += ' sel';
+    if(isBlocked(ds)) cls += ' blk';
+    html += '<div class="' + cls + '" data-ac-ds="' + ds + '">' + d + '</div>';
+  }
+  g.innerHTML = html;
+  g.querySelectorAll('.cal-d').forEach(function(el) {
+    el.addEventListener('click', function() { selDataAcademia(el.dataset.acDs); });
+  });
+
+  // Status atual da academia
+  var agora = new Date();
+  var agoraMin = agora.getHours() * 60 + agora.getMinutes();
+  var dotEl = document.getElementById('ac-status-dot');
+  sb.from('reservas')
+    .select('id')
+    .eq('data_reserva', today)
+    .eq('status', 'confirmada')
+    .eq('espaco_id', espacoAcademiaId)
+    .then(function(res) {
+      var ocupados = (res.data || []).length;
+      var ac2 = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+      var max = ac2 ? ac2.max_simult : 3;
+      if(dotEl) dotEl.style.background = ocupados >= max ? '#E24B4A' : ocupados > 0 ? '#EF9F27' : '#639922';
+    });
+}
+
+function selDataAcademia(ds) {
+  if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
+  if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
+  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso.'); return; }
+  acSelDate = ds;
+  renderAcademia();
+  var sc = document.getElementById('ac-slots-card');
+  sc.style.display = 'block';
+  document.getElementById('ac-slots-lbl').textContent = 'Horarios - ' + fmtD(ds);
+  var sg = document.getElementById('ac-slot-grid');
+  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+  var maxSimult = ac ? (ac.max_simult || 3) : 3;
+
+  sb.from('reservas')
+    .select('slot_inicio, slot_fim, unidade_id, status')
+    .eq('data_reserva', ds)
+    .eq('status', 'confirmada')
+    .eq('espaco_id', espacoAcademiaId)
+    .then(function(res) {
+      var reservasDia = res.data || [];
+      var agora = new Date();
+      var agoraMin = agora.getHours() * 60 + agora.getMinutes();
+      var ehHoje = ds === ts();
+      var html = '';
+      SLOTS.forEach(function(slot) {
+        if(parseInt(slot) >= 22) return;
+        var slotMin = parseInt(slot.split(':')[0]) * 60;
+        if(ehHoje && slotMin <= agoraMin) return;
+        var ocupados = reservasDia.filter(function(r) {
+          var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60;
+          var fim = parseInt((r.slot_fim||'00:00').slice(0,2))*60;
+          return slotMin >= ini && slotMin < fim;
+        }).length;
+        var minhaRes = reservasDia.find(function(r) {
+          return r.unidade_id === morador.unidade_id && parseInt((r.slot_inicio||'00:00').slice(0,2))*60 === slotMin;
+        });
+        var livre = ocupados < maxSimult;
+        var cls = minhaRes ? 'slot minha' : livre ? 'slot livre' : 'slot ocupado';
+        var lbl = minhaRes ? 'Minha' : livre ? (ocupados + '/' + maxSimult) : 'Cheio';
+        var action = minhaRes ? '' : livre ? 'ac_' + slot : '';
+        html += '<div class="' + cls + '" data-ac-slot="' + (action||'') + '">'
+          + '<div class="slot-hora">' + slot + '</div>'
+          + '<div class="slot-lbl">' + lbl + '</div></div>';
+      });
+      sg.innerHTML = html || '<div class="empty">Sem horarios disponiveis</div>';
+      sg.querySelectorAll('[data-ac-slot]').forEach(function(el) {
+        var act = el.dataset.acSlot;
+        if(!act) return;
+        el.addEventListener('click', function() {
+          var slot = act.replace('ac_', '');
+          if(!confirm('Reservar academia em ' + fmtD(ds) + ' as ' + slot + '?')) return;
+          var horaIni = slot + ':00';
+          var horaFim = addH(slot, 1) + ':00';
+          sb.from('reservas').insert({
+            unidade_id: morador.unidade_id,
+            morador_id: morador.id,
+            data_reserva: ds,
+            slot_inicio: horaIni,
+            slot_fim: horaFim,
+            duracao_min: 60,
+            tipo_reserva: 'pontual',
+            status: 'confirmada',
+            espaco_id: espacoAcademiaId
+          }).then(function(r) {
+            if(r.error) { toast('Erro: ' + r.error.message); return; }
+            toast('Academia reservada!');
+            selDataAcademia(ds);
+            renderAcademia();
+          });
+        });
+      });
+    });
+}
+
+// Navegacao calendario academia
+document.getElementById('btn-prev-m-ac').addEventListener('click', function() {
+  acVM--; if(acVM<0){acVM=11;acVY--;} renderAcademia();
+});
+document.getElementById('btn-next-m-ac').addEventListener('click', function() {
+  acVM++; if(acVM>11){acVM=0;acVY++;} renderAcademia();
 });
 
 document.getElementById('btn-enviar-dispensa').addEventListener('click', function() {
