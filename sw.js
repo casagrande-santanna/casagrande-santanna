@@ -1,4 +1,4 @@
-const CACHE = 'casagrande-v2';
+const CACHE = 'casagrande-v3';
 
 const ASSETS = [
   '/',
@@ -7,34 +7,27 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', event => {
-
   event.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
   );
-
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
-
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys
-          .filter(key => key !== CACHE)
-          .map(key => caches.delete(key))
+        keys.filter(key => key !== CACHE).map(key => caches.delete(key))
       );
     })
   );
-
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
+    fetch(event.request).catch(function() {
+      return caches.match(event.request);
+    })
   );
 });
