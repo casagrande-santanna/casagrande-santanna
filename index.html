@@ -216,6 +216,7 @@ textarea.form-in{resize:vertical}
   </div>
   <div class="content">
     <div class="screen active" id="screen-avisos">
+      <div id="wsq-lembrete" style="display:none;background:var(--vl);border:0.5px solid #97C459;border-radius:10px;padding:10px 14px;margin-bottom:8px"></div>
       <div id="widget-status-quadra" style="border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:0.5px solid var(--br)">
         <div style="display:flex;align-items:center;gap:10px">
           <div id="wsq-dot" style="width:10px;height:10px;border-radius:50%;background:#B4B2A9;flex-shrink:0"></div>
@@ -333,6 +334,13 @@ textarea.form-in{resize:vertical}
       <button class="btn-p" id="btn-nova-oco" style="margin-top:6px;display:none"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrencia</button>
     </div>
     <div class="screen" id="screen-config">
+      <div class="card" style="background:var(--rd);border-color:var(--rdb)">
+        <div class="card-title" style="color:var(--rdt)"><i class="ti ti-alert-triangle" aria-hidden="true" style="color:var(--rdt)"></i>Bloqueio emergencial</div>
+        <div style="font-size:11px;color:var(--rdt);margin-bottom:10px;line-height:1.5">Bloqueia a quadra para o restante do dia atual (sem cancelar reservas existentes).</div>
+        <div id="blk-emerg-status" style="font-size:11px;color:var(--rdt);margin-bottom:8px;display:none"></div>
+        <button class="btn-d" id="btn-blk-emergencial" style="width:100%"><i class="ti ti-lock" aria-hidden="true"></i>Bloquear quadra agora</button>
+        <button class="btn-s" id="btn-desblk-emergencial" style="width:100%;margin-top:6px;display:none;border-color:var(--rdb);color:var(--rdt)"><i class="ti ti-lock-open" aria-hidden="true"></i>Remover bloqueio emergencial</button>
+      </div>
       <div class="card" style="border:2px dashed var(--v)">
         <div class="card-title"><i class="ti ti-printer" aria-hidden="true"></i>QR Code Fixo da Quadra</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Imprima e fixe na parede da quadra.</div>
@@ -1218,7 +1226,7 @@ document.getElementById('tab-minhas').addEventListener('click', function() { goS
 document.getElementById('tab-checkin').addEventListener('click', function() { goScreen('checkin'); renderCheckin(); });
 document.getElementById('tab-calendario').addEventListener('click', function() { goScreen('calendario'); renderCalendario(); });
 document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); });
-document.getElementById('tab-config').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('config'); renderConfig(); });
+document.getElementById('tab-config').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('config'); renderConfig(); verificarBloqueioEmergencial(); });
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
 function goScreen(name) {
@@ -2026,6 +2034,38 @@ function renderWidgetStatus() {
         subEl.style.color = 'var(--v)';
         subEl.textContent = h < 6 ? 'Abre as 06:00' : h >= 22 ? 'Encerrada por hoje' : 'Sem mais reservas hoje';
         if(btnRes) { btnRes.style.display = 'flex'; btnRes.onclick = function(){ document.getElementById('tab-reservar').click(); }; }
+      }
+
+      // Lembrete: reserva do proprio morador nas proximas 2h
+      var lembreteEl = document.getElementById('wsq-lembrete');
+      if(lembreteEl && morador && morador.unidade_id) {
+        sb.from('reservas')
+          .select('slot_inicio, slot_fim, checkin_feito, modalidades(nome)')
+          .eq('unidade_id', morador.unidade_id)
+          .eq('data_reserva', hoje)
+          .eq('status', 'confirmada')
+          .then(function(r2) {
+            var minhasHoje = (r2.data||[]).filter(function(r) {
+              if(r.checkin_feito) return false;
+              var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
+              var diffMin = ini - agoraMin;
+              return diffMin >= 0 && diffMin <= 120;
+            });
+            if(minhasHoje.length) {
+              var pr = minhasHoje[0];
+              var diffM = parseInt((pr.slot_inicio||'00:00').slice(0,2))*60 + parseInt((pr.slot_inicio||'00:00').slice(3,5)) - agoraMin;
+              var diffTxt = diffM <= 10 ? 'em menos de 10 min' : 'em ' + diffM + ' min';
+              var modNome = pr.modalidades ? pr.modalidades.nome : '';
+              lembreteEl.style.display = 'block';
+              lembreteEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+                + '<div><div style="font-size:12px;font-weight:600;color:var(--v)"><i class="ti ti-bell-ringing" aria-hidden="true"></i> Sua reserva começa ' + diffTxt + '</div>'
+                + '<div style="font-size:11px;color:var(--t2)">' + (pr.slot_inicio||'').slice(0,5) + '–' + (pr.slot_fim||'').slice(0,5) + (modNome ? ' • ' + modNome : '') + '</div></div>'
+                + '<button class="btn-sm b" onclick="document.getElementById('tab-checkin').click()" style="flex-shrink:0;font-size:11px"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>'
+                + '</div>';
+            } else {
+              lembreteEl.style.display = 'none';
+            }
+          });
       }
     });
 }
@@ -2935,6 +2975,72 @@ document.getElementById('btn-fechar-contrato').addEventListener('click', functio
 document.getElementById('btn-criar-contrato').addEventListener('click', criarContrato);
 
 // ── BLOQUEIOS ──────────────────────────────────────────────────
+// ── BLOQUEIO EMERGENCIAL ───────────────────────────────────────
+var _blkEmergId = null;
+
+function verificarBloqueioEmergencial() {
+  var hoje = new Date().toISOString().slice(0,10);
+  sb.from('bloqueios')
+    .select('id, motivo')
+    .eq('data_inicio', hoje)
+    .eq('data_fim', hoje)
+    .eq('hora_inicio', '00:00')
+    .eq('hora_fim', '23:59')
+    .ilike('motivo', '%emergencial%')
+    .maybeSingle()
+    .then(function(res) {
+      _blkEmergId = res.data ? res.data.id : null;
+      var btnBlk   = document.getElementById('btn-blk-emergencial');
+      var btnDesblk = document.getElementById('btn-desblk-emergencial');
+      var statusEl  = document.getElementById('blk-emerg-status');
+      if(!btnBlk) return;
+      if(_blkEmergId) {
+        btnBlk.style.display = 'none';
+        if(btnDesblk) btnDesblk.style.display = 'block';
+        if(statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '⚠️ Quadra bloqueada para hoje por bloqueio emergencial.'; }
+      } else {
+        btnBlk.style.display = 'block';
+        if(btnDesblk) btnDesblk.style.display = 'none';
+        if(statusEl) statusEl.style.display = 'none';
+      }
+    });
+}
+
+document.getElementById('btn-blk-emergencial').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  if(!confirm('Bloquear a quadra para o restante do dia de hoje?')) return;
+  var hoje = new Date().toISOString().slice(0,10);
+  sb.from('bloqueios').insert({
+    data_inicio: hoje, data_fim: hoje,
+    hora_inicio: '00:00', hora_fim: '23:59',
+    motivo: 'Bloqueio emergencial',
+    tipo: 'emergencial',
+    criado_por: morador.id
+  }).then(function(r) {
+    if(r.error) { toast('Erro: ' + r.error.message); return; }
+    toast('Quadra bloqueada para hoje.');
+    carregarBloqueios();
+    renderCal();
+    verificarBloqueioEmergencial();
+    renderWidgetStatus();
+  });
+});
+
+document.getElementById('btn-desblk-emergencial').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  if(!_blkEmergId) return;
+  if(!confirm('Remover o bloqueio emergencial e liberar a quadra?')) return;
+  sb.from('bloqueios').delete().eq('id', _blkEmergId).then(function(r) {
+    if(r.error) { toast('Erro: ' + r.error.message); return; }
+    _blkEmergId = null;
+    toast('Bloqueio emergencial removido.');
+    carregarBloqueios();
+    renderCal();
+    verificarBloqueioEmergencial();
+    renderWidgetStatus();
+  });
+});
+
 document.getElementById('btn-add-bloqueio').addEventListener('click', function() {
   if(!requireAdmin()) return;
   var ini = document.getElementById('blk-ini').value;
