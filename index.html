@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#27500A">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CG Quadra">
 <title>Casa Grande de Sant'Anna</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -776,6 +780,46 @@ textarea.form-in{resize:vertical}
   </div>
 </div>
 
+  <script>
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+  })
+}
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt',(e)=>{
+
+  e.preventDefault();
+
+  deferredPrompt = e;
+
+  var btn = document.getElementById('btn-install-pwa');
+
+  if(btn) btn.style.display = 'block';
+});
+
+var btnInstall = document.getElementById('btn-install-pwa');
+
+if(btnInstall){
+
+  btnInstall.addEventListener('click', async()=>{
+
+    if(!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    await deferredPrompt.userChoice;
+
+    deferredPrompt = null;
+
+    btnInstall.style.display = 'none';
+  });
+}
+
+</script>
 <div id="toast"></div>
 
 <script>
@@ -854,7 +898,7 @@ function carregarConfiguracoes() {
 }
 
 function resetPermissoesUI() {
-  ['tab-config','tab-ocorrencias'].forEach(function(id) {
+  ['tab-config'].forEach(function(id) {
     var e = document.getElementById(id);
     if(e) e.style.display = 'none';
   });
@@ -1044,14 +1088,10 @@ function iniciarApp(user) {
     document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
 
     var roleTagEl = document.getElementById('role-tag');
-    if(morador.status === 'suspenso') {
-      roleTagEl.textContent = 'Suspenso';
-      roleTagEl.style.background = 'rgba(162,45,45,0.7)';
-      roleTagEl.style.color = '#fff';
-      toast('Atencao: seu apartamento esta suspenso para novas reservas.');
-    } else {
-      roleTagEl.textContent = isAdmin() ? 'Administrador' : 'Morador';
-    }
+    if(morador.status === 'suspenso' && morador.tipo !== 'admin') {
+  toast('Apartamento suspenso. Reservas bloqueadas.');
+  return;
+}
 
     if(morador.foto_url) {
       var fotoImg = document.getElementById('pf-foto');
@@ -1403,7 +1443,22 @@ function showStep(n) {
     document.getElementById('m-res-step'+i).style.display = (i===n?'block':'none');
   });
 }
+function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
 
+  const dtStart = date.replace(/-/g,'') + 'T' + slotInicio.replace(':','') + '00';
+
+  const dtEnd = date.replace(/-/g,'') + 'T' + slotFim.replace(':','') + '00';
+
+  const texto = encodeURIComponent(`🎾 Reserva da Quadra — ${modalidade}`);
+
+  const local = encodeURIComponent('Quadra Poliesportiva — Casa Grande Sant\'Anna');
+
+  const details = encodeURIComponent(
+    `Apto ${apto} • Lembre-se do check-in até 15 min após o início.`
+  );
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${texto}&dates=${dtStart}/${dtEnd}&location=${local}&details=${details}`;
+}
 // ── CONFIRMAR RESERVA ──────────────────────────────────────────
 function confirmarReserva() {
   if(!morador || !pendSlot || !pendMod || !pendDur) return;
@@ -1467,6 +1522,17 @@ function _fazerInsertReserva() {
           selData(pendSlot.date);
           renderMinhas(); renderCheckin();
           toast('Reserva confirmada!');
+          var linkCalendar = gerarLinkGoogleCalendar(
+  pendSlot.date,
+  slotInicio,
+  slotFim,
+  mod.nome,
+  morador.unidades ? morador.unidades.codigo : ''
+);
+
+setTimeout(function(){
+  window.open(linkCalendar,'_blank');
+},500);
         });
       });
     });
