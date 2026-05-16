@@ -196,7 +196,7 @@ textarea.form-in{resize:vertical}
   <div class="hdr">
     <div class="hdr-row">
       <div>
-        <div class="hdr-title">Casa Grande Sant'Anna</div>
+        <div class="hdr-title">Casa Grande de Sant'Anna</div>
         <div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div>
       </div>
       <div class="hdr-right">
@@ -747,7 +747,7 @@ textarea.form-in{resize:vertical}
   <div class="modal-card center">
     <div class="mhandle"></div>
     <div class="mtitle">Criar conta</div>
-    <div class="msub">Morador do Casa Grande Sant'Anna</div>
+    <div class="msub">Morador do Casa Grande de Sant'Anna</div>
     <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="cad-nome" placeholder="Seu nome completo"></div>
     <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="cad-email"></div>
     <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Minimo 6 caracteres"></div>
@@ -1451,7 +1451,7 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
 
   const texto = encodeURIComponent(`🎾 Reserva da Quadra — ${modalidade}`);
 
-  const local = encodeURIComponent('Quadra Poliesportiva — Casa Grande Sant\'Anna');
+  const local = encodeURIComponent('Quadra Poliesportiva — Casa Grande de Sant\'Anna');
 
   const details = encodeURIComponent(
     `Apto ${apto} • Lembre-se do check-in até 15 min após o início.`
@@ -2869,7 +2869,7 @@ if(tglPush) {
         if(perm === 'granted') {
           tglPush.classList.add('on');
           toast('Notificacoes ativadas!');
-          new Notification('Casa Grande SantAnna', {body:'Notificacoes ativadas com sucesso!'});
+          new Notification('Casa Grande de SantAnna', {body:'Notificacoes ativadas com sucesso!'});
         } else {
           tglPush.classList.remove('on');
           toast('Permissao negada.');
