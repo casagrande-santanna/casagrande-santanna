@@ -42,8 +42,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .hdr-right{display:flex;align-items:center;gap:8px}
 .role-tag{font-size:9px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 8px}
 .av-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;cursor:pointer}
-.tab-bar{display:flex;background:var(--cd);border-bottom:0.5px solid var(--br);position:sticky;top:58px;z-index:29}
-.tab{flex:1;padding:8px 2px 6px;text-align:center;font-size:9px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;border:none;background:none;line-height:1.2}
+.tab-bar{display:flex;background:var(--cd);border-bottom:0.5px solid var(--br);position:sticky;top:58px;z-index:29;overflow-x:auto}
+.tab{flex:1;padding:8px 2px 6px;text-align:center;font-size:9px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;border:none;background:none;line-height:1.2;min-width:55px}
 .tab i{font-size:17px}
 .tab.active{color:var(--v);border-bottom:2px solid var(--v)}
 .ndot{width:6px;height:6px;background:#E24B4A;border-radius:50%;position:absolute;top:4px;right:5px;display:none}
@@ -959,50 +959,126 @@ textarea.form-in{resize:vertical}
   </div>
 </div>
 
-  <script>
+<!-- MODAL SUCESSO RESERVA -->
+<div class="modal-bg" id="m-reserva-ok">
+  <div class="modal-card center" style="max-width:320px;text-align:center">
+    <div style="font-size:36px;margin-bottom:8px">✅</div>
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:var(--t1)">Reserva confirmada!</div>
+    <div id="m-reserva-ok-detalhe" style="font-size:12px;color:var(--t2);margin-bottom:18px"></div>
+    <a id="btn-calendar-link" href="#" target="_blank" rel="noopener"
+      style="display:block;background:#27500A;color:#fff;text-decoration:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;margin-bottom:10px">
+      📅 Adicionar ao Google Calendar
+    </a>
+    <button id="btn-fechar-reserva-ok"
+      style="background:none;border:1px solid var(--br);border-radius:10px;padding:8px 16px;font-size:13px;color:var(--t2);width:100%;cursor:pointer">
+      Fechar
+    </button>
+  </div>
+</div>
 
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js')
-  })
-}
+<div class="modal-bg" id="m-novo-achado">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Registrar item encontrado</div>
+    <div class="msub">Descreva o objeto para que o dono possa reclamar</div>
+    <div style="padding:10px 0">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Descricao do objeto</label>
+      <input type="text" class="form-in" id="achado-desc" placeholder="Ex: Raquete azul, garrafa preta...">
+    </div>
+    <div style="padding:0 0 10px">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Local onde foi encontrado</label>
+      <select class="form-in" id="achado-local">
+        <option value="Quadra poliesportiva">Quadra poliesportiva</option>
+        <option value="Entrada da quadra">Entrada da quadra</option>
+        <option value="Vestiario">Vestiario</option>
+        <option value="Area externa">Area externa</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div class="macts">
+      <button class="btn-s" id="btn-fechar-achado">Cancelar</button>
+      <button class="btn-p" id="btn-salvar-achado"><i class="ti ti-check" aria-hidden="true"></i>Registrar</button>
+    </div>
+  </div>
+</div>
 
-let deferredPrompt;
+<div class="modal-bg" id="m-novo-placar">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Registrar placar</div>
+    <div style="padding:10px 0">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Modalidade</label>
+      <select class="form-in" id="placar-mod">
+        <option value="Tenis simples">Tenis simples</option>
+        <option value="Tenis duplas">Tenis duplas</option>
+        <option value="Futebol">Futebol</option>
+        <option value="Basquete">Basquete</option>
+        <option value="Volei">Volei</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 24px 1fr;gap:8px;align-items:end;padding-bottom:10px">
+      <div>
+        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Meu placar</label>
+        <input type="number" class="form-in" id="placar-casa" placeholder="0" min="0" style="text-align:center;font-size:20px;font-weight:600">
+      </div>
+      <div style="font-size:14px;color:var(--t2);text-align:center;padding-bottom:8px">x</div>
+      <div>
+        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Placar adversario</label>
+        <input type="number" class="form-in" id="placar-visitante" placeholder="0" min="0" style="text-align:center;font-size:20px;font-weight:600">
+      </div>
+    </div>
+    <div style="padding-bottom:12px">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Apto adversario (opcional)</label>
+      <input type="text" class="form-in" id="placar-adversario" placeholder="Ex: B-202">
+    </div>
+    <div class="macts">
+      <button class="btn-s" id="btn-fechar-placar">Cancelar</button>
+      <button class="btn-p" id="btn-salvar-placar"><i class="ti ti-check" aria-hidden="true"></i>Salvar placar</button>
+    </div>
+  </div>
+</div>
 
-window.addEventListener('beforeinstallprompt',(e)=>{
+<div class="modal-bg" id="m-onboarding" style="align-items:center;justify-content:center">
+  <div class="modal-card center" style="max-width:340px;padding:0;overflow:hidden">
+    <div id="onb-step-1" style="padding:28px 24px;text-align:center">
+      <div style="font-size:44px;margin-bottom:12px">&#127934;</div>
+      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Bem-vindo ao app da quadra!</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Aqui voce reserva a quadra poliesportiva, faz check-in e acompanha seu historico, tudo pelo celular.</div>
+      <button class="btn-p" onclick="onbStep(2)" style="width:100%">Proximo <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    </div>
+    <div id="onb-step-2" style="display:none;padding:28px 24px;text-align:center">
+      <div style="font-size:44px;margin-bottom:12px">&#9971;</div>
+      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Regras do fair play</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Cada apartamento tem limite mensal de reservas. Cancelamentos fora do prazo ou ausencias sem check-in geram faltas. Com 2 faltas no mes, o apartamento fica suspenso por 15 dias.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" onclick="onbStep(1)" style="flex:1">Voltar</button>
+        <button class="btn-p" onclick="onbStep(3)" style="flex:2">Proximo <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div id="onb-step-3" style="display:none;padding:28px 24px;text-align:center">
+      <div style="font-size:44px;margin-bottom:12px">&#9989;</div>
+      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Check-in obrigatorio</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">No dia da sua reserva, faca o check-in pela aba Check-in ou escaneando o QR Code na entrada da quadra. Voce tem ate 15 minutos apos o inicio do horario.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" onclick="onbStep(2)" style="flex:1">Voltar</button>
+        <button class="btn-p" id="btn-fechar-onboarding" style="flex:2"><i class="ti ti-check" aria-hidden="true"></i>Entendido!</button>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:6px;padding:0 0 16px">
+      <div id="onb-dot-1" style="width:6px;height:6px;border-radius:50%;background:var(--v)"></div>
+      <div id="onb-dot-2" style="width:6px;height:6px;border-radius:50%;background:var(--br)"></div>
+      <div id="onb-dot-3" style="width:6px;height:6px;border-radius:50%;background:var(--br)"></div>
+    </div>
+  </div>
+</div>
 
-  e.preventDefault();
-
-  deferredPrompt = e;
-
-  var btn = document.getElementById('btn-install-pwa');
-
-  if(btn) btn.style.display = 'block';
-});
-
-var btnInstall = document.getElementById('btn-install-pwa');
-
-if(btnInstall){
-
-  btnInstall.addEventListener('click', async()=>{
-
-    if(!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-
-    await deferredPrompt.userChoice;
-
-    deferredPrompt = null;
-
-    btnInstall.style.display = 'none';
-  });
-}
-
-</script>
 <div id="toast"></div>
 
 <script>
-// ── CONFIGURAÇÕES GLOBAIS ──────────────────────────────────────
+// ============================================
+// CONFIGURAÇÕES GLOBAIS
+// ============================================
 var SURL = 'https://gkdwfntluopycapxyvfx.supabase.co';
 var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
 var sb = supabase.createClient(SURL, SKEY);
@@ -1030,7 +1106,8 @@ var acVY = new Date().getFullYear(), acVM = new Date().getMonth();
 var acSelDate = null;
 var vY = new Date().getFullYear(), vM = new Date().getMonth();
 var selDate = null, pendSlot = null, pendMod = null, pendDur = null;
-var cancelId = null, ocoFiltro = 'todos', ocoDetalhe = null;
+var cancelId = null, dispensaReservaId = null;
+var ocoFiltro = 'todos', ocoDetalhe = null;
 var bloquCache = [];
 var pendEspera = null;
 var html5QrcodeScanner = null;
@@ -1056,7 +1133,9 @@ var appCfg = {
   fair_play_ativo: true
 };
 
-// ── UTILITÁRIOS ────────────────────────────────────────────────
+// ============================================
+// UTILITÁRIOS
+// ============================================
 function ts() { return new Date().toISOString().slice(0,10); }
 function fmtD(ds) { if(!ds) return ''; var p=ds.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function addH(t,h) { var p=t.split(':').map(Number); return String(p[0]+h).padStart(2,'0')+':'+String(p[1]).padStart(2,'0'); }
@@ -1110,7 +1189,9 @@ document.querySelectorAll('.modal-bg').forEach(function(m) {
   m.addEventListener('click', function(e) { if(e.target===m) fecharModal(m.id); });
 });
 
-// ── LOGIN ──────────────────────────────────────────────────────
+// ============================================
+// LOGIN E AUTENTICAÇÃO
+// ============================================
 document.getElementById('btn-entrar').addEventListener('click', function() {
   var email = document.getElementById('login-email').value.trim();
   var pass = document.getElementById('login-pass').value;
@@ -1123,7 +1204,7 @@ document.getElementById('btn-entrar').addEventListener('click', function() {
   });
 });
 
-// ── RECUPERAÇÃO DE SENHA ───────────────────────────────────────
+// Recuperação de senha
 document.getElementById('link-esqueci').addEventListener('click', function() {
   var emailLogin = document.getElementById('login-email').value.trim();
   if(emailLogin) document.getElementById('esqueci-email').value = emailLogin;
@@ -1186,7 +1267,7 @@ sb.auth.onAuthStateChange(function(event, session) {
   }
 });
 
-// ── CADASTRO ───────────────────────────────────────────────────
+// Cadastro
 document.getElementById('link-cadastro').addEventListener('click', function() {
   var sel = document.getElementById('cad-apto');
   var opts = '';
@@ -1233,7 +1314,7 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
   });
 });
 
-// ── LOGOUT ─────────────────────────────────────────────────────
+// Logout
 document.getElementById('btn-logout').addEventListener('click', function() {
   sb.auth.signOut().then(function() {
     resetPermissoesUI();
@@ -1243,7 +1324,9 @@ document.getElementById('btn-logout').addEventListener('click', function() {
   });
 });
 
-// ── INICIAR APP ────────────────────────────────────────────────
+// ============================================
+// INICIAR APP
+// ============================================
 function iniciarApp(user) {
   usuario = user;
   resetPermissoesUI();
@@ -1356,7 +1439,9 @@ sb.auth.getSession().then(function(res) {
   if(res.data && res.data.session) iniciarApp(res.data.session.user);
 });
 
-// ── TABS ───────────────────────────────────────────────────────
+// ============================================
+// TABS
+// ============================================
 document.getElementById('tab-avisos').addEventListener('click', function() { goScreen('avisos'); renderAvisos(); });
 document.getElementById('tab-dashboard').addEventListener('click', function() { goScreen('dashboard'); renderDashboard(); });
 document.getElementById('tab-reservar').addEventListener('click', function() { goScreen('reservar'); renderCal(); });
@@ -1382,7 +1467,9 @@ function goScreen(name) {
   if(name !== 'checkin') fecharScannerEForcarParada();
 }
 
-// ── QR SCANNER ─────────────────────────────────────────────────
+// ============================================
+// QR SCANNER
+// ============================================
 function fecharScannerEForcarParada() {
   if(html5QrcodeScanner) {
     html5QrcodeScanner.stop().then(function() {
@@ -1416,6 +1503,7 @@ function processarQrQuadra() {
     .select('id,unidade_id,checkin_feito,slot_inicio,slot_fim')
     .eq('data_reserva', hoje)
     .eq('status', 'confirmada')
+    .eq('espaco_id', espacoQuadraId)
     .then(function(res) {
       var reservas = res.data || [];
       var ativa = null;
@@ -1440,7 +1528,8 @@ function processarQrQuadra() {
             modalidade_id: mId, data_reserva: hoje,
             slot_inicio: slotAtual+':00', slot_fim: slotFim+':00',
             duracao_min: 60, tipo_reserva: 'pontual', status: 'confirmada',
-            checkin_feito: true, checkin_em: new Date().toISOString()
+            checkin_feito: true, checkin_em: new Date().toISOString(),
+            espaco_id: espacoQuadraId
           }).then(function(ins) {
             if(ins.error) { toast('Erro: ' + ins.error.message); return; }
             toast('Quadra livre! Reserva criada e check-in realizado.');
@@ -1451,7 +1540,9 @@ function processarQrQuadra() {
     });
 }
 
-// ── CALENDARIO ─────────────────────────────────────────────────
+// ============================================
+// CALENDARIO E BLOQUEIOS
+// ============================================
 document.getElementById('btn-prev-m').addEventListener('click', function() { vM--; if(vM<0){vM=11;vY--;} renderCal(); });
 document.getElementById('btn-next-m').addEventListener('click', function() { vM++; if(vM>11){vM=0;vY++;} renderCal(); });
 
@@ -1507,7 +1598,9 @@ function renderCal() {
   });
 }
 
-// ── SELECIONAR DATA E SLOTS ────────────────────────────────────
+// ============================================
+// SELECIONAR DATA E SLOTS (CORRIGIDO)
+// ============================================
 function selData(ds) {
   if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
@@ -1516,7 +1609,7 @@ function selData(ds) {
 
   var sc = document.getElementById('slots-card');
   sc.style.display = 'block';
-  var maxH = 22; // slots de 06:00 ate 21:00 (encerra as 22:00), valido para todos os dias
+  var maxH = 22;
   document.getElementById('slots-lbl').textContent = 'Horarios - ' + fmtD(ds);
   var sg = document.getElementById('slot-grid');
 
@@ -1524,6 +1617,7 @@ function selData(ds) {
     .select('id, unidade_id, slot_inicio, slot_fim, status, tipo_reserva, modalidades(nome, icone), unidades(codigo)')
     .eq('data_reserva', ds)
     .neq('status', 'cancelada')
+    .eq('espaco_id', espacoQuadraId)
     .then(function(res) {
       var reservasDia = res.data || [];
       var agora = new Date();
@@ -1536,7 +1630,6 @@ function selData(ds) {
 
         var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
 
-        // Verificar bloqueio para este slot específico
         var bloqueioInfo = isBlocked(ds, slot);
         if(bloqueioInfo) {
           html += '<div class="slot bloq" title="'+bloqueioInfo.motivo+'">';
@@ -1544,7 +1637,7 @@ function selData(ds) {
           return;
         }
 
-        // Verificar se existe reserva cobrindo este slot
+        // Verificar reserva que cobre este slot
         var r = reservasDia.find(function(x) {
           var ini = (x.slot_inicio || '').substring(0,5);
           var fim = (x.slot_fim || '').substring(0,5);
@@ -1552,7 +1645,6 @@ function selData(ds) {
           return sStr >= ini && sStr < fim;
         });
 
-        // Se não há reserva e o horário já passou, ocultar o slot
         if(!r && ehHoje && slotMin <= agoraMin + 15) return;
 
         var cls, lbl, action;
@@ -1593,7 +1685,9 @@ function selData(ds) {
     });
 }
 
-// ── MODAL RESERVA ──────────────────────────────────────────────
+// ============================================
+// MODAL RESERVA E CONFIRMAÇÃO (CORRIGIDO)
+// ============================================
 document.getElementById('btn-cancelar-res').addEventListener('click', function() { fecharModal('m-reserva'); });
 document.getElementById('btn-voltar-step1').addEventListener('click', function() { pendDur=null; showStep(1); renderModGrid(); });
 document.getElementById('btn-voltar-step2').addEventListener('click', function() {
@@ -1650,6 +1744,7 @@ function buildDurRow(m) {
   document.getElementById('m-dur-info').innerHTML = '<div class="ib ib-amber" style="font-size:10.5px">Maximo: 2 horas para '+m.nome+'.</div>';
 }
 
+function selDur(d) { pendDur=d
 function selDur(d) { pendDur=d; showStep(3); buildResumo(); }
 
 function buildResumo() {
@@ -1669,7 +1764,7 @@ function showStep(n) {
     document.getElementById('m-res-step'+i).style.display = (i===n?'block':'none');
   });
 }
-// ── CONFIRMAR RESERVA ──────────────────────────────────────────
+
 function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   var dtStart = date.replace(/-/g,'') + 'T' + slotInicio.replace(':','') + '00';
   var dtEnd   = date.replace(/-/g,'') + 'T' + slotFim.replace(':','') + '00';
@@ -1678,7 +1773,9 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   var details = encodeURIComponent('Apto ' + apto + ' • Lembre-se do check-in até 15 min após o início.');
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + texto + '&dates=' + dtStart + '/' + dtEnd + '&location=' + local + '&details=' + details;
 }
-  function confirmarReserva() {
+
+// CONFIRMAR RESERVA COM VALIDAÇÃO DE CONFLITO
+function confirmarReserva() {
   if(!morador || !pendSlot || !pendMod || !pendDur) return;
   if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
 
@@ -1708,23 +1805,36 @@ function _fazerInsertReserva() {
   var horaInicio = pendSlot.slot + ':00';
   var horaFim = addH(pendSlot.slot, pendDur / 60) + ':00';
   var _date = pendSlot.date;
-  var _mod  = pendMod;
+  var _mod = pendMod;
 
-  // Verifica conflito de horário antes de inserir
+  // Verifica conflito de horário - CORREÇÃO COMPLETA
   sb.from('reservas')
-    .select('id')
+    .select('id, slot_inicio, slot_fim')
     .eq('data_reserva', pendSlot.date)
     .neq('status', 'cancelada')
-    .or('and(slot_inicio.gte.'+horaInicio+',slot_inicio.lt.'+horaFim+'),and(slot_fim.gt.'+horaInicio+',slot_fim.lte.'+horaFim+')')
+    .eq('espaco_id', espacoQuadraId)
     .then(function(conflito) {
-      if(conflito.data && conflito.data.length > 0) {
+      var reservasExistentes = conflito.data || [];
+      
+      // Verificar conflito (considerando reservas que se sobrepõem)
+      var temConflito = reservasExistentes.some(function(reserva) {
+        var iniExistente = reserva.slot_inicio || '00:00:00';
+        var fimExistente = reserva.slot_fim || '00:00:00';
+        var conflita = (horaInicio < fimExistente && horaFim > iniExistente);
+        if(conflita) {
+          toast('Conflito com reserva existente: ' + iniExistente.slice(0,5) + '-' + fimExistente.slice(0,5));
+        }
+        return conflita;
+      });
+      
+      if(temConflito) {
         toast('Horario indisponivel. Por favor, escolha outro.');
         selData(_date);
         fecharModal('m-reserva');
         return;
       }
 
-      var modNome = MODS.find(function(x){ return x.id===pendMod; }).nome;
+      var modNome = MODS.find(function(x){ return x.id === pendMod; }).nome;
       sb.from('modalidades').select('id,nome').then(function(r) {
         var todas = r.data||[];
         var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
@@ -1732,12 +1842,21 @@ function _fazerInsertReserva() {
         var mid = found ? found.id : null;
 
         sb.from('reservas').insert({
-          unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
+          unidade_id: morador.unidade_id, 
+          morador_id: morador.id, 
+          modalidade_id: mid,
           data_reserva: pendSlot.date,
-          slot_inicio: horaInicio, slot_fim: horaFim,
-          duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
+          slot_inicio: horaInicio, 
+          slot_fim: horaFim,
+          duracao_min: pendDur, 
+          tipo_reserva: 'pontual', 
+          status: 'confirmada',
+          espaco_id: espacoQuadraId
         }).then(function(r2) {
-          if(r2.error) { toast('Erro: '+r2.error.message); return; }
+          if(r2.error) { 
+            toast('Erro: '+r2.error.message); 
+            return; 
+          }
           fecharModal('m-reserva');
           var modNomeCalendar = MODS.find(function(x){ return x.id===_mod; });
           var nomeModal = modNomeCalendar ? modNomeCalendar.nome : '';
@@ -1760,7 +1879,9 @@ function _fazerInsertReserva() {
     });
 }
 
-// ── MODAL CANCELAR ─────────────────────────────────────────────
+// ============================================
+// MODAL CANCELAR (CORRIGIDO)
+// ============================================
 document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
 document.getElementById('btn-exec-cancel').addEventListener('click', function() {
   if(!cancelId) return;
@@ -1772,6 +1893,7 @@ document.getElementById('btn-exec-cancel').addEventListener('click', function() 
   if(isentar) upd.isento_penalidade = true;
   if(motivo) upd.motivo_cancelamento = motivo;
   var temDispensa = !!dispensaReservaId && !isAdmin() && !isentar;
+  
   sb.from('reservas').update(upd).eq('id',cancelId).then(function(r) {
     if(r.error) { toast('Erro ao cancelar'); return; }
     fecharModal('m-cancelar');
@@ -1794,14 +1916,17 @@ function abrirModalCancelar(id) {
   if(wrapIsentar) wrapIsentar.style.display = isAdmin() ? 'block' : 'none';
   var mcMotivo = document.getElementById('mc-motivo');
   if(mcMotivo) mcMotivo.value = '';
+  
   sb.from('reservas').select('*').eq('id',id).single().then(function(res) {
     var r = res.data; if(!r) return;
     document.getElementById('mc-sub').textContent = 'Apto '+(morador&&morador.unidades?morador.unidades.codigo:'');
     document.getElementById('mc-dt').textContent = fmtD(r.data_reserva);
     document.getElementById('mc-hr').textContent = (r.slot_inicio||'').slice(0,5)+' - '+(r.slot_fim||'').slice(0,5);
-    // Verifica carência
+    
     var avisoPen = document.getElementById('mc-aviso-penalidade');
     var foraCarencia = false;
+    var podeSolicitarDispensa = false;
+    
     if(!isAdmin() && r.slot_inicio) {
       var agora = new Date();
       var dtStr = r.data_reserva + 'T' + r.slot_inicio;
@@ -1809,33 +1934,90 @@ function abrirModalCancelar(id) {
       var diffMin = (dtReserva - agora) / 60000;
       var carenciaMin = appCfg.carencia_cancel_min || 120;
       foraCarencia = diffMin < carenciaMin;
+      podeSolicitarDispensa = foraCarencia && diffMin > 0;
     }
-    if(avisoPen) avisoPen.style.display = foraCarencia ? 'block' : 'none';
-    dispensaReservaId = foraCarencia ? id : null;
+    
+    if(avisoPen) {
+      avisoPen.style.display = foraCarencia ? 'block' : 'none';
+      if(podeSolicitarDispensa) {
+        avisoPen.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> ' +
+          'Este cancelamento esta fora do prazo de carencia. ' +
+          'Voce pode solicitar dispensa da falta ao administrador.';
+      }
+    }
+    
+    dispensaReservaId = podeSolicitarDispensa ? id : null;
     abrirModal('m-cancelar');
   });
 }
 
-// ── CHECK-IN ───────────────────────────────────────────────────
+// ============================================
+// CHECK-IN CORRIGIDO
+// ============================================
 function doCheckin(id) {
-  sb.from('reservas').update({checkin_feito:true,checkin_em:new Date().toISOString()}).eq('id',id).then(function(r) {
-    if(r.error) { toast('Erro no check-in'); return; }
-    renderCheckin(); renderMinhas();
-    toast('Check-in realizado! Boa partida!');
-  });
+  sb.from('reservas').select('unidade_id, data_reserva, slot_inicio, checkin_feito, status')
+    .eq('id', id)
+    .single()
+    .then(function(res) {
+      if(res.error) { toast('Reserva nao encontrada.'); return; }
+      var reserva = res.data;
+      
+      if(reserva.unidade_id !== morador.unidade_id) {
+        toast('Esta reserva nao pertence ao seu apartamento.');
+        return;
+      }
+      
+      if(reserva.checkin_feito) {
+        toast('Check-in ja realizado para esta reserva.');
+        return;
+      }
+      
+      if(reserva.status !== 'confirmada') {
+        toast('Esta reserva nao esta mais ativa.');
+        return;
+      }
+      
+      var agora = new Date();
+      var dataHoraReserva = new Date(reserva.data_reserva + 'T' + (reserva.slot_inicio || '00:00'));
+      var diffMin = (agora - dataHoraReserva) / 60000;
+      var janelaCheckin = appCfg.checkin_janela_min || 15;
+      var antecipacaoPermitida = appCfg.checkin_ant_min || 10;
+      
+      if(diffMin > janelaCheckin) {
+        toast('Janela de check-in expirou. Reserva sera cancelada.');
+        sb.from('reservas').update({status: 'expirada'}).eq('id', id).then(function() {
+          verificarFairPlay(morador.unidade_id);
+          renderCheckin(); 
+          renderMinhas();
+        });
+        return;
+      }
+      
+      if(diffMin < -antecipacaoPermitida) {
+        toast('Check-in permitido apenas ' + antecipacaoPermitida + ' minutos antes do inicio.');
+        return;
+      }
+      
+      sb.from('reservas').update({
+        checkin_feito: true,
+        checkin_em: new Date().toISOString()
+      }).eq('id', id).then(function(r) {
+        if(r.error) { toast('Erro no check-in: ' + r.error.message); return; }
+        renderCheckin(); 
+        renderMinhas();
+        toast('Check-in realizado! Boa partida!');
+      });
+    });
 }
 
-// Verifica e aplica suspensão por fair play após uma falta (reserva expirada)
 function verificarFairPlay(unidadeId) {
   if(!appCfg.fair_play_ativo) return;
-  // Sempre busca configuração atualizada do banco antes de verificar
   sb.from('configuracoes').select('faltas_suspensao,suspensao_dias,fair_play_ativo').limit(1).maybeSingle().then(function(cfgRes) {
     var cfg = cfgRes.data || {};
     var ativo = cfg.fair_play_ativo !== false && appCfg.fair_play_ativo !== false;
     if(!ativo) return;
     var limiteFaltas = parseInt(cfg.faltas_suspensao || appCfg.faltas_suspensao) || 2;
     var diasSusp = parseInt(cfg.suspensao_dias || appCfg.suspensao_dias) || 15;
-    // Sincroniza appCfg com valor real do banco
     if(cfg.faltas_suspensao) appCfg.faltas_suspensao = limiteFaltas;
     if(cfg.suspensao_dias) appCfg.suspensao_dias = diasSusp;
 
@@ -1893,7 +2075,7 @@ function renderCheckin() {
       html += '<div class="ckin-hero-title">Reserva de hoje</div>';
       html += '<div class="ckin-hero-sub">'+nomeMod+' - '+si+' a '+sf+'</div>';
       html += '<button class="ckin-big-btn" id="btn-fazer-ckin"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>';
-      html += '<div style="font-size:10px;opacity:.75;margin-top:10px">Disponivel 10 min antes. Cancela apos 15 min sem check-in.</div>';
+      html += '<div style="font-size:10px;opacity:.75;margin-top:10px">Disponivel '+appCfg.checkin_ant_min+' min antes. Cancela apos '+appCfg.checkin_janela_min+' min sem check-in.</div>';
       html += '<button style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;margin-top:10px;width:100%" id="btn-cancelar-ckin">Cancelar minha reserva e liberar a quadra</button>';
       html += '</div>';
       main.innerHTML = html;
@@ -1922,9 +2104,7 @@ function renderCheckin() {
     .limit(30)
     .then(function(res) {
     var todosHist = res.data||[];
-    // Filtra ocultos localmente (tolerante a coluna inexistente)
     var hist = todosHist.filter(function(r){ return !r.oculto_morador; });
-    // Ordena: futuras/hoje primeiro (ASC), passadas depois (DESC mais recente)
     var hojeH = ts();
     var futurasH = hist.filter(function(r){ return r.data_reserva >= hojeH; });
     var passadasH = hist.filter(function(r){ return r.data_reserva < hojeH; });
@@ -1936,16 +2116,16 @@ function renderCheckin() {
     if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
     var html = '';
     hist.forEach(function(r) {
-      var fezCheckin = !!r.checkin_feito; // !! converte null/undefined para false
+      var fezCheckin = !!r.checkin_feito;
       var cancelada  = r.status === 'cancelada';
       var expirada   = r.status === 'expirada';
       var confirmada = r.status === 'confirmada';
 
       var dotC;
-      if(fezCheckin)          dotC = '#3B6D11';        // verde
-      else if(cancelada)      dotC = '#F09595';        // vermelho claro
-      else if(expirada)       dotC = '#B4B2A9';        // cinza
-      else                    dotC = '#EF9F27';        // amarelo (aguardando)
+      if(fezCheckin)          dotC = '#3B6D11';
+      else if(cancelada)      dotC = '#F09595';
+      else if(expirada)       dotC = '#B4B2A9';
+      else                    dotC = '#EF9F27';
 
       var bl;
       if(fezCheckin)          bl = '<span class="badge b-teal">✓ Check-in feito</span>';
@@ -1963,7 +2143,6 @@ function renderCheckin() {
     });
     hel.innerHTML = html;
 
-    // Botão limpar histórico check-in
     var btnLimCkin = document.getElementById('btn-limpar-hist-ckin');
     if(btnLimCkin) {
       var newBtnLimCkin = btnLimCkin.cloneNode(true);
@@ -1971,12 +2150,10 @@ function renderCheckin() {
       newBtnLimCkin.addEventListener('click', function() {
         if(!confirm('Ocultar historico de check-in passado e cancelados?')) return;
         var hojeL = ts();
-        // IDs a ocultar: passados, cancelados ou expirados
         var idsOcultar = todosHist
           .filter(function(r){ return r.data_reserva < hojeL || r.status==='cancelada' || r.status==='expirada'; })
           .map(function(r){ return r.id; });
         if(!idsOcultar.length) { toast('Nada para limpar.'); return; }
-        // Oculta imediatamente no DOM (funciona mesmo sem a coluna)
         hel.querySelectorAll('.ckin-row').forEach(function(row) {
           var dt = row.dataset.dt;
           var st = row.dataset.st;
@@ -1986,7 +2163,6 @@ function renderCheckin() {
             setTimeout(function(){ row.style.display='none'; }, 300);
           }
         });
-        // Persiste no banco se coluna existir
         Promise.all(idsOcultar.map(function(id){
           return sb.from('reservas').update({oculto_morador: true}).eq('id', id);
         })).then(function() {
@@ -1997,7 +2173,9 @@ function renderCheckin() {
   });
 }
 
-// ── MINHAS RESERVAS ────────────────────────────────────────────
+// ============================================
+// MINHAS RESERVAS
+// ============================================
 function renderMinhas() {
   if(!morador) return;
   if(!morador.unidade_id) {
@@ -2010,7 +2188,6 @@ function renderMinhas() {
     .order('slot_inicio', {ascending:true})
     .then(function(res) {
       var mine = (res.data||[]).filter(function(r){ return !r.oculto_morador; });
-      // Ordena: futuras primeiro (mais próxima no topo), passadas depois (mais recente no topo)
       var hoje = ts();
       var futuras = mine.filter(function(r){ return r.data_reserva >= hoje; });
       var passadas = mine.filter(function(r){ return r.data_reserva < hoje; });
@@ -2065,7 +2242,6 @@ function renderMinhas() {
         });
       });
 
-      // Limpar histórico
       var btnLimpar = document.getElementById('btn-limpar-historico');
       if(btnLimpar) {
         var newLimpar = btnLimpar.cloneNode(true);
@@ -2073,7 +2249,6 @@ function renderMinhas() {
         newLimpar.addEventListener('click', function() {
           if(!confirm('Deseja ocultar reservas passadas e canceladas?')) return;
           var hoje = ts();
-          // Oculta visualmente no DOM imediatamente
           list.querySelectorAll('[data-reserva-row]').forEach(function(row) {
             var dt = row.dataset.dt;
             var st = row.dataset.st;
@@ -2084,7 +2259,6 @@ function renderMinhas() {
             }
           });
           toast('Historico limpo.');
-          // Tenta persistir no banco silenciosamente (falha sem impacto se coluna nao existir)
           var ids = mine.filter(function(r){
             return r.data_reserva < hoje || r.status === 'cancelada' || r.status === 'expirada';
           }).map(function(r){ return r.id; });
@@ -2096,7 +2270,6 @@ function renderMinhas() {
         });
       }
 
-      // Cancelar em lote - pontuais
       var btnCancPont = document.getElementById('btn-cancelar-pontuais');
       if(btnCancPont) {
         var newBtnCP = btnCancPont.cloneNode(true);
@@ -2114,7 +2287,6 @@ function renderMinhas() {
         });
       }
 
-      // Cancelar em lote - aulas
       var btnCancAulas = document.getElementById('btn-cancelar-aulas');
       if(btnCancAulas) {
         var newBtnCA = btnCancAulas.cloneNode(true);
@@ -2134,7 +2306,9 @@ function renderMinhas() {
     });
 }
 
-// ── AVISOS ─────────────────────────────────────────────────────
+// ============================================
+// AVISOS
+// ============================================
 function renderWidgetStatus() {
   var dot = document.getElementById('wsq-dot');
   var statusEl = document.getElementById('wsq-status');
@@ -2150,6 +2324,7 @@ function renderWidgetStatus() {
     .select('slot_inicio, slot_fim, status, unidades(codigo)')
     .eq('data_reserva', hoje)
     .eq('status', 'confirmada')
+    .eq('espaco_id', espacoQuadraId)
     .then(function(res) {
       var reservasHoje = res.data || [];
       var ocupadaAgora = reservasHoje.find(function(r) {
@@ -2191,7 +2366,6 @@ function renderWidgetStatus() {
         if(btnRes) { btnRes.style.display = 'flex'; btnRes.onclick = function(){ document.getElementById('tab-reservar').click(); }; }
       }
 
-      // Lembrete: reserva do proprio morador nas proximas 2h
       var lembreteEl = document.getElementById('wsq-lembrete');
       if(lembreteEl && morador && morador.unidade_id) {
         sb.from('reservas')
@@ -2199,6 +2373,7 @@ function renderWidgetStatus() {
           .eq('unidade_id', morador.unidade_id)
           .eq('data_reserva', hoje)
           .eq('status', 'confirmada')
+          .eq('espaco_id', espacoQuadraId)
           .then(function(r2) {
             var minhasHoje = (r2.data||[]).filter(function(r) {
               if(r.checkin_feito) return false;
@@ -2252,7 +2427,6 @@ function renderAvisos() {
       html += '<span class="badge '+bcls+'" style="margin-left:8px;flex-shrink:0">'+AVL[av.tipo]+'</span></div>';
       html += '<div class="av-corpo">'+av.corpo+'</div>';
       if(av.enquete_pergunta) {
-        // Suporta tanto colunas dedicadas (novo) quanto formato || (legado)
         var enqueteTipo, enqueteCustomA, enqueteCustomB, enquetePergunta;
         if(av.enquete_tipo) {
           enqueteTipo    = av.enquete_tipo;
@@ -2286,12 +2460,8 @@ function renderAvisos() {
         var pctSim = totalVotos > 0 ? Math.round((av.enquete_sim||0)/totalVotos*100) : 0;
         var pctNao = totalVotos > 0 ? (100 - pctSim) : 0;
 
-        // Todos (morador e admin) podem votar.
-        // Considera "já votou" quem tem entrada em leituras_avisos
-        // (votar registra leitura; mas admin não marca lido automaticamente,
-        //  então admin vê botões a menos que tenha votado explicitamente)
         var jaVotou = !!(lido);
-        var podeVotar = !jaVotou; // todos podem votar enquanto não votaram
+        var podeVotar = !jaVotou;
 
         html += '<div style="background:var(--bg);border-radius:8px;padding:10px 11px;margin:4px 11px 8px;border:0.5px solid var(--br)">';
         html += '<div style="font-size:11.5px;font-weight:600;margin-bottom:8px;color:var(--tx)">📊 '+enquetePergunta+'</div>';
@@ -2414,11 +2584,18 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
   });
 });
 
-// ── LISTA DE ESPERA ────────────────────────────────────────────
+// ============================================
+// LISTA DE ESPERA (CORRIGIDA)
+// ============================================
 function abrirListaEspera(ds, slot, reservaId) {
-  if(!morador || !morador.unidade_id) return;
+  if(!morador || !morador.unidade_id) {
+    toast('Sem apartamento vinculado.');
+    return;
+  }
+  
   pendEspera = {ds: ds, slot: slot, reservaId: reservaId};
   document.getElementById('m-espera-sub').textContent = fmtD(ds) + ' as ' + slot;
+  
   sb.from('lista_espera')
     .select('id')
     .eq('data_reserva', ds)
@@ -2431,10 +2608,16 @@ function abrirListaEspera(ds, slot, reservaId) {
       var btnEntrar = document.getElementById('btn-entrar-espera');
       if(res.data) {
         if(infoEl) infoEl.textContent = 'Voce ja esta na lista de espera para este horario.';
-        if(btnEntrar) { btnEntrar.textContent = 'Ja na lista'; btnEntrar.disabled = true; }
+        if(btnEntrar) { 
+          btnEntrar.textContent = 'Ja na lista'; 
+          btnEntrar.disabled = true;
+        }
       } else {
         if(infoEl) infoEl.textContent = 'Voce ainda nao esta na lista. Clique para entrar.';
-        if(btnEntrar) { btnEntrar.innerHTML = '<i class="ti ti-bell-plus" aria-hidden="true"></i>Entrar na lista'; btnEntrar.disabled = false; }
+        if(btnEntrar) { 
+          btnEntrar.innerHTML = '<i class="ti ti-bell-plus" aria-hidden="true"></i>Entrar na lista'; 
+          btnEntrar.disabled = false;
+        }
       }
     });
   abrirModal('m-espera');
@@ -2459,7 +2642,35 @@ function entrarListaEspera() {
 document.getElementById('btn-fechar-espera').addEventListener('click', function() { fecharModal('m-espera'); });
 document.getElementById('btn-entrar-espera').addEventListener('click', entrarListaEspera);
 
-// ── OCORRÊNCIAS ────────────────────────────────────────────────
+// ============================================
+// DISPENSA
+// ============================================
+document.getElementById('btn-enviar-dispensa').addEventListener('click', function() {
+  if(!dispensaReservaId || !morador) return;
+  var texto = (document.getElementById('disp-texto').value || '').trim();
+  if(!texto) { toast('Descreva o motivo da solicitacao.'); return; }
+  sb.from('solicitacoes_dispensa').insert({
+    reserva_id: dispensaReservaId,
+    morador_id: morador.id,
+    unidade_id: morador.unidade_id,
+    motivo: texto,
+    status: 'pendente'
+  }).then(function(r) {
+    if(r.error) { toast('Erro ao enviar solicitacao.'); return; }
+    document.getElementById('disp-texto').value = '';
+    fecharModal('m-dispensa');
+    toast('Solicitacao enviada! O administrador analisara em breve.');
+  });
+});
+
+document.getElementById('btn-fechar-dispensa').addEventListener('click', function() {
+  fecharModal('m-dispensa');
+  toast('Reserva cancelada.');
+});
+
+// ============================================
+// OCORRÊNCIAS
+// ============================================
 document.getElementById('btn-nova-oco').addEventListener('click', function() {
   if(!requireAdmin()) return;
   abrirModal('m-nova-oco');
@@ -2617,7 +2828,9 @@ function renderOco() {
   });
 }
 
-// ── CONFIGURAÇÕES ──────────────────────────────────────────────
+// ============================================
+// CONFIGURAÇÕES (RESUMO)
+// ============================================
 function renderConfig() {
   if(!requireAdmin()) return;
   var sl = function(id, val) {
@@ -2647,7 +2860,8 @@ function renderConfig() {
   stg('tgl-blk-dom',       appCfg.blk_domingo);
   stg('tgl-aulas-rec',     appCfg.aulas_rec_ativo);
   stg('tgl-fair-play',     appCfg.fair_play_ativo !== false);
-  // Estado da academia
+  
+  // Academia toggle
   var tglAc2 = document.getElementById('tgl-academia');
   var wrapAc2 = document.getElementById('academia-cfg-wrap');
   var acEspaco = espacos.find(function(e){ return e.id === espacoAcademiaId; });
@@ -2659,187 +2873,465 @@ function renderConfig() {
   var selSim2 = document.getElementById('cfg-academia-simult');
   if(selSim2 && acEspaco) selSim2.value = String(acEspaco.max_simult || 3);
 
-  // Pendentes
-  sb.from('moradores').select('*,unidades(codigo)').eq('status','pendente').order('created_at',{ascending:false}).then(function(res) {
-    var pends = res.data||[];
-    var badge = document.getElementById('badge-pendentes');
-    if(badge) badge.textContent = pends.length > 0 ? pends.length+' pendente(s)' : '';
-    var ndC = document.getElementById('nd-config');
-    if(ndC) ndC.classList.toggle('show', pends.length > 0);
-    var html = pends.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhuma inscricao pendente.</div>';
-    pends.forEach(function(m) {
-      var cod = m.unidades ? m.unidades.codigo : 'Sindico';
-      html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:7px">';
-      html += '<div style="font-size:12px;font-weight:600">'+m.nome+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+m.email+' - Apto '+cod+'</div>';
-      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">';
-      html += '<button class="btn-sm g" data-apr-id="'+m.id+'"><i class="ti ti-check" aria-hidden="true"></i>Aprovar</button>';
-      html += '<button class="btn-sm" style="background:var(--bl);border-color:var(--blb);color:var(--blt)" data-adm-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Aprovar como Admin</button>';
-      html += '<button class="btn-sm r" data-rej-id="'+m.id+'"><i class="ti ti-x" aria-hidden="true"></i>Rejeitar</button>';
-      html += '</div></div>';
-    });
-    var lp = document.getElementById('lista-pendentes');
-    if(lp) {
-      lp.innerHTML = html;
-      lp.querySelectorAll('[data-apr-id]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          sb.from('moradores').update({status:'ativo'}).eq('id',btn.dataset.aprId).then(function() { toast('Inscricao aprovada!'); renderConfig(); });
-        });
-      });
-      lp.querySelectorAll('[data-adm-id]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          sb.from('moradores').update({status:'ativo',tipo:'admin'}).eq('id',btn.dataset.admId).then(function() { toast('Aprovado como administrador!'); renderConfig(); });
-        });
-      });
-      lp.querySelectorAll('[data-rej-id]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          if(!confirm('Rejeitar esta inscricao?')) return;
-          sb.from('moradores').update({status:'inativo'}).eq('id',btn.dataset.rejId).then(function() { toast('Inscricao rejeitada.'); renderConfig(); });
-        });
-      });
-    }
-  });
-
-  // Bloqueios
-  sb.from('bloqueios').select('*').order('data_inicio').then(function(res) {
-    var blqs = res.data||[];
-    var html = blqs.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum bloqueio cadastrado.</div>';
-    blqs.forEach(function(b) {
-      var blkIcons = {manutencao:'🔧',limpeza:'🧹',evento:'🎉',vistoria:'📋',outro:'📌'};
-      var blkIcon = blkIcons[b.tipo] || '📌';
-      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
-      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+blkIcon+' '+b.motivo+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+fmtD(b.data_inicio)+(b.data_inicio!==b.data_fim?' a '+fmtD(b.data_fim):'')+'</div></div>';
-      html += '<button class="btn-sm r" data-blk-id="'+b.id+'"><i class="ti ti-trash" aria-hidden="true"></i></button></div>';
-    });
-    var lb = document.getElementById('lista-bloqueios');
-    if(lb) {
-      lb.innerHTML = html;
-      lb.querySelectorAll('[data-blk-id]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          sb.from('bloqueios').delete().eq('id',btn.dataset.blkId).then(function() {
-            toast('Bloqueio removido.'); renderConfig(); carregarBloqueios(); renderCal();
-          });
-        });
-      });
-    }
-  });
-
-  // Suspensos
-  sb.from('moradores').select('*,unidades(codigo)').eq('status','suspenso').then(function(res) {
-    var susps = res.data||[];
-    var html = susps.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum apartamento suspenso.</div>';
-    susps.forEach(function(m) {
-      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
-      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+(m.unidades?m.unidades.codigo:'')+' - '+m.nome+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--rdt)">'+(m.faltas_mes||0)+' falta(s)</div></div>';
-      html += '<button class="btn-sm g" data-susp-id="'+m.id+'"><i class="ti ti-lock-open" aria-hidden="true"></i>Liberar</button></div>';
-    });
-    var ls = document.getElementById('lista-suspensos');
-    if(ls) {
-      ls.innerHTML = html;
-      ls.querySelectorAll('[data-susp-id]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          sb.from('moradores').update({status:'ativo',suspenso_ate:null,faltas_mes:0}).eq('id',btn.dataset.suspId).then(function() {
-            toast('Apartamento liberado!'); renderConfig();
-          });
-        });
-      });
-    }
-  });
-
-  // Gerenciar admins
-  sb.from('moradores').select('*,unidades(codigo)').eq('status','ativo').order('created_at').then(function(res) {
-    var todos = res.data||[];
-    var html = todos.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum morador ativo.</div>';
-    todos.forEach(function(m) {
-      var cod = m.unidades ? m.unidades.codigo : 'Sindico';
-      var isAdm = m.tipo === 'admin';
-      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
-      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+m.nome+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+cod+' - '+(isAdm?'Administrador':'Morador')+'</div></div>';
-      if(m.id !== morador.id) {
-        if(!isAdm) html += '<button class="btn-sm b" data-prom-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Tornar admin</button>';
-        else html += '<button class="btn-sm" data-rebx-id="'+m.id+'"><i class="ti ti-user" aria-hidden="true"></i>Tornar morador</button>';
-      } else {
-        html += '<span style="font-size:10px;color:var(--t2)">Voce</span>';
-      }
-      html += '</div>';
-    });
-    var la = document.getElementById('lista-admins');
-    if(la) {
-      la.innerHTML = html;
-      la.querySelectorAll('[data-prom-id]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          sb.from('moradores').update({tipo:'admin'}).eq('id',btn.dataset.promId).then(function() { toast('Promovido a administrador!'); renderConfig(); });
-        });
-      });
-      la.querySelectorAll('[data-rebx-id]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          if(!confirm('Rebaixar este administrador a morador comum?')) return;
-          sb.from('moradores').update({tipo:'proprietario'}).eq('id',btn.dataset.rebxId).then(function() { toast('Revertido a morador.'); renderConfig(); });
-        });
-      });
-    }
-  });
-
   renderRankingPontualidade();
   renderContratosAula();
+}
 
-  // Agenda do dia
-  var hoje = ts();
-  sb.from('reservas').select('*,unidades(codigo),modalidades(nome,icone)').eq('data_reserva',hoje).neq('status','cancelada').order('slot_inicio').then(function(res) {
-    var ags = res.data||[];
-    var html = ags.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhuma reserva hoje.</div>';
-    ags.forEach(function(r) {
-      var dotC = r.checkin_feito ? '#3B6D11' : '#EF9F27';
-      var bl = r.checkin_feito ? '<span class="badge b-teal">Presente</span>' : '<span class="badge b-warn">Aguardando</span>';
-      var m = r.modalidades, u = r.unidades;
-      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
-      html += '<div style="width:8px;height:8px;border-radius:50%;background:'+dotC+';flex-shrink:0"></div>';
-      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+(r.slot_inicio||'').slice(0,5)+' - Apto '+(u?u.codigo:'')+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+(m?m.icone+' '+m.nome:'')+'</div></div>'+bl+'</div>';
+// ============================================
+// ACADEMIA (CORRIGIDA)
+// ============================================
+function renderAcademia() {
+  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+  var maxSimult = ac ? (ac.max_simult || 3) : 3;
+  var infoEl = document.getElementById('ac-info-simult');
+  if(infoEl) infoEl.textContent = 'Ate ' + maxSimult + ' pessoa(s) simultaneamente';
+
+  document.getElementById('cal-lbl-ac').textContent = MESES[acVM] + ' ' + acVY;
+  var g = document.getElementById('cal-grid-ac');
+  var html = DIAS_N.map(function(d){ return '<div class="cal-dn">' + d + '</div>'; }).join('');
+  var first = new Date(acVY, acVM, 1).getDay();
+  var days = new Date(acVY, acVM+1, 0).getDate();
+  var today = ts();
+  for(var i=0; i<first; i++) html += '<div></div>';
+  for(var d=1; d<=days; d++) {
+    var ds = acVY + '-' + String(acVM+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var cls = 'cal-d';
+    if(ds === today) cls += ' today';
+    if(ds === acSelDate) cls += ' sel';
+    if(isBlocked(ds)) cls += ' blk';
+    html += '<div class="' + cls + '" data-ac-ds="' + ds + '">' + d + '</div>';
+  }
+  g.innerHTML = html;
+  g.querySelectorAll('.cal-d').forEach(function(el) {
+    el.addEventListener('click', function() { selDataAcademia(el.dataset.acDs); });
+  });
+
+  var agora = new Date();
+  var agoraMin = agora.getHours() * 60 + agora.getMinutes();
+  var dotEl = document.getElementById('ac-status-dot');
+  sb.from('reservas')
+    .select('id')
+    .eq('data_reserva', today)
+    .eq('status', 'confirmada')
+    .eq('espaco_id', espacoAcademiaId)
+    .then(function(res) {
+      var ocupados = (res.data || []).length;
+      var ac2 = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+      var max = ac2 ? ac2.max_simult : 3;
+      if(dotEl) dotEl.style.background = ocupados >= max ? '#E24B4A' : ocupados > 0 ? '#EF9F27' : '#639922';
     });
-    var ag = document.getElementById('agenda-adm');
-    if(ag) ag.innerHTML = html;
+}
+
+function selDataAcademia(ds) {
+  if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
+  if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
+  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso.'); return; }
+  acSelDate = ds;
+  renderAcademia();
+  var sc = document.getElementById('ac-slots-card');
+  sc.style.display = 'block';
+  document.getElementById('ac-slots-lbl').textContent = 'Horarios - ' + fmtD(ds);
+  var sg = document.getElementById('ac-slot-grid');
+  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+  var maxSimult = ac ? (ac.max_simult || 3) : 3;
+
+  sb.from('reservas')
+    .select('slot_inicio, slot_fim, unidade_id, status')
+    .eq('data_reserva', ds)
+    .eq('status', 'confirmada')
+    .eq('espaco_id', espacoAcademiaId)
+    .then(function(res) {
+      var reservasDia = res.data || [];
+      var agora = new Date();
+      var agoraMin = agora.getHours() * 60 + agora.getMinutes();
+      var ehHoje = ds === ts();
+      var html = '';
+      
+      SLOTS.forEach(function(slot) {
+        if(parseInt(slot) >= 22) return;
+        var slotMin = parseInt(slot.split(':')[0]) * 60;
+        if(ehHoje && slotMin <= agoraMin) return;
+        
+        var ocupados = reservasDia.filter(function(r) {
+          var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60;
+          var fim = parseInt((r.slot_fim||'00:00').slice(0,2))*60;
+          return slotMin >= ini && slotMin < fim;
+        }).length;
+        
+        var minhaRes = reservasDia.find(function(r) {
+          return r.unidade_id === morador.unidade_id && 
+                 parseInt((r.slot_inicio||'00:00').slice(0,2))*60 === slotMin;
+        });
+        
+        var livre = ocupados < maxSimult;
+        var cls = minhaRes ? 'slot minha' : livre ? 'slot livre' : 'slot ocupado';
+        var lbl = minhaRes ? 'Minha' : livre ? (ocupados + '/' + maxSimult) : 'Cheio';
+        var action = minhaRes ? '' : livre ? 'ac_' + slot : '';
+        
+        html += '<div class="' + cls + '" data-ac-slot="' + (action||'') + '">'
+          + '<div class="sh">' + slot + '</div>'
+          + '<div class="sl">' + lbl + '</div></div>';
+      });
+      
+      sg.innerHTML = html || '<div class="empty">Sem horarios disponiveis</div>';
+      
+      sg.querySelectorAll('[data-ac-slot]').forEach(function(el) {
+        var act = el.dataset.acSlot;
+        if(!act) return;
+        el.addEventListener('click', function() {
+          var slot = act.replace('ac_', '');
+          if(!confirm('Reservar academia em ' + fmtD(ds) + ' as ' + slot + '?')) return;
+          var horaIni = slot + ':00';
+          var horaFim = addH(slot, 1) + ':00';
+          
+          sb.from('reservas').insert({
+            unidade_id: morador.unidade_id,
+            morador_id: morador.id,
+            data_reserva: ds,
+            slot_inicio: horaIni,
+            slot_fim: horaFim,
+            duracao_min: 60,
+            tipo_reserva: 'pontual',
+            status: 'confirmada',
+            espaco_id: espacoAcademiaId
+          }).then(function(r) {
+            if(r.error) { toast('Erro: ' + r.error.message); return; }
+            toast('Academia reservada!');
+            selDataAcademia(ds);
+            renderAcademia();
+          });
+        });
+      });
+    });
+}
+
+document.getElementById('btn-prev-m-ac').addEventListener('click', function() {
+  acVM--; if(acVM<0){acVM=11;acVY--;} renderAcademia();
+});
+document.getElementById('btn-next-m-ac').addEventListener('click', function() {
+  acVM++; if(acVM>11){acVM=0;acVY++;} renderAcademia();
+});
+
+// ============================================
+// ESPAÇOS
+// ============================================
+function carregarEspacos() {
+  sb.from('espacos').select('*').order('criado_at').then(function(res) {
+    espacos = res.data || [];
+    espacoQuadraId = null;
+    espacoAcademiaId = null;
+    espacos.forEach(function(e) {
+      var n = (e.nome || '').toLowerCase();
+      if(n.indexOf('quadra') >= 0) espacoQuadraId = e.id;
+      if(n.indexOf('academia') >= 0) espacoAcademiaId = e.id;
+    });
+    atualizarTabAcademia();
   });
 }
 
+function atualizarTabAcademia() {
+  var tabAc = document.getElementById('tab-academia');
+  if(!tabAc) return;
+  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+  var ativo = ac ? ac.ativo : false;
+  tabAc.style.display = (espacoAcademiaId && ativo) ? 'flex' : 'none';
+}
+
+// ============================================
+// DASHBOARD
+// ============================================
+function renderDashboard() {
+  var mesIni = new Date().toISOString().slice(0,7) + '-01';
+  var hoje = new Date();
+  var mesFim = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).toISOString().slice(0,10);
+  var totalSlotsDia = 16;
+  var diasMes = parseInt(mesFim.slice(8));
+
+  sb.from('reservas')
+    .select('data_reserva, slot_inicio, status, checkin_feito, modalidades(nome), unidades(codigo)')
+    .gte('data_reserva', mesIni)
+    .lte('data_reserva', mesFim)
+    .eq('espaco_id', espacoQuadraId)
+    .then(function(res) {
+      var todas = res.data || [];
+      var confirmadas = todas.filter(function(r){ return r.status === 'confirmada' || r.checkin_feito; });
+      var comCheckin = todas.filter(function(r){ return r.checkin_feito; });
+      var total = confirmadas.length;
+      var taxa = total > 0 ? Math.round(comCheckin.length / total * 100) : 0;
+      var totalSlotsMes = totalSlotsDia * diasMes;
+      var ocupacao = Math.round(total / totalSlotsMes * 100);
+
+      var slotCount = {};
+      confirmadas.forEach(function(r) {
+        var s = (r.slot_inicio || '').slice(0,5);
+        if(s) slotCount[s] = (slotCount[s] || 0) + 1;
+      });
+      var topSlot = Object.keys(slotCount).sort(function(a,b){ return slotCount[b]-slotCount[a]; })[0] || '--:--';
+
+      document.getElementById('dash-total-mes').textContent = total;
+      document.getElementById('dash-taxa-checkin').textContent = taxa + '%';
+      document.getElementById('dash-ocupacao').textContent = ocupacao + '%';
+      document.getElementById('dash-top-slot').textContent = topSlot;
+
+      var diasNome = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+      var diaCount = [0,0,0,0,0,0,0];
+      var diaMax = 1;
+      confirmadas.forEach(function(r) {
+        if(!r.data_reserva) return;
+        var d = new Date(r.data_reserva + 'T12:00:00').getDay();
+        diaCount[d]++;
+        if(diaCount[d] > diaMax) diaMax = diaCount[d];
+      });
+      var hmHtml = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">';
+      diasNome.forEach(function(d){ hmHtml += '<div style="font-size:9px;color:var(--t2);text-align:center">' + d + '</div>'; });
+      hmHtml += '</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
+      diaCount.forEach(function(cnt) {
+        var pct = Math.round(cnt / diaMax * 100);
+        var bg = pct >= 75 ? '#27500A' : pct >= 40 ? '#639922' : pct >= 15 ? '#C0DD97' : '#EAF3DE';
+        hmHtml += '<div style="height:32px;border-radius:6px;background:' + bg + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:' + (pct>=40?'#fff':'var(--t2)') + '">' + cnt + '</div>';
+      });
+      hmHtml += '</div>';
+      var hmEl = document.getElementById('dash-heatmap');
+      if(hmEl) hmEl.innerHTML = hmHtml;
+
+      var aptoMap = {};
+      confirmadas.forEach(function(r) {
+        var cod = r.unidades ? r.unidades.codigo : null;
+        if(!cod) return;
+        if(!aptoMap[cod]) aptoMap[cod] = {total:0, checkin:0};
+        aptoMap[cod].total++;
+        if(r.checkin_feito) aptoMap[cod].checkin++;
+      });
+      var rankList = Object.keys(aptoMap).map(function(k) {
+        return {apto:k, total:aptoMap[k].total, taxa: aptoMap[k].total > 0 ? Math.round(aptoMap[k].checkin/aptoMap[k].total*100) : 0};
+      }).sort(function(a,b){ return b.total - a.total || b.taxa - a.taxa; }).slice(0,8);
+      var rkHtml = rankList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>';
+      rankList.forEach(function(a, i) {
+        var cor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 60 ? 'var(--amb)' : 'var(--rdt)';
+        var isMeu = morador && morador.unidades && morador.unidades.codigo === a.apto;
+        rkHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--br)">';
+        rkHtml += '<div style="font-size:12px;width:20px;text-align:center;color:var(--t2)">' + (i+1) + '</div>';
+        rkHtml += '<div style="flex:1;font-size:12px;font-weight:' + (isMeu?'600':'400') + ';color:' + (isMeu?'var(--v)':'var(--t1)') + '">Apto ' + a.apto + '</div>';
+        rkHtml += '<div style="font-size:11px;color:var(--t2)">' + a.total + ' reserva(s)</div>';
+        rkHtml += '<div style="font-size:12px;font-weight:600;color:' + cor + ';min-width:32px;text-align:right">' + a.taxa + '%</div>';
+        rkHtml += '</div>';
+      });
+      var rkEl = document.getElementById('dash-ranking');
+      if(rkEl) rkEl.innerHTML = rkHtml;
+
+      var modMap = {};
+      confirmadas.forEach(function(r) {
+        var nome = r.modalidades ? r.modalidades.nome : 'Uso livre';
+        modMap[nome] = (modMap[nome] || 0) + 1;
+      });
+      var modList = Object.keys(modMap).sort(function(a,b){ return modMap[b]-modMap[a]; });
+      var modMax = modList.length ? modMap[modList[0]] : 1;
+      var modHtml = modList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados.</div>';
+      var modCores = ['#27500A','#185FA5','#854F0B','#A32D2D','#534AB7','#0F6E56'];
+      modList.forEach(function(nome, i) {
+        var cnt = modMap[nome];
+        var pct = Math.round(cnt / modMax * 100);
+        var cor = modCores[i % modCores.length];
+        modHtml += '<div style="margin-bottom:8px">';
+        modHtml += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--t1)">' + nome + '</span><span style="color:var(--t2)">' + cnt + '</span></div>';
+        modHtml += '<div style="background:var(--bg);border-radius:20px;height:6px;overflow:hidden"><div style="height:100%;border-radius:20px;background:' + cor + ';width:' + pct + '%"></div></div>';
+        modHtml += '</div>';
+      });
+      var modEl = document.getElementById('dash-modalidades');
+      if(modEl) modEl.innerHTML = modHtml;
+    });
+}
+
+// ============================================
+// CALENDÁRIO DE RESERVAS
+// ============================================
+var calVY = new Date().getFullYear(), calVM = new Date().getMonth();
+var calSelDate = null;
+
+document.getElementById('btn-prev-m-cal').addEventListener('click', function() {
+  calVM--; if(calVM<0){calVM=11;calVY--;} renderCalendario();
+});
+document.getElementById('btn-next-m-cal').addEventListener('click', function() {
+  calVM++; if(calVM>11){calVM=0;calVY++;} renderCalendario();
+});
+
+function renderCalendario() {
+  document.getElementById('cal-lbl-cal').textContent = MESES[calVM]+' '+calVY;
+  var ini = calVY+'-'+String(calVM+1).padStart(2,'0')+'-01';
+  var fim = calVY+'-'+String(calVM+1).padStart(2,'0')+'-31';
+
+  sb.from('reservas')
+    .select('data_reserva,slot_inicio,slot_fim,tipo_reserva,unidades(codigo),modalidades(nome,icone)')
+    .neq('status','cancelada')
+    .gte('data_reserva', ini)
+    .lte('data_reserva', fim)
+    .eq('espaco_id', espacoQuadraId)
+    .order('slot_inicio',{ascending:true})
+    .then(function(res) {
+      var reservasMes = res.data || [];
+      var porData = {};
+      reservasMes.forEach(function(r) {
+        var d = r.data_reserva;
+        if(!porData[d]) porData[d] = [];
+        porData[d].push(r);
+      });
+
+      var g = document.getElementById('cal-grid-cal');
+      var html = DIAS_N.map(function(d){ return '<div class="cal-dn">'+d+'</div>'; }).join('');
+      var first = new Date(calVY,calVM,1).getDay();
+      var days = new Date(calVY,calVM+1,0).getDate();
+      var today = ts();
+      for(var i=0; i<first; i++) html += '<div></div>';
+      for(var d=1; d<=days; d++) {
+        var ds = calVY+'-'+String(calVM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        var blk = isBlocked(ds);
+        var temReserva = porData[ds] && porData[ds].length > 0;
+        var cls = 'cal-d';
+        if(ds === today) cls += ' today';
+        if(ds === calSelDate) cls += ' sel';
+        if(blk) cls += ' blk';
+        else if(temReserva) {
+          html += '<div class="'+cls+'" data-cds="'+ds+'" style="background:#FCEBEB;color:var(--rdt);font-weight:600;cursor:pointer" title="'+porData[ds].length+' reserva(s)">'+d+'<span style="display:block;font-size:7px;line-height:1">'+porData[ds].length+'x</span></div>';
+          continue;
+        }
+        html += '<div class="'+cls+'" data-cds="'+ds+'">'+d+'</div>';
+      }
+      g.innerHTML = html;
+
+      g.querySelectorAll('[data-cds]').forEach(function(el) {
+        el.addEventListener('click', function() {
+          calSelDate = el.dataset.cds;
+          renderCalendario();
+          var ds = el.dataset.cds;
+          var detalheCard = document.getElementById('cal-detalhe-card');
+          var detalheLbl = document.getElementById('cal-detalhe-lbl');
+          var detalheLista = document.getElementById('cal-detalhe-lista');
+          detalheLbl.textContent = 'Reservas em ' + fmtD(ds);
+          var ress = porData[ds] || [];
+          if(!ress.length) {
+            detalheCard.style.display = 'block';
+            detalheLista.innerHTML = '<div style="font-size:11px;color:var(--t2);padding:6px 0">Nenhuma reserva neste dia.</div>';
+          } else {
+            detalheCard.style.display = 'block';
+            detalheLista.innerHTML = ress.map(function(r) {
+              var cod = r.unidades ? r.unidades.codigo : '---';
+              var mod = r.modalidades ? (r.modalidades.icone+' '+r.modalidades.nome) : 'Uso Livre';
+              var si = (r.slot_inicio||'').slice(0,5);
+              var sf = (r.slot_fim||'').slice(0,5);
+              var tipoBadge = r.tipo_reserva === 'aula'
+                ? '<span class="badge b-info" style="font-size:9px">Aula</span>'
+                : '<span class="badge b-ok" style="font-size:9px">Pontual</span>';
+              return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">'
+                + '<div style="min-width:52px;max-width:56px;height:36px;border-radius:8px;background:var(--vl);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:700;color:var(--v);padding:0 5px;white-space:nowrap;letter-spacing:-0.3px">'+cod+'</div>'
+                + '<div style="flex:1;min-width:0">'
+                  + '<div style="font-size:11.5px;font-weight:600">'+si+' &ndash; '+sf+'</div>'
+                  + '<div style="font-size:10.5px;color:var(--t2)">'+mod+'</div>'
+                + '</div>'
+                + tipoBadge
+                + '</div>';
+            }).join('');
+          }
+        });
+      });
+
+      var totalRes = reservasMes.length;
+      var aptosUnicos = {};
+      reservasMes.forEach(function(r){ if(r.unidades) aptosUnicos[r.unidades.codigo] = (aptosUnicos[r.unidades.codigo]||0)+1; });
+      var rankApto = Object.entries(aptosUnicos).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+
+      var totalMinutos = 0;
+      reservasMes.forEach(function(r) {
+        if(r.slot_inicio && r.slot_fim) {
+          var hIni = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
+          var hFim = parseInt((r.slot_fim||'00:00').slice(0,2))*60   + parseInt((r.slot_fim||'00:00').slice(3,5));
+          if(hFim > hIni) { totalMinutos += (hFim - hIni); return; }
+        }
+        totalMinutos += (r.duracao_min || 60);
+      });
+      var totalHoras = (totalMinutos / 60).toFixed(1).replace('.0','');
+
+      var diasMes = new Date(calVY,calVM+1,0).getDate();
+      var slotsDisponiveis = 16 * diasMes;
+      var slotsOcupados = Math.round(totalMinutos / 60);
+      var taxaSlots = Math.min(100, Math.round(slotsOcupados / slotsDisponiveis * 100));
+
+      var el = document.getElementById('cal-resumo-mes');
+      var resumoHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+        + '<div style="background:var(--vl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--v)">'+totalRes+'</div><div style="font-size:10px;color:var(--t2)">Reservas no mes</div></div>'
+        + '<div style="background:var(--bl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blt)">'+totalHoras+'h</div><div style="font-size:10px;color:var(--t2)">Horas reservadas</div></div>'
+        + '</div>'
+        + '<div style="background:var(--am);border-radius:8px;padding:10px;margin-bottom:10px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
+        + '<span style="font-size:11px;font-weight:600;color:var(--amt)">Ocupacao dos horarios disponiveis do mes</span>'
+        + '<span style="font-size:16px;font-weight:700;color:var(--amt)">'+taxaSlots+'%</span>'
+        + '</div>'
+        + '<div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden">'
+        + '<div style="height:100%;background:var(--amb);width:'+taxaSlots+'%;border-radius:4px"></div>'
+        + '</div>'
+        + '<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponiveis+' horarios de 1h reservados</div>'
+        + '</div>';
+      if(rankApto.length) {
+        resumoHtml += '<div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Apartamentos mais ativos</div>';
+        rankApto.forEach(function(a, i) {
+          var medals = ['🥇','🥈','🥉'];
+          var medal = medals[i] || (i+1+'.');
+          resumoHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--br)">'
+            + '<span style="font-size:13px">'+medal+'</span>'
+            + '<span style="flex:1;font-size:12px;font-weight:600">Apto '+a[0]+'</span>'
+            + '<span class="badge b-ok">'+a[1]+' reserva(s)</span>'
+            + '</div>';
+        });
+      } else {
+        resumoHtml += '<div style="font-size:11px;color:var(--t2)">Nenhuma reserva neste mes.</div>';
+      }
+      el.innerHTML = resumoHtml;
+    });
+}
+
+// ============================================
+// RANKING DE PONTUALIDADE
+// ============================================
 function renderRankingPontualidade() {
   var mesAtual = new Date().toISOString().slice(0,7);
-  sb.from('reservas').select('unidade_id,checkin_feito,status,unidades(codigo)').gte('data_reserva',mesAtual+'-01').lte('data_reserva',mesAtual+'-31').then(function(res) {
-    var todas = res.data||[];
-    var aptos = {};
-    todas.forEach(function(r) {
-      var cod = r.unidades ? r.unidades.codigo : (r.unidade_id ? r.unidade_id.slice(0,8) : '---');
-      if(!aptos[cod]) aptos[cod] = {total:0,checkin:0,falta:0};
-      if(r.status === 'confirmada' || r.checkin_feito || r.status === 'expirada') aptos[cod].total++;
-      if(r.checkin_feito) aptos[cod].checkin++;
-      if(r.status === 'expirada') aptos[cod].falta++;
+  sb.from('reservas').select('unidade_id,checkin_feito,status,unidades(codigo)')
+    .gte('data_reserva',mesAtual+'-01')
+    .lte('data_reserva',mesAtual+'-31')
+    .eq('espaco_id', espacoQuadraId)
+    .then(function(res) {
+      var todas = res.data||[];
+      var aptos = {};
+      todas.forEach(function(r) {
+        var cod = r.unidades ? r.unidades.codigo : (r.unidade_id ? r.unidade_id.slice(0,8) : '---');
+        if(!aptos[cod]) aptos[cod] = {total:0,checkin:0,falta:0};
+        if(r.status === 'confirmada' || r.checkin_feito || r.status === 'expirada') aptos[cod].total++;
+        if(r.checkin_feito) aptos[cod].checkin++;
+        if(r.status === 'expirada') aptos[cod].falta++;
+      });
+      var lista = Object.entries(aptos)
+        .filter(function(e){ return e[1].total >= 1; })
+        .map(function(e){ return {cod:e[0], taxa:e[1].total>0?Math.round(e[1].checkin/e[1].total*100):0, total:e[1].total, falta:e[1].falta}; })
+        .sort(function(a,b){ return b.taxa - a.taxa || b.total - a.total; })
+        .slice(0,10);
+      var el = document.getElementById('ranking-pontualidade');
+      if(!el) return;
+      if(!lista.length) { el.innerHTML='<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>'; return; }
+      var medals = ['🥇','🥈','🥉'];
+      el.innerHTML = lista.map(function(a,i){
+        var medal = medals[i] || (i+1+'.');
+        var cor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 70 ? 'var(--amb)' : 'var(--rdt)';
+        return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--br)">'
+          + '<div style="font-size:14px;width:24px;text-align:center">'+medal+'</div>'
+          + '<div style="flex:1;font-size:12px;font-weight:600">Apto '+a.cod+'</div>'
+          + '<div style="font-size:11px;color:var(--t2)">'+a.total+' reserva(s)</div>'
+          + '<div style="font-size:13px;font-weight:700;color:'+cor+'">'+a.taxa+'%</div>'
+          + '</div>';
+      }).join('');
     });
-    var lista = Object.entries(aptos)
-      .filter(function(e){ return e[1].total >= 1; })
-      .map(function(e){ return {cod:e[0], taxa:e[1].total>0?Math.round(e[1].checkin/e[1].total*100):0, total:e[1].total, falta:e[1].falta}; })
-      .sort(function(a,b){ return b.taxa - a.taxa || b.total - a.total; })
-      .slice(0,10);
-    var el = document.getElementById('ranking-pontualidade');
-    if(!el) return;
-    if(!lista.length) { el.innerHTML='<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>'; return; }
-    var medals = ['🥇','🥈','🥉'];
-    el.innerHTML = lista.map(function(a,i){
-      var medal = medals[i] || (i+1+'.');
-      var cor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 70 ? 'var(--amb)' : 'var(--rdt)';
-      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--br)">'
-        +'<div style="font-size:14px;width:24px;text-align:center">'+medal+'</div>'
-        +'<div style="flex:1;font-size:12px;font-weight:600">Apto '+a.cod+'</div>'
-        +'<div style="font-size:11px;color:var(--t2)">'+a.total+' reserva(s)</div>'
-        +'<div style="font-size:13px;font-weight:700;color:'+cor+'">'+a.taxa+'%</div>'
-        +'</div>';
-    }).join('');
-  });
 }
 
-// ── CONTRATOS DE AULA ──────────────────────────────────────────
+// ============================================
+// CONTRATOS DE AULA
+// ============================================
 function renderContratosAula() {
   sb.from('reservas')
     .select('id,unidade_id,slot_inicio,slot_fim,duracao_min,status,tipo_reserva,data_reserva,modalidade_id,morador_id,unidades(codigo),modalidades(nome,icone)')
@@ -2913,7 +3405,7 @@ function renderContratosAula() {
       lc.querySelectorAll('[data-renovar-contr]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           if(!requireAdmin()) return;
-          var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-renovar-contr')));
+          var d = JSON.parse(decodeURIComponent(btn.getAttribute('data-editar-contr')));
           var novoIni = new Date(d.fim+'T12:00:00');
           novoIni.setDate(novoIni.getDate()+1);
           d.novoIni = novoIni.toISOString().slice(0,10);
@@ -3031,7 +3523,8 @@ function criarContrato() {
           unidade_id: aptoId, morador_id: moradorId, modalidade_id: modDbId,
           data_reserva: ds,
           slot_inicio: hora+':00', slot_fim: horaFim+':00',
-          duracao_min: dur, tipo_reserva: 'aula', status: 'confirmada'
+          duracao_min: dur, tipo_reserva: 'aula', status: 'confirmada',
+          espaco_id: espacoQuadraId
         });
       }
       cur.setDate(cur.getDate()+1);
@@ -3058,56 +3551,9 @@ function criarContrato() {
   });
 }
 
-// ── SALVAR CONFIGURAÇÕES ───────────────────────────────────────
-document.getElementById('btn-salvar-config').addEventListener('click', function() {
-  if(!requireAdmin()) return;
-  var li = function(id, def) {
-    var el = document.getElementById(id); if(!el) return def;
-    var v = parseInt(el.value, 10); return isNaN(v) ? def : v;
-  };
-  var tg = function(id) { var el = document.getElementById(id); return el ? el.classList.contains('on') : false; };
-  var cfg = {
-    max_reservas_mes:       li('cfg-max-mes', 4),
-    max_reservas_simult:    li('cfg-max-simult', 2),
-    antecedencia_min_h:     li('cfg-ant-min', 1),
-    antecedencia_max_dias:  li('cfg-ant-max', 15),
-    checkin_janela_min:     li('cfg-ckin-janela', 15),
-    checkin_ant_min:        li('cfg-ckin-ant', 10),
-    faltas_suspensao:       li('cfg-faltas-susp', 2),
-    carencia_cancel_min:    li('cfg-carencia', 120),
-    suspensao_dias:         li('cfg-susp-dias', 15),
-    blk_aulas_fds:  tg('tgl-blk-aulas-fds'),
-    blk_sabado:     tg('tgl-blk-sab'),
-    blk_domingo:    tg('tgl-blk-dom'),
-    ant_fds_h:              li('cfg-ant-fds', 0),
-    aulas_rec_ativo: tg('tgl-aulas-rec'),
-    aula_duracao_max_meses: li('cfg-aula-duracao', 6),
-    aula_aviso_dias:        li('cfg-aula-aviso', 30),
-    aula_max_contratos:     li('cfg-aula-max-contr', 1)
-  };
-  sb.from('configuracoes').select('id').limit(1).maybeSingle().then(function(rc) {
-    if(rc.data) {
-      sb.from('configuracoes').update(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).eq('id', rc.data.id).then(function(r) {
-        if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
-      });
-    } else {
-      sb.from('configuracoes').insert(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).then(function(r) {
-        if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
-      });
-    }
-  });
-});
-
-// ── BOTÕES CONTRATOS / FECHAMENTO ──────────────────────────────
-document.getElementById('btn-novo-contrato').addEventListener('click', function() {
-  if(!requireAdmin()) return;
-  abrirModalContrato(null, false);
-});
-document.getElementById('btn-fechar-contrato').addEventListener('click', function() { fecharModal('m-novo-contrato'); });
-document.getElementById('btn-criar-contrato').addEventListener('click', criarContrato);
-
-// ── BLOQUEIOS ──────────────────────────────────────────────────
-// ── BLOQUEIO EMERGENCIAL ───────────────────────────────────────
+// ============================================
+// BLOQUEIO EMERGENCIAL
+// ============================================
 var _blkEmergId = null;
 
 function verificarBloqueioEmergencial() {
@@ -3173,7 +3619,9 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
   });
 });
 
-// ── CANCELAMENTO EM MASSA ──────────────────────────────────────
+// ============================================
+// CANCELAMENTO EM MASSA
+// ============================================
 (function() {
   var selPeriodo = document.getElementById('cancel-massa-periodo');
   var preview    = document.getElementById('cancel-massa-preview');
@@ -3206,6 +3654,7 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
       .eq('status', 'confirmada')
       .gte('data_reserva', r.ini)
       .lte('data_reserva', r.fim)
+      .eq('espaco_id', espacoQuadraId)
       .then(function(res) {
         var n = res.count || 0;
         preview.textContent = n > 0
@@ -3230,6 +3679,7 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
       .eq('status', 'confirmada')
       .gte('data_reserva', r.ini)
       .lte('data_reserva', r.fim)
+      .eq('espaco_id', espacoQuadraId)
       .then(function(res) {
         var ids = (res.data || []).map(function(x) { return x.id; });
         if(!ids.length) { toast('Nenhuma reserva confirmada neste periodo.'); return; }
@@ -3253,11 +3703,83 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
       });
   });
 
-  // Carrega preview ao abrir a aba Config
   document.getElementById('tab-config').addEventListener('click', function() {
     setTimeout(atualizarPreview, 400);
   });
 })();
+
+// ============================================
+// SALVAR CONFIGURAÇÕES
+// ============================================
+document.getElementById('btn-salvar-config').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  var li = function(id, def) {
+    var el = document.getElementById(id); if(!el) return def;
+    var v = parseInt(el.value, 10); return isNaN(v) ? def : v;
+  };
+  var tg = function(id) { var el = document.getElementById(id); return el ? el.classList.contains('on') : false; };
+  var cfg = {
+    max_reservas_mes:       li('cfg-max-mes', 4),
+    max_reservas_simult:    li('cfg-max-simult', 2),
+    antecedencia_min_h:     li('cfg-ant-min', 1),
+    antecedencia_max_dias:  li('cfg-ant-max', 15),
+    checkin_janela_min:     li('cfg-ckin-janela', 15),
+    checkin_ant_min:        li('cfg-ckin-ant', 10),
+    faltas_suspensao:       li('cfg-faltas-susp', 2),
+    carencia_cancel_min:    li('cfg-carencia', 120),
+    suspensao_dias:         li('cfg-susp-dias', 15),
+    blk_aulas_fds:  tg('tgl-blk-aulas-fds'),
+    blk_sabado:     tg('tgl-blk-sab'),
+    blk_domingo:    tg('tgl-blk-dom'),
+    ant_fds_h:              li('cfg-ant-fds', 0),
+    aulas_rec_ativo: tg('tgl-aulas-rec'),
+    aula_duracao_max_meses: li('cfg-aula-duracao', 6),
+    aula_aviso_dias:        li('cfg-aula-aviso', 30),
+    aula_max_contratos:     li('cfg-aula-max-contr', 1),
+    fair_play_ativo: tg('tgl-fair-play')
+  };
+  sb.from('configuracoes').select('id').limit(1).maybeSingle().then(function(rc) {
+    if(rc.data) {
+      sb.from('configuracoes').update(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).eq('id', rc.data.id).then(function(r) {
+        if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
+      });
+    } else {
+      sb.from('configuracoes').insert(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).then(function(r) {
+        if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
+      });
+    }
+  });
+});
+
+// ============================================
+// TOGGLES E OUTROS COMPONENTES
+// ============================================
+var tglEnquete = document.getElementById('tgl-enquete');
+if(tglEnquete) {
+  tglEnquete.addEventListener('click', function() {
+    tglEnquete.classList.toggle('on');
+    var campos = document.getElementById('enquete-campos');
+    if(campos) campos.style.display = tglEnquete.classList.contains('on') ? 'block' : 'none';
+  });
+}
+
+var enqueteTipoSel = document.getElementById('av-enquete-tipo');
+var enqueteCustom = document.getElementById('enquete-custom');
+if(enqueteTipoSel && enqueteCustom) {
+  enqueteTipoSel.addEventListener('change', function() {
+    enqueteCustom.style.display = enqueteTipoSel.value === 'personalizado' ? 'flex' : 'none';
+    enqueteCustom.style.flexDirection = 'column';
+  });
+}
+
+var blkTipoSel = document.getElementById('blk-tipo');
+var blkCkWrap = document.getElementById('blk-checklist-wrap');
+if(blkTipoSel && blkCkWrap) {
+  blkTipoSel.addEventListener('change', function() {
+    var exibe = ['manutencao','vistoria','limpeza'].indexOf(blkTipoSel.value) !== -1;
+    blkCkWrap.style.display = exibe ? 'block' : 'none';
+  });
+}
 
 document.getElementById('btn-add-bloqueio').addEventListener('click', function() {
   if(!requireAdmin()) return;
@@ -3298,7 +3820,6 @@ document.getElementById('btn-add-bloqueio').addEventListener('click', function()
   });
 });
 
-// ── TOGGLES ────────────────────────────────────────────────────
 // Toggle academia
 (function() {
   var tglAc = document.getElementById('tgl-academia');
@@ -3311,13 +3832,11 @@ document.getElementById('btn-add-bloqueio').addEventListener('click', function()
     tglAc.addEventListener('click', function() {
       tglAc.classList.toggle('on');
       syncAcademiaCfg();
-      // Atualiza no banco
       var ativo = tglAc.classList.contains('on');
       if(espacoAcademiaId) {
         sb.from('espacos').update({ativo: ativo}).eq('id', espacoAcademiaId).then(function() {
           atualizarTabAcademia();
           toast(ativo ? 'Academia ativada.' : 'Academia desativada.');
-          // Atualiza max_simult se necessario
           var sel = document.getElementById('cfg-academia-simult');
           if(sel && ativo) {
             sb.from('espacos').update({max_simult: parseInt(sel.value)}).eq('id', espacoAcademiaId).then(function(){});
@@ -3348,34 +3867,9 @@ document.getElementById('btn-add-bloqueio').addEventListener('click', function()
   if(el) el.addEventListener('click', function() { el.classList.toggle('on'); });
 });
 
-var tglEnquete = document.getElementById('tgl-enquete');
-if(tglEnquete) {
-  tglEnquete.addEventListener('click', function() {
-    tglEnquete.classList.toggle('on');
-    var campos = document.getElementById('enquete-campos');
-    if(campos) campos.style.display = tglEnquete.classList.contains('on') ? 'block' : 'none';
-  });
-}
-
-var enqueteTipoSel = document.getElementById('av-enquete-tipo');
-var enqueteCustom = document.getElementById('enquete-custom');
-if(enqueteTipoSel && enqueteCustom) {
-  enqueteTipoSel.addEventListener('change', function() {
-    enqueteCustom.style.display = enqueteTipoSel.value === 'personalizado' ? 'flex' : 'none';
-    enqueteCustom.style.flexDirection = 'column';
-  });
-}
-
-var blkTipoSel = document.getElementById('blk-tipo');
-var blkCkWrap = document.getElementById('blk-checklist-wrap');
-if(blkTipoSel && blkCkWrap) {
-  blkTipoSel.addEventListener('change', function() {
-    var exibe = ['manutencao','vistoria','limpeza'].indexOf(blkTipoSel.value) !== -1;
-    blkCkWrap.style.display = exibe ? 'block' : 'none';
-  });
-}
-
-// ── SCANNER QR ─────────────────────────────────────────────────
+// ============================================
+// SCANNER QR
+// ============================================
 document.getElementById('btn-abrir-scanner').addEventListener('click', function() {
   var reader = document.getElementById('reader');
   var ba = document.getElementById('btn-abrir-scanner');
@@ -3403,7 +3897,9 @@ document.getElementById('btn-abrir-scanner').addEventListener('click', function(
 });
 document.getElementById('btn-fechar-scanner').addEventListener('click', function() { fecharScannerEForcarParada(); });
 
-// ── PERFIL / FOTO ──────────────────────────────────────────────
+// ============================================
+// PERFIL / FOTO
+// ============================================
 document.getElementById('btn-editar-foto').addEventListener('click', function() {
   var fotoWrapInput = document.getElementById('foto-input-wrap');
   if(fotoWrapInput) fotoWrapInput.style.display = fotoWrapInput.style.display==='none' ? 'block' : 'none';
@@ -3432,7 +3928,9 @@ document.getElementById('btn-cancelar-foto').addEventListener('click', function(
   document.getElementById('foto-input-wrap').style.display = 'none';
 });
 
-// ── MODO ESCURO ────────────────────────────────────────────────
+// ============================================
+// MODO ESCURO
+// ============================================
 var tglDark = document.getElementById('tgl-dark');
 if(tglDark) {
   var darkSaved = localStorage.getItem('cg_dark') === '1';
@@ -3444,7 +3942,9 @@ if(tglDark) {
   });
 }
 
-// ── NOTIFICAÇÕES PUSH ──────────────────────────────────────────
+// ============================================
+// NOTIFICAÇÕES PUSH
+// ============================================
 var tglPush = document.getElementById('tgl-push');
 if(tglPush) {
   if('Notification' in window && Notification.permission === 'granted') tglPush.classList.add('on');
@@ -3467,165 +3967,15 @@ if(tglPush) {
   });
 }
 
-// ── CALENDÁRIO DE RESERVAS ─────────────────────────────────────
-var calVY = new Date().getFullYear(), calVM = new Date().getMonth();
-var calSelDate = null;
-
-document.getElementById('btn-prev-m-cal').addEventListener('click', function() {
-  calVM--; if(calVM<0){calVM=11;calVY--;} renderCalendario();
-});
-document.getElementById('btn-next-m-cal').addEventListener('click', function() {
-  calVM++; if(calVM>11){calVM=0;calVY++;} renderCalendario();
-});
-
-function renderCalendario() {
-  document.getElementById('cal-lbl-cal').textContent = MESES[calVM]+' '+calVY;
-  var ini = calVY+'-'+String(calVM+1).padStart(2,'0')+'-01';
-  var fim = calVY+'-'+String(calVM+1).padStart(2,'0')+'-31';
-
-  // Busca todas as reservas confirmadas do mês
-  sb.from('reservas')
-    .select('data_reserva,slot_inicio,slot_fim,tipo_reserva,unidades(codigo),modalidades(nome,icone)')
-    .neq('status','cancelada')
-    .gte('data_reserva', ini)
-    .lte('data_reserva', fim)
-    .order('slot_inicio',{ascending:true})
-    .then(function(res) {
-      var reservasMes = res.data || [];
-
-      // Agrupa por data
-      var porData = {};
-      reservasMes.forEach(function(r) {
-        var d = r.data_reserva;
-        if(!porData[d]) porData[d] = [];
-        porData[d].push(r);
-      });
-
-      // Monta o grid do calendário
-      var g = document.getElementById('cal-grid-cal');
-      var html = DIAS_N.map(function(d){ return '<div class="cal-dn">'+d+'</div>'; }).join('');
-      var first = new Date(calVY,calVM,1).getDay();
-      var days = new Date(calVY,calVM+1,0).getDate();
-      var today = ts();
-      for(var i=0; i<first; i++) html += '<div></div>';
-      for(var d=1; d<=days; d++) {
-        var ds = calVY+'-'+String(calVM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-        var blk = isBlocked(ds);
-        var temReserva = porData[ds] && porData[ds].length > 0;
-        var cls = 'cal-d';
-        if(ds === today) cls += ' today';
-        if(ds === calSelDate) cls += ' sel';
-        if(blk) cls += ' blk';
-        else if(temReserva) {
-          // Dia com reserva: fundo vermelho claro (ocupado)
-          html += '<div class="'+cls+'" data-cds="'+ds+'" style="background:#FCEBEB;color:var(--rdt);font-weight:600;cursor:pointer" title="'+porData[ds].length+' reserva(s)">'+d+'<span style="display:block;font-size:7px;line-height:1">'+porData[ds].length+'x</span></div>';
-          continue;
-        }
-        html += '<div class="'+cls+'" data-cds="'+ds+'">'+d+'</div>';
-      }
-      g.innerHTML = html;
-
-      // Eventos de clique nos dias
-      g.querySelectorAll('[data-cds]').forEach(function(el) {
-        el.addEventListener('click', function() {
-          calSelDate = el.dataset.cds;
-          renderCalendario(); // re-render para marcar selecionado
-          var ds = el.dataset.cds;
-          var detalheCard = document.getElementById('cal-detalhe-card');
-          var detalheLbl = document.getElementById('cal-detalhe-lbl');
-          var detalheLista = document.getElementById('cal-detalhe-lista');
-          detalheLbl.textContent = 'Reservas em ' + fmtD(ds);
-          var ress = porData[ds] || [];
-          if(!ress.length) {
-            detalheCard.style.display = 'block';
-            detalheLista.innerHTML = '<div style="font-size:11px;color:var(--t2);padding:6px 0">Nenhuma reserva neste dia.</div>';
-          } else {
-            detalheCard.style.display = 'block';
-            detalheLista.innerHTML = ress.map(function(r) {
-              var cod = r.unidades ? r.unidades.codigo : '---';
-              var mod = r.modalidades ? (r.modalidades.icone+' '+r.modalidades.nome) : 'Uso Livre';
-              var si = (r.slot_inicio||'').slice(0,5);
-              var sf = (r.slot_fim||'').slice(0,5);
-              var tipoBadge = r.tipo_reserva === 'aula'
-                ? '<span class="badge b-info" style="font-size:9px">Aula</span>'
-                : '<span class="badge b-ok" style="font-size:9px">Pontual</span>';
-              return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">'
-                +'<div style="min-width:52px;max-width:56px;height:36px;border-radius:8px;background:var(--vl);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:700;color:var(--v);padding:0 5px;white-space:nowrap;letter-spacing:-0.3px">'+cod+'</div>'
-                +'<div style="flex:1;min-width:0">'
-                  +'<div style="font-size:11.5px;font-weight:600">'+si+' &ndash; '+sf+'</div>'
-                  +'<div style="font-size:10.5px;color:var(--t2)">'+mod+'</div>'
-                +'</div>'
-                +tipoBadge
-                +'</div>';
-            }).join('');
-          }
-        });
-      });
-
-      // Resumo do mês
-      var totalRes = reservasMes.length;
-      var aptosUnicos = {};
-      reservasMes.forEach(function(r){ if(r.unidades) aptosUnicos[r.unidades.codigo] = (aptosUnicos[r.unidades.codigo]||0)+1; });
-      var rankApto = Object.entries(aptosUnicos).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
-
-      // Total de horas: usa slot_fim se disponível, senão duracao_min, senão 60min
-      var totalMinutos = 0;
-      reservasMes.forEach(function(r) {
-        if(r.slot_inicio && r.slot_fim) {
-          var hIni = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
-          var hFim = parseInt((r.slot_fim||'00:00').slice(0,2))*60   + parseInt((r.slot_fim||'00:00').slice(3,5));
-          if(hFim > hIni) { totalMinutos += (hFim - hIni); return; }
-        }
-        totalMinutos += (r.duracao_min || 60);
-      });
-      var totalHoras = (totalMinutos / 60).toFixed(1).replace('.0','');
-
-      // Taxa de ocupação baseada em SLOTS (horários de 1h disponíveis no mês)
-      // 06:00 a 21:00 = 16 slots por dia × dias do mês
-      var diasMes = new Date(calVY,calVM+1,0).getDate();
-      var slotsDisponiveis = 16 * diasMes;
-      // Conta slots efetivamente ocupados (cada hora reservada = 1 slot)
-      var slotsOcupados = Math.round(totalMinutos / 60);
-      var taxaSlots = Math.min(100, Math.round(slotsOcupados / slotsDisponiveis * 100));
-
-      var el = document.getElementById('cal-resumo-mes');
-      var resumoHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
-        +'<div style="background:var(--vl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--v)">'+totalRes+'</div><div style="font-size:10px;color:var(--t2)">Reservas no mes</div></div>'
-        +'<div style="background:var(--bl);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blt)">'+totalHoras+'h</div><div style="font-size:10px;color:var(--t2)">Horas reservadas</div></div>'
-        +'</div>'
-        +'<div style="background:var(--am);border-radius:8px;padding:10px;margin-bottom:10px">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
-        +'<span style="font-size:11px;font-weight:600;color:var(--amt)">Ocupacao dos horarios disponiveis do mes</span>'
-        +'<span style="font-size:16px;font-weight:700;color:var(--amt)">'+taxaSlots+'%</span>'
-        +'</div>'
-        +'<div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden">'
-        +'<div style="height:100%;background:var(--amb);width:'+taxaSlots+'%;border-radius:4px"></div>'
-        +'</div>'
-        +'<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponiveis+' horarios de 1h reservados</div>'
-        +'</div>';
-      if(rankApto.length) {
-        resumoHtml += '<div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Apartamentos mais ativos</div>';
-        rankApto.forEach(function(a, i) {
-          var medals = ['🥇','🥈','🥉'];
-          var medal = medals[i] || (i+1+'.');
-          resumoHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--br)">'
-            +'<span style="font-size:13px">'+medal+'</span>'
-            +'<span style="flex:1;font-size:12px;font-weight:600">Apto '+a[0]+'</span>'
-            +'<span class="badge b-ok">'+a[1]+' reserva(s)</span>'
-            +'</div>';
-        });
-      } else {
-        resumoHtml += '<div style="font-size:11px;color:var(--t2)">Nenhuma reserva neste mes.</div>';
-      }
-      el.innerHTML = resumoHtml;
-    });
-}
-
-// ── REGULAMENTO ────────────────────────────────────────────────
+// ============================================
+// REGULAMENTO
+// ============================================
 document.getElementById('btn-ver-regulamento').addEventListener('click', function() { abrirModal('m-regulamento'); });
 document.getElementById('btn-fechar-regulamento').addEventListener('click', function() { fecharModal('m-regulamento'); });
 
-// ── QR CODE PESSOAL ────────────────────────────────────────────
+// ============================================
+// QR CODE PESSOAL
+// ============================================
 document.getElementById('btn-qr-checkin').addEventListener('click', function() {
   var wrap = document.getElementById('qr-checkin-wrap');
   if(!wrap) return;
@@ -3640,421 +3990,10 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
   if(qrEl) qrEl.innerHTML = '<img src="'+qrUrl+'" style="width:150px;height:150px" alt="QR Code">';
   wrap.style.display = 'block';
 });
-</script>
 
-<!-- MODAL SUCESSO RESERVA -->
-<div class="modal-bg" id="m-novo-achado">
-  <div class="modal-card">
-    <div class="mhandle"></div>
-    <div class="mtitle">Registrar item encontrado</div>
-    <div class="msub">Descreva o objeto para que o dono possa reclamar</div>
-    <div style="padding:10px 0">
-      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Descricao do objeto</label>
-      <input type="text" class="form-in" id="achado-desc" placeholder="Ex: Raquete azul, garrafa preta...">
-    </div>
-    <div style="padding:0 0 10px">
-      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Local onde foi encontrado</label>
-      <select class="form-in" id="achado-local">
-        <option value="Quadra poliesportiva">Quadra poliesportiva</option>
-        <option value="Entrada da quadra">Entrada da quadra</option>
-        <option value="Vestiario">Vestiario</option>
-        <option value="Area externa">Area externa</option>
-        <option value="Outro">Outro</option>
-      </select>
-    </div>
-    <div class="macts">
-      <button class="btn-s" id="btn-fechar-achado">Cancelar</button>
-      <button class="btn-p" id="btn-salvar-achado"><i class="ti ti-check" aria-hidden="true"></i>Registrar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-bg" id="m-novo-placar">
-  <div class="modal-card">
-    <div class="mhandle"></div>
-    <div class="mtitle">Registrar placar</div>
-    <div style="padding:10px 0">
-      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Modalidade</label>
-      <select class="form-in" id="placar-mod">
-        <option value="Tenis simples">Tenis simples</option>
-        <option value="Tenis duplas">Tenis duplas</option>
-        <option value="Futebol">Futebol</option>
-        <option value="Basquete">Basquete</option>
-        <option value="Volei">Volei</option>
-        <option value="Outro">Outro</option>
-      </select>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 24px 1fr;gap:8px;align-items:end;padding-bottom:10px">
-      <div>
-        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Meu placar</label>
-        <input type="number" class="form-in" id="placar-casa" placeholder="0" min="0" style="text-align:center;font-size:20px;font-weight:600">
-      </div>
-      <div style="font-size:14px;color:var(--t2);text-align:center;padding-bottom:8px">x</div>
-      <div>
-        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Placar adversario</label>
-        <input type="number" class="form-in" id="placar-visitante" placeholder="0" min="0" style="text-align:center;font-size:20px;font-weight:600">
-      </div>
-    </div>
-    <div style="padding-bottom:12px">
-      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">Apto adversario (opcional)</label>
-      <input type="text" class="form-in" id="placar-adversario" placeholder="Ex: B-202">
-    </div>
-    <div class="macts">
-      <button class="btn-s" id="btn-fechar-placar">Cancelar</button>
-      <button class="btn-p" id="btn-salvar-placar"><i class="ti ti-check" aria-hidden="true"></i>Salvar placar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-bg" id="m-onboarding" style="align-items:center;justify-content:center">
-  <div class="modal" style="max-width:340px;padding:0;overflow:hidden;border-radius:16px;background:var(--cd)">
-    <div id="onb-step-1" style="padding:28px 24px;text-align:center">
-      <div style="font-size:44px;margin-bottom:12px">&#127934;</div>
-      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Bem-vindo ao app da quadra!</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Aqui voce reserva a quadra poliesportiva, faz check-in e acompanha seu historico, tudo pelo celular.</div>
-      <button class="btn-p" onclick="onbStep(2)" style="width:100%">Proximo <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
-    </div>
-    <div id="onb-step-2" style="display:none;padding:28px 24px;text-align:center">
-      <div style="font-size:44px;margin-bottom:12px">&#9971;</div>
-      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Regras do fair play</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Cada apartamento tem limite mensal de reservas. Cancelamentos fora do prazo ou ausencias sem check-in geram faltas. Com 2 faltas no mes, o apartamento fica suspenso por 15 dias.</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-s" onclick="onbStep(1)" style="flex:1">Voltar</button>
-        <button class="btn-p" onclick="onbStep(3)" style="flex:2">Proximo <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
-      </div>
-    </div>
-    <div id="onb-step-3" style="display:none;padding:28px 24px;text-align:center">
-      <div style="font-size:44px;margin-bottom:12px">&#9989;</div>
-      <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Check-in obrigatorio</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">No dia da sua reserva, faca o check-in pela aba Check-in ou escaneando o QR Code na entrada da quadra. Voce tem ate 15 minutos apos o inicio do horario.</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-s" onclick="onbStep(2)" style="flex:1">Voltar</button>
-        <button class="btn-p" id="btn-fechar-onboarding" style="flex:2"><i class="ti ti-check" aria-hidden="true"></i>Entendido!</button>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:center;gap:6px;padding:0 0 16px">
-      <div id="onb-dot-1" style="width:6px;height:6px;border-radius:50%;background:var(--v)"></div>
-      <div id="onb-dot-2" style="width:6px;height:6px;border-radius:50%;background:var(--br)"></div>
-      <div id="onb-dot-3" style="width:6px;height:6px;border-radius:50%;background:var(--br)"></div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-bg" id="m-reserva-ok">
-  <div class="modal" style="max-width:320px;text-align:center;padding:24px 20px">
-    <div style="font-size:36px;margin-bottom:8px">✅</div>
-    <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:var(--t1)">Reserva confirmada!</div>
-    <div id="m-reserva-ok-detalhe" style="font-size:12px;color:var(--t2);margin-bottom:18px"></div>
-    <a id="btn-calendar-link" href="#" target="_blank" rel="noopener"
-      style="display:block;background:#27500A;color:#fff;text-decoration:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;margin-bottom:10px">
-      📅 Adicionar ao Google Calendar
-    </a>
-    <button id="btn-fechar-reserva-ok"
-      style="background:none;border:1px solid var(--brd);border-radius:10px;padding:8px 16px;font-size:13px;color:var(--t2);width:100%;cursor:pointer">
-      Fechar
-    </button>
-  </div>
-</div>
-<script>
-document.getElementById('btn-fechar-reserva-ok').addEventListener('click', function() { fecharModal('m-reserva-ok'); });
-
-var dispensaReservaId = null;
-
-document.getElementById('btn-fechar-dispensa').addEventListener('click', function() {
-  fecharModal('m-dispensa');
-  toast('Reserva cancelada.');
-});
-
-// ── ESPACOS ────────────────────────────────────────────────────
-function carregarEspacos() {
-  sb.from('espacos').select('*').order('criado_at').then(function(res) {
-    espacos = res.data || [];
-    espacoQuadraId = null;
-    espacoAcademiaId = null;
-    espacos.forEach(function(e) {
-      var n = (e.nome || '').toLowerCase();
-      if(n.indexOf('quadra') >= 0) espacoQuadraId = e.id;
-      if(n.indexOf('academia') >= 0) espacoAcademiaId = e.id;
-    });
-    atualizarTabAcademia();
-  });
-}
-
-function atualizarTabAcademia() {
-  var tabAc = document.getElementById('tab-academia');
-  if(!tabAc) return;
-  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
-  var ativo = ac ? ac.ativo : false;
-  tabAc.style.display = (espacoAcademiaId && ativo) ? 'flex' : 'none';
-}
-
-// ── DASHBOARD ──────────────────────────────────────────────────
-function renderDashboard() {
-  var mesIni = new Date().toISOString().slice(0,7) + '-01';
-  var hoje = new Date();
-  var mesFim = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).toISOString().slice(0,10);
-  var totalSlotsDia = 16;
-  var diasMes = parseInt(mesFim.slice(8));
-
-  sb.from('reservas')
-    .select('data_reserva, slot_inicio, status, checkin_feito, modalidades(nome), unidades(codigo)')
-    .gte('data_reserva', mesIni)
-    .lte('data_reserva', mesFim)
-    .then(function(res) {
-      var todas = res.data || [];
-      var confirmadas = todas.filter(function(r){ return r.status === 'confirmada' || r.checkin_feito; });
-      var comCheckin = todas.filter(function(r){ return r.checkin_feito; });
-      var total = confirmadas.length;
-      var taxa = total > 0 ? Math.round(comCheckin.length / total * 100) : 0;
-      var totalSlotsMes = totalSlotsDia * diasMes;
-      var ocupacao = Math.round(total / totalSlotsMes * 100);
-
-      // Top slot
-      var slotCount = {};
-      confirmadas.forEach(function(r) {
-        var s = (r.slot_inicio || '').slice(0,5);
-        if(s) slotCount[s] = (slotCount[s] || 0) + 1;
-      });
-      var topSlot = Object.keys(slotCount).sort(function(a,b){ return slotCount[b]-slotCount[a]; })[0] || '--:--';
-
-      document.getElementById('dash-total-mes').textContent = total;
-      document.getElementById('dash-taxa-checkin').textContent = taxa + '%';
-      document.getElementById('dash-ocupacao').textContent = ocupacao + '%';
-      document.getElementById('dash-top-slot').textContent = topSlot;
-
-      // Heatmap por dia da semana
-      var diasNome = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
-      var diaCount = [0,0,0,0,0,0,0];
-      var diaMax = 1;
-      confirmadas.forEach(function(r) {
-        if(!r.data_reserva) return;
-        var d = new Date(r.data_reserva + 'T12:00:00').getDay();
-        diaCount[d]++;
-        if(diaCount[d] > diaMax) diaMax = diaCount[d];
-      });
-      var hmHtml = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">';
-      diasNome.forEach(function(d){ hmHtml += '<div style="font-size:9px;color:var(--t2);text-align:center">' + d + '</div>'; });
-      hmHtml += '</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
-      diaCount.forEach(function(cnt) {
-        var pct = Math.round(cnt / diaMax * 100);
-        var bg = pct >= 75 ? '#27500A' : pct >= 40 ? '#639922' : pct >= 15 ? '#C0DD97' : '#EAF3DE';
-        hmHtml += '<div style="height:32px;border-radius:6px;background:' + bg + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:' + (pct>=40?'#fff':'var(--t2)') + '">' + cnt + '</div>';
-      });
-      hmHtml += '</div>';
-      var hmEl = document.getElementById('dash-heatmap');
-      if(hmEl) hmEl.innerHTML = hmHtml;
-
-      // Ranking por apartamento
-      var aptoMap = {};
-      confirmadas.forEach(function(r) {
-        var cod = r.unidades ? r.unidades.codigo : null;
-        if(!cod) return;
-        if(!aptoMap[cod]) aptoMap[cod] = {total:0, checkin:0};
-        aptoMap[cod].total++;
-        if(r.checkin_feito) aptoMap[cod].checkin++;
-      });
-      var rankList = Object.keys(aptoMap).map(function(k) {
-        return {apto:k, total:aptoMap[k].total, taxa: aptoMap[k].total > 0 ? Math.round(aptoMap[k].checkin/aptoMap[k].total*100) : 0};
-      }).sort(function(a,b){ return b.total - a.total || b.taxa - a.taxa; }).slice(0,8);
-      var rkHtml = rankList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>';
-      rankList.forEach(function(a, i) {
-        var cor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 60 ? 'var(--amb)' : 'var(--rdt)';
-        var isMeu = morador && morador.unidades && morador.unidades.codigo === a.apto;
-        rkHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--br)">';
-        rkHtml += '<div style="font-size:12px;width:20px;text-align:center;color:var(--t2)">' + (i+1) + '</div>';
-        rkHtml += '<div style="flex:1;font-size:12px;font-weight:' + (isMeu?'600':'400') + ';color:' + (isMeu?'var(--v)':'var(--t1)') + '">Apto ' + a.apto + '</div>';
-        rkHtml += '<div style="font-size:11px;color:var(--t2)">' + a.total + ' reserva(s)</div>';
-        rkHtml += '<div style="font-size:12px;font-weight:600;color:' + cor + ';min-width:32px;text-align:right">' + a.taxa + '%</div>';
-        rkHtml += '</div>';
-      });
-      var rkEl = document.getElementById('dash-ranking');
-      if(rkEl) rkEl.innerHTML = rkHtml;
-
-      // Modalidades
-      var modMap = {};
-      confirmadas.forEach(function(r) {
-        var nome = r.modalidades ? r.modalidades.nome : 'Uso livre';
-        modMap[nome] = (modMap[nome] || 0) + 1;
-      });
-      var modList = Object.keys(modMap).sort(function(a,b){ return modMap[b]-modMap[a]; });
-      var modMax = modList.length ? modMap[modList[0]] : 1;
-      var modHtml = modList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados.</div>';
-      var modCores = ['#27500A','#185FA5','#854F0B','#A32D2D','#534AB7','#0F6E56'];
-      modList.forEach(function(nome, i) {
-        var cnt = modMap[nome];
-        var pct = Math.round(cnt / modMax * 100);
-        var cor = modCores[i % modCores.length];
-        modHtml += '<div style="margin-bottom:8px">';
-        modHtml += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--t1)">' + nome + '</span><span style="color:var(--t2)">' + cnt + '</span></div>';
-        modHtml += '<div style="background:var(--bg);border-radius:20px;height:6px;overflow:hidden"><div style="height:100%;border-radius:20px;background:' + cor + ';width:' + pct + '%"></div></div>';
-        modHtml += '</div>';
-      });
-      var modEl = document.getElementById('dash-modalidades');
-      if(modEl) modEl.innerHTML = modHtml;
-    });
-}
-
-// ── ACADEMIA ───────────────────────────────────────────────────
-function renderAcademia() {
-  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
-  var maxSimult = ac ? (ac.max_simult || 3) : 3;
-  var infoEl = document.getElementById('ac-info-simult');
-  if(infoEl) infoEl.textContent = 'Ate ' + maxSimult + ' pessoa(s) simultaneamente';
-
-  document.getElementById('cal-lbl-ac').textContent = MESES[acVM] + ' ' + acVY;
-  var g = document.getElementById('cal-grid-ac');
-  var html = DIAS_N.map(function(d){ return '<div class="cal-dn">' + d + '</div>'; }).join('');
-  var first = new Date(acVY, acVM, 1).getDay();
-  var days = new Date(acVY, acVM+1, 0).getDate();
-  var today = ts();
-  for(var i=0; i<first; i++) html += '<div></div>';
-  for(var d=1; d<=days; d++) {
-    var ds = acVY + '-' + String(acVM+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-    var cls = 'cal-d';
-    if(ds === today) cls += ' today';
-    if(ds === acSelDate) cls += ' sel';
-    if(isBlocked(ds)) cls += ' blk';
-    html += '<div class="' + cls + '" data-ac-ds="' + ds + '">' + d + '</div>';
-  }
-  g.innerHTML = html;
-  g.querySelectorAll('.cal-d').forEach(function(el) {
-    el.addEventListener('click', function() { selDataAcademia(el.dataset.acDs); });
-  });
-
-  // Status atual da academia
-  var agora = new Date();
-  var agoraMin = agora.getHours() * 60 + agora.getMinutes();
-  var dotEl = document.getElementById('ac-status-dot');
-  sb.from('reservas')
-    .select('id')
-    .eq('data_reserva', today)
-    .eq('status', 'confirmada')
-    .eq('espaco_id', espacoAcademiaId)
-    .then(function(res) {
-      var ocupados = (res.data || []).length;
-      var ac2 = espacos.find(function(e){ return e.id === espacoAcademiaId; });
-      var max = ac2 ? ac2.max_simult : 3;
-      if(dotEl) dotEl.style.background = ocupados >= max ? '#E24B4A' : ocupados > 0 ? '#EF9F27' : '#639922';
-    });
-}
-
-function selDataAcademia(ds) {
-  if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
-  if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
-  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso.'); return; }
-  acSelDate = ds;
-  renderAcademia();
-  var sc = document.getElementById('ac-slots-card');
-  sc.style.display = 'block';
-  document.getElementById('ac-slots-lbl').textContent = 'Horarios - ' + fmtD(ds);
-  var sg = document.getElementById('ac-slot-grid');
-  var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
-  var maxSimult = ac ? (ac.max_simult || 3) : 3;
-
-  sb.from('reservas')
-    .select('slot_inicio, slot_fim, unidade_id, status')
-    .eq('data_reserva', ds)
-    .eq('status', 'confirmada')
-    .eq('espaco_id', espacoAcademiaId)
-    .then(function(res) {
-      var reservasDia = res.data || [];
-      var agora = new Date();
-      var agoraMin = agora.getHours() * 60 + agora.getMinutes();
-      var ehHoje = ds === ts();
-      var html = '';
-      SLOTS.forEach(function(slot) {
-        if(parseInt(slot) >= 22) return;
-        var slotMin = parseInt(slot.split(':')[0]) * 60;
-        if(ehHoje && slotMin <= agoraMin) return;
-        var ocupados = reservasDia.filter(function(r) {
-          var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60;
-          var fim = parseInt((r.slot_fim||'00:00').slice(0,2))*60;
-          return slotMin >= ini && slotMin < fim;
-        }).length;
-        var minhaRes = reservasDia.find(function(r) {
-          return r.unidade_id === morador.unidade_id && parseInt((r.slot_inicio||'00:00').slice(0,2))*60 === slotMin;
-        });
-        var livre = ocupados < maxSimult;
-        var cls = minhaRes ? 'slot minha' : livre ? 'slot livre' : 'slot ocupado';
-        var lbl = minhaRes ? 'Minha' : livre ? (ocupados + '/' + maxSimult) : 'Cheio';
-        var action = minhaRes ? '' : livre ? 'ac_' + slot : '';
-        html += '<div class="' + cls + '" data-ac-slot="' + (action||'') + '">'
-          + '<div class="slot-hora">' + slot + '</div>'
-          + '<div class="slot-lbl">' + lbl + '</div></div>';
-      });
-      sg.innerHTML = html || '<div class="empty">Sem horarios disponiveis</div>';
-      sg.querySelectorAll('[data-ac-slot]').forEach(function(el) {
-        var act = el.dataset.acSlot;
-        if(!act) return;
-        el.addEventListener('click', function() {
-          var slot = act.replace('ac_', '');
-          if(!confirm('Reservar academia em ' + fmtD(ds) + ' as ' + slot + '?')) return;
-          var horaIni = slot + ':00';
-          var horaFim = addH(slot, 1) + ':00';
-          sb.from('reservas').insert({
-            unidade_id: morador.unidade_id,
-            morador_id: morador.id,
-            data_reserva: ds,
-            slot_inicio: horaIni,
-            slot_fim: horaFim,
-            duracao_min: 60,
-            tipo_reserva: 'pontual',
-            status: 'confirmada'
-          }).then(function(r) {
-            if(r.error) { toast('Erro: ' + r.error.message); return; }
-            toast('Academia reservada!');
-            selDataAcademia(ds);
-            renderAcademia();
-          });
-        });
-      });
-    });
-}
-
-// Navegacao calendario academia
-document.getElementById('btn-prev-m-ac').addEventListener('click', function() {
-  acVM--; if(acVM<0){acVM=11;acVY--;} renderAcademia();
-});
-document.getElementById('btn-next-m-ac').addEventListener('click', function() {
-  acVM++; if(acVM>11){acVM=0;acVY++;} renderAcademia();
-});
-
-document.getElementById('btn-enviar-dispensa').addEventListener('click', function() {
-  if(!dispensaReservaId || !morador) return;
-  var texto = (document.getElementById('disp-texto').value || '').trim();
-  if(!texto) { toast('Descreva o motivo da solicitacao.'); return; }
-  sb.from('solicitacoes_dispensa').insert({
-    reserva_id: dispensaReservaId,
-    morador_id: morador.id,
-    unidade_id: morador.unidade_id,
-    motivo: texto,
-    status: 'pendente'
-  }).then(function(r) {
-    if(r.error) { toast('Erro ao enviar solicitacao.'); return; }
-    document.getElementById('disp-texto').value = '';
-    fecharModal('m-dispensa');
-    toast('Solicitacao enviada! O administrador analisara em breve.');
-  });
-});
-
-// ── ONBOARDING ─────────────────────────────────────────────────
-function onbStep(n) {
-  [1,2,3].forEach(function(i) {
-    var el = document.getElementById('onb-step-'+i);
-    var dot = document.getElementById('onb-dot-'+i);
-    if(el) el.style.display = (i===n) ? 'block' : 'none';
-    if(dot) dot.style.background = (i===n) ? 'var(--v)' : 'var(--br)';
-  });
-}
-
-document.getElementById('btn-fechar-onboarding').addEventListener('click', function() {
-  fecharModal('m-onboarding');
-  if(morador) {
-    sb.from('moradores').update({onboarding_visto: true}).eq('id', morador.id).then(function(){});
-  }
-});
-
-// ── ACHADOS E PERDIDOS ─────────────────────────────────────────
+// ============================================
+// ACHADOS E PERDIDOS
+// ============================================
 document.getElementById('btn-novo-achado').addEventListener('click', function() {
   var inp = document.getElementById('achado-desc');
   if(inp) inp.value = '';
@@ -4130,7 +4069,9 @@ function renderAchados() {
     });
 }
 
-// ── PLACAR E RANKING ───────────────────────────────────────────
+// ============================================
+// PLACAR E RANKING
+// ============================================
 var rankingModo = 'ranking';
 
 document.getElementById('rpill-ranking').addEventListener('click', function() {
@@ -4247,7 +4188,58 @@ function renderRanking(modo) {
   }
 }
 
-</script>
+// ============================================
+// ONBOARDING
+// ============================================
+function onbStep(n) {
+  [1,2,3].forEach(function(i) {
+    var el = document.getElementById('onb-step-'+i);
+    var dot = document.getElementById('onb-dot-'+i);
+    if(el) el.style.display = (i===n) ? 'block' : 'none';
+    if(dot) dot.style.background = (i===n) ? 'var(--v)' : 'var(--br)';
+  });
+}
 
+document.getElementById('btn-fechar-onboarding').addEventListener('click', function() {
+  fecharModal('m-onboarding');
+  if(morador) {
+    sb.from('moradores').update({onboarding_visto: true}).eq('id', morador.id).then(function(){});
+  }
+});
+
+document.getElementById('btn-fechar-reserva-ok').addEventListener('click', function() { fecharModal('m-reserva-ok'); });
+
+document.getElementById('btn-novo-contrato').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  abrirModalContrato(null, false);
+});
+document.getElementById('btn-fechar-contrato').addEventListener('click', function() { fecharModal('m-novo-contrato'); });
+document.getElementById('btn-criar-contrato').addEventListener('click', criarContrato);
+
+// Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+  })
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  var btn = document.getElementById('btn-install-pwa');
+  if(btn) btn.style.display = 'block';
+});
+var btnInstall = document.getElementById('btn-install-pwa');
+if(btnInstall){
+  btnInstall.addEventListener('click', async()=>{
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    btnInstall.style.display = 'none';
+  });
+}
+</script>
 </body>
 </html>
