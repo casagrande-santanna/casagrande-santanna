@@ -167,6 +167,12 @@ textarea.form-in{resize:vertical}
 .tgl.on::after{left:18px}
 .empty{text-align:center;padding:32px 16px;color:var(--t2)}
 .empty i{font-size:40px;display:block;margin-bottom:8px;color:var(--br)}
+.btn-loading{opacity:.7;pointer-events:none}
+.chip-apto{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:20px;border:.5px solid var(--br);background:var(--cd);cursor:pointer;margin:2px}
+.chip-apto.sel{background:var(--vl);border-color:#97C459;color:var(--v);font-weight:600}
+.conv-card{border:.5px solid var(--amb);border-radius:var(--r);padding:10px 12px;margin-bottom:7px;background:var(--am)}
+.btn-loading i{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 #toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(23,52,4,.94);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:500;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
 </style>
 </head>
@@ -228,6 +234,7 @@ textarea.form-in{resize:vertical}
   </div>
   <div class="content">
     <div class="screen active" id="screen-avisos">
+      <div id="conv-pendentes-wrap" style="display:none;margin-bottom:8px"></div>
       <div id="wsq-lembrete" style="display:none;background:var(--vl);border:0.5px solid #97C459;border-radius:10px;padding:10px 14px;margin-bottom:8px"></div>
       <div id="widget-status-quadra" style="border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:0.5px solid var(--br)">
         <div style="display:flex;align-items:center;gap:10px">
@@ -599,6 +606,13 @@ textarea.form-in{resize:vertical}
         <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking de pontualidade</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:8px">Apartamentos com maior taxa de check-in no mes corrente.</div>
         <div id="ranking-pontualidade"></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:.5px solid var(--br)">
+          <div class="card-title" style="margin-bottom:8px"><i class="ti ti-download" aria-hidden="true"></i>Exportar relatorios</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <button class="btn-s" id="btn-export-reservas" style="flex:1;font-size:11px"><i class="ti ti-table-export" aria-hidden="true"></i>Reservas do mes</button>
+            <button class="btn-s" id="btn-export-faltas" style="flex:1;font-size:11px"><i class="ti ti-user-x" aria-hidden="true"></i>Faltas e suspensoes</button>
+          </div>
+        </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-barbell" aria-hidden="true"></i>Academia</div>
@@ -723,6 +737,13 @@ textarea.form-in{resize:vertical}
       <div class="mtitle">Confirmar reserva</div>
       <div class="resumo-box" id="m-resumo"></div>
       <div class="ib ib-blue" style="font-size:10.5px">Reserva vinculada ao seu apartamento. Dados protegidos - LGPD.</div>
+      <div style="margin:10px 0 4px">
+        <div style="font-size:11px;font-weight:600;color:var(--t1);margin-bottom:4px"><i class="ti ti-user-plus" aria-hidden="true"></i> Convidar apartamentos (opcional)</div>
+        <div id="conv-chips" style="display:flex;flex-wrap:wrap;gap:2px;min-height:28px;padding:4px;border:.5px solid var(--br);border-radius:8px;background:var(--bg)">
+          <div style="font-size:10px;color:var(--t3);padding:4px">Carregando...</div>
+        </div>
+        <div style="font-size:10px;color:var(--t2);margin-top:3px">Toque para selecionar os aptos a convidar</div>
+      </div>
       <div class="macts">
         <button class="btn-s" id="btn-voltar-step2">Voltar</button>
         <button class="btn-p" id="btn-confirmar-res"><i class="ti ti-check" aria-hidden="true"></i>Confirmar</button>
@@ -1082,6 +1103,19 @@ function toast(msg) {
 }
 function abrirModal(id) { document.getElementById(id).classList.add('open'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function setLoading(btnId, loading, textoOriginal) {
+  var btn = document.getElementById(btnId);
+  if(!btn) return;
+  if(loading) {
+    btn._textoOriginal = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Aguarde...';
+    btn.classList.add('btn-loading');
+  } else {
+    btn.innerHTML = textoOriginal || btn._textoOriginal || btn.innerHTML;
+    btn.classList.remove('btn-loading');
+  }
+}
 function isAdmin() { return !!(morador && morador.tipo === 'admin' && morador.status === 'ativo'); }
 function requireAdmin() {
   if(!isAdmin()) { toast('Acesso restrito aos administradores.'); goScreen('avisos'); return false; }
@@ -1142,7 +1176,9 @@ document.getElementById('btn-entrar').addEventListener('click', function() {
   var cb = document.getElementById('remember-checkbox');
   err.style.display = 'none';
   if(!email || !pass) { err.textContent='Preencha e-mail e senha.'; err.style.display='block'; return; }
+  setLoading('btn-entrar', true);
   sb.auth.signInWithPassword({email:email, password:pass}).then(function(res) {
+    setLoading('btn-entrar', false, 'Entrar');
     if(res.error) { err.textContent='E-mail ou senha incorretos.'; err.style.display='block'; return; }
     if(cb && cb.checked) localStorage.setItem('cg_remember_email', email);
     else localStorage.removeItem('cg_remember_email');
@@ -1401,6 +1437,7 @@ function iniciarApp(user) {
     renderCal();
     renderAvisos();
     renderCheckin();
+    renderConvitesPendentes();
 
     if(!morador.onboarding_visto && morador.tipo !== 'admin') {
       setTimeout(function() { abrirModal('m-onboarding'); }, 900);
@@ -1689,7 +1726,10 @@ document.getElementById('btn-voltar-step2').addEventListener('click', function()
   var m=MODS.find(function(x){return x.id===pendMod;});
   showStep(2); buildDurRow(m);
 });
-document.getElementById('btn-confirmar-res').addEventListener('click', confirmarReserva);
+document.getElementById('btn-confirmar-res').addEventListener('click', function() {
+  setLoading('btn-confirmar-res', true);
+  confirmarReserva();
+});
 
 function abrirModalReserva(date, slot) {
   if(!morador || !morador.unidade_id) { toast('Sem apartamento para reservar.'); return; }
@@ -1717,7 +1757,7 @@ function renderModGrid() {
 function selMod(id) {
   pendMod = id;
   var m = MODS.find(function(x){return x.id===id;});
-  if(m.fixo) { pendDur=m.durs[0]; showStep(3); buildResumo(); }
+  if(m.fixo) { pendDur=m.durs[0]; showStep(3); buildResumo(); carregarChipsConvite(); }
   else { showStep(2); buildDurRow(m); }
 }
 
@@ -1738,7 +1778,32 @@ function buildDurRow(m) {
   document.getElementById('m-dur-info').innerHTML = '<div class="ib ib-amber" style="font-size:10.5px">Maximo: 2 horas para '+m.nome+'.</div>';
 }
 
-function selDur(d) { pendDur=d; showStep(3); buildResumo(); }
+function selDur(d) { pendDur=d; showStep(3); buildResumo(); carregarChipsConvite(); }
+
+var _convitesSelecionados = [];
+
+function carregarChipsConvite() {
+  if(!morador || !morador.unidade_id) return;
+  _convitesSelecionados = [];
+  sb.from('unidades').select('id,codigo').neq('id', morador.unidade_id).order('codigo').then(function(res) {
+    var unids = res.data || [];
+    var chips = document.getElementById('conv-chips');
+    if(!chips) return;
+    if(!unids.length) { chips.innerHTML = '<div style="font-size:10px;color:var(--t3);padding:4px">Nenhum outro apartamento</div>'; return; }
+    chips.innerHTML = unids.map(function(u) {
+      return '<div class="chip-apto" data-uid="'+u.id+'" data-cod="'+u.codigo+'">'+u.codigo+'</div>';
+    }).join('');
+    chips.querySelectorAll('.chip-apto').forEach(function(ch) {
+      ch.addEventListener('click', function() {
+        ch.classList.toggle('sel');
+        var uid = ch.dataset.uid;
+        var idx = _convitesSelecionados.indexOf(uid);
+        if(idx >= 0) _convitesSelecionados.splice(idx, 1);
+        else _convitesSelecionados.push(uid);
+      });
+    });
+  });
+}
 
 function buildResumo() {
   var m = MODS.find(function(x){return x.id===pendMod;});
@@ -1807,12 +1872,15 @@ function _fazerInsertReserva() {
   if(espacoQuadraId) conflQ = conflQ.eq('espaco_id', espacoQuadraId);
   conflQ.then(function(conflito) {
       var temConflito = (conflito.data||[]).some(function(rv) {
-        var ini = rv.slot_inicio || '00:00:00';
-        var fim = rv.slot_fim   || '00:00:00';
-        // sobreposição completa: nova começa antes de existente terminar E nova termina depois de existente começar
-        return horaInicio < fim && horaFim > ini;
+        // Normaliza para HH:MM para comparação segura independente de formato
+        var ini = (rv.slot_inicio || '00:00').slice(0,5);
+        var fim = (rv.slot_fim   || '00:00').slice(0,5);
+        var hIni = horaInicio.slice(0,5);
+        var hFim = horaFim.slice(0,5);
+        return hIni < fim && hFim > ini;
       });
       if(temConflito) {
+        setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar reserva');
         toast('Horario indisponivel. Por favor, escolha outro.');
         selData(_date);
         fecharModal('m-reserva');
@@ -1833,7 +1901,7 @@ function _fazerInsertReserva() {
           duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
         };
         if(espacoQuadraId) payload.espaco_id = espacoQuadraId;
-        sb.from('reservas').insert(payload).then(function(r2) {
+        sb.from('reservas').insert(payload).select('id').then(function(r2) {
           if(r2.error) { toast('Erro: '+r2.error.message); return; }
           fecharModal('m-reserva');
           var modNomeCalendar = MODS.find(function(x){ return x.id===_mod; });
@@ -1850,6 +1918,26 @@ function _fazerInsertReserva() {
           if(det) det.textContent = (apto ? 'Apto '+apto+' • ' : '') + fmtD(_date) + ' • ' + horaInicio.slice(0,5) + '–' + horaFim.slice(0,5) + (nomeModal ? ' • '+nomeModal : '');
           var btnCal = document.getElementById('btn-calendar-link');
           if(btnCal) btnCal.href = linkCalendar;
+          setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar reserva');
+          // Inserir convites se houver apartamentos selecionados
+          var novaReservaId = r2.data && r2.data[0] ? r2.data[0].id : null;
+          var convSel = _convitesSelecionados.slice();
+          _convitesSelecionados = [];
+          if(novaReservaId && convSel.length) {
+            var convites = convSel.map(function(uid) {
+              return {reserva_id: novaReservaId, unidade_convidada_id: uid, criado_por: morador.id};
+            });
+            sb.from('convites_reserva').insert(convites).then(function(cv) {
+              var convEl = document.getElementById('m-reserva-ok-convites');
+              if(convEl) {
+                convEl.style.display = 'block';
+                convEl.innerHTML = '<i class="ti ti-users" aria-hidden="true"></i> Convite enviado para ' + convSel.length + ' apartamento(s).';
+              }
+            });
+          } else {
+            var convEl2 = document.getElementById('m-reserva-ok-convites');
+            if(convEl2) convEl2.style.display = 'none';
+          }
           abrirModal('m-reserva-ok');
           setTimeout(function(){ selData(_date); renderMinhas(); renderCheckin(); }, 300);
         });
@@ -1920,7 +2008,25 @@ function doCheckin(id) {
     .eq('id', id).single().then(function(res) {
       if(res.error || !res.data) { toast('Reserva nao encontrada.'); return; }
       var rv = res.data;
-      if(rv.unidade_id !== morador.unidade_id) { toast('Esta reserva nao pertence ao seu apartamento.'); return; }
+      // Permite check-in se for o titular OU se o apartamento tiver convite aceito
+      var podeCheckin = rv.unidade_id === morador.unidade_id;
+      if(!podeCheckin && morador.unidade_id) {
+        // Verifica convite aceito (sincrono simplificado — continua abaixo)
+      }
+      if(!podeCheckin) {
+        // Verifica se tem convite aceito para esta reserva
+        sb.from('convites_reserva').select('id').eq('reserva_id', id).eq('unidade_convidada_id', morador.unidade_id).eq('status', 'aceito').maybeSingle().then(function(cvRes) {
+          if(!cvRes.data) { toast('Esta reserva nao pertence ao seu apartamento.'); return; }
+          // Tem convite aceito - faz check-in
+          if(rv.checkin_feito) { toast('Check-in ja realizado.'); return; }
+          sb.from('reservas').update({checkin_feito:true, checkin_em:new Date().toISOString()}).eq('id', id).then(function(r) {
+            if(r.error) { toast('Erro no check-in.'); return; }
+            renderCheckin(); renderMinhas();
+            toast('Check-in realizado como convidado!');
+          });
+        });
+        return;
+      }
       if(rv.checkin_feito) { toast('Check-in ja realizado.'); return; }
       if(rv.status !== 'confirmada') { toast('Reserva nao esta mais ativa.'); return; }
       var agora = new Date();
@@ -1963,13 +2069,15 @@ function verificarFairPlay(unidadeId) {
     if(cfg.suspensao_dias) appCfg.suspensao_dias = diasSusp;
 
     var mesAtual = new Date().toISOString().slice(0,7);
-    sb.from('reservas')
+    // Só conta faltas da quadra (não academia) — usa espaco_id ou tipo_reserva
+    var faltasQ = sb.from('reservas')
       .select('id', {count:'exact', head:true})
       .eq('unidade_id', unidadeId)
       .eq('status', 'expirada')
       .gte('data_reserva', mesAtual+'-01')
-      .lte('data_reserva', mesAtual+'-31')
-      .then(function(rc) {
+      .lte('data_reserva', mesAtual+'-31');
+    if(espacoQuadraId) faltasQ = faltasQ.eq('espaco_id', espacoQuadraId);
+    faltasQ.then(function(rc) {
         var totalFaltas = rc.count || 0;
         if(totalFaltas >= limiteFaltas) {
           var ate = new Date();
@@ -2350,8 +2458,54 @@ function renderWidgetStatus() {
     });
 }
 
+function renderConvitesPendentes() {
+  if(!morador || !morador.unidade_id) return;
+  var wrap = document.getElementById('conv-pendentes-wrap');
+  if(!wrap) return;
+  sb.from('convites_reserva')
+    .select('id, status, criado_em, reservas(id, data_reserva, slot_inicio, slot_fim, unidades(codigo)), moradores!criado_por(nome)')
+    .eq('unidade_convidada_id', morador.unidade_id)
+    .eq('status', 'pendente')
+    .order('criado_em', {ascending: false})
+    .then(function(res) {
+      var convites = res.data || [];
+      // Atualiza badge
+      var nd = document.getElementById('nd-avisos');
+      if(nd) nd.classList.toggle('show', convites.length > 0);
+      if(!convites.length) { wrap.style.display = 'none'; return; }
+      wrap.style.display = 'block';
+      var html = '<div class="card-title" style="margin-bottom:8px"><i class="ti ti-users" aria-hidden="true" style="color:var(--amb)"></i> Convites pendentes</div>';
+      convites.forEach(function(cv) {
+        var rv = cv.reservas;
+        var criador = cv.moradores ? cv.moradores.nome : '';
+        var aptoOrigem = rv && rv.unidades ? rv.unidades.codigo : '';
+        var dt = rv ? fmtD(rv.data_reserva) + ' ' + (rv.slot_inicio||'').slice(0,5) + '-' + (rv.slot_fim||'').slice(0,5) : '';
+        html += '<div class="conv-card">';
+        html += '<div style="font-size:12px;font-weight:600;margin-bottom:4px">Apto ' + aptoOrigem + ' convidou voce</div>';
+        html += '<div style="font-size:11px;color:var(--amt);margin-bottom:8px">' + dt + (criador ? ' &bull; ' + criador : '') + '</div>';
+        html += '<div style="display:flex;gap:6px">';
+        html += '<button class="btn-sm g" data-conv-id="' + cv.id + '" data-conv-acao="aceito" style="flex:1"><i class="ti ti-check" aria-hidden="true"></i>Aceitar</button>';
+        html += '<button class="btn-sm r" data-conv-id="' + cv.id + '" data-conv-acao="recusado" style="flex:1"><i class="ti ti-x" aria-hidden="true"></i>Recusar</button>';
+        html += '</div></div>';
+      });
+      wrap.innerHTML = html;
+      wrap.querySelectorAll('[data-conv-id]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var cid = btn.dataset.convId;
+          var acao = btn.dataset.convAcao;
+          sb.from('convites_reserva').update({status: acao, respondido_em: new Date().toISOString()}).eq('id', cid).then(function(r) {
+            if(r.error) { toast('Erro ao responder convite.'); return; }
+            toast(acao === 'aceito' ? 'Convite aceito! Voce pode fazer check-in na reserva.' : 'Convite recusado.');
+            renderConvitesPendentes();
+          });
+        });
+      });
+    });
+}
+
 function renderAvisos() {
   renderWidgetStatus();
+  renderConvitesPendentes();
   if(!morador) { document.getElementById('avisos-list').innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Faca login</div>'; return; }
   sb.from('avisos').select('*,enquete_tipo,enquete_label_a,enquete_label_b,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
     var avisos = res.data||[];
@@ -3243,6 +3397,76 @@ document.getElementById('btn-fechar-contrato').addEventListener('click', functio
 document.getElementById('btn-criar-contrato').addEventListener('click', criarContrato);
 
 // ── BLOQUEIOS ──────────────────────────────────────────────────
+// ── EXPORTAÇÃO CSV ────────────────────────────────────────────
+function exportarCSV(dados, nomeArquivo) {
+  if(!dados || !dados.length) { toast('Nenhum dado para exportar.'); return; }
+  var cols = Object.keys(dados[0]);
+  var linhas = [cols.join(';')];
+  dados.forEach(function(row) {
+    linhas.push(cols.map(function(k) {
+      var v = row[k] == null ? '' : String(row[k]);
+      return '"' + v.replace(/"/g, '""') + '"';
+    }).join(';'));
+  });
+  var bom = '﻿';
+  var blob = new Blob([bom + linhas.join('
+')], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = nomeArquivo;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Arquivo gerado com sucesso!');
+}
+
+document.getElementById('btn-export-reservas').addEventListener('click', function() {
+  setLoading('btn-export-reservas', true);
+  var mes = new Date().toISOString().slice(0,7);
+  sb.from('reservas')
+    .select('data_reserva, slot_inicio, slot_fim, status, tipo_reserva, checkin_feito, motivo_cancelamento, unidades(codigo), modalidades(nome)')
+    .gte('data_reserva', mes+'-01')
+    .lte('data_reserva', mes+'-31')
+    .order('data_reserva').order('slot_inicio')
+    .then(function(res) {
+      setLoading('btn-export-reservas', false, '<i class="ti ti-table-export"></i>Reservas do mes');
+      var rows = (res.data||[]).map(function(r) {
+        return {
+          Data: r.data_reserva,
+          Horario: (r.slot_inicio||'').slice(0,5) + '-' + (r.slot_fim||'').slice(0,5),
+          Apartamento: r.unidades ? r.unidades.codigo : '',
+          Modalidade: r.modalidades ? r.modalidades.nome : '',
+          Tipo: r.tipo_reserva,
+          Status: r.status,
+          CheckIn: r.checkin_feito ? 'Sim' : 'Nao',
+          Motivo_Cancelamento: r.motivo_cancelamento || ''
+        };
+      });
+      exportarCSV(rows, 'reservas-' + mes + '.csv');
+    });
+});
+
+document.getElementById('btn-export-faltas').addEventListener('click', function() {
+  setLoading('btn-export-faltas', true);
+  sb.from('moradores')
+    .select('nome, status, faltas_mes, suspenso_ate, unidades(codigo)')
+    .neq('tipo', 'admin')
+    .order('faltas_mes', {ascending: false})
+    .then(function(res) {
+      setLoading('btn-export-faltas', false, '<i class="ti ti-user-x"></i>Faltas e suspensoes');
+      var rows = (res.data||[]).map(function(m) {
+        return {
+          Apartamento: m.unidades ? m.unidades.codigo : '',
+          Morador: m.nome,
+          Status: m.status,
+          Faltas_Mes: m.faltas_mes || 0,
+          Suspenso_Ate: m.suspenso_ate || ''
+        };
+      });
+      exportarCSV(rows, 'faltas-' + new Date().toISOString().slice(0,10) + '.csv');
+    });
+});
+
 // ── BLOQUEIO EMERGENCIAL ───────────────────────────────────────
 var _blkEmergId = null;
 
@@ -3883,7 +4107,8 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
   <div class="modal" style="max-width:320px;text-align:center;padding:24px 20px">
     <div style="font-size:36px;margin-bottom:8px">✅</div>
     <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:var(--t1)">Reserva confirmada!</div>
-    <div id="m-reserva-ok-detalhe" style="font-size:12px;color:var(--t2);margin-bottom:18px"></div>
+    <div id="m-reserva-ok-detalhe" style="font-size:12px;color:var(--t2);margin-bottom:10px"></div>
+    <div id="m-reserva-ok-convites" style="display:none;margin-bottom:12px;font-size:11px;color:var(--t2);background:var(--vl);border-radius:8px;padding:8px 10px"></div>
     <a id="btn-calendar-link" href="#" target="_blank" rel="noopener"
       style="display:block;background:#27500A;color:#fff;text-decoration:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;margin-bottom:10px">
       📅 Adicionar ao Google Calendar
