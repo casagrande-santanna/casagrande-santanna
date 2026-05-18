@@ -174,6 +174,29 @@ textarea.form-in{resize:vertical}
 .btn-loading i{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(23,52,4,.94);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:500;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
+
+.desktop-body{display:flex;flex:1;min-height:0;overflow:hidden;flex-direction:column}
+
+@media(min-width:768px){
+  body{max-width:100%;flex-direction:column;align-items:stretch}
+  .desktop-body{flex-direction:row}
+  .app{flex:1;flex-direction:column;max-width:100%}
+  .hdr{position:sticky;top:0;z-index:30}
+  .tab-bar{width:180px;flex-direction:column;border-bottom:none;border-right:0.5px solid var(--br);position:sticky;top:0;height:100%;overflow-y:auto;padding:8px 0;flex-shrink:0;align-self:flex-start;max-height:calc(100vh - 58px)}
+  .tab{flex:none;flex-direction:row;justify-content:flex-start;padding:10px 16px;font-size:12px;border-bottom:none;border-left:3px solid transparent;gap:10px;text-align:left}
+  .tab i{font-size:18px;flex-shrink:0}
+  .tab.active{border-bottom:none;border-left:3px solid var(--v);background:var(--vl)}
+  .tab .ndot{top:8px;right:8px}
+  .content{padding:16px 24px 40px;max-width:860px;height:calc(100vh - 58px);overflow-y:auto}
+  .modal-card{max-width:520px;border-radius:14px;margin:20px auto}
+  .modal-bg{align-items:center}
+  .slot-grid{grid-template-columns:repeat(5,1fr)}
+  .mod-grid{grid-template-columns:repeat(3,1fr)}
+  .res-card{margin-bottom:8px}
+  #toast{bottom:24px}
+  .login-wrap{padding:40px}
+  .login-card{max-width:420px}
+}
 </style>
 </head>
 <body>
@@ -220,6 +243,7 @@ textarea.form-in{resize:vertical}
       </div>
     </div>
   </div>
+  <div class="desktop-body" style="display:flex;flex:1;overflow:hidden">
   <div class="tab-bar">
     <button class="tab active" id="tab-avisos"><i class="ti ti-bell" aria-hidden="true"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
     <button class="tab" id="tab-dashboard" style="display:none"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard</button>
@@ -719,6 +743,7 @@ textarea.form-in{resize:vertical}
       <button class="btn-s" id="btn-qr-checkin" style="margin-top:6px;width:100%"><i class="ti ti-qrcode" aria-hidden="true"></i>Meu QR Code de check-in</button>
     </div>
   </div>
+  </div><!-- end desktop-body -->
 </div>
 
 <!-- MODAIS -->
