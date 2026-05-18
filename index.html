@@ -388,11 +388,6 @@ textarea.form-in{resize:vertical}
     </div>
     <div class="screen" id="screen-quadra">
       <div class="card">
-        <div class="card-title"><i class="ti ti-search" aria-hidden="true"></i>Achados e perdidos</div>
-        <div id="achados-list"><div class="empty"><i class="ti ti-search"></i>Nenhum item cadastrado</div></div>
-        <button class="btn-p" id="btn-novo-achado" style="margin-top:10px"><i class="ti ti-plus" aria-hidden="true"></i>Registrar item encontrado</button>
-      </div>
-      <div class="card">
         <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Placar e ranking</div>
         <div class="filter-bar" style="margin-bottom:8px">
           <button class="fpill active" id="rpill-ranking">Ranking</button>
@@ -409,6 +404,16 @@ textarea.form-in{resize:vertical}
         <div id="lista-dispensas"></div>
         <div style="height:1px;background:var(--br);margin:12px 0"></div>
       </div>
+      <!-- Achados e perdidos -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="card-title" style="margin-bottom:0"><i class="ti ti-search" aria-hidden="true"></i>Achados e perdidos</div>
+          <button class="btn-sm g" id="btn-novo-achado"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+        </div>
+        <div id="achados-list"><div class="empty"><i class="ti ti-search"></i>Nenhum item cadastrado</div></div>
+      </div>
+      <!-- Botão nova ocorrência (todos os moradores) -->
+      <button class="btn-p" id="btn-nova-oco-morador" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Abrir nova ocorrencia</button>
       <div class="card" style="background:var(--bl);border-color:var(--blb)">
         <div style="display:flex;align-items:flex-start;gap:8px">
           <i class="ti ti-clipboard-list" style="font-size:20px;color:var(--blt);flex-shrink:0;margin-top:2px" aria-hidden="true"></i>
@@ -1036,7 +1041,7 @@ if(btnInstall){
 <div id="toast"></div>
 
 <script>
-// ── CONFIGURAÇÕES GLOBAIS ──────────────────────────────────────
+// -- CONFIGURAÇÕES GLOBAIS --------------------------------------
 var SURL = 'https://gkdwfntluopycapxyvfx.supabase.co';
 var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
 var sb = supabase.createClient(SURL, SKEY);
@@ -1090,7 +1095,7 @@ var appCfg = {
   fair_play_ativo: true
 };
 
-// ── UTILITÁRIOS ────────────────────────────────────────────────
+// -- UTILITÁRIOS ------------------------------------------------
 function ts() { return new Date().toISOString().slice(0,10); }
 function fmtD(ds) { if(!ds) return ''; var p=ds.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function addH(t,h) { var p=t.split(':').map(Number); return String(p[0]+h).padStart(2,'0')+':'+String(p[1]).padStart(2,'0'); }
@@ -1157,7 +1162,7 @@ document.querySelectorAll('.modal-bg').forEach(function(m) {
   m.addEventListener('click', function(e) { if(e.target===m) fecharModal(m.id); });
 });
 
-// ── LOGIN ──────────────────────────────────────────────────────
+// -- LOGIN ------------------------------------------------------
 // Lembrar-me: preenche e-mail salvo
 (function() {
   var savedEmail = localStorage.getItem('cg_remember_email');
@@ -1186,37 +1191,44 @@ document.getElementById('btn-entrar').addEventListener('click', function() {
   });
 });
 
-// Biometria (WebAuthn / FaceID / TouchID via navigator.credentials)
+// Biometria - usa autocomplete do navegador/SO (FaceID, TouchID, sensor)
 document.getElementById('btn-biometric').addEventListener('click', function() {
-  var savedEmail = localStorage.getItem('cg_remember_email') || document.getElementById('login-email').value.trim();
-  if(!savedEmail) { toast('Digite seu e-mail antes de usar biometria.'); return; }
-  if(!window.PublicKeyCredential) { toast('Seu dispositivo nao suporta biometria.'); return; }
-  // Usa credencial salva pelo navegador (autocomplete="current-password" + biometria do SO)
-  var form = document.createElement('form');
-  form.method = 'dialog';
-  document.body.appendChild(form);
-  navigator.credentials.get({
-    password: true,
-    mediation: 'optional'
-  }).then(function(cred) {
-    document.body.removeChild(form);
-    if(cred && cred.type === 'password') {
-      var err = document.getElementById('login-err');
-      err.style.display = 'none';
-      sb.auth.signInWithPassword({email: cred.id, password: cred.password}).then(function(res) {
-        if(res.error) { err.textContent='Biometria falhou. Use sua senha.'; err.style.display='block'; return; }
-        iniciarApp(res.data.user);
+  try {
+    var emailEl = document.getElementById('login-email');
+    var passEl  = document.getElementById('login-pass');
+    var err     = document.getElementById('login-err');
+    err.style.display = 'none';
+    // Tenta usar Credential Management API se disponível
+    if(window.PasswordCredential) {
+      navigator.credentials.get({password: true, mediation: 'optional'}).then(function(cred) {
+        if(cred && cred.type === 'password') {
+          setLoading('btn-biometric', true);
+          sb.auth.signInWithPassword({email: cred.id, password: cred.password}).then(function(res) {
+            setLoading('btn-biometric', false, '<i class="ti ti-fingerprint"></i> Entrar com biometria');
+            if(res.error) { err.textContent='Falha na autenticacao. Use sua senha.'; err.style.display='block'; return; }
+            iniciarApp(res.data.user);
+          });
+        } else {
+          toast('Use seu e-mail e senha para entrar.');
+        }
+      }).catch(function() {
+        toast('Biometria nao disponivel neste dispositivo.');
       });
     } else {
-      toast('Biometria nao disponivel. Use sua senha.');
+      // Fallback: foca no campo de senha para o SO oferecer preenchimento automatico
+      if(emailEl && emailEl.value) {
+        passEl.focus();
+        toast('Use o preenchimento automatico do seu dispositivo.');
+      } else {
+        toast('Digite seu e-mail e use o preenchimento automatico do navegador.');
+      }
     }
-  }).catch(function() {
-    document.body.removeChild(form);
-    toast('Biometria cancelada ou nao disponivel.');
-  });
+  } catch(e) {
+    toast('Biometria nao suportada. Use sua senha.');
+  }
 });
 
-// ── RECUPERAÇÃO DE SENHA ───────────────────────────────────────
+// -- RECUPERAÇÃO DE SENHA ---------------------------------------
 document.getElementById('link-esqueci').addEventListener('click', function() {
   var emailLogin = document.getElementById('login-email').value.trim();
   if(emailLogin) document.getElementById('esqueci-email').value = emailLogin;
@@ -1279,7 +1291,7 @@ sb.auth.onAuthStateChange(function(event, session) {
   }
 });
 
-// ── CADASTRO ───────────────────────────────────────────────────
+// -- CADASTRO ---------------------------------------------------
 document.getElementById('link-cadastro').addEventListener('click', function() {
   var sel = document.getElementById('cad-apto');
   var opts = '';
@@ -1326,7 +1338,7 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
   });
 });
 
-// ── LOGOUT ─────────────────────────────────────────────────────
+// -- LOGOUT -----------------------------------------------------
 document.getElementById('btn-logout').addEventListener('click', function() {
   sb.auth.signOut().then(function() {
     resetPermissoesUI();
@@ -1336,7 +1348,7 @@ document.getElementById('btn-logout').addEventListener('click', function() {
   });
 });
 
-// ── INICIAR APP ────────────────────────────────────────────────
+// -- INICIAR APP ------------------------------------------------
 function iniciarApp(user) {
   usuario = user;
   resetPermissoesUI();
@@ -1463,7 +1475,7 @@ sb.auth.getSession().then(function(res) {
   }
 });
 
-// ── TABS ───────────────────────────────────────────────────────
+// -- TABS -------------------------------------------------------
 document.getElementById('tab-avisos').addEventListener('click', function() { goScreen('avisos'); renderAvisos(); });
 document.getElementById('tab-dashboard').addEventListener('click', function() { goScreen('dashboard'); renderDashboard(); });
 document.getElementById('btn-hdr-dashboard').addEventListener('click', function() { goScreen('dashboard'); renderDashboard(); document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');}); document.getElementById('tab-dashboard').classList.add('active'); });
@@ -1472,8 +1484,8 @@ document.getElementById('tab-academia').addEventListener('click', function() { g
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
 document.getElementById('tab-checkin').addEventListener('click', function() { goScreen('checkin'); renderCheckin(); });
 document.getElementById('tab-calendario').addEventListener('click', function() { goScreen('calendario'); renderCalendario(); });
-document.getElementById('tab-quadra').addEventListener('click', function() { goScreen('quadra'); renderAchados(); renderRanking('ranking'); });
-document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); });
+document.getElementById('tab-quadra').addEventListener('click', function() { goScreen('quadra'); renderRanking('ranking'); });
+document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); renderAchados(); });
 document.getElementById('tab-config').addEventListener('click', function() {
   if(!requireAdmin()) return;
   goScreen('config');
@@ -1504,7 +1516,7 @@ function goScreen(name) {
   if(name !== 'checkin') fecharScannerEForcarParada();
 }
 
-// ── QR SCANNER ─────────────────────────────────────────────────
+// -- QR SCANNER -------------------------------------------------
 function fecharScannerEForcarParada() {
   if(html5QrcodeScanner) {
     html5QrcodeScanner.stop().then(function() {
@@ -1576,7 +1588,7 @@ function processarQrQuadra() {
     });
 }
 
-// ── CALENDARIO ─────────────────────────────────────────────────
+// -- CALENDARIO -------------------------------------------------
 document.getElementById('btn-prev-m').addEventListener('click', function() { vM--; if(vM<0){vM=11;vY--;} renderCal(); });
 document.getElementById('btn-next-m').addEventListener('click', function() { vM++; if(vM>11){vM=0;vY++;} renderCal(); });
 
@@ -1632,7 +1644,7 @@ function renderCal() {
   });
 }
 
-// ── SELECIONAR DATA E SLOTS ────────────────────────────────────
+// -- SELECIONAR DATA E SLOTS ------------------------------------
 function selData(ds) {
   if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
@@ -1718,7 +1730,7 @@ function selData(ds) {
     });
 }
 
-// ── MODAL RESERVA ──────────────────────────────────────────────
+// -- MODAL RESERVA ----------------------------------------------
 document.getElementById('btn-cancelar-res').addEventListener('click', function() { fecharModal('m-reserva'); });
 document.getElementById('btn-voltar-step1').addEventListener('click', function() { pendDur=null; showStep(1); renderModGrid(); });
 document.getElementById('btn-voltar-step2').addEventListener('click', function() {
@@ -1822,12 +1834,12 @@ function showStep(n) {
     document.getElementById('m-res-step'+i).style.display = (i===n?'block':'none');
   });
 }
-// ── CONFIRMAR RESERVA ──────────────────────────────────────────
+// -- CONFIRMAR RESERVA ------------------------------------------
 function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   var dtStart = date.replace(/-/g,'') + 'T' + slotInicio.replace(':','') + '00';
   var dtEnd   = date.replace(/-/g,'') + 'T' + slotFim.replace(':','') + '00';
-  var texto   = encodeURIComponent('🎾 Reserva da Quadra — ' + modalidade);
-  var local   = encodeURIComponent("Quadra Poliesportiva — Casa Grande Sant'Anna");
+  var texto   = encodeURIComponent('🎾 Reserva da Quadra - ' + modalidade);
+  var local   = encodeURIComponent("Quadra Poliesportiva - Casa Grande Sant'Anna");
   var details = encodeURIComponent('Apto ' + apto + ' • Lembre-se do check-in até 15 min após o início.');
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + texto + '&dates=' + dtStart + '/' + dtEnd + '&location=' + local + '&details=' + details;
 }
@@ -1863,7 +1875,7 @@ function _fazerInsertReserva() {
   var _date = pendSlot.date;
   var _mod  = pendMod;
 
-  // Verifica conflito de horário — cobre todos os casos de sobreposição
+  // Verifica conflito de horário - cobre todos os casos de sobreposição
   var conflQ = sb.from('reservas')
     .select('id, slot_inicio, slot_fim')
     .eq('data_reserva', pendSlot.date)
@@ -1915,7 +1927,7 @@ function _fazerInsertReserva() {
             apto
           );
           var det = document.getElementById('m-reserva-ok-detalhe');
-          if(det) det.textContent = (apto ? 'Apto '+apto+' • ' : '') + fmtD(_date) + ' • ' + horaInicio.slice(0,5) + '–' + horaFim.slice(0,5) + (nomeModal ? ' • '+nomeModal : '');
+          if(det) det.textContent = (apto ? 'Apto '+apto+' • ' : '') + fmtD(_date) + ' • ' + horaInicio.slice(0,5) + '-' + horaFim.slice(0,5) + (nomeModal ? ' • '+nomeModal : '');
           var btnCal = document.getElementById('btn-calendar-link');
           if(btnCal) btnCal.href = linkCalendar;
           setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar reserva');
@@ -1945,7 +1957,7 @@ function _fazerInsertReserva() {
     });
 }
 
-// ── MODAL CANCELAR ─────────────────────────────────────────────
+// -- MODAL CANCELAR ---------------------------------------------
 document.getElementById('btn-fechar-cancel').addEventListener('click', function() { fecharModal('m-cancelar'); });
 document.getElementById('btn-exec-cancel').addEventListener('click', function() {
   if(!cancelId) return;
@@ -2001,7 +2013,7 @@ function abrirModalCancelar(id) {
   });
 }
 
-// ── CHECK-IN ───────────────────────────────────────────────────
+// -- CHECK-IN ---------------------------------------------------
 function doCheckin(id) {
   sb.from('reservas')
     .select('unidade_id, data_reserva, slot_inicio, checkin_feito, status')
@@ -2011,7 +2023,7 @@ function doCheckin(id) {
       // Permite check-in se for o titular OU se o apartamento tiver convite aceito
       var podeCheckin = rv.unidade_id === morador.unidade_id;
       if(!podeCheckin && morador.unidade_id) {
-        // Verifica convite aceito (sincrono simplificado — continua abaixo)
+        // Verifica convite aceito (sincrono simplificado - continua abaixo)
       }
       if(!podeCheckin) {
         // Verifica se tem convite aceito para esta reserva
@@ -2030,11 +2042,14 @@ function doCheckin(id) {
       if(rv.checkin_feito) { toast('Check-in ja realizado.'); return; }
       if(rv.status !== 'confirmada') { toast('Reserva nao esta mais ativa.'); return; }
       var agora = new Date();
-      var dtReserva = new Date(rv.data_reserva + 'T' + (rv.slot_inicio || '00:00'));
-      var diffMin = (agora - dtReserva) / 60000;
-      var janela = appCfg.checkin_janela_min || 15;
+      var dtInicio = new Date(rv.data_reserva + 'T' + (rv.slot_inicio || '00:00'));
+      var dtFim    = new Date(rv.data_reserva + 'T' + (rv.slot_fim   || '23:59'));
+      var diffMin  = (agora - dtInicio) / 60000;
+      var janela   = appCfg.checkin_janela_min || 15;
       var antecipacao = appCfg.checkin_ant_min || 10;
-      if(diffMin > janela) {
+      var reservaEmCurso = agora >= dtInicio && agora < dtFim;
+      // Só expira se o horário da reserva JÁ PASSOU (não se ainda está em andamento)
+      if(diffMin > janela && !reservaEmCurso) {
         toast('Janela de check-in expirou. Reserva sera marcada como ausencia.');
         sb.from('reservas').update({status:'expirada'}).eq('id', id).then(function() {
           verificarFairPlay(morador.unidade_id);
@@ -2069,7 +2084,7 @@ function verificarFairPlay(unidadeId) {
     if(cfg.suspensao_dias) appCfg.suspensao_dias = diasSusp;
 
     var mesAtual = new Date().toISOString().slice(0,7);
-    // Só conta faltas da quadra (não academia) — usa espaco_id ou tipo_reserva
+    // Só conta faltas da quadra (não academia) - usa espaco_id ou tipo_reserva
     var faltasQ = sb.from('reservas')
       .select('id', {count:'exact', head:true})
       .eq('unidade_id', unidadeId)
@@ -2228,7 +2243,7 @@ function renderCheckin() {
   });
 }
 
-// ── MINHAS RESERVAS ────────────────────────────────────────────
+// -- MINHAS RESERVAS --------------------------------------------
 function renderMinhas() {
   if(!morador) return;
   if(!morador.unidade_id) {
@@ -2367,7 +2382,7 @@ function renderMinhas() {
     });
 }
 
-// ── AVISOS ─────────────────────────────────────────────────────
+// -- AVISOS -----------------------------------------------------
 function renderWidgetStatus() {
   var dot = document.getElementById('wsq-dot');
   var statusEl = document.getElementById('wsq-status');
@@ -2447,7 +2462,7 @@ function renderWidgetStatus() {
               lembreteEl.style.display = 'block';
               lembreteEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
                 + '<div><div style="font-size:12px;font-weight:600;color:var(--v)"><i class="ti ti-bell-ringing" aria-hidden="true"></i> Sua reserva começa ' + diffTxt + '</div>'
-                + '<div style="font-size:11px;color:var(--t2)">' + (pr.slot_inicio||'').slice(0,5) + '–' + (pr.slot_fim||'').slice(0,5) + (modNome ? ' • ' + modNome : '') + '</div></div>'
+                + '<div style="font-size:11px;color:var(--t2)">' + (pr.slot_inicio||'').slice(0,5) + '-' + (pr.slot_fim||'').slice(0,5) + (modNome ? ' • ' + modNome : '') + '</div></div>'
                 + '<button class="btn-sm b" onclick="document.getElementById(&quot;tab-checkin&quot;).click()" style="flex-shrink:0;font-size:11px"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>'
                 + '</div>';
             } else {
@@ -2587,7 +2602,7 @@ function renderAvisos() {
           html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--rdt)">'+rotulos.b+'</span><span style="font-weight:700">'+(av.enquete_nao||0)+' ('+pctNao+'%)</span></div>';
           html += '<div style="height:10px;background:var(--br);border-radius:5px;overflow:hidden"><div style="height:100%;background:var(--rdt);width:'+pctNao+'%;border-radius:5px"></div></div>';
           html += '</div>';
-          html += '<div style="font-size:10px;color:var(--t2);margin-top:6px;text-align:right">'+totalVotos+' voto(s) registrado(s) — voce ja votou</div>';
+          html += '<div style="font-size:10px;color:var(--t2);margin-top:6px;text-align:right">'+totalVotos+' voto(s) registrado(s) - voce ja votou</div>';
         }
         html += '</div>';
       }
@@ -2693,7 +2708,7 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
   });
 });
 
-// ── LISTA DE ESPERA ────────────────────────────────────────────
+// -- LISTA DE ESPERA --------------------------------------------
 function abrirListaEspera(ds, slot, reservaId) {
   if(!morador || !morador.unidade_id) return;
   pendEspera = {ds: ds, slot: slot, reservaId: reservaId};
@@ -2738,7 +2753,7 @@ function entrarListaEspera() {
 document.getElementById('btn-fechar-espera').addEventListener('click', function() { fecharModal('m-espera'); });
 document.getElementById('btn-entrar-espera').addEventListener('click', entrarListaEspera);
 
-// ── OCORRÊNCIAS ────────────────────────────────────────────────
+// -- OCORRÊNCIAS ------------------------------------------------
 document.getElementById('btn-nova-oco').addEventListener('click', function() {
   if(!requireAdmin()) return;
   abrirModal('m-nova-oco');
@@ -2834,6 +2849,13 @@ function renderDispensas() {
 
 function renderOco() {
   renderDispensas();
+  renderAchados();
+  // Botão nova ocorrência visível para todos (morador abre, admin também)
+  var btnNovaOcoMorador = document.getElementById('btn-nova-oco-morador');
+  if(btnNovaOcoMorador && !btnNovaOcoMorador._listenerAdded) {
+    btnNovaOcoMorador._listenerAdded = true;
+    btnNovaOcoMorador.addEventListener('click', function() { abrirModal('m-nova-oco'); });
+  }
   var q = sb.from('ocorrencias').select('*,mensagens_ocorrencia(*),moradores(nome,unidades(codigo))');
   if(isAdmin()) {
     // Admin ve todas as ocorrencias
@@ -2891,7 +2913,7 @@ function renderOco() {
       var aptoInfo = '';
       if(isAdmin() && o.moradores) {
         var oc_cod = o.moradores.unidades ? o.moradores.unidades.codigo : '';
-        aptoInfo = oc_cod ? ' — Apto ' + oc_cod : (o.moradores.nome ? ' — ' + o.moradores.nome : '');
+        aptoInfo = oc_cod ? ' - Apto ' + oc_cod : (o.moradores.nome ? ' - ' + o.moradores.nome : '');
       }
       var bc = o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray';
       html += '<div class="oco-card '+o.status+'" data-oco-id="'+o.id+'">';
@@ -2907,7 +2929,7 @@ function renderOco() {
   });
 }
 
-// ── CONFIGURAÇÕES ──────────────────────────────────────────────
+// -- CONFIGURAÇÕES ----------------------------------------------
 function renderConfig() {
   if(!requireAdmin()) return;
   var sl = function(id, val) {
@@ -3129,7 +3151,7 @@ function renderRankingPontualidade() {
   });
 }
 
-// ── CONTRATOS DE AULA ──────────────────────────────────────────
+// -- CONTRATOS DE AULA ------------------------------------------
 function renderContratosAula() {
   sb.from('reservas')
     .select('id,unidade_id,slot_inicio,slot_fim,duracao_min,status,tipo_reserva,data_reserva,modalidade_id,morador_id,unidades(codigo),modalidades(nome,icone)')
@@ -3348,7 +3370,7 @@ function criarContrato() {
   });
 }
 
-// ── SALVAR CONFIGURAÇÕES ───────────────────────────────────────
+// -- SALVAR CONFIGURAÇÕES ---------------------------------------
 document.getElementById('btn-salvar-config').addEventListener('click', function() {
   if(!requireAdmin()) return;
   var li = function(id, def) {
@@ -3388,7 +3410,7 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
   });
 });
 
-// ── BOTÕES CONTRATOS / FECHAMENTO ──────────────────────────────
+// -- BOTÕES CONTRATOS / FECHAMENTO ------------------------------
 document.getElementById('btn-novo-contrato').addEventListener('click', function() {
   if(!requireAdmin()) return;
   abrirModalContrato(null, false);
@@ -3396,8 +3418,8 @@ document.getElementById('btn-novo-contrato').addEventListener('click', function(
 document.getElementById('btn-fechar-contrato').addEventListener('click', function() { fecharModal('m-novo-contrato'); });
 document.getElementById('btn-criar-contrato').addEventListener('click', criarContrato);
 
-// ── BLOQUEIOS ──────────────────────────────────────────────────
-// ── EXPORTAÇÃO CSV ────────────────────────────────────────────
+// -- BLOQUEIOS --------------------------------------------------
+// -- EXPORTAÇÃO CSV --------------------------------------------
 function exportarCSV(dados, nomeArquivo) {
   if(!dados || !dados.length) { toast('Nenhum dado para exportar.'); return; }
   var cols = Object.keys(dados[0]);
@@ -3409,8 +3431,7 @@ function exportarCSV(dados, nomeArquivo) {
     }).join(';'));
   });
   var bom = '﻿';
-  var blob = new Blob([bom + linhas.join('
-')], {type:'text/csv;charset=utf-8'});
+  var blob = new Blob([bom + linhas.join('\n')], {type:'text/csv;charset=utf-8'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url; a.download = nomeArquivo;
@@ -3467,7 +3488,7 @@ document.getElementById('btn-export-faltas').addEventListener('click', function(
     });
 });
 
-// ── BLOQUEIO EMERGENCIAL ───────────────────────────────────────
+// -- BLOQUEIO EMERGENCIAL ---------------------------------------
 var _blkEmergId = null;
 
 function verificarBloqueioEmergencial() {
@@ -3533,7 +3554,7 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
   });
 });
 
-// ── CANCELAMENTO EM MASSA ──────────────────────────────────────
+// -- CANCELAMENTO EM MASSA --------------------------------------
 (function() {
   var selPeriodo = document.getElementById('cancel-massa-periodo');
   var preview    = document.getElementById('cancel-massa-preview');
@@ -3658,7 +3679,7 @@ document.getElementById('btn-add-bloqueio').addEventListener('click', function()
   });
 });
 
-// ── TOGGLES ────────────────────────────────────────────────────
+// -- TOGGLES ----------------------------------------------------
 // Toggle academia
 (function() {
   var tglAc = document.getElementById('tgl-academia');
@@ -3735,7 +3756,7 @@ if(blkTipoSel && blkCkWrap) {
   });
 }
 
-// ── SCANNER QR ─────────────────────────────────────────────────
+// -- SCANNER QR -------------------------------------------------
 document.getElementById('btn-abrir-scanner').addEventListener('click', function() {
   var reader = document.getElementById('reader');
   var ba = document.getElementById('btn-abrir-scanner');
@@ -3763,7 +3784,7 @@ document.getElementById('btn-abrir-scanner').addEventListener('click', function(
 });
 document.getElementById('btn-fechar-scanner').addEventListener('click', function() { fecharScannerEForcarParada(); });
 
-// ── PERFIL / FOTO ──────────────────────────────────────────────
+// -- PERFIL / FOTO ----------------------------------------------
 document.getElementById('btn-editar-foto').addEventListener('click', function() {
   var fotoWrapInput = document.getElementById('foto-input-wrap');
   if(fotoWrapInput) fotoWrapInput.style.display = fotoWrapInput.style.display==='none' ? 'block' : 'none';
@@ -3792,7 +3813,7 @@ document.getElementById('btn-cancelar-foto').addEventListener('click', function(
   document.getElementById('foto-input-wrap').style.display = 'none';
 });
 
-// ── MODO ESCURO ────────────────────────────────────────────────
+// -- MODO ESCURO ------------------------------------------------
 var tglDark = document.getElementById('tgl-dark');
 if(tglDark) {
   var darkSaved = localStorage.getItem('cg_dark') === '1';
@@ -3804,7 +3825,7 @@ if(tglDark) {
   });
 }
 
-// ── NOTIFICAÇÕES PUSH ──────────────────────────────────────────
+// -- NOTIFICAÇÕES PUSH ------------------------------------------
 var tglPush = document.getElementById('tgl-push');
 if(tglPush) {
   if('Notification' in window && Notification.permission === 'granted') tglPush.classList.add('on');
@@ -3827,7 +3848,7 @@ if(tglPush) {
   });
 }
 
-// ── CALENDÁRIO DE RESERVAS ─────────────────────────────────────
+// -- CALENDÁRIO DE RESERVAS -------------------------------------
 var calVY = new Date().getFullYear(), calVM = new Date().getMonth();
 var calSelDate = null;
 
@@ -3981,11 +4002,11 @@ function renderCalendario() {
     });
 }
 
-// ── REGULAMENTO ────────────────────────────────────────────────
+// -- REGULAMENTO ------------------------------------------------
 document.getElementById('btn-ver-regulamento').addEventListener('click', function() { abrirModal('m-regulamento'); });
 document.getElementById('btn-fechar-regulamento').addEventListener('click', function() { fecharModal('m-regulamento'); });
 
-// ── QR CODE PESSOAL ────────────────────────────────────────────
+// -- QR CODE PESSOAL --------------------------------------------
 document.getElementById('btn-qr-checkin').addEventListener('click', function() {
   var wrap = document.getElementById('qr-checkin-wrap');
   if(!wrap) return;
@@ -4129,7 +4150,7 @@ document.getElementById('btn-fechar-dispensa').addEventListener('click', functio
   toast('Reserva cancelada.');
 });
 
-// ── ESPACOS ────────────────────────────────────────────────────
+// -- ESPACOS ----------------------------------------------------
 function carregarEspacos() {
   sb.from('espacos').select('*').order('criado_at').then(function(res) {
     espacos = res.data || [];
@@ -4152,7 +4173,7 @@ function atualizarTabAcademia() {
   tabAc.style.display = (espacoAcademiaId && ativo) ? 'flex' : 'none';
 }
 
-// ── DASHBOARD ──────────────────────────────────────────────────
+// -- DASHBOARD --------------------------------------------------
 function renderDashboard() {
   var mesIni = new Date().toISOString().slice(0,7) + '-01';
   var hoje = new Date();
@@ -4258,7 +4279,7 @@ function renderDashboard() {
     });
 }
 
-// ── ACADEMIA ───────────────────────────────────────────────────
+// -- ACADEMIA ---------------------------------------------------
 function renderAcademia() {
   var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
   var maxSimult = ac ? (ac.max_simult || 3) : 3;
@@ -4403,7 +4424,7 @@ document.getElementById('btn-enviar-dispensa').addEventListener('click', functio
   });
 });
 
-// ── ONBOARDING ─────────────────────────────────────────────────
+// -- ONBOARDING -------------------------------------------------
 function onbStep(n) {
   [1,2,3].forEach(function(i) {
     var el = document.getElementById('onb-step-'+i);
@@ -4420,7 +4441,7 @@ document.getElementById('btn-fechar-onboarding').addEventListener('click', funct
   }
 });
 
-// ── ACHADOS E PERDIDOS ─────────────────────────────────────────
+// -- ACHADOS E PERDIDOS -----------------------------------------
 document.getElementById('btn-novo-achado').addEventListener('click', function() {
   var inp = document.getElementById('achado-desc');
   if(inp) inp.value = '';
@@ -4496,7 +4517,7 @@ function renderAchados() {
     });
 }
 
-// ── PLACAR E RANKING ───────────────────────────────────────────
+// -- PLACAR E RANKING -------------------------------------------
 var rankingModo = 'ranking';
 
 document.getElementById('rpill-ranking').addEventListener('click', function() {
