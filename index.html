@@ -2124,17 +2124,30 @@ function verificarFairPlay(unidadeId) {
     if(espacoQuadraId) faltasQ = faltasQ.eq('espaco_id', espacoQuadraId);
     faltasQ.then(function(rc) {
         var totalFaltas = rc.count || 0;
+        // Atualiza faltas_mes no morador independente de suspender
+        sb.from('moradores').update({faltas_mes: totalFaltas})
+          .eq('unidade_id', unidadeId).then(function(){});
         if(totalFaltas >= limiteFaltas) {
-          var ate = new Date();
-          ate.setDate(ate.getDate() + diasSusp);
-          var ateStr = ate.toISOString().slice(0,10);
-          sb.from('moradores')
-            .update({status:'suspenso', suspenso_ate: ateStr, faltas_mes: totalFaltas})
-            .eq('unidade_id', unidadeId)
-            .eq('status', 'ativo')
-            .then(function(upd) {
-              if(!upd.error) {
-                toast('Atencao: apartamento suspenso por '+diasSusp+' dias ('+totalFaltas+'/'+limiteFaltas+' faltas este mes).');
+          // Verifica se o morador nao foi liberado manualmente (suspenso_ate no passado ou nulo)
+          sb.from('moradores').select('status,suspenso_ate,faltas_mes')
+            .eq('unidade_id', unidadeId).single().then(function(mr) {
+              if(!mr.data) return;
+              var hoje = new Date().toISOString().slice(0,10);
+              var foiLiberadoManualmente = mr.data.status === 'ativo' && mr.data.faltas_mes === 0;
+              // Nao re-suspende se admin ja liberou (faltas_mes foi zerado manualmente)
+              if(foiLiberadoManualmente) return;
+              if(mr.data.status === 'ativo') {
+                var ate = new Date();
+                ate.setDate(ate.getDate() + diasSusp);
+                var ateStr = ate.toISOString().slice(0,10);
+                sb.from('moradores')
+                  .update({status:'suspenso', suspenso_ate: ateStr, faltas_mes: totalFaltas})
+                  .eq('unidade_id', unidadeId)
+                  .then(function(upd) {
+                    if(!upd.error) {
+                      toast('Atencao: apartamento suspenso por '+diasSusp+' dias ('+totalFaltas+'/'+limiteFaltas+' faltas este mes).');
+                    }
+                  });
               }
             });
         }
@@ -3120,12 +3133,31 @@ function renderConfig() {
       ls.innerHTML = html;
       ls.querySelectorAll('[data-susp-id]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          sb.from('moradores').update({status:'ativo',suspenso_ate:null,faltas_mes:0}).eq('id',btn.dataset.suspId).then(function() {
-            toast('Apartamento liberado!'); renderConfig();
+          var suspId = btn.dataset.suspId;
+          // Busca unidade_id do morador para limpar reservas expiradas do mes
+          sb.from('moradores').select('unidade_id').eq('id', suspId).single().then(function(mr) {
+            var uid = mr.data ? mr.data.unidade_id : null;
+            var mesAtual = new Date().toISOString().slice(0,7);
+            // Marca expiradas do mes como dispensadas para nao recontabilizar
+            var limparQ = Promise.resolve();
+            if(uid) {
+              limparQ = sb.from('reservas')
+                .update({status:'cancelada', cancelado_por:'admin_dispensa'})
+                .eq('unidade_id', uid)
+                .eq('status', 'expirada')
+                .gte('data_reserva', mesAtual+'-01')
+                .lte('data_reserva', mesAtual+'-31');
+            }
+            limparQ.then(function() {
+              sb.from('moradores').update({status:'ativo', suspenso_ate:null, faltas_mes:0}).eq('id', suspId).then(function() {
+                toast('Apartamento liberado! Faltas do mes zeradas.');
+                renderConfig();
+              });
+            });
           });
         });
       });
-    }
+    }   
   });
 
   // Gerenciar admins
