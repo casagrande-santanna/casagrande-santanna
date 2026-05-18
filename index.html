@@ -206,6 +206,9 @@ textarea.form-in{resize:vertical}
         <div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div>
       </div>
       <div class="hdr-right">
+        <button id="btn-hdr-dashboard" style="background:rgba(255,255,255,.18);border:none;border-radius:7px;padding:4px 8px;color:#fff;cursor:pointer;font-size:10px;display:flex;align-items:center;gap:3px" title="Dashboard">
+          <i class="ti ti-chart-bar" style="font-size:14px" aria-hidden="true"></i>
+        </button>
         <span class="role-tag" id="role-tag">Morador</span>
         <div class="av-btn" id="av-btn">DT</div>
       </div>
@@ -213,7 +216,7 @@ textarea.form-in{resize:vertical}
   </div>
   <div class="tab-bar">
     <button class="tab active" id="tab-avisos"><i class="ti ti-bell" aria-hidden="true"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
-    <button class="tab" id="tab-dashboard"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard</button>
+    <button class="tab" id="tab-dashboard" style="display:none"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard</button>
     <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
     <button class="tab" id="tab-minhas"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in<span class="ndot" id="nd-ckin"></span></button>
@@ -443,9 +446,13 @@ textarea.form-in{resize:vertical}
       <div class="card" style="border:2px dashed var(--v)">
         <div class="card-title"><i class="ti ti-printer" aria-hidden="true"></i>QR Code Fixo da Quadra</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Imprima e fixe na parede da quadra.</div>
-        <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:0.5px solid var(--br)">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CG_QUADRA_01" alt="QR Quadra" style="width:150px;height:150px">
+        <div id="qr-fixo-wrap" style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:0.5px solid var(--br)">
+          <div style="font-size:11px;color:#999;padding:20px 0">Gerando QR Code...</div>
         </div>
+        <div style="font-size:10px;color:var(--t2);margin-top:8px;text-align:center" id="qr-fixo-url"></div>
+        <button class="btn-s" id="btn-imprimir-qr" style="margin-top:8px;width:100%" onclick="window.print()">
+          <i class="ti ti-printer" aria-hidden="true"></i> Imprimir QR Code
+        </button>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i>Limites por apartamento</div>
@@ -1422,6 +1429,7 @@ sb.auth.getSession().then(function(res) {
 // ── TABS ───────────────────────────────────────────────────────
 document.getElementById('tab-avisos').addEventListener('click', function() { goScreen('avisos'); renderAvisos(); });
 document.getElementById('tab-dashboard').addEventListener('click', function() { goScreen('dashboard'); renderDashboard(); });
+document.getElementById('btn-hdr-dashboard').addEventListener('click', function() { goScreen('dashboard'); renderDashboard(); document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');}); document.getElementById('tab-dashboard').classList.add('active'); });
 document.getElementById('tab-reservar').addEventListener('click', function() { goScreen('reservar'); renderCal(); });
 document.getElementById('tab-academia').addEventListener('click', function() { goScreen('academia'); renderAcademia(); });
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
@@ -1429,7 +1437,21 @@ document.getElementById('tab-checkin').addEventListener('click', function() { go
 document.getElementById('tab-calendario').addEventListener('click', function() { goScreen('calendario'); renderCalendario(); });
 document.getElementById('tab-quadra').addEventListener('click', function() { goScreen('quadra'); renderAchados(); renderRanking('ranking'); });
 document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); });
-document.getElementById('tab-config').addEventListener('click', function() { if(!requireAdmin()) return; goScreen('config'); renderConfig(); verificarBloqueioEmergencial(); });
+document.getElementById('tab-config').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  goScreen('config');
+  renderConfig();
+  verificarBloqueioEmergencial();
+  // Gera QR com URL real do app
+  var wrap = document.getElementById('qr-fixo-wrap');
+  var urlEl = document.getElementById('qr-fixo-url');
+  if(wrap) {
+    var appUrl = window.location.origin + window.location.pathname + '?checkin=quadra';
+    var qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(appUrl) + '&margin=10';
+    wrap.innerHTML = '<img src="' + qrSrc + '" style="width:180px;height:180px" alt="QR Code">';
+    if(urlEl) urlEl.textContent = appUrl;
+  }
+});
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
 function goScreen(name) {
@@ -4096,8 +4118,8 @@ function selDataAcademia(ds) {
         var lbl = minhaRes ? 'Minha' : livre ? (ocupados + '/' + maxSimult) : 'Cheio';
         var action = minhaRes ? '' : livre ? 'ac_' + slot : '';
         html += '<div class="' + cls + '" data-ac-slot="' + (action||'') + '">'
-          + '<div class="slot-hora">' + slot + '</div>'
-          + '<div class="slot-lbl">' + lbl + '</div></div>';
+          + '<div class="sh">' + slot + '</div>'
+          + '<div class="sl">' + lbl + '</div></div>';
       });
       sg.innerHTML = html || '<div class="empty">Sem horarios disponiveis</div>';
       sg.querySelectorAll('[data-ac-slot]').forEach(function(el) {
