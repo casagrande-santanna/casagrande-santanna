@@ -178,15 +178,21 @@ textarea.form-in{resize:vertical}
   <div class="login-sub">Sistema de reserva da quadra</div>
   <div class="login-card">
     <label class="login-lbl">E-mail</label>
-    <input class="login-input" type="email" id="login-email" placeholder="seu@email.com">
+    <input class="login-input" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
     <label class="login-lbl">Senha</label>
-    <input class="login-input" type="password" id="login-pass">
+    <input class="login-input" type="password" id="login-pass" autocomplete="current-password">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;font-size:11px">
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#555">
+        <input type="checkbox" id="remember-checkbox" style="accent-color:var(--v)"> Lembrar-me
+      </label>
+      <span style="color:#999;cursor:pointer;text-decoration:underline" id="link-esqueci">Esqueci minha senha</span>
+    </div>
     <button class="login-btn" id="btn-entrar">Entrar</button>
+    <button class="login-btn" id="btn-biometric" style="margin-top:8px;background:#f4f4f0;color:#333;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;gap:6px">
+      <i class="ti ti-fingerprint"></i> Entrar com biometria
+    </button>
     <div class="login-err" id="login-err"></div>
     <div style="text-align:center;margin-top:10px">
-      <span style="font-size:11px;color:#999;cursor:pointer;text-decoration:underline" id="link-esqueci">Esqueci minha senha</span>
-    </div>
-    <div style="text-align:center;margin-top:8px">
       <span style="font-size:11px;color:#666;cursor:pointer;text-decoration:underline" id="link-cadastro">Nao tem conta? Cadastre-se</span>
     </div>
   </div>
@@ -1111,15 +1117,59 @@ document.querySelectorAll('.modal-bg').forEach(function(m) {
 });
 
 // ── LOGIN ──────────────────────────────────────────────────────
+// Lembrar-me: preenche e-mail salvo
+(function() {
+  var savedEmail = localStorage.getItem('cg_remember_email');
+  if(savedEmail) {
+    var el = document.getElementById('login-email');
+    var cb = document.getElementById('remember-checkbox');
+    if(el) el.value = savedEmail;
+    if(cb) cb.checked = true;
+  }
+})();
+
 document.getElementById('btn-entrar').addEventListener('click', function() {
   var email = document.getElementById('login-email').value.trim();
   var pass = document.getElementById('login-pass').value;
   var err = document.getElementById('login-err');
+  var cb = document.getElementById('remember-checkbox');
   err.style.display = 'none';
   if(!email || !pass) { err.textContent='Preencha e-mail e senha.'; err.style.display='block'; return; }
   sb.auth.signInWithPassword({email:email, password:pass}).then(function(res) {
     if(res.error) { err.textContent='E-mail ou senha incorretos.'; err.style.display='block'; return; }
+    if(cb && cb.checked) localStorage.setItem('cg_remember_email', email);
+    else localStorage.removeItem('cg_remember_email');
     iniciarApp(res.data.user);
+  });
+});
+
+// Biometria (WebAuthn / FaceID / TouchID via navigator.credentials)
+document.getElementById('btn-biometric').addEventListener('click', function() {
+  var savedEmail = localStorage.getItem('cg_remember_email') || document.getElementById('login-email').value.trim();
+  if(!savedEmail) { toast('Digite seu e-mail antes de usar biometria.'); return; }
+  if(!window.PublicKeyCredential) { toast('Seu dispositivo nao suporta biometria.'); return; }
+  // Usa credencial salva pelo navegador (autocomplete="current-password" + biometria do SO)
+  var form = document.createElement('form');
+  form.method = 'dialog';
+  document.body.appendChild(form);
+  navigator.credentials.get({
+    password: true,
+    mediation: 'optional'
+  }).then(function(cred) {
+    document.body.removeChild(form);
+    if(cred && cred.type === 'password') {
+      var err = document.getElementById('login-err');
+      err.style.display = 'none';
+      sb.auth.signInWithPassword({email: cred.id, password: cred.password}).then(function(res) {
+        if(res.error) { err.textContent='Biometria falhou. Use sua senha.'; err.style.display='block'; return; }
+        iniciarApp(res.data.user);
+      });
+    } else {
+      toast('Biometria nao disponivel. Use sua senha.');
+    }
+  }).catch(function() {
+    document.body.removeChild(form);
+    toast('Biometria cancelada ou nao disponivel.');
   });
 });
 
@@ -1351,9 +1401,22 @@ function iniciarApp(user) {
   });
 }
 
-// Sessao persistente
+// Sessao persistente + check-in via QR externo
 sb.auth.getSession().then(function(res) {
-  if(res.data && res.data.session) iniciarApp(res.data.session.user);
+  if(res.data && res.data.session) {
+    iniciarApp(res.data.session.user);
+    // Verifica se o app foi aberto via QR externo
+    var params = new URLSearchParams(window.location.search);
+    if(params.get('checkin') === 'quadra') {
+      setTimeout(function() {
+        if(morador) {
+          processarQrQuadra();
+          // Limpa o parametro da URL sem recarregar
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }, 1500);
+    }
+  }
 });
 
 // ── TABS ───────────────────────────────────────────────────────
@@ -1556,7 +1619,7 @@ function selData(ds) {
         });
 
         // Se não há reserva e o horário já passou, ocultar o slot
-        if(!r && ehHoje && slotMin <= agoraMin + 15) return;
+        if(!r && ehHoje && slotMin < agoraMin) return;
 
         var cls, lbl, action;
         if(!r) {
@@ -2070,7 +2133,9 @@ function renderMinhas() {
         var m = r.modalidades;
         html += '<div class="res-card '+r.status+'" data-reserva-row="1" data-dt="'+r.data_reserva+'" data-st="'+(r.status||'')+'">';
         html += '<div class="res-top"><div class="res-data">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
-        html += '<div class="res-info">'+(m?m.icone+' '+m.nome:'---')+' - '+(r.duracao_min===60?'1 hora':'2 horas')+'</div>';
+        var isAcademia = r.espaco_id && r.espaco_id === espacoAcademiaId;
+        var modLabel = isAcademia ? '&#127947; Academia' : (m ? m.icone+' '+m.nome : 'Uso livre');
+        html += '<div class="res-info">'+modLabel+' - '+(r.duracao_min===60?'1 hora':r.duracao_min===120?'2 horas':(r.duracao_min||60)+'min')+'</div>';
         if(r.status==='confirmada') {
           html += '<div class="res-acts">';
           if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
@@ -2592,10 +2657,16 @@ function renderDispensas() {
 }
 
 function renderOco() {
-  if(!requireAdmin()) return;
   renderDispensas();
-  var q = sb.from('ocorrencias').select('*,mensagens_ocorrencia(*)');
-  if(ocoFiltro!=='todos') q = q.eq('status',ocoFiltro);
+  var q = sb.from('ocorrencias').select('*,mensagens_ocorrencia(*),moradores(nome,unidades(codigo))');
+  if(isAdmin()) {
+    // Admin ve todas as ocorrencias
+    if(ocoFiltro!=='todos') q = q.eq('status',ocoFiltro);
+  } else {
+    // Morador ve apenas as suas proprias
+    q = q.eq('morador_id', morador.id);
+    if(ocoFiltro!=='todos') q = q.eq('status',ocoFiltro);
+  }
   q.order('created_at',{ascending:false}).limit(20).then(function(res) {
     var ocos = res.data||[];
     var list = document.getElementById('oco-list');
@@ -2641,9 +2712,14 @@ function renderOco() {
     if(!ocos.length) { list.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma ocorrencia</div>'; return; }
     var html = '';
     ocos.forEach(function(o) {
+      var aptoInfo = '';
+      if(isAdmin() && o.moradores) {
+        var oc_cod = o.moradores.unidades ? o.moradores.unidades.codigo : '';
+        aptoInfo = oc_cod ? ' — Apto ' + oc_cod : (o.moradores.nome ? ' — ' + o.moradores.nome : '');
+      }
       var bc = o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray';
       html += '<div class="oco-card '+o.status+'" data-oco-id="'+o.id+'">';
-      html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'⚠ ':'')+o.titulo+'</div>';
+      html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'⚠ ':'')+o.titulo+'<span style="font-size:9.5px;font-weight:400;color:var(--t2)">'+aptoInfo+'</span></div>';
       html += '<span class="badge '+bc+'">'+STL[o.status]+'</span></div>';
       html += '<div class="oco-meta"><span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span>';
       html += '<span>'+(o.local||'')+'</span><span>'+fmtD((o.created_at||'').slice(0,10))+'</span></div></div>';
@@ -3675,7 +3751,10 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
   var qrData = encodeURIComponent('checkin|'+morador.unidade_id+'|'+cod);
   var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data='+qrData;
   var qrEl = document.getElementById('qr-code-display');
-  if(qrEl) qrEl.innerHTML = '<img src="'+qrUrl+'" style="width:150px;height:150px" alt="QR Code">';
+  // URL com parametro de checkin para QR externo
+  var checkinUrl = window.location.origin + window.location.pathname + '?checkin=quadra';
+  var qrUrlCheckin = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(checkinUrl);
+  if(qrEl) qrEl.innerHTML = '<img src="'+qrUrlCheckin+'" style="width:150px;height:150px" alt="QR Code"><div style="font-size:9px;color:var(--t2);margin-top:4px;text-align:center;word-break:break-all">'+checkinUrl+'</div>';
   wrap.style.display = 'block';
 });
 </script>
@@ -4003,7 +4082,7 @@ function selDataAcademia(ds) {
       SLOTS.forEach(function(slot) {
         if(parseInt(slot) >= 22) return;
         var slotMin = parseInt(slot.split(':')[0]) * 60;
-        if(ehHoje && slotMin <= agoraMin) return;
+        if(ehHoje && slotMin < agoraMin) return;
         var ocupados = reservasDia.filter(function(r) {
           var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60;
           var fim = parseInt((r.slot_fim||'00:00').slice(0,2))*60;
