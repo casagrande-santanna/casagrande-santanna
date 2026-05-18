@@ -434,6 +434,10 @@ textarea.form-in{resize:vertical}
           <div class="card-title" style="margin-bottom:0"><i class="ti ti-search" aria-hidden="true"></i>Achados e perdidos</div>
           <button class="btn-sm g" id="btn-novo-achado"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
         </div>
+        <div style="display:flex;gap:5px;margin-bottom:8px">
+          <button class="fpill active" id="achados-pill-ativos">Ativos</button>
+          <button class="fpill" id="achados-pill-arquivados"><i class="ti ti-archive" aria-hidden="true"></i> Arquivados</button>
+        </div>
         <div id="achados-list"><div class="empty"><i class="ti ti-search"></i>Nenhum item cadastrado</div></div>
       </div>
       <!-- Botão nova ocorrência (todos os moradores) -->
@@ -448,10 +452,11 @@ textarea.form-in{resize:vertical}
         </div>
       </div>
       <div class="filter-bar">
-        <button class="fpill active" id="fpill-todos">Todas</button>
+        <button class="fpill active" id="fpill-todos">Ativas</button>
         <button class="fpill" id="fpill-aberta">Abertas</button>
         <button class="fpill" id="fpill-andamento">Em andamento</button>
         <button class="fpill" id="fpill-resolvida">Resolvidas</button>
+        <button class="fpill" id="fpill-arquivadas"><i class="ti ti-archive" aria-hidden="true"></i> Arquivadas</button>
       </div>
       <div id="oco-list"></div>
       <div id="oco-detail"></div>
@@ -2806,6 +2811,7 @@ document.getElementById('btn-salvar-oco').addEventListener('click', function() {
 document.getElementById('fpill-todos').addEventListener('click', function() { setFiltro('todos',this); });
 document.getElementById('fpill-aberta').addEventListener('click', function() { setFiltro('aberta',this); });
 document.getElementById('fpill-andamento').addEventListener('click', function() { setFiltro('andamento',this); });
+document.getElementById('fpill-arquivadas').addEventListener('click', function() { setFiltro('arquivadas',this); });
 document.getElementById('fpill-resolvida').addEventListener('click', function() { setFiltro('resolvida',this); });
 
 function setFiltro(f, el) {
@@ -2875,20 +2881,28 @@ function renderDispensas() {
 function renderOco() {
   renderDispensas();
   renderAchados();
-  // Botão nova ocorrência visível para todos (morador abre, admin também)
   var btnNovaOcoMorador = document.getElementById('btn-nova-oco-morador');
   if(btnNovaOcoMorador && !btnNovaOcoMorador._listenerAdded) {
     btnNovaOcoMorador._listenerAdded = true;
     btnNovaOcoMorador.addEventListener('click', function() { abrirModal('m-nova-oco'); });
   }
   var q = sb.from('ocorrencias').select('*,mensagens_ocorrencia(*),moradores(nome,unidades(codigo))');
+  var mostrarArquivadas = ocoFiltro === 'arquivadas';
   if(isAdmin()) {
-    // Admin ve todas as ocorrencias
-    if(ocoFiltro!=='todos') q = q.eq('status',ocoFiltro);
+    if(mostrarArquivadas) {
+      q = q.eq('status','encerrada');
+    } else {
+      q = q.neq('status','encerrada');
+      if(ocoFiltro !== 'todos') q = q.eq('status', ocoFiltro);
+    }
   } else {
-    // Morador ve apenas as suas proprias
     q = q.eq('morador_id', morador.id);
-    if(ocoFiltro!=='todos') q = q.eq('status',ocoFiltro);
+    if(mostrarArquivadas) {
+      q = q.eq('status','encerrada');
+    } else {
+      q = q.neq('status','encerrada');
+      if(ocoFiltro !== 'todos') q = q.eq('status', ocoFiltro);
+    }
   }
   q.order('created_at',{ascending:false}).limit(20).then(function(res) {
     var ocos = res.data||[];
@@ -2916,9 +2930,22 @@ function renderOco() {
       html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">';
       html += '<button class="btn-sm" id="btn-voltar-oco">Voltar</button>';
       if(o.status==='aberta'||o.status==='andamento') html += '<button class="btn-sm b" id="btn-resp-oco">Responder</button>';
+      if(o.status!=='encerrada') html += '<button class="btn-sm" id="btn-arquivar-oco" style="color:var(--gyt);border-color:var(--gyb)"><i class="ti ti-archive" aria-hidden="true"></i>Arquivar</button>';
       html += '</div></div>';
       det.innerHTML = html;
       document.getElementById('btn-voltar-oco').addEventListener('click', function() { ocoDetalhe=null; renderOco(); });
+      var btnArquivar = document.getElementById('btn-arquivar-oco');
+      if(btnArquivar) {
+        btnArquivar.addEventListener('click', function() {
+          if(!confirm('Arquivar esta ocorrencia?')) return;
+          sb.from('ocorrencias').update({status:'encerrada'}).eq('id', o.id).then(function(r) {
+            if(r.error) { toast('Erro ao arquivar.'); return; }
+            toast('Ocorrencia arquivada.');
+            ocoDetalhe = null;
+            renderOco();
+          });
+        });
+      }
       var btnResp = document.getElementById('btn-resp-oco');
       if(btnResp) {
         btnResp.addEventListener('click', function() {
@@ -2945,11 +2972,27 @@ function renderOco() {
       html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'⚠ ':'')+o.titulo+'<span style="font-size:9.5px;font-weight:400;color:var(--t2)">'+aptoInfo+'</span></div>';
       html += '<span class="badge '+bc+'">'+STL[o.status]+'</span></div>';
       html += '<div class="oco-meta"><span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span>';
-      html += '<span>'+(o.local||'')+'</span><span>'+fmtD((o.created_at||'').slice(0,10))+'</span></div></div>';
+      html += '<span>'+(o.local||'')+'</span><span>'+fmtD((o.created_at||'').slice(0,10))+'</span>';
+      if(o.status==='resolvida'||o.status==='encerrada') {
+        html += '<button class="btn-sm" data-oco-arquivar="'+o.id+'" style="color:var(--gyt);border-color:var(--gyb);font-size:9.5px;padding:2px 7px" onclick="event.stopPropagation()"><i class="ti ti-archive" aria-hidden="true"></i>Arquivar</button>';
+      }
+      html += '</div></div>';
     });
     list.innerHTML = html;
     list.querySelectorAll('[data-oco-id]').forEach(function(el) {
       el.addEventListener('click', function() { ocoDetalhe=el.dataset.ocoId; renderOco(); });
+    });
+    list.querySelectorAll('[data-oco-arquivar]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if(!confirm('Arquivar esta ocorrencia? Ela ficara visivel apenas no filtro "Arquivadas".')) return;
+        sb.from('ocorrencias').update({status:'encerrada'}).eq('id', btn.dataset.ocoArquivar).then(function(r) {
+          if(r.error) { toast('Erro ao arquivar.'); return; }
+          toast('Ocorrencia arquivada.');
+          ocoDetalhe = null;
+          renderOco();
+        });
+      });
     });
   });
 }
@@ -4467,6 +4510,22 @@ document.getElementById('btn-fechar-onboarding').addEventListener('click', funct
 });
 
 // -- ACHADOS E PERDIDOS -----------------------------------------
+// Pills achados
+(function() {
+  var pAtivos = document.getElementById('achados-pill-ativos');
+  var pArq    = document.getElementById('achados-pill-arquivados');
+  if(pAtivos) pAtivos.addEventListener('click', function() {
+    _achadosFiltro = 'ativos';
+    pAtivos.classList.add('active'); if(pArq) pArq.classList.remove('active');
+    renderAchados();
+  });
+  if(pArq) pArq.addEventListener('click', function() {
+    _achadosFiltro = 'arquivados';
+    pArq.classList.add('active'); if(pAtivos) pAtivos.classList.remove('active');
+    renderAchados();
+  });
+})();
+
 document.getElementById('btn-novo-achado').addEventListener('click', function() {
   var inp = document.getElementById('achado-desc');
   if(inp) inp.value = '';
@@ -4496,14 +4555,19 @@ document.getElementById('btn-salvar-achado').addEventListener('click', function(
   });
 });
 
+var _achadosFiltro = 'ativos';
+
 function renderAchados() {
   var el = document.getElementById('achados-list');
   if(!el) return;
-  sb.from('achados_perdidos')
-    .select('*,moradores!criado_por(nome,unidades(codigo))')
-    .neq('status', 'entregue')
-    .order('created_at', {ascending: false})
-    .limit(20)
+  var qA = sb.from('achados_perdidos')
+    .select('*,moradores!criado_por(nome,unidades(codigo))');
+  if(_achadosFiltro === 'arquivados') {
+    qA = qA.eq('status', 'entregue');
+  } else {
+    qA = qA.neq('status', 'entregue');
+  }
+  qA.order('created_at', {ascending: false}).limit(20)
     .then(function(res) {
       var items = res.data || [];
       if(!items.length) { el.innerHTML = '<div class="empty"><i class="ti ti-search"></i>Nenhum item cadastrado</div>'; return; }
@@ -4522,11 +4586,26 @@ function renderAchados() {
         html += '</div>';
         html += '<div style="font-size:10.5px;color:var(--t2)">' + item.local + ' &bull; Encontrado por ' + quem + '</div>';
         if(isEncontrado) {
-          html += '<button class="btn-sm g" data-achado-id="' + item.id + '" style="margin-top:6px;font-size:10px"><i class="ti ti-check" aria-hidden="true"></i>Este e meu objeto</button>';
+          html += '<div style="display:flex;gap:5px;margin-top:6px">';
+          html += '<button class="btn-sm g" data-achado-id="' + item.id + '" style="font-size:10px"><i class="ti ti-check" aria-hidden="true"></i>Este e meu objeto</button>';
+          if(isAdmin()) html += '<button class="btn-sm" data-achado-arquivar="' + item.id + '" style="font-size:10px;color:var(--gyt);border-color:var(--gyb)"><i class="ti ti-archive" aria-hidden="true"></i>Arquivar</button>';
+          html += '</div>';
+        } else {
+          if(isAdmin()) html += '<button class="btn-sm" data-achado-arquivar="' + item.id + '" style="margin-top:6px;font-size:10px;color:var(--gyt);border-color:var(--gyb)"><i class="ti ti-archive" aria-hidden="true"></i>Arquivar</button>';
         }
         html += '</div>';
       });
       el.innerHTML = html;
+      el.querySelectorAll('[data-achado-arquivar]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if(!confirm('Arquivar este item? Ele ficara visivel em "Arquivados".')) return;
+          sb.from('achados_perdidos').update({status:'entregue'}).eq('id', btn.dataset.achadoArquivar).then(function(r) {
+            if(r.error) { toast('Erro ao arquivar.'); return; }
+            toast('Item arquivado.');
+            renderAchados();
+          });
+        });
+      });
       el.querySelectorAll('[data-achado-id]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           if(!morador) return;
