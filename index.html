@@ -1707,11 +1707,19 @@ function selData(ds) {
   document.getElementById('slots-lbl').textContent = 'Horarios - ' + fmtD(ds);
   var sg = document.getElementById('slot-grid');
 
+  // If espacos not loaded yet, wait and retry
+  if(!espacoQuadraId && espacos.length === 0) {
+    setTimeout(function() { selData(ds); }, 500);
+    return;
+  }
+  // Busca reservas confirmadas da quadra: inclui espaco_id correto E registros antigos sem espaco_id
   var resQ = sb.from('reservas')
     .select('id, unidade_id, slot_inicio, slot_fim, status, tipo_reserva, modalidades(nome, icone), unidades(codigo)')
     .eq('data_reserva', ds)
     .eq('status', 'confirmada');
-  if(espacoQuadraId) resQ = resQ.eq('espaco_id', espacoQuadraId);
+  if(espacoQuadraId) {
+    resQ = resQ.or('espaco_id.eq.' + espacoQuadraId + ',espaco_id.is.null');
+  }
   resQ.then(function(res) {
       var reservasDia = res.data || [];
       var agora = new Date();
@@ -1932,8 +1940,9 @@ function _fazerInsertReserva() {
     .select('id, slot_inicio, slot_fim')
     .eq('data_reserva', pendSlot.date)
     .eq('status', 'confirmada');
-  if(espacoQuadraId) conflQ = conflQ.eq('espaco_id', espacoQuadraId);
-  else conflQ = conflQ.is('espaco_id', null);
+  if(espacoQuadraId) {
+    conflQ = conflQ.or('espaco_id.eq.' + espacoQuadraId + ',espaco_id.is.null');
+  }
   conflQ.then(function(conflito) {
       var temConflito = (conflito.data||[]).some(function(rv) {
         // Normaliza para HH:MM para comparação segura independente de formato
@@ -3690,9 +3699,12 @@ document.getElementById('btn-reset-app').addEventListener('click', function() {
         });
       return;
     }
-    sb.from(tabelas[idx]).delete().gte('created_at', '2000-01-01T00:00:00Z').then(function(r) {
+    // Usa filtro adequado para cada tabela
+    var tabelaAtual = tabelas[idx];
+    var colData = tabelaAtual === 'convites_reserva' ? 'criado_em' : 'created_at';
+    sb.from(tabelaAtual).delete().gte(colData, '2000-01-01T00:00:00Z').then(function(r) {
       if(r.error) {
-        console.warn('Erro ao apagar ' + tabelas[idx] + ':', r.error.message);
+        console.warn('Erro ao apagar ' + tabelaAtual + ':', r.error.message);
       }
       apagarTabela(idx + 1);
     });
