@@ -1754,12 +1754,18 @@ function selData(ds) {
           return sStr >= ini && sStr < fim;
         });
 
-        // Se não há reserva e o horário já passou, ocultar o slot
-        if(!r && ehHoje && slotMin < agoraMin) return;
+        // Mostra slot se: nao começou ainda, OU já começou mas tem pelo menos 30min restantes
+        var slotFimMin = slotMin + 60; // slot padrao de 1h
+        var minutosPassados = agoraMin - slotMin;
+        var minutosRestantes = slotFimMin - agoraMin;
+        if(!r && ehHoje && slotMin < agoraMin && minutosRestantes < 30) return;
 
         var cls, lbl, action;
         if(!r) {
-          cls = 'slot livre'; lbl = 'Livre'; action = 'livre';
+          var emCurso = ehHoje && slotMin < agoraMin && minutosRestantes >= 30;
+          cls = 'slot livre';
+          lbl = emCurso ? (minutosRestantes + 'min') : 'Livre';
+          action = 'livre';
         } else if(morador && r.unidade_id === morador.unidade_id) {
           cls = 'slot meu'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : 'Minha'); action = 'meu_' + r.id;
         } else {
@@ -1888,7 +1894,12 @@ function buildResumo() {
   var html = '';
   html += '<div class="resumo-row"><span class="resumo-lbl">Apartamento</span><span>'+cod+'</span></div>';
   html += '<div class="resumo-row"><span class="resumo-lbl">Data</span><span>'+fmtD(pendSlot.date)+'</span></div>';
-  html += '<div class="resumo-row"><span class="resumo-lbl">Horario</span><span>'+pendSlot.slot+' - '+addH(pendSlot.slot,pendDur/60)+'</span></div>';
+  var agora2 = new Date();
+  var agoraMin2 = agora2.getHours()*60 + agora2.getMinutes();
+  var slotMin2 = parseInt(pendSlot.slot.split(':')[0])*60 + parseInt(pendSlot.slot.split(':')[1]);
+  var emCurso2 = (pendSlot.date === ts()) && slotMin2 < agoraMin2;
+  var horarioLabel = pendSlot.slot + ' - ' + addH(pendSlot.slot,pendDur/60) + (emCurso2 ? ' <span style="color:var(--amt);font-size:10px">(em andamento)</span>' : '');
+  html += '<div class="resumo-row"><span class="resumo-lbl">Horario</span><span>'+horarioLabel+'</span></div>';
   html += '<div class="resumo-row"><span class="resumo-lbl">Modalidade</span><span>'+m.icon+' '+m.nome+'</span></div>';
   html += '<div class="resumo-row"><span class="resumo-lbl">Duracao</span><span>'+(pendDur===60?'1 hora':'2 horas')+'</span></div>';
   document.getElementById('m-resumo').innerHTML = html;
@@ -4580,7 +4591,9 @@ function selDataAcademia(ds) {
       SLOTS.forEach(function(slot) {
         if(parseInt(slot) >= 22) return;
         var slotMin = parseInt(slot.split(':')[0]) * 60;
-        if(ehHoje && slotMin < agoraMin) return;
+        var slotFimMinAc = slotMin + 60;
+        var minRestantesAc = slotFimMinAc - agoraMin;
+        if(ehHoje && slotMin < agoraMin && minRestantesAc < 30) return;
         var ocupados = reservasDia.filter(function(r) {
           var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60;
           var fim = parseInt((r.slot_fim||'00:00').slice(0,2))*60;
