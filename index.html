@@ -1146,7 +1146,13 @@ var appCfg = {
 };
 
 // -- UTILITÁRIOS ------------------------------------------------
-function ts() { return new Date().toISOString().slice(0,10); }
+function ts() {
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
 function fmtD(ds) { if(!ds) return ''; var p=ds.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function addH(t,h) { var p=t.split(':').map(Number); return String(p[0]+h).padStart(2,'0')+':'+String(p[1]).padStart(2,'0'); }
 
@@ -1908,7 +1914,7 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
 
   var maxMes = appCfg.max_reservas_mes;
   if(maxMes > 0) {
-    var mesAtual = new Date().toISOString().slice(0,7);
+    var mesAtual = ts().slice(0,7);
     sb.from('reservas')
       .select('id', {count:'exact', head:true})
       .eq('unidade_id', morador.unidade_id)
@@ -2144,7 +2150,7 @@ function verificarFairPlay(unidadeId) {
     if(cfg.faltas_suspensao) appCfg.faltas_suspensao = limiteFaltas;
     if(cfg.suspensao_dias) appCfg.suspensao_dias = diasSusp;
 
-    var mesAtual = new Date().toISOString().slice(0,7);
+    var mesAtual = ts().slice(0,7);
     // Só conta faltas da quadra (não academia) - usa espaco_id ou tipo_reserva
     var faltasQ = sb.from('reservas')
       .select('id', {count:'exact', head:true})
@@ -3223,7 +3229,7 @@ function renderConfig() {
           // Busca unidade_id do morador para limpar reservas expiradas do mes
           sb.from('moradores').select('unidade_id').eq('id', suspId).single().then(function(mr) {
             var uid = mr.data ? mr.data.unidade_id : null;
-            var mesAtual = new Date().toISOString().slice(0,7);
+            var mesAtual = ts().slice(0,7);
             // Marca expiradas do mes como dispensadas para nao recontabilizar
             var limparQ = Promise.resolve();
             if(uid) {
@@ -3304,7 +3310,7 @@ function renderConfig() {
 }
 
 function renderRankingPontualidade() {
-  var mesAtual = new Date().toISOString().slice(0,7);
+  var mesAtual = ts().slice(0,7);
   sb.from('reservas').select('unidade_id,checkin_feito,status,unidades(codigo)').gte('data_reserva',mesAtual+'-01').lte('data_reserva',mesAtual+'-31').then(function(res) {
     var todas = res.data||[];
     var aptos = {};
