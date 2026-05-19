@@ -470,6 +470,11 @@ textarea.form-in{resize:vertical}
         <button class="btn-d" id="btn-blk-emergencial" style="width:100%"><i class="ti ti-lock" aria-hidden="true"></i>Bloquear quadra agora</button>
         <button class="btn-s" id="btn-desblk-emergencial" style="width:100%;margin-top:6px;display:none;border-color:var(--rdb);color:var(--rdt)"><i class="ti ti-lock-open" aria-hidden="true"></i>Remover bloqueio emergencial</button>
       </div>
+      <div class="card" style="background:var(--rd);border-color:var(--rdb);border-width:2px">
+        <div class="card-title" style="color:var(--rdt)"><i class="ti ti-nuclear" aria-hidden="true" style="color:var(--rdt)"></i>Zerar aplicativo</div>
+        <div style="font-size:11px;color:var(--rdt);margin-bottom:10px;line-height:1.5">Remove <strong style="font-weight:600">TODAS</strong> as reservas, avisos, ocorrencias, achados, placares, convites e suspensoes. Mantem moradores e configuracoes. Acao irreversivel.</div>
+        <button class="btn-d" id="btn-reset-app" style="width:100%"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Zerar tudo agora</button>
+      </div>
       <div class="card" style="background:var(--rd);border-color:var(--rdb)">
         <div class="card-title" style="color:var(--rdt)"><i class="ti ti-trash" aria-hidden="true" style="color:var(--rdt)"></i>Cancelamento em massa</div>
         <div style="font-size:11px;color:var(--rdt);margin-bottom:12px;line-height:1.5">Cancela todas as reservas confirmadas no periodo selecionado. Esta acao nao pode ser desfeita.</div>
@@ -1874,8 +1879,8 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + texto + '&dates=' + dtStart + '/' + dtEnd + '&location=' + local + '&details=' + details;
 }
   function confirmarReserva() {
-  if(!morador || !pendSlot || !pendMod || !pendDur) return;
-  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
+  if(!morador || !pendSlot || !pendMod || !pendDur) { setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
+  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
 
   var maxMes = appCfg.max_reservas_mes;
   if(maxMes > 0) {
@@ -1890,6 +1895,7 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
       .then(function(rc) {
         if(rc.count >= maxMes) {
           toast('Limite de '+maxMes+' reservas mensais atingido para este apartamento.');
+          setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
           return;
         }
         _fazerInsertReserva();
@@ -1909,9 +1915,9 @@ function _fazerInsertReserva() {
   var conflQ = sb.from('reservas')
     .select('id, slot_inicio, slot_fim')
     .eq('data_reserva', pendSlot.date)
-    .neq('status', 'cancelada')
-    .neq('status', 'expirada');
+    .eq('status', 'confirmada');
   if(espacoQuadraId) conflQ = conflQ.eq('espaco_id', espacoQuadraId);
+  else conflQ = conflQ.is('espaco_id', null);
   conflQ.then(function(conflito) {
       var temConflito = (conflito.data||[]).some(function(rv) {
         // Normaliza para HH:MM para comparação segura independente de formato
@@ -1944,7 +1950,7 @@ function _fazerInsertReserva() {
         };
         if(espacoQuadraId) payload.espaco_id = espacoQuadraId;
         sb.from('reservas').insert(payload).select('id').then(function(r2) {
-          if(r2.error) { toast('Erro: '+r2.error.message); return; }
+          if(r2.error) { toast('Erro: '+r2.error.message); setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
           fecharModal('m-reserva');
           var modNomeCalendar = MODS.find(function(x){ return x.id===_mod; });
           var nomeModal = modNomeCalendar ? modNomeCalendar.nome : '';
@@ -3142,7 +3148,7 @@ function renderConfig() {
             var limparQ = Promise.resolve();
             if(uid) {
               limparQ = sb.from('reservas')
-                .update({status:'cancelada', cancelado_por:'admin_dispensa'})
+                .update({status:'cancelada', cancelado_por:'admin'})
                 .eq('unidade_id', uid)
                 .eq('status', 'expirada')
                 .gte('data_reserva', mesAtual+'-01')
@@ -3586,6 +3592,41 @@ document.getElementById('btn-export-faltas').addEventListener('click', function(
       });
       exportarCSV(rows, 'faltas-' + new Date().toISOString().slice(0,10) + '.csv');
     });
+});
+
+// -- RESET APP -------------------------------------------------
+document.getElementById('btn-reset-app').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  var conf1 = confirm('ATENCAO: Esta acao apagara TODAS as reservas, avisos, ocorrencias, achados, placares e convites.\n\nEsta acao NAO pode ser desfeita.\n\nDeseja continuar?');
+  if(!conf1) return;
+  var conf2 = prompt('Digite CONFIRMAR para prosseguir:');
+  if(conf2 !== 'CONFIRMAR') { toast('Operacao cancelada.'); return; }
+  setLoading('btn-reset-app', true);
+  // Apaga em sequencia para evitar conflitos de FK
+  var tabelas = [
+    'convites_reserva', 'mensagens_ocorrencia', 'solicitacoes_dispensa',
+    'placares', 'achados_perdidos', 'ocorrencias', 'reservas',
+    'leituras_avisos', 'avisos'
+  ];
+  function apagarTabela(idx) {
+    if(idx >= tabelas.length) {
+      // Zera faltas e suspensoes dos moradores
+      sb.from('moradores').update({status:'ativo', suspenso_ate:null, faltas_mes:0})
+        .neq('tipo','admin').then(function() {
+          setLoading('btn-reset-app', false, '<i class="ti ti-alert-triangle"></i>Zerar tudo agora');
+          toast('App zerado com sucesso! Todos os dados foram removidos.');
+          renderConfig(); renderAvisos(); renderMinhas(); renderCheckin(); renderCal();
+        });
+      return;
+    }
+    sb.from(tabelas[idx]).delete().neq('id', '00000000-0000-0000-0000-000000000000').then(function(r) {
+      if(r.error) {
+        console.warn('Erro ao apagar ' + tabelas[idx] + ':', r.error.message);
+      }
+      apagarTabela(idx + 1);
+    });
+  }
+  apagarTabela(0);
 });
 
 // -- BLOQUEIO EMERGENCIAL ---------------------------------------
