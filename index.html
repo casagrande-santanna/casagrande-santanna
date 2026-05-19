@@ -3700,29 +3700,34 @@ document.getElementById('btn-reset-app').addEventListener('click', function() {
   if(conf2 !== 'CONFIRMAR') { toast('Operacao cancelada.'); return; }
   setLoading('btn-reset-app', true);
   // Apaga em sequencia para evitar conflitos de FK
-  var tabelas = [
-    'convites_reserva', 'mensagens_ocorrencia', 'solicitacoes_dispensa',
-    'placares', 'achados_perdidos', 'ocorrencias', 'reservas',
-    'leituras_avisos', 'avisos'
+  // Mapeamento: tabela -> {coluna de filtro, valor minimo}
+  var tabelasConfig = [
+    {t:'convites_reserva',    col:'criado_em',   val:'2000-01-01T00:00:00Z'},
+    {t:'mensagens_ocorrencia',col:'id',           val:'00000000-0000-0000-0000-000000000000', op:'gt'},
+    {t:'solicitacoes_dispensa',col:'created_at',  val:'2000-01-01T00:00:00Z'},
+    {t:'placares',             col:'created_at',  val:'2000-01-01T00:00:00Z'},
+    {t:'achados_perdidos',     col:'created_at',  val:'2000-01-01T00:00:00Z'},
+    {t:'ocorrencias',          col:'created_at',  val:'2000-01-01T00:00:00Z'},
+    {t:'reservas',             col:'created_at',  val:'2000-01-01T00:00:00Z'},
+    {t:'leituras_avisos',      col:'aviso_id',    val:'00000000-0000-0000-0000-000000000000', op:'gt'},
+    {t:'avisos',               col:'created_at',  val:'2000-01-01T00:00:00Z'}
   ];
   function apagarTabela(idx) {
-    if(idx >= tabelas.length) {
-      // Zera faltas e suspensoes dos moradores
+    if(idx >= tabelasConfig.length) {
       sb.from('moradores').update({status:'ativo', suspenso_ate:null, faltas_mes:0})
         .neq('tipo','admin').then(function() {
           setLoading('btn-reset-app', false, '<i class="ti ti-alert-triangle"></i>Zerar tudo agora');
-          toast('App zerado com sucesso! Todos os dados foram removidos.');
+          toast('App zerado! Todos os dados foram removidos.');
           renderConfig(); renderAvisos(); renderMinhas(); renderCheckin(); renderCal();
         });
       return;
     }
-    // Usa filtro adequado para cada tabela
-    var tabelaAtual = tabelas[idx];
-    var colData = tabelaAtual === 'convites_reserva' ? 'criado_em' : 'created_at';
-    sb.from(tabelaAtual).delete().gte(colData, '2000-01-01T00:00:00Z').then(function(r) {
-      if(r.error) {
-        console.warn('Erro ao apagar ' + tabelaAtual + ':', r.error.message);
-      }
+    var cfg = tabelasConfig[idx];
+    var q = sb.from(cfg.t).delete();
+    if(cfg.op === 'gt') q = q.gt(cfg.col, cfg.val);
+    else q = q.gte(cfg.col, cfg.val);
+    q.then(function(r) {
+      if(r.error) console.warn('Erro ao apagar ' + cfg.t + ':', r.error.message);
       apagarTabela(idx + 1);
     });
   }
@@ -4108,7 +4113,7 @@ function renderCalendario() {
   // Busca todas as reservas confirmadas do mês
   sb.from('reservas')
     .select('data_reserva,slot_inicio,slot_fim,tipo_reserva,unidades(codigo),modalidades(nome,icone)')
-    .neq('status','cancelada')
+    .eq('status','confirmada')
     .gte('data_reserva', ini)
     .lte('data_reserva', fim)
     .order('slot_inicio',{ascending:true})
