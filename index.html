@@ -258,17 +258,32 @@ textarea.form-in{resize:vertical}
   </div>
   <div class="content">
     <div class="screen active" id="screen-avisos">
-      <div id="conv-pendentes-wrap" style="display:none;margin-bottom:8px"></div>
-      <div id="wsq-lembrete" style="display:none;background:var(--vl);border:0.5px solid #97C459;border-radius:10px;padding:10px 14px;margin-bottom:8px"></div>
-      <div id="widget-status-quadra" style="border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:0.5px solid var(--br)">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div id="wsq-dot" style="width:10px;height:10px;border-radius:50%;background:#B4B2A9;flex-shrink:0"></div>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:var(--t1)" id="wsq-status">Verificando...</div>
-            <div style="font-size:11px;color:var(--t2)" id="wsq-sub"></div>
+      <div id="home-hero" style="background:var(--v);border-radius:14px;padding:16px;margin-bottom:10px;color:#fff">
+        <div style="font-size:11px;opacity:.75;margin-bottom:2px" id="home-saudacao">Ola!</div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:10px" id="home-nome">...</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 12px">
+            <div style="font-size:9px;opacity:.75;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Quadra agora</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div id="home-dot" style="width:7px;height:7px;border-radius:50%;background:#B4B2A9;flex-shrink:0"></div>
+              <div style="font-size:12px;font-weight:600" id="home-quadra-status">...</div>
+            </div>
+            <div style="font-size:10px;opacity:.75;margin-top:2px" id="home-quadra-sub"></div>
+          </div>
+          <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 12px">
+            <div style="font-size:9px;opacity:.75;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Proxima reserva</div>
+            <div style="font-size:12px;font-weight:600" id="home-prox-hora">--:--</div>
+            <div style="font-size:10px;opacity:.75;margin-top:2px" id="home-prox-info">Sem reservas</div>
           </div>
         </div>
-        <button class="btn-sm" id="btn-wsq-reservar" style="display:none;font-size:11px"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar</button>
+        <button onclick="document.getElementById('tab-reservar').click()" style="margin-top:10px;width:100%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar quadra</button>
+      </div>
+      <div id="conv-pendentes-wrap" style="display:none;margin-bottom:8px"></div>
+      <div id="wsq-lembrete" style="display:none;background:var(--vl);border:0.5px solid #97C459;border-radius:10px;padding:10px 14px;margin-bottom:8px"></div>
+      <div id="home-faltas-alert" style="display:none;margin-bottom:8px"></div>
+      <div id="widget-status-quadra" style="display:none">
+        <div id="wsq-dot"></div><div id="wsq-status"></div>
+        <div id="wsq-sub"></div><button id="btn-wsq-reservar"></button>
       </div>
       <div id="fab-aviso"></div>
       <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
@@ -1692,11 +1707,12 @@ function selData(ds) {
   document.getElementById('slots-lbl').textContent = 'Horarios - ' + fmtD(ds);
   var sg = document.getElementById('slot-grid');
 
-  sb.from('reservas')
+  var resQ = sb.from('reservas')
     .select('id, unidade_id, slot_inicio, slot_fim, status, tipo_reserva, modalidades(nome, icone), unidades(codigo)')
     .eq('data_reserva', ds)
-    .neq('status', 'cancelada')
-    .then(function(res) {
+    .eq('status', 'confirmada');
+  if(espacoQuadraId) resQ = resQ.eq('espaco_id', espacoQuadraId);
+  resQ.then(function(res) {
       var reservasDia = res.data || [];
       var agora = new Date();
       var agoraMin = agora.getHours() * 60 + agora.getMinutes();
@@ -2432,6 +2448,56 @@ function renderMinhas() {
 }
 
 // -- AVISOS -----------------------------------------------------
+function renderHome() {
+  if(!morador) return;
+  var h = new Date().getHours();
+  var saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  var nome = (morador.nome || '').split(' ')[0];
+  var elS = document.getElementById('home-saudacao');
+  var elN = document.getElementById('home-nome');
+  if(elS) elS.textContent = saud + '!';
+  if(elN) elN.textContent = nome + ' \u{1F44B}';
+  var hoje = ts();
+  var agora = new Date();
+  var agoraMin = agora.getHours()*60 + agora.getMinutes();
+  if(morador.unidade_id) {
+    sb.from('reservas').select('slot_inicio,slot_fim,checkin_feito,modalidades(nome,icone)')
+      .eq('unidade_id',morador.unidade_id).eq('data_reserva',hoje).eq('status','confirmada')
+      .order('slot_inicio').then(function(res) {
+        var lista = res.data||[];
+        var proxima = lista.find(function(r){
+          return parseInt((r.slot_inicio||'00:00').slice(0,2))*60 >= agoraMin && !r.checkin_feito;
+        });
+        var elH = document.getElementById('home-prox-hora');
+        var elI = document.getElementById('home-prox-info');
+        if(proxima) {
+          var m = proxima.modalidades;
+          if(elH) elH.textContent = (proxima.slot_inicio||'').slice(0,5)+'-'+(proxima.slot_fim||'').slice(0,5);
+          if(elI) elI.textContent = m ? m.icone+' '+m.nome : 'Reserva confirmada';
+        } else if(lista.length) {
+          if(elH) elH.textContent = 'Hoje'; if(elI) elI.textContent = lista.length+' reserva(s)';
+        } else {
+          if(elH) elH.textContent = '--:--'; if(elI) elI.textContent = 'Sem reservas hoje';
+        }
+      });
+  }
+  var faltas = morador.faltas_mes||0; var limite = appCfg.faltas_suspensao||2;
+  var fa = document.getElementById('home-faltas-alert');
+  if(fa && faltas>0 && morador.tipo!=='admin') {
+    fa.style.display='block';
+    var faltando=limite-faltas; var verm=faltando<=1;
+    fa.innerHTML='<div style="background:'+(verm?'var(--rd)':'var(--am)')
+      +';border:.5px solid '+(verm?'var(--rdb)':'var(--amb)')
+      +';border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px">'
+      +'<i class="ti ti-alert-triangle" style="color:'+(verm?'var(--rdt)':'var(--amt)')
+      +';font-size:18px;flex-shrink:0" aria-hidden="true"></i>'
+      +'<div><div style="font-size:12px;font-weight:600;color:'+(verm?'var(--rdt)':'var(--amt)')
+      +'">'+faltas+' falta(s) este mes</div>'
+      +'<div style="font-size:10.5px;color:'+(verm?'var(--rdt)':'var(--amt)')
+      +';opacity:.85">'+(faltando>0?'Mais '+faltando+' resulta em suspensao':'Limite atingido')+'</div></div></div>';
+  } else if(fa) { fa.style.display='none'; }
+}
+
 function renderWidgetStatus() {
   var dot = document.getElementById('wsq-dot');
   var statusEl = document.getElementById('wsq-status');
@@ -2459,8 +2525,10 @@ function renderWidgetStatus() {
         return ini > agoraMin;
       }).sort(function(a,b){ return a.slot_inicio > b.slot_inicio ? 1 : -1; })[0];
 
+      var hd=document.getElementById('home-dot'),hqs=document.getElementById('home-quadra-status'),hqsub=document.getElementById('home-quadra-sub');
       if(ocupadaAgora) {
         dot.style.background = '#E24B4A';
+        if(hd)hd.style.background='#E24B4A'; if(hqs)hqs.textContent='Ocupada'; if(hqsub)hqsub.textContent='Libera as '+(ocupadaAgora.slot_fim||'').slice(0,5);
         widget.style.background = 'var(--rd)';
         widget.style.borderColor = 'var(--rdb)';
         statusEl.style.color = 'var(--rdt)';
@@ -2470,6 +2538,7 @@ function renderWidgetStatus() {
         if(btnRes) btnRes.style.display = 'none';
       } else if(proximaHoje) {
         dot.style.background = '#EF9F27';
+        if(hd)hd.style.background='#EF9F27'; if(hqs)hqs.textContent='Livre agora'; if(hqsub)hqsub.textContent='Ocupa as '+(proximaHoje.slot_inicio||'').slice(0,5);
         widget.style.background = 'var(--am)';
         widget.style.borderColor = 'var(--amb)';
         statusEl.style.color = 'var(--amt)';
@@ -2479,6 +2548,7 @@ function renderWidgetStatus() {
         if(btnRes) { btnRes.style.display = 'flex'; btnRes.onclick = function(){ document.getElementById('tab-reservar').click(); }; }
       } else {
         dot.style.background = '#639922';
+        if(hd)hd.style.background='#639922'; if(hqs)hqs.textContent='Livre'; if(hqsub)hqsub.textContent=h<6?'Abre as 06:00':'Disponivel agora';
         widget.style.background = 'var(--vl)';
         widget.style.borderColor = '#97C459';
         statusEl.style.color = 'var(--v)';
@@ -2568,6 +2638,7 @@ function renderConvitesPendentes() {
 }
 
 function renderAvisos() {
+  renderHome();
   renderWidgetStatus();
   renderConvitesPendentes();
   if(!morador) { document.getElementById('avisos-list').innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Faca login</div>'; return; }
@@ -3619,7 +3690,7 @@ document.getElementById('btn-reset-app').addEventListener('click', function() {
         });
       return;
     }
-    sb.from(tabelas[idx]).delete().neq('id', '00000000-0000-0000-0000-000000000000').then(function(r) {
+    sb.from(tabelas[idx]).delete().gte('created_at', '2000-01-01T00:00:00Z').then(function(r) {
       if(r.error) {
         console.warn('Erro ao apagar ' + tabelas[idx] + ':', r.error.message);
       }
