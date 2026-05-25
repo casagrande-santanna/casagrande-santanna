@@ -1945,27 +1945,27 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   if(!morador || !pendSlot || !pendMod || !pendDur) { setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
   if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
 
-  var maxMes = appCfg.max_reservas_mes;
+  var maxMes = parseInt(appCfg.max_reservas_mes) || 4;
   if(maxMes > 0) {
-    var mesAtual = ts().slice(0,7);
-    sb.from('reservas')
-      .select('id', {count:'exact', head:true})
-      .eq('unidade_id', morador.unidade_id)
-      .eq('tipo_reserva','pontual')
-      .eq('status','confirmada')
-      .gte('data_reserva', mesAtual+'-01')
-      .lte('data_reserva', mesAtual+'-31')
-      .then(function(rc) {
-        if(rc.count >= maxMes) {
-          toast('Limite de '+maxMes+' reservas mensais atingido para este apartamento.');
-          setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
-          return;
-        }
-        _fazerInsertReserva();
-      });
-  } else {
-    _fazerInsertReserva();
-  }
+  var mesAtual = ts().slice(0,7);
+  sb.from('reservas')
+    .select('id', {count:'exact', head:true})
+    .eq('unidade_id', morador.unidade_id)
+    .eq('tipo_reserva','pontual')
+    .eq('status','confirmada')
+    .gte('data_reserva', mesAtual+'-01')
+    .lte('data_reserva', mesAtual+'-31')
+    .then(function(rc) {
+      var limite = parseInt(appCfg.max_reservas_mes) || 4;
+      if((rc.count || 0) >= limite) {
+        toast('Limite de '+limite+' reservas mensais atingido para este apartamento.');
+        setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
+        return;
+      }
+      _fazerInsertReserva();
+    });
+} else {
+  _fazerInsertReserva();
 }
 
 function _fazerInsertReserva() {
