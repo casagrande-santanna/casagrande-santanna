@@ -1184,9 +1184,31 @@ function requireAdmin() {
 }
 
 function carregarConfiguracoes() {
-  sb.from('configuracoes').select('*').limit(1).maybeSingle().then(function(res) {
-    if(res.data) Object.assign(appCfg, res.data);
-  });
+  sb.from('configuracoes')
+    .select('max_reservas_mes,max_reservas_simult,antecedencia_min_h,antecedencia_max_dias,checkin_janela_min,checkin_ant_min,faltas_suspensao,carencia_cancel_min,suspensao_dias,blk_aulas_fds,blk_sabado,blk_domingo,ant_fds_h,aulas_rec_ativo,aula_duracao_max_meses,aula_aviso_dias,aula_max_contratos,fair_play_ativo')
+    .limit(1).maybeSingle().then(function(res) {
+      if(res.data) {
+        var d = res.data;
+        if(d.max_reservas_mes != null) appCfg.max_reservas_mes = parseInt(d.max_reservas_mes) || 4;
+        if(d.max_reservas_simult != null) appCfg.max_reservas_simult = parseInt(d.max_reservas_simult) || 2;
+        if(d.antecedencia_min_h != null) appCfg.antecedencia_min_h = parseInt(d.antecedencia_min_h) || 1;
+        if(d.antecedencia_max_dias != null) appCfg.antecedencia_max_dias = parseInt(d.antecedencia_max_dias) || 15;
+        if(d.checkin_janela_min != null) appCfg.checkin_janela_min = parseInt(d.checkin_janela_min) || 15;
+        if(d.checkin_ant_min != null) appCfg.checkin_ant_min = parseInt(d.checkin_ant_min) || 10;
+        if(d.faltas_suspensao != null) appCfg.faltas_suspensao = parseInt(d.faltas_suspensao) || 2;
+        if(d.carencia_cancel_min != null) appCfg.carencia_cancel_min = parseInt(d.carencia_cancel_min) || 120;
+        if(d.suspensao_dias != null) appCfg.suspensao_dias = parseInt(d.suspensao_dias) || 15;
+        if(d.ant_fds_h != null) appCfg.ant_fds_h = parseInt(d.ant_fds_h) || 0;
+        if(d.aula_duracao_max_meses != null) appCfg.aula_duracao_max_meses = parseInt(d.aula_duracao_max_meses) || 6;
+        if(d.aula_aviso_dias != null) appCfg.aula_aviso_dias = parseInt(d.aula_aviso_dias) || 30;
+        if(d.aula_max_contratos != null) appCfg.aula_max_contratos = parseInt(d.aula_max_contratos) || 1;
+        if(d.blk_aulas_fds != null) appCfg.blk_aulas_fds = !!d.blk_aulas_fds;
+        if(d.blk_sabado != null) appCfg.blk_sabado = !!d.blk_sabado;
+        if(d.blk_domingo != null) appCfg.blk_domingo = !!d.blk_domingo;
+        if(d.aulas_rec_ativo != null) appCfg.aulas_rec_ativo = !!d.aulas_rec_ativo;
+        if(d.fair_play_ativo != null) appCfg.fair_play_ativo = !!d.fair_play_ativo;
+      }
+    });
 }
 
 function resetPermissoesUI() {
