@@ -1932,40 +1932,48 @@ function showStep(n) {
     document.getElementById('m-res-step'+i).style.display = (i===n?'block':'none');
   });
 }
-// -- CONFIRMAR RESERVA ------------------------------------------
+
 function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   var dtStart = date.replace(/-/g,'') + 'T' + slotInicio.replace(':','') + '00';
   var dtEnd   = date.replace(/-/g,'') + 'T' + slotFim.replace(':','') + '00';
-  var texto   = encodeURIComponent('🎾 Reserva da Quadra - ' + modalidade);
+  var texto   = encodeURIComponent('Reserva da Quadra - ' + modalidade);
   var local   = encodeURIComponent("Quadra Poliesportiva - Casa Grande Sant'Anna");
-  var details = encodeURIComponent('Apto ' + apto + ' • Lembre-se do check-in até 15 min após o início.');
+  var details = encodeURIComponent('Apto ' + apto + ' - Lembre-se do check-in ate 15 min apos o inicio.');
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + texto + '&dates=' + dtStart + '/' + dtEnd + '&location=' + local + '&details=' + details;
 }
-  function confirmarReserva() {
-  if(!morador || !pendSlot || !pendMod || !pendDur) { setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
-  if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
 
+function confirmarReserva() {
+  if(!morador || !pendSlot || !pendMod || !pendDur) {
+    setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
+    return;
+  }
+  if(morador.status === 'suspenso' && morador.tipo !== 'admin') {
+    toast('Apartamento suspenso. Novas reservas bloqueadas.');
+    setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
+    return;
+  }
   var maxMes = parseInt(appCfg.max_reservas_mes) || 4;
   if(maxMes > 0) {
-  var mesAtual = ts().slice(0,7);
-  sb.from('reservas')
-    .select('id', {count:'exact', head:true})
-    .eq('unidade_id', morador.unidade_id)
-    .eq('tipo_reserva','pontual')
-    .eq('status','confirmada')
-    .gte('data_reserva', mesAtual+'-01')
-    .lte('data_reserva', mesAtual+'-31')
-    .then(function(rc) {
-      var limite = parseInt(appCfg.max_reservas_mes) || 4;
-      if((rc.count || 0) >= limite) {
-        toast('Limite de '+limite+' reservas mensais atingido para este apartamento.');
-        setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
-        return;
-      }
-      _fazerInsertReserva();
-    });
-} else {
-  _fazerInsertReserva();
+    var mesAtual = ts().slice(0,7);
+    sb.from('reservas')
+      .select('id', {count:'exact', head:true})
+      .eq('unidade_id', morador.unidade_id)
+      .eq('tipo_reserva','pontual')
+      .eq('status','confirmada')
+      .gte('data_reserva', mesAtual+'-01')
+      .lte('data_reserva', mesAtual+'-31')
+      .then(function(rc) {
+        var limite = parseInt(appCfg.max_reservas_mes) || 4;
+        if((rc.count || 0) >= limite) {
+          toast('Limite de '+limite+' reservas mensais atingido para este apartamento.');
+          setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
+          return;
+        }
+        _fazerInsertReserva();
+      });
+  } else {
+    _fazerInsertReserva();
+  }
 }
 
 function _fazerInsertReserva() {
@@ -1973,8 +1981,6 @@ function _fazerInsertReserva() {
   var horaFim = addH(pendSlot.slot, pendDur / 60) + ':00';
   var _date = pendSlot.date;
   var _mod  = pendMod;
-
-  // Verifica conflito de horário - cobre todos os casos de sobreposição
   var conflQ = sb.from('reservas')
     .select('id, slot_inicio, slot_fim')
     .eq('data_reserva', pendSlot.date)
@@ -1983,78 +1989,72 @@ function _fazerInsertReserva() {
     conflQ = conflQ.or('espaco_id.eq.' + espacoQuadraId + ',espaco_id.is.null');
   }
   conflQ.then(function(conflito) {
-      var temConflito = (conflito.data||[]).some(function(rv) {
-        // Normaliza para HH:MM para comparação segura independente de formato
-        var ini = (rv.slot_inicio || '00:00').slice(0,5);
-        var fim = (rv.slot_fim   || '00:00').slice(0,5);
-        var hIni = horaInicio.slice(0,5);
-        var hFim = horaFim.slice(0,5);
-        return hIni < fim && hFim > ini;
-      });
-      if(temConflito) {
-        setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar reserva');
-        toast('Horario indisponivel. Por favor, escolha outro.');
-        selData(_date);
+    var temConflito = (conflito.data||[]).some(function(rv) {
+      var ini = (rv.slot_inicio || '00:00').slice(0,5);
+      var fim = (rv.slot_fim   || '00:00').slice(0,5);
+      var hIni = horaInicio.slice(0,5);
+      var hFim = horaFim.slice(0,5);
+      return hIni < fim && hFim > ini;
+    });
+    if(temConflito) {
+      setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar reserva');
+      toast('Horario indisponivel. Por favor, escolha outro.');
+      selData(_date);
+      fecharModal('m-reserva');
+      return;
+    }
+    var modNome = MODS.find(function(x){ return x.id===pendMod; }).nome;
+    sb.from('modalidades').select('id,nome').then(function(r) {
+      var todas = r.data||[];
+      var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
+      var found = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNome); });
+      var mid = found ? found.id : null;
+      var payload = {
+        unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
+        data_reserva: pendSlot.date,
+        slot_inicio: horaInicio, slot_fim: horaFim,
+        duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
+      };
+      if(espacoQuadraId) payload.espaco_id = espacoQuadraId;
+      sb.from('reservas').insert(payload).select('id').then(function(r2) {
+        if(r2.error) {
+          toast('Erro: '+r2.error.message);
+          setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
+          return;
+        }
         fecharModal('m-reserva');
-        return;
-      }
-
-      var modNome = MODS.find(function(x){ return x.id===pendMod; }).nome;
-      sb.from('modalidades').select('id,nome').then(function(r) {
-        var todas = r.data||[];
-        var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); };
-        var found = todas.find(function(m){ return semAcento(m.nome)===semAcento(modNome); });
-        var mid = found ? found.id : null;
-
-        var payload = {
-          unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
-          data_reserva: pendSlot.date,
-          slot_inicio: horaInicio, slot_fim: horaFim,
-          duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
-        };
-        if(espacoQuadraId) payload.espaco_id = espacoQuadraId;
-        sb.from('reservas').insert(payload).select('id').then(function(r2) {
-          if(r2.error) { toast('Erro: '+r2.error.message); setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
-          fecharModal('m-reserva');
-          var modNomeCalendar = MODS.find(function(x){ return x.id===_mod; });
-          var nomeModal = modNomeCalendar ? modNomeCalendar.nome : '';
-          var apto = morador.unidades ? morador.unidades.codigo : '';
-          var linkCalendar = gerarLinkGoogleCalendar(
-            _date,
-            horaInicio.slice(0,5),
-            horaFim.slice(0,5),
-            nomeModal,
-            apto
-          );
-          var det = document.getElementById('m-reserva-ok-detalhe');
-          if(det) det.textContent = (apto ? 'Apto '+apto+' • ' : '') + fmtD(_date) + ' • ' + horaInicio.slice(0,5) + '-' + horaFim.slice(0,5) + (nomeModal ? ' • '+nomeModal : '');
-          var btnCal = document.getElementById('btn-calendar-link');
-          if(btnCal) btnCal.href = linkCalendar;
-          setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar reserva');
-          // Inserir convites se houver apartamentos selecionados
-          var novaReservaId = r2.data && r2.data[0] ? r2.data[0].id : null;
-          var convSel = _convitesSelecionados.slice();
-          _convitesSelecionados = [];
-          if(novaReservaId && convSel.length) {
-            var convites = convSel.map(function(uid) {
-              return {reserva_id: novaReservaId, unidade_convidada_id: uid, criado_por: morador.id};
-            });
-            sb.from('convites_reserva').insert(convites).then(function(cv) {
-              var convEl = document.getElementById('m-reserva-ok-convites');
-              if(convEl) {
-                convEl.style.display = 'block';
-                convEl.innerHTML = '<i class="ti ti-users" aria-hidden="true"></i> Convite enviado para ' + convSel.length + ' apartamento(s).';
-              }
-            });
-          } else {
-            var convEl2 = document.getElementById('m-reserva-ok-convites');
-            if(convEl2) convEl2.style.display = 'none';
-          }
-          abrirModal('m-reserva-ok');
-          setTimeout(function(){ selData(_date); renderMinhas(); renderCheckin(); }, 300);
-        });
+        var modNomeCalendar = MODS.find(function(x){ return x.id===_mod; });
+        var nomeModal = modNomeCalendar ? modNomeCalendar.nome : '';
+        var apto = morador.unidades ? morador.unidades.codigo : '';
+        var linkCalendar = gerarLinkGoogleCalendar(_date, horaInicio.slice(0,5), horaFim.slice(0,5), nomeModal, apto);
+        var det = document.getElementById('m-reserva-ok-detalhe');
+        if(det) det.textContent = (apto ? 'Apto '+apto+' - ' : '') + fmtD(_date) + ' - ' + horaInicio.slice(0,5) + '-' + horaFim.slice(0,5) + (nomeModal ? ' - '+nomeModal : '');
+        var btnCal = document.getElementById('btn-calendar-link');
+        if(btnCal) btnCal.href = linkCalendar;
+        setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar reserva');
+        var novaReservaId = r2.data && r2.data[0] ? r2.data[0].id : null;
+        var convSel = _convitesSelecionados.slice();
+        _convitesSelecionados = [];
+        if(novaReservaId && convSel.length) {
+          var convites = convSel.map(function(uid) {
+            return {reserva_id: novaReservaId, unidade_convidada_id: uid, criado_por: morador.id};
+          });
+          sb.from('convites_reserva').insert(convites).then(function(cv) {
+            var convEl = document.getElementById('m-reserva-ok-convites');
+            if(convEl) {
+              convEl.style.display = 'block';
+              convEl.innerHTML = '<i class="ti ti-users" aria-hidden="true"></i> Convite enviado para ' + convSel.length + ' apartamento(s).';
+            }
+          });
+        } else {
+          var convEl2 = document.getElementById('m-reserva-ok-convites');
+          if(convEl2) convEl2.style.display = 'none';
+        }
+        abrirModal('m-reserva-ok');
+        setTimeout(function(){ selData(_date); renderMinhas(); renderCheckin(); }, 300);
       });
     });
+  });
 }
 
 // -- MODAL CANCELAR ---------------------------------------------
