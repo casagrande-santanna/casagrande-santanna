@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#27500A">
 <meta name="description" content="Casa Grande de Sant'Anna - Sistema de gestão de espaços comuns do condomínio. Reserve a quadra poliesportiva, academia e muito mais.">
@@ -249,6 +250,37 @@ textarea.form-in{resize:vertical}
   .login-wrap{padding:40px}
   .login-card{max-width:420px}
 }
+
+/* ===== MOBILE BOTTOM NAVIGATION ===== */
+@media (max-width: 430px) {
+  .tab-bar { display: none !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .app-wrapper { padding-bottom: 64px; }
+}
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: var(--card);
+  border-top: 1px solid var(--br);
+  z-index: 1000;
+  align-items: stretch;
+  justify-content: space-around;
+  box-shadow: 0 -2px 12px rgba(0,0,0,.10);
+}
+.mobile-bottom-nav .mbn-item {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex: 1; gap: 2px; cursor: pointer;
+  color: var(--t2); font-size: 9px;
+  padding: 6px 2px; transition: color .2s;
+  border: none; background: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.mobile-bottom-nav .mbn-item.active { color: var(--v); }
+.mobile-bottom-nav .mbn-item i { font-size: 20px; }
 </style>
 </head>
 <body>
@@ -494,7 +526,7 @@ textarea.form-in{resize:vertical}
 
     <div class="screen" id="screen-ocorrencias">
       <div id="sec-dispensas-wrap" style="display:none">
-        <div class="card-title" style="margin-bottom:8px"><i class="ti ti-hand-stop" aria-hidden="true" style="color:var(--amb)"></i> SolicitaçÃµes de Dispensa</div>
+        <div class="card-title" style="margin-bottom:8px"><i class="ti ti-hand-stop" aria-hidden="true" style="color:var(--amb)"></i> Solicitações de Dispensa</div>
         <div id="lista-dispensas"></div>
         <div style="height:1px;background:var(--br);margin:12px 0"></div>
       </div>
@@ -517,7 +549,7 @@ textarea.form-in{resize:vertical}
           <i class="ti ti-clipboard-list" style="font-size:20px;color:var(--blt);flex-shrink:0;margin-top:2px" aria-hidden="true"></i>
           <div>
             <div style="font-size:12px;font-weight:600;color:var(--blt);margin-bottom:3px">Relatório de Danos e Ocorrências</div>
-            <div style="font-size:11px;color:var(--t2);line-height:1.5">Canal direto para moradores e zelador reportarem problemas na área comum, quadra ou instalaçÃµes.</div>
+            <div style="font-size:11px;color:var(--t2);line-height:1.5">Canal direto para moradores e zelador reportarem problemas na área comum, quadra ou instalações.</div>
           </div>
         </div>
       </div>
@@ -695,7 +727,7 @@ textarea.form-in{resize:vertical}
         <div id="lista-bloqueios"></div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-user-check" aria-hidden="true"></i>InscriçÃµes Pendentes<span id="badge-pendentes" class="badge b-warn" style="margin-left:8px"></span></div>
+        <div class="card-title"><i class="ti ti-user-check" aria-hidden="true"></i>Inscrições Pendentes<span id="badge-pendentes" class="badge b-warn" style="margin-left:8px"></span></div>
         <div id="lista-pendentes"></div>
       </div>
       <div class="card">
@@ -722,7 +754,7 @@ textarea.form-in{resize:vertical}
           <div class="card-title" style="margin-bottom:8px"><i class="ti ti-download" aria-hidden="true"></i>Exportar Relatórios</div>
           <div style="display:flex;gap:7px;flex-wrap:wrap">
             <button class="btn-s" id="btn-export-reservas" style="flex:1;font-size:11px"><i class="ti ti-table-export" aria-hidden="true"></i>Reservas do Mês</button>
-            <button class="btn-s" id="btn-export-faltas" style="flex:1;font-size:11px"><i class="ti ti-user-x" aria-hidden="true"></i>Faltas e SuspensÃµes</button>
+            <button class="btn-s" id="btn-export-faltas" style="flex:1;font-size:11px"><i class="ti ti-user-x" aria-hidden="true"></i>Faltas e Suspensões</button>
           </div>
         </div>
       </div>
@@ -776,7 +808,34 @@ textarea.form-in{resize:vertical}
         <div id="lista-contratos-aula"></div>
         <button class="btn-p" id="btn-novo-contrato" style="margin-top:10px"><i class="ti ti-plus" aria-hidden="true"></i>Criar contrato de aula</button>
       </div>
-      <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px"><i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar ConfiguraçÃµes</button>
+      
+      <!-- GALERIA ADMIN SECTION -->
+      <div class="card" id="galeria-admin-card" style="display:none">
+        <div class="card-title"><i class="ti ti-photo" aria-hidden="true"></i>Gerenciar Galeria</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:12px;line-height:1.5">Adicione fotos das áreas do condomínio (URL da imagem hospedada online).</div>
+        <div class="form-row">
+          <label class="form-lbl">Área/Espaço</label>
+          <select class="form-in" id="galeria-admin-espaco"><option value="">Selecione...</option></select>
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">URL da imagem</label>
+          <input type="url" class="form-in" id="galeria-admin-url" placeholder="https://exemplo.com/foto.jpg">
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Legenda (opcional)</label>
+          <input type="text" class="form-in" id="galeria-admin-legenda" placeholder="Descrição da foto...">
+        </div>
+        <div id="galeria-admin-preview" style="margin:8px 0;display:none">
+          <img id="galeria-admin-img" src="" style="width:100%;border-radius:8px;max-height:200px;object-fit:cover" alt="Preview">
+        </div>
+        <button class="btn-p" id="btn-galeria-add" style="width:100%"><i class="ti ti-plus" aria-hidden="true"></i>Adicionar foto</button>
+        <div id="galeria-admin-status" style="margin-top:8px;font-size:11px"></div>
+        <div style="margin-top:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:8px">Fotos cadastradas:</div>
+          <div id="galeria-admin-lista" style="font-size:11px;color:var(--t2)">Carregando...</div>
+        </div>
+      </div>
+      <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px"><i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar Configurações</button>
     </div>
     <div class="screen" id="screen-perfil">
       <div class="card">
@@ -2225,7 +2284,11 @@ function doCheckin(id) {
       sb.from('reservas').update({checkin_feito:true, checkin_em:new Date().toISOString()}).eq('id', id).then(function(r) {
         if(r.error) { toast('Erro no check-in: ' + r.error.message); return; }
         renderCheckin(); renderMinhas();
-        toast('Check-in realizado! Boa partida!');
+        toast('Check-in realizado! Boa partida! +10 pts 🏆');
+        if(morador && morador.id){
+          var pts = (morador.pontos_gamificacao || 0) + 10;
+          sb.from('moradores').update({pontos_gamificacao: pts}).eq('id', morador.id).then(function(){ morador.pontos_gamificacao = pts; });
+        }
       });
     });
 }
@@ -3760,7 +3823,7 @@ document.getElementById('btn-export-faltas').addEventListener('click', function(
     .neq('tipo', 'admin')
     .order('faltas_mes', {ascending: false})
     .then(function(res) {
-      setLoading('btn-export-faltas', false, '<i class="ti ti-user-x"></i>Faltas e SuspensÃµes');
+      setLoading('btn-export-faltas', false, '<i class="ti ti-user-x"></i>Faltas e Suspensões');
       var rows = (res.data||[]).map(function(m) {
         return {
           Apartamento: m.unidades ? m.unidades.codigo : '',
@@ -4605,6 +4668,13 @@ function renderDashboard() {
       });
       var modEl = document.getElementById('dash-modalidades');
       if(modEl) modEl.innerHTML = modHtml;
+
+      // Connect Chart.js charts with collected data
+      var chartStats = {
+        porDia: diaCount,
+        porModalidade: modMap
+      };
+      renderDashboardCharts(chartStats);
     });
 }
 
@@ -5067,10 +5137,97 @@ function initMelhorias(){
   loadClima();
   setTimeout(loadNotificacoes,1000);
   setInterval(loadNotificacoes,120000);
+  if(isAdmin){
+    var gaCard=document.getElementById('galeria-admin-card');
+    if(gaCard) gaCard.style.display='';
+    initGaleriaAdmin();
+  }
+}
+
+function initGaleriaAdmin(){
+  var selEsp=document.getElementById('galeria-admin-espaco');
+  if(selEsp&&espacos&&espacos.length){
+    espacos.forEach(function(e){var opt=document.createElement('option');opt.value=e.id;opt.textContent=e.nome||('Espaço '+e.id);selEsp.appendChild(opt);});
+  }
+  var urlInput=document.getElementById('galeria-admin-url');
+  if(urlInput){
+    urlInput.addEventListener('input',function(){
+      var prev=document.getElementById('galeria-admin-preview');
+      var img=document.getElementById('galeria-admin-img');
+      if(this.value&&this.value.startsWith('http')){img.src=this.value;prev.style.display='block';}
+      else{prev.style.display='none';}
+    });
+  }
+  var btnAdd=document.getElementById('btn-galeria-add');
+  if(btnAdd){
+    btnAdd.addEventListener('click',async function(){
+      var url=(document.getElementById('galeria-admin-url')||{}).value||'';
+      var espId=(document.getElementById('galeria-admin-espaco')||{}).value||'';
+      var legenda=(document.getElementById('galeria-admin-legenda')||{}).value||'';
+      var statusEl=document.getElementById('galeria-admin-status');
+      if(!url){if(statusEl)statusEl.innerHTML='<span style="color:var(--rdt)">Informe a URL da imagem.</span>';return;}
+      if(!espId){if(statusEl)statusEl.innerHTML='<span style="color:var(--rdt)">Selecione uma área.</span>';return;}
+      btnAdd.disabled=true;
+      var ins=await sb.from('galeria').insert({espaco_id:espId,url_foto:url,legenda:legenda||null,adicionado_por:morador?morador.id:null});
+      btnAdd.disabled=false;
+      if(ins.error){if(statusEl)statusEl.innerHTML='<span style="color:var(--rdt)">Erro: '+ins.error.message+'</span>';}
+      else{if(statusEl)statusEl.innerHTML='<span style="color:var(--v)">Foto adicionada!</span>';document.getElementById('galeria-admin-url').value='';document.getElementById('galeria-admin-legenda').value='';document.getElementById('galeria-admin-preview').style.display='none';loadGaleriaAdminLista();}
+    });
+  }
+  loadGaleriaAdminLista();
+}
+
+async function loadGaleriaAdminLista(){
+  var listaEl=document.getElementById('galeria-admin-lista');
+  if(!listaEl)return;
+  var res=await sb.from('galeria').select('id,url_foto,legenda,created_at,espacos(nome)').order('created_at',{ascending:false}).limit(20);
+  if(res.error||!res.data||!res.data.length){listaEl.textContent='Nenhuma foto cadastrada.';return;}
+  listaEl.innerHTML=res.data.map(function(f){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--br)">'
+      +'<img src="'+f.url_foto+'" style="width:48px;height:36px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">'
+      +'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(f.espacos?f.espacos.nome:'')+'</div>'
+      +'<div style="font-size:10px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(f.legenda||f.url_foto)+'</div></div>'
+      +'<button onclick="deleteGaleriaFoto('+f.id+',this)" style="background:none;border:none;color:var(--rdt);cursor:pointer;padding:4px"><i class="ti ti-trash" style="font-size:16px"></i></button>'
+      +'</div>';
+  }).join('');
+}
+
+async function deleteGaleriaFoto(id,btn){
+  if(!confirm('Remover esta foto?'))return;
+  btn.disabled=true;
+  var res=await sb.from('galeria').delete().eq('id',id);
+  if(!res.error)loadGaleriaAdminLista();else btn.disabled=false;
 }
 
 
 </script>
 
+
+  <!-- MOBILE BOTTOM NAVIGATION -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Navegação inferior mobile">
+    <button class="mbn-item active" id="mbn-avisos" onclick="goScreen('avisos');document.querySelectorAll('.mbn-item').forEach(el=>el.classList.remove('active'));this.classList.add('active');" aria-label="Avisos">
+      <i class="ti ti-bell" aria-hidden="true"></i><span>Avisos</span>
+    </button>
+    <button class="mbn-item" id="mbn-reservar" onclick="goScreen('reservar');renderCal();document.querySelectorAll('.mbn-item').forEach(el=>el.classList.remove('active'));this.classList.add('active');" aria-label="Reservar">
+      <i class="ti ti-calendar-plus" aria-hidden="true"></i><span>Reservar</span>
+    </button>
+    <button class="mbn-item" id="mbn-minhas" onclick="goScreen('minhas');document.querySelectorAll('.mbn-item').forEach(el=>el.classList.remove('active'));this.classList.add('active');" aria-label="Minhas">
+      <i class="ti ti-list-check" aria-hidden="true"></i><span>Minhas</span>
+    </button>
+    <button class="mbn-item" id="mbn-perfil" onclick="goScreen('perfil');loadMeuPerfil();document.querySelectorAll('.mbn-item').forEach(el=>el.classList.remove('active'));this.classList.add('active');" aria-label="Perfil">
+      <i class="ti ti-user" aria-hidden="true"></i><span>Perfil</span>
+    </button>
+    <button class="mbn-item" id="mbn-mais" onclick="document.getElementById('menu-mais-mobile').classList.toggle('show');" aria-label="Mais">
+      <i class="ti ti-dots" aria-hidden="true"></i><span>Mais</span>
+    </button>
+  </nav>
+  <div id="menu-mais-mobile" style="display:none;position:fixed;bottom:60px;left:0;right:0;background:var(--card);border-top:1px solid var(--br);z-index:999;padding:8px 0;box-shadow:0 -4px 16px rgba(0,0,0,.15)">
+    <style>#menu-mais-mobile.show{display:block!important}</style>
+    <div onclick="goScreen('checkin');document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-qrcode" style="font-size:20px"></i><span>Check-in</span></div>
+    <div onclick="goScreen('calendario');document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-calendar" style="font-size:20px"></i><span>Calendário</span></div>
+    <div onclick="goScreen('dashboard');renderDashboard();document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-chart-bar" style="font-size:20px"></i><span>Dashboard</span></div>
+    <div onclick="goScreen('ocorrencias');document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-alert-triangle" style="font-size:20px"></i><span>Ocorrências</span></div>
+    <div onclick="goScreen('config');document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-settings" style="font-size:20px"></i><span>Configurações</span></div>
+  </div>
 </body>
 </html>
