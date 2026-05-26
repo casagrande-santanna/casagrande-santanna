@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#27500A">
-<meta name="description" content="Casa Grande de Sant'Anna - Sistema de gestão de espaços comuns do condomínio. Reserve a quadra poliesportiva, academia e muito mais.">
+<meta name="description" content="Casa Grande de Sant'Anna - Sistema de gestÃ£o de espaÃ§os comuns do condomÃ­nio. Reserve a quadra poliesportiva, academia e muito mais.">
 <meta property="og:title" content="Casa Grande de Sant'Anna">
-<meta property="og:description" content="Sistema de gestão de espaços comuns do condomínio">
+<meta property="og:description" content="Sistema de gestÃ£o de espaÃ§os comuns do condomÃ­nio">
 <meta property="og:type" content="website">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -283,7 +283,7 @@ textarea.form-in{resize:vertical}
   <div class="hdr">
     <div class="hdr-row">
       <div>
-        <div style="display:flex;align-items:center;gap:8px"><div style="width:30px;height:30px;background:rgba(255,255,255,.18);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🏡</div><div><div class="hdr-title">Casa Grande de Sant'Anna</div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:30px;height:30px;background:rgba(255,255,255,.18);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">ð¡</div><div><div class="hdr-title">Casa Grande de Sant'Anna</div>
         <div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div>
       </div>
       <div class="hdr-right">
@@ -305,13 +305,13 @@ textarea.form-in{resize:vertical}
     <button class="tab" id="tab-calendario"><i class="ti ti-calendar-month" aria-hidden="true"></i>Calendario</button>
     <button class="tab" id="tab-quadra"><i class="ti ti-trophy" aria-hidden="true"></i>Quadra</button>
     <button class="tab" id="tab-academia" style="display:none"><i class="ti ti-barbell" aria-hidden="true"></i>Academia</button>
-    <button class="tab" id="tab-ocorrencias" style="display:none"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorrências</button>
+    <button class="tab" id="tab-ocorrencias" style="display:none"><i class="ti ti-alert-circle" aria-hidden="true"></i>OcorrÃªncias</button>
     <button class="tab" id="tab-perfil" style="display:none;position:relative"><i class="ti ti-user-circle" aria-hidden="true"></i>Perfil<span id="notif-count-badge" style="display:none;background:#E24B4A;color:#fff;font-size:8px;font-weight:700;border-radius:10px;padding:1px 4px;position:absolute;top:2px;right:2px;min-width:14px;text-align:center"></span></button>
     <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config<span class="ndot" id="nd-config"></span></button>
   </div>
   <div class="content">
     <div class="screen active" id="screen-avisos">
-    <div class="clima-widget" id="clima-widget"><div><div class="clima-temp">--°C</div><div class="clima-desc">Carregando...</div><div style="font-size:9px;opacity:.7;margin-top:2px">Fortaleza, CE</div></div><div style="font-size:28px">🌤️</div></div>
+    <div class="clima-widget" id="clima-widget"><div><div class="clima-temp">--Â°C</div><div class="clima-desc">Carregando...</div><div style="font-size:9px;opacity:.7;margin-top:2px">Fortaleza, CE</div></div><div style="font-size:28px">ð¤ï¸</div></div>
       <div id="home-hero" style="background:var(--v);border-radius:14px;padding:16px;margin-bottom:10px;color:#fff">
         <div style="font-size:11px;opacity:.75;margin-bottom:2px" id="home-saudacao">Ola!</div>
         <div style="font-size:18px;font-weight:600;margin-bottom:10px" id="home-nome">...</div>
@@ -345,7 +345,7 @@ textarea.form-in{resize:vertical}
     <div class="screen" id="screen-dashboard">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
         <div class="card" style="padding:12px;text-align:center">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Reservas este mês</div>
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Reservas este mÃªs</div>
           <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-total-mes">--</div>
         </div>
         <div class="card" style="padding:12px;text-align:center">
@@ -353,20 +353,20 @@ textarea.form-in{resize:vertical}
           <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-taxa-checkin">--%</div>
         </div>
         <div class="card" style="padding:12px;text-align:center">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Horário mais reservado</div>
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">HorÃ¡rio mais reservado</div>
           <div style="font-size:18px;font-weight:600;color:var(--v)" id="dash-top-slot">--:--</div>
         </div>
         <div class="card" style="padding:12px;text-align:center">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Ocupação média</div>
+          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">OcupaÃ§Ã£o mÃ©dia</div>
           <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-ocupacao">--%</div>
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Ocupação por dia da semana</div>
+        <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>OcupaÃ§Ã£o por dia da semana</div>
         <div id="dash-heatmap" style="margin-top:6px"><canvas id="chart-ocupacao" style="height:140px;max-height:140px"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking do Mês</div>
+        <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking do MÃªs</div>
         <div id="dash-ranking" style="margin-top:4px"></div>
       </div>
       <div class="card">
@@ -376,7 +376,7 @@ textarea.form-in{resize:vertical}
     </div>
 
     <div class="screen" id="screen-reservar">
-      <div class="stepper" id="res-stepper"><div class="step-item active" id="step1"><div class="step-circle">1</div><div class="step-lbl">Data</div></div><div class="step-item" id="step2"><div class="step-circle">2</div><div class="step-lbl">Horário</div></div><div class="step-item" id="step3"><div class="step-circle">3</div><div class="step-lbl">Confirmar</div></div></div>
+      <div class="stepper" id="res-stepper"><div class="step-item active" id="step1"><div class="step-circle">1</div><div class="step-lbl">Data</div></div><div class="step-item" id="step2"><div class="step-circle">2</div><div class="step-lbl">HorÃ¡rio</div></div><div class="step-item" id="step3"><div class="step-circle">3</div><div class="step-lbl">Confirmar</div></div></div>
 <div class="card">
         <div class="card-title"><i class="ti ti-calendar" aria-hidden="true"></i>Selecione uma data</div>
         <div class="cal-hdr">
@@ -393,7 +393,7 @@ textarea.form-in{resize:vertical}
         </div>
       </div>
       <div class="card" id="slots-card" style="display:none">
-        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="slots-lbl">Horários</span></div>
+        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="slots-lbl">HorÃ¡rios</span></div>
         <div class="slot-grid" id="slot-grid"></div>
       </div>
       <div class="card" id="card-reservas-dia" style="display:none">
@@ -422,7 +422,7 @@ textarea.form-in{resize:vertical}
         <div class="cal-grid" id="cal-grid-ac"></div>
       </div>
       <div class="card" id="ac-slots-card" style="display:none">
-        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="ac-slots-lbl">Horários disponiveis</span></div>
+        <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="ac-slots-lbl">HorÃ¡rios disponiveis</span></div>
         <div class="slot-grid" id="ac-slot-grid"></div>
       </div>
     </div>
@@ -436,29 +436,29 @@ textarea.form-in{resize:vertical}
           <i class="ti ti-repeat-off" aria-hidden="true"></i>Cancelar aulas
         </button>
       </div>
-      <button class="btn-s" id="btn-limpar-histórico" style="width:100%;margin-bottom:8px;font-size:10.5px;color:var(--gyt)">
-        <i class="ti ti-trash" aria-hidden="true"></i>Limpar histórico antigo
+      <button class="btn-s" id="btn-limpar-histÃ³rico" style="width:100%;margin-bottom:8px;font-size:10.5px;color:var(--gyt)">
+        <i class="ti ti-trash" aria-hidden="true"></i>Limpar histÃ³rico antigo
       </button>
       <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
     </div>
     <div class="screen" id="screen-checkin">
       <div class="card" style="background:var(--vl);border-color:#97C459;margin-bottom:10px">
         <div class="card-title"><i class="ti ti-qrcode" aria-hidden="true" style="color:var(--vm)"></i>Check-in por QR Code</div>
-        <div style="font-size:11px;color:var(--tx);margin-bottom:10px">Aponte a câmera para o QR Code fixado na entrada da quadra. Se você tiver uma reserva, o check-in será feito automaticamente.</div>
+        <div style="font-size:11px;color:var(--tx);margin-bottom:10px">Aponte a cÃ¢mera para o QR Code fixado na entrada da quadra. Se vocÃª tiver uma reserva, o check-in serÃ¡ feito automaticamente.</div>
         <div id="reader" style="width:100%;border-radius:8px;overflow:hidden;display:none;margin-bottom:10px;border:1px solid var(--vm)"></div>
         <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm)"><i class="ti ti-camera" aria-hidden="true"></i>Escanear QR da Quadra</button>
         <button class="btn-s" id="btn-fechar-scanner" style="display:none;width:100%;border-color:var(--rdb);color:var(--rdt);margin-top:6px"><i class="ti ti-x" aria-hidden="true"></i>Cancelar Leitura</button>
       </div>
       <div id="ckin-main"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;margin-bottom:2px">
-        <div class="sec-lbl" style="padding:0">Histórico</div>
-        <button class="btn-sm r" id="btn-limpar-hist-ckin" style="font-size:10px"><i class="ti ti-trash" aria-hidden="true"></i>Limpar histórico</button>
+        <div class="sec-lbl" style="padding:0">HistÃ³rico</div>
+        <button class="btn-sm r" id="btn-limpar-hist-ckin" style="font-size:10px"><i class="ti ti-trash" aria-hidden="true"></i>Limpar histÃ³rico</button>
       </div>
       <div id="ckin-hist"></div>
     </div>
     <div class="screen" id="screen-calendario">
       <div class="card">
-        <div class="card-title"><i class="ti ti-calendar-month" aria-hidden="true"></i>Calendário de Reservas</div>
+        <div class="card-title"><i class="ti ti-calendar-month" aria-hidden="true"></i>CalendÃ¡rio de Reservas</div>
         <div class="cal-hdr">
           <button class="cal-nav" id="btn-prev-m-cal"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
           <span class="cal-month" id="cal-lbl-cal"></span>
@@ -476,7 +476,7 @@ textarea.form-in{resize:vertical}
         <div id="cal-detalhe-lista"></div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-chart-pie" aria-hidden="true"></i>Resumo do Mês</div>
+        <div class="card-title"><i class="ti ti-chart-pie" aria-hidden="true"></i>Resumo do MÃªs</div>
         <div id="cal-resumo-mes"><div style="font-size:11px;color:var(--t2)">Carregando...</div></div>
       </div>
     </div>
@@ -485,7 +485,7 @@ textarea.form-in{resize:vertical}
         <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Placar e ranking</div>
         <div class="filter-bar" style="margin-bottom:8px">
           <button class="fpill active" id="rpill-ranking">Ranking</button>
-          <button class="fpill" id="rpill-histórico">Histórico</button>
+          <button class="fpill" id="rpill-histÃ³rico">HistÃ³rico</button>
         </div>
         <div id="ranking-list"><div class="empty"><i class="ti ti-trophy"></i>Sem partidas registradas</div></div>
         <button class="btn-p" id="btn-novo-placar" style="margin-top:10px"><i class="ti ti-plus" aria-hidden="true"></i>Registrar placar</button>
@@ -494,7 +494,7 @@ textarea.form-in{resize:vertical}
 
     <div class="screen" id="screen-ocorrencias">
       <div id="sec-dispensas-wrap" style="display:none">
-        <div class="card-title" style="margin-bottom:8px"><i class="ti ti-hand-stop" aria-hidden="true" style="color:var(--amb)"></i> Solicitações de Dispensa</div>
+        <div class="card-title" style="margin-bottom:8px"><i class="ti ti-hand-stop" aria-hidden="true" style="color:var(--amb)"></i> SolicitaÃ§Ãµes de Dispensa</div>
         <div id="lista-dispensas"></div>
         <div style="height:1px;background:var(--br);margin:12px 0"></div>
       </div>
@@ -510,14 +510,14 @@ textarea.form-in{resize:vertical}
         </div>
         <div id="achados-list"><div class="empty"><i class="ti ti-search"></i>Nenhum item cadastrado</div></div>
       </div>
-      <!-- BotÃ£o nova ocorrÃªncia (todos os moradores) -->
+      <!-- BotÃÂ£o nova ocorrÃÂªncia (todos os moradores) -->
       <button class="btn-p" id="btn-nova-oco-morador" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Abrir nova ocorrencia</button>
       <div class="card" style="background:var(--bl);border-color:var(--blb)">
         <div style="display:flex;align-items:flex-start;gap:8px">
           <i class="ti ti-clipboard-list" style="font-size:20px;color:var(--blt);flex-shrink:0;margin-top:2px" aria-hidden="true"></i>
           <div>
-            <div style="font-size:12px;font-weight:600;color:var(--blt);margin-bottom:3px">Relatório de Danos e Ocorrências</div>
-            <div style="font-size:11px;color:var(--t2);line-height:1.5">Canal direto para moradores e zelador reportarem problemas na área comum, quadra ou instalações.</div>
+            <div style="font-size:12px;font-weight:600;color:var(--blt);margin-bottom:3px">RelatÃ³rio de Danos e OcorrÃªncias</div>
+            <div style="font-size:11px;color:var(--t2);line-height:1.5">Canal direto para moradores e zelador reportarem problemas na Ã¡rea comum, quadra ou instalaÃ§Ãµes.</div>
           </div>
         </div>
       </div>
@@ -533,7 +533,7 @@ textarea.form-in{resize:vertical}
       <button class="btn-p" id="btn-nova-oco" style="margin-top:6px;display:none"><i class="ti ti-plus" aria-hidden="true"></i>Nova ocorrencia</button>
     </div>
     <div class="screen" id="screen-perfil">
-  <div id="meu-perfil-content"><div style="text-align:center;padding:32px 16px"><span style="font-size:40px;opacity:.25;display:block;margin-bottom:8px">👤</span><div style="font-size:14px;font-weight:600;color:var(--t2)">Carregando perfil...</div></div></div>
+  <div id="meu-perfil-content"><div style="text-align:center;padding:32px 16px"><span style="font-size:40px;opacity:.25;display:block;margin-bottom:8px">ð¤</span><div style="font-size:14px;font-weight:600;color:var(--t2)">Carregando perfil...</div></div></div>
 </div>
 <div class="screen" id="screen-config">
       <div class="card" style="background:var(--rd);border-color:var(--rdb)">
@@ -550,7 +550,7 @@ textarea.form-in{resize:vertical}
       </div>
       <div class="card" style="background:var(--rd);border-color:var(--rdb)">
         <div class="card-title" style="color:var(--rdt)"><i class="ti ti-trash" aria-hidden="true" style="color:var(--rdt)"></i>Cancelamento em Massa</div>
-        <div style="font-size:11px;color:var(--rdt);margin-bottom:12px;line-height:1.5">Cancela todas as reservas confirmadas no período selecionado. Esta ação não pode ser desfeita.</div>
+        <div style="font-size:11px;color:var(--rdt);margin-bottom:12px;line-height:1.5">Cancela todas as reservas confirmadas no perÃ­odo selecionado. Esta aÃ§Ã£o nÃ£o pode ser desfeita.</div>
         <div style="margin-bottom:10px">
           <label style="font-size:11px;color:var(--rdt);display:block;margin-bottom:5px;font-weight:600">Periodo</label>
           <select class="form-in" id="cancel-massa-periodo" style="font-size:12px;border-color:var(--rdb);color:var(--rdt);background:var(--cd)">
@@ -589,24 +589,24 @@ textarea.form-in{resize:vertical}
             <option value="3">3 reservas por vez</option><option value="4">4 reservas por vez</option>
             <option value="0">Sem limite</option>
           </select></div>
-        <div class="form-row"><label class="form-lbl">Antecedência mínima para reservar</label>
+        <div class="form-row"><label class="form-lbl">AntecedÃªncia mÃ­nima para reservar</label>
           <select class="form-in" id="cfg-ant-min">
             <option value="0">Sem restricao</option><option value="30">30 minutos</option>
             <option value="60" selected>1 hora</option><option value="120">2 horas</option>
           </select></div>
-        <div class="form-row"><label class="form-lbl">Antecedência máxima para reservar</label>
+        <div class="form-row"><label class="form-lbl">AntecedÃªncia mÃ¡xima para reservar</label>
           <select class="form-in" id="cfg-ant-max">
             <option value="7">7 dias</option><option value="15" selected>15 dias</option><option value="30">30 dias</option>
           </select></div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</div>
-        <div class="form-row"><label class="form-lbl">Janela de check-in (minutos após o início)</label>
+        <div class="form-row"><label class="form-lbl">Janela de check-in (minutos apÃ³s o inÃ­cio)</label>
           <select class="form-in" id="cfg-ckin-janela">
             <option value="10">10 minutos</option><option value="15" selected>15 minutos</option>
             <option value="20">20 minutos</option><option value="30">30 minutos</option>
           </select></div>
-        <div class="form-row"><label class="form-lbl">Antecipação permitida para check-in</label>
+        <div class="form-row"><label class="form-lbl">AntecipaÃ§Ã£o permitida para check-in</label>
           <select class="form-in" id="cfg-ckin-ant">
             <option value="10" selected>10 minutos antes</option><option value="15">15 minutos antes</option>
             <option value="30">30 minutos antes</option>
@@ -615,23 +615,23 @@ textarea.form-in{resize:vertical}
       <div class="card">
         <div class="card-title"><i class="ti ti-shield-x" aria-hidden="true"></i>Regra de Fair Play</div>
         <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div><div style="font-size:12px;font-weight:600">Ativar suspensão automática</div></div>
+          <div><div style="font-size:12px;font-weight:600">Ativar suspensÃ£o automÃ¡tica</div></div>
           <div class="tgl on" id="tgl-fair-play" style="margin-left:12px;margin-top:2px"></div>
         </div>
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Faltas para suspensão automática</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Faltas para suspensÃ£o automÃ¡tica</div>
           <select class="form-in" id="cfg-faltas-susp">
             <option value="1">1 falta</option><option value="2" selected>2 faltas</option>
             <option value="3">3 faltas</option><option value="5">5 faltas</option>
           </select></div>
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Cancelamento sem penalidade até</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Cancelamento sem penalidade atÃ©</div>
           <select class="form-in" id="cfg-carencia">
             <option value="60">1 hora antes</option><option value="120" selected>2 horas antes</option>
             <option value="240">4 horas antes</option><option value="1440">24 horas antes</option>
           </select></div>
         <div style="padding:9px 0">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Duração da suspensão</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">DuraÃ§Ã£o da suspensÃ£o</div>
           <select class="form-in" id="cfg-susp-dias">
             <option value="7">7 dias</option><option value="15" selected>15 dias</option>
             <option value="30">30 dias</option><option value="60">60 dias</option>
@@ -653,7 +653,7 @@ textarea.form-in{resize:vertical}
           </select></div>
         <div style="padding:9px 0">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="font-size:12px;font-weight:600">Bloquear sábados completamente</div>
+            <div style="font-size:12px;font-weight:600">Bloquear sÃ¡bados completamente</div>
             <div class="tgl" id="tgl-blk-sab"></div>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between">
@@ -663,14 +663,14 @@ textarea.form-in{resize:vertical}
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-calendar-off" aria-hidden="true"></i>Bloquear período específico</div>
+        <div class="card-title"><i class="ti ti-calendar-off" aria-hidden="true"></i>Bloquear perÃ­odo especÃ­fico</div>
         <div class="form-row"><label class="form-lbl">Categoria do bloqueio</label>
           <select class="form-in" id="blk-tipo">
-            <option value="manutencao">ð§ Manutencao / Reforma</option>
-            <option value="limpeza">ð§¹ Limpeza profunda</option>
-            <option value="evento">ð Evento condominial</option>
-            <option value="vistoria">ð Vistoria</option>
-            <option value="outro">ð Outro</option>
+            <option value="manutencao">Ã°ÂÂÂ§ Manutencao / Reforma</option>
+            <option value="limpeza">Ã°ÂÂ§Â¹ Limpeza profunda</option>
+            <option value="evento">Ã°ÂÂÂ Evento condominial</option>
+            <option value="vistoria">Ã°ÂÂÂ Vistoria</option>
+            <option value="outro">Ã°ÂÂÂ Outro</option>
           </select></div>
         <div style="display:flex;gap:8px">
           <div class="form-row" style="flex:1"><label class="form-lbl">Data inicial</label><input type="date" class="form-in" id="blk-ini"></div>
@@ -695,7 +695,7 @@ textarea.form-in{resize:vertical}
         <div id="lista-bloqueios"></div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-user-check" aria-hidden="true"></i>Inscrições Pendentes<span id="badge-pendentes" class="badge b-warn" style="margin-left:8px"></span></div>
+        <div class="card-title"><i class="ti ti-user-check" aria-hidden="true"></i>InscriÃ§Ãµes Pendentes<span id="badge-pendentes" class="badge b-warn" style="margin-left:8px"></span></div>
         <div id="lista-pendentes"></div>
       </div>
       <div class="card">
@@ -712,17 +712,17 @@ textarea.form-in{resize:vertical}
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard de Uso</div>
-        <div id="dashboard-uso"><div style="font-size:11px;color:var(--t2)">Carregando estatísticas...</div></div>
+        <div id="dashboard-uso"><div style="font-size:11px;color:var(--t2)">Carregando estatÃ­sticas...</div></div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking de Pontualidade</div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:8px">Apartamentos com maior taxa de check-in no mes corrente.</div>
         <div id="ranking-pontualidade"></div>
         <div style="margin-top:12px;padding-top:10px;border-top:.5px solid var(--br)">
-          <div class="card-title" style="margin-bottom:8px"><i class="ti ti-download" aria-hidden="true"></i>Exportar Relatórios</div>
+          <div class="card-title" style="margin-bottom:8px"><i class="ti ti-download" aria-hidden="true"></i>Exportar RelatÃ³rios</div>
           <div style="display:flex;gap:7px;flex-wrap:wrap">
-            <button class="btn-s" id="btn-export-reservas" style="flex:1;font-size:11px"><i class="ti ti-table-export" aria-hidden="true"></i>Reservas do Mês</button>
-            <button class="btn-s" id="btn-export-faltas" style="flex:1;font-size:11px"><i class="ti ti-user-x" aria-hidden="true"></i>Faltas e Suspensões</button>
+            <button class="btn-s" id="btn-export-reservas" style="flex:1;font-size:11px"><i class="ti ti-table-export" aria-hidden="true"></i>Reservas do MÃªs</button>
+            <button class="btn-s" id="btn-export-faltas" style="flex:1;font-size:11px"><i class="ti ti-user-x" aria-hidden="true"></i>Faltas e SuspensÃµes</button>
           </div>
         </div>
       </div>
@@ -736,7 +736,7 @@ textarea.form-in{resize:vertical}
           <div class="tgl" id="tgl-academia" style="margin-left:12px;margin-top:2px"></div>
         </div>
         <div id="academia-cfg-wrap" style="display:none;padding:9px 0 0;border-top:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Limite de pessoas simultâneas</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Limite de pessoas simultÃ¢neas</div>
           <select class="form-in" id="cfg-academia-simult">
             <option value="1">1 pessoa</option>
             <option value="2">2 pessoas</option>
@@ -749,24 +749,24 @@ textarea.form-in{resize:vertical}
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-repeat" aria-hidden="true"></i>Aulas recorrentes â regras</div>
+        <div class="card-title"><i class="ti ti-repeat" aria-hidden="true"></i>Aulas recorrentes Ã¢ÂÂ regras</div>
         <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br)">
           <div><div style="font-size:12px;font-weight:600">Permitir aulas recorrentes semanais</div></div>
           <div class="tgl on" id="tgl-aulas-rec" style="margin-left:12px;margin-top:2px"></div>
         </div>
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Duração máxima do contrato de aula</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">DuraÃ§Ã£o mÃ¡xima do contrato de aula</div>
           <select class="form-in" id="cfg-aula-duracao">
             <option value="1">1 mes</option><option value="2">2 meses</option><option value="3">3 meses</option>
             <option value="6" selected>6 meses</option><option value="12">12 meses</option>
           </select></div>
         <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Aviso de renovação (antes do vencimento)</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Aviso de renovaÃ§Ã£o (antes do vencimento)</div>
           <select class="form-in" id="cfg-aula-aviso">
             <option value="15">15 dias antes</option><option value="30" selected>30 dias antes</option><option value="45">45 dias antes</option>
           </select></div>
         <div style="padding:9px 0">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Máximo de contratos de aula por apartamento</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px">MÃ¡ximo de contratos de aula por apartamento</div>
           <select class="form-in" id="cfg-aula-max-contr">
             <option value="1" selected>1 contrato ativo</option><option value="2">2 contratos</option><option value="3">3 contratos</option>
           </select></div>
@@ -776,7 +776,7 @@ textarea.form-in{resize:vertical}
         <div id="lista-contratos-aula"></div>
         <button class="btn-p" id="btn-novo-contrato" style="margin-top:10px"><i class="ti ti-plus" aria-hidden="true"></i>Criar contrato de aula</button>
       </div>
-      <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px"><i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar Configurações</button>
+      <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px"><i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar ConfiguraÃ§Ãµes</button>
     </div>
     <div class="screen" id="screen-perfil">
       <div class="card">
@@ -1011,12 +1011,12 @@ textarea.form-in{resize:vertical}
         <input type="text" class="form-in" id="av-enquete-pergunta" placeholder="Ex: Mudar horario da reuniao?" style="margin-bottom:6px">
         <label class="form-lbl">Tipo de resposta</label>
         <select class="form-in" id="av-enquete-tipo" style="margin-bottom:4px">
-          <option value="sim_nao">ð Sim / ð Nao</option>
-          <option value="concordo_discordo">â Concordo / â Discordo</option>
-          <option value="aprovado_reprovado">âï¸ Aprovado / âï¸ Reprovado</option>
-          <option value="favoravel_contrario">ð¢ Favoravel / ð´ Contrario</option>
-          <option value="gostei_nao_gostei">ð Gostei / ð Nao gostei</option>
-          <option value="personalizado">âï¸ Personalizado</option>
+          <option value="sim_nao">Ã°ÂÂÂ Sim / Ã°ÂÂÂ Nao</option>
+          <option value="concordo_discordo">Ã¢ÂÂ Concordo / Ã¢ÂÂ Discordo</option>
+          <option value="aprovado_reprovado">Ã¢ÂÂÃ¯Â¸Â Aprovado / Ã¢ÂÂÃ¯Â¸Â Reprovado</option>
+          <option value="favoravel_contrario">Ã°ÂÂÂ¢ Favoravel / Ã°ÂÂÂ´ Contrario</option>
+          <option value="gostei_nao_gostei">Ã°ÂÂÂ Gostei / Ã°ÂÂÂ Nao gostei</option>
+          <option value="personalizado">Ã¢ÂÂÃ¯Â¸Â Personalizado</option>
         </select>
         <div id="enquete-custom" style="display:none;gap:6px;margin-top:4px">
           <input type="text" class="form-in" id="av-enquete-opcao-a" placeholder="Opcao positiva (ex: A favor)" style="margin-bottom:4px">
@@ -1057,10 +1057,10 @@ textarea.form-in{resize:vertical}
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">3. Cancelamentos</div>
       <div>Cancelamentos com mais de 2 horas de antecedencia nao geram penalidade. Cancelamentos tardios ou ausencias sao registrados como falta.</div>
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">4. Conduta</div>
-      <div>E obrigatorio: calcado esportivo; manter o espaco limpo; respeitar os horários; nao consumir bebidas alcoolicas; manter volume compativel com o sossego.</div>
+      <div>E obrigatorio: calcado esportivo; manter o espaco limpo; respeitar os horÃ¡rios; nao consumir bebidas alcoolicas; manter volume compativel com o sossego.</div>
       <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">5. Manutencao</div>
       <div>Danos causados serao de responsabilidade do apartamento que usava a quadra. Qualquer avaria deve ser reportada pelo canal de Ocorrencias.</div>
-      <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">6. Horários de Funcionamento</div>
+      <div style="font-size:12px;font-weight:600;color:var(--tx);margin:8px 0 4px">6. HorÃ¡rios de Funcionamento</div>
       <div>Dias uteis: 07h00 as 22h00. Fins de semana e feriados: 07h00 as 20h00.</div>
     </div>
     <div class="macts">
@@ -1149,7 +1149,7 @@ if(btnInstall){
 <div id="toast"></div>
 
 <script>
-// -- CONFIGURAÃÃES GLOBAIS --------------------------------------
+// -- CONFIGURAÃÂÃÂES GLOBAIS --------------------------------------
 var SURL = 'https://gkdwfntluopycapxyvfx.supabase.co';
 var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
 var sb = supabase.createClient(SURL, SKEY);
@@ -1158,12 +1158,12 @@ var MESES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agost
 var DIAS_N = ['D','S','T','Q','Q','S','S'];
 var SLOTS = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
 var MODS = [
-  {id:'tenis1',nome:'Tenis simples',sub:'1x1',icon:'ð¾',fixo:true,durs:[60]},
-  {id:'tenis2',nome:'Tenis duplas',sub:'2x2',icon:'ð¾',fixo:false,durs:[60,120]},
-  {id:'basquete',nome:'Basquete',sub:'coletivo',icon:'ð',fixo:false,durs:[60,120]},
-  {id:'futebol',nome:'Futebol',sub:'coletivo',icon:'â½',fixo:false,durs:[60,120]},
-  {id:'volei',nome:'Volei',sub:'coletivo',icon:'ð',fixo:false,durs:[60,120]},
-  {id:'livre',nome:'Uso livre',sub:'treino',icon:'ð',fixo:false,durs:[60,120]}
+  {id:'tenis1',nome:'Tenis simples',sub:'1x1',icon:'Ã°ÂÂÂ¾',fixo:true,durs:[60]},
+  {id:'tenis2',nome:'Tenis duplas',sub:'2x2',icon:'Ã°ÂÂÂ¾',fixo:false,durs:[60,120]},
+  {id:'basquete',nome:'Basquete',sub:'coletivo',icon:'Ã°ÂÂÂ',fixo:false,durs:[60,120]},
+  {id:'futebol',nome:'Futebol',sub:'coletivo',icon:'Ã¢ÂÂ½',fixo:false,durs:[60,120]},
+  {id:'volei',nome:'Volei',sub:'coletivo',icon:'Ã°ÂÂÂ',fixo:false,durs:[60,120]},
+  {id:'livre',nome:'Uso livre',sub:'treino',icon:'Ã°ÂÂÂ',fixo:false,durs:[60,120]}
 ];
 var OCA = {manutencao:'Manutencao',barulho:'Barulho',seguranca:'Seguranca',limpeza:'Limpeza',outros:'Outros'};
 var STL = {aberta:'Aberta',andamento:'Em andamento',resolvida:'Resolvida',encerrada:'Encerrada'};
@@ -1203,7 +1203,7 @@ var appCfg = {
   fair_play_ativo: true
 };
 
-// -- UTILITÃRIOS ------------------------------------------------
+// -- UTILITÃÂRIOS ------------------------------------------------
 function ts() {
   var d = new Date();
   var y = d.getFullYear();
@@ -1334,7 +1334,7 @@ document.getElementById('btn-biometric').addEventListener('click', function() {
     var passEl  = document.getElementById('login-pass');
     var err     = document.getElementById('login-err');
     err.style.display = 'none';
-    // Tenta usar Credential Management API se disponÃ­vel
+    // Tenta usar Credential Management API se disponÃÂ­vel
     if(window.PasswordCredential) {
       navigator.credentials.get({password: true, mediation: 'optional'}).then(function(cred) {
         if(cred && cred.type === 'password') {
@@ -1364,7 +1364,7 @@ document.getElementById('btn-biometric').addEventListener('click', function() {
   }
 });
 
-// -- RECUPERAÃÃO DE SENHA ---------------------------------------
+// -- RECUPERAÃÂÃÂO DE SENHA ---------------------------------------
 document.getElementById('link-esqueci').addEventListener('click', function() {
   var emailLogin = document.getElementById('login-email').value.trim();
   if(emailLogin) document.getElementById('esqueci-email').value = emailLogin;
@@ -1575,7 +1575,7 @@ function iniciarApp(user) {
     document.getElementById('tab-perfil').style.display = 'flex';
     setTimeout(initMelhorias, 500);
 
-    // Mostra seÃ§Ã£o de dispensas sÃ³ para admin
+    // Mostra seÃÂ§ÃÂ£o de dispensas sÃÂ³ para admin
     if(isAdmin()) {
       var secDisp = document.getElementById('sec-dispensas-wrap');
       if(secDisp) secDisp.style.display = 'block';
@@ -1785,7 +1785,7 @@ function renderCal() {
 
 // -- SELECIONAR DATA E SLOTS ------------------------------------
 function selData(ds) {
-  if(ds < ts()) { toast('Não é possível reservar datas passadas.'); return; }
+  if(ds < ts()) { toast('NÃ£o Ã© possÃ­vel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
   if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
   renderCal();
@@ -1793,7 +1793,7 @@ function selData(ds) {
   var sc = document.getElementById('slots-card');
   sc.style.display = 'block';
   var maxH = 22; // slots de 06:00 ate 21:00 (encerra as 22:00), valido para todos os dias
-  document.getElementById('slots-lbl').textContent = 'Horários - ' + fmtD(ds);
+  document.getElementById('slots-lbl').textContent = 'HorÃ¡rios - ' + fmtD(ds);
   var sg = document.getElementById('slot-grid');
 
   // If espacos not loaded yet, wait and retry
@@ -1821,7 +1821,7 @@ function selData(ds) {
 
         var slotMin = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
 
-        // Verificar bloqueio para este slot especÃ­fico
+        // Verificar bloqueio para este slot especÃÂ­fico
         var bloqueioInfo = isBlocked(ds, slot);
         if(bloqueioInfo) {
           html += '<div class="slot bloq" title="'+bloqueioInfo.motivo+'">';
@@ -1837,7 +1837,7 @@ function selData(ds) {
           return sStr >= ini && sStr < fim;
         });
 
-        // Mostra slot se: nao comeÃ§ou ainda, OU jÃ¡ comeÃ§ou mas tem pelo menos 30min restantes
+        // Mostra slot se: nao comeÃÂ§ou ainda, OU jÃÂ¡ comeÃÂ§ou mas tem pelo menos 30min restantes
         var slotFimMin = slotMin + 60; // slot padrao de 1h
         var minutosPassados = agoraMin - slotMin;
         var minutosRestantes = slotFimMin - agoraMin;
@@ -2157,7 +2157,7 @@ function abrirModalCancelar(id) {
     document.getElementById('mc-sub').textContent = 'Apto '+(morador&&morador.unidades?morador.unidades.codigo:'');
     document.getElementById('mc-dt').textContent = fmtD(r.data_reserva);
     document.getElementById('mc-hr').textContent = (r.slot_inicio||'').slice(0,5)+' - '+(r.slot_fim||'').slice(0,5);
-    // Verifica carÃªncia
+    // Verifica carÃÂªncia
     var avisoPen = document.getElementById('mc-aviso-penalidade');
     var foraCarencia = false;
     if(!isAdmin() && r.slot_inicio) {
@@ -2209,7 +2209,7 @@ function doCheckin(id) {
       var janela   = appCfg.checkin_janela_min || 15;
       var antecipacao = appCfg.checkin_ant_min || 10;
       var reservaEmCurso = agora >= dtInicio && agora < dtFim;
-      // SÃ³ expira se o horÃ¡rio da reserva JÃ PASSOU (nÃ£o se ainda estÃ¡ em andamento)
+      // SÃÂ³ expira se o horÃÂ¡rio da reserva JÃÂ PASSOU (nÃÂ£o se ainda estÃÂ¡ em andamento)
       if(diffMin > janela && !reservaEmCurso) {
         toast('Janela de check-in expirou. Reserva sera marcada como ausencia.');
         sb.from('reservas').update({status:'expirada'}).eq('id', id).then(function() {
@@ -2230,10 +2230,10 @@ function doCheckin(id) {
     });
 }
 
-// Verifica e aplica suspensÃ£o por fair play apÃ³s uma falta (reserva expirada)
+// Verifica e aplica suspensÃÂ£o por fair play apÃÂ³s uma falta (reserva expirada)
 function verificarFairPlay(unidadeId) {
   if(!appCfg.fair_play_ativo) return;
-  // Sempre busca configuraÃ§Ã£o atualizada do banco antes de verificar
+  // Sempre busca configuraÃÂ§ÃÂ£o atualizada do banco antes de verificar
   sb.from('configuracoes').select('faltas_suspensao,suspensao_dias,fair_play_ativo').limit(1).maybeSingle().then(function(cfgRes) {
     var cfg = cfgRes.data || {};
     var ativo = cfg.fair_play_ativo !== false && appCfg.fair_play_ativo !== false;
@@ -2245,7 +2245,7 @@ function verificarFairPlay(unidadeId) {
     if(cfg.suspensao_dias) appCfg.suspensao_dias = diasSusp;
 
     var mesAtual = ts().slice(0,7);
-    // SÃ³ conta faltas da quadra (nÃ£o academia) - usa espaco_id ou tipo_reserva
+    // SÃÂ³ conta faltas da quadra (nÃÂ£o academia) - usa espaco_id ou tipo_reserva
     var faltasQ = sb.from('reservas')
       .select('id', {count:'exact', head:true})
       .eq('unidade_id', unidadeId)
@@ -2313,7 +2313,7 @@ function renderCheckin() {
       html += '<div class="ckin-hero-title">Reserva de hoje</div>';
       html += '<div class="ckin-hero-sub">'+nomeMod+' - '+si+' a '+sf+'</div>';
       html += '<button class="ckin-big-btn" id="btn-fazer-ckin"><i class="ti ti-check" aria-hidden="true" style="font-size:18px"></i>Fazer check-in agora</button>';
-      html += '<div style="font-size:10px;opacity:.75;margin-top:10px">Disponível 10 min antes. Cancela após 15 min sem check-in.</div>';
+      html += '<div style="font-size:10px;opacity:.75;margin-top:10px">DisponÃ­vel 10 min antes. Cancela apÃ³s 15 min sem check-in.</div>';
       html += '<button style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;margin-top:10px;width:100%" id="btn-cancelar-ckin">Cancelar minha reserva e liberar a quadra</button>';
       html += '</div>';
       main.innerHTML = html;
@@ -2353,7 +2353,7 @@ function renderCheckin() {
     hist = futurasH.concat(passadasH);
 
     var hel = document.getElementById('ckin-hist');
-    if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem histórico</div>'; return; }
+    if(!hist.length) { hel.innerHTML='<div class="empty"><i class="ti ti-history"></i>Sem histÃ³rico</div>'; return; }
     var html = '';
     hist.forEach(function(r) {
       var fezCheckin = !!r.checkin_feito; // !! converte null/undefined para false
@@ -2368,7 +2368,7 @@ function renderCheckin() {
       else                    dotC = '#EF9F27';        // amarelo (aguardando)
 
       var bl;
-      if(fezCheckin)          bl = '<span class="badge b-teal">â Check-in feito</span>';
+      if(fezCheckin)          bl = '<span class="badge b-teal">Ã¢ÂÂ Check-in feito</span>';
       else if(cancelada)      bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
       else if(expirada)       bl = '<span class="badge b-gray">Ausencia</span>';
       else if(confirmada)     bl = '<span class="badge b-warn">Confirmada</span>';
@@ -2383,13 +2383,13 @@ function renderCheckin() {
     });
     hel.innerHTML = html;
 
-    // BotÃ£o limpar histÃ³rico check-in
+    // BotÃÂ£o limpar histÃÂ³rico check-in
     var btnLimCkin = document.getElementById('btn-limpar-hist-ckin');
     if(btnLimCkin) {
       var newBtnLimCkin = btnLimCkin.cloneNode(true);
       btnLimCkin.parentNode.replaceChild(newBtnLimCkin, btnLimCkin);
       newBtnLimCkin.addEventListener('click', function() {
-        if(!confirm('Ocultar histórico de check-in passado e cancelados?')) return;
+        if(!confirm('Ocultar histÃ³rico de check-in passado e cancelados?')) return;
         var hojeL = ts();
         // IDs a ocultar: passados, cancelados ou expirados
         var idsOcultar = todosHist
@@ -2410,7 +2410,7 @@ function renderCheckin() {
         Promise.all(idsOcultar.map(function(id){
           return sb.from('reservas').update({oculto_morador: true}).eq('id', id);
         })).then(function() {
-          toast('Histórico de check-in limpo.');
+          toast('HistÃ³rico de check-in limpo.');
         });
       });
     }
@@ -2430,7 +2430,7 @@ function renderMinhas() {
     .order('slot_inicio', {ascending:true})
     .then(function(res) {
       var mine = (res.data||[]).filter(function(r){ return !r.oculto_morador; });
-      // Ordena: futuras primeiro (mais prÃ³xima no topo), passadas depois (mais recente no topo)
+      // Ordena: futuras primeiro (mais prÃÂ³xima no topo), passadas depois (mais recente no topo)
       var hoje = ts();
       var futuras = mine.filter(function(r){ return r.data_reserva >= hoje; });
       var passadas = mine.filter(function(r){ return r.data_reserva < hoje; });
@@ -2487,8 +2487,8 @@ function renderMinhas() {
         });
       });
 
-      // Limpar histÃ³rico
-      var btnLimpar = document.getElementById('btn-limpar-histórico');
+      // Limpar histÃÂ³rico
+      var btnLimpar = document.getElementById('btn-limpar-histÃ³rico');
       if(btnLimpar) {
         var newLimpar = btnLimpar.cloneNode(true);
         btnLimpar.parentNode.replaceChild(newLimpar, btnLimpar);
@@ -2505,7 +2505,7 @@ function renderMinhas() {
               setTimeout(function(){ row.style.display = 'none'; }, 300);
             }
           });
-          toast('Histórico limpo.');
+          toast('HistÃ³rico limpo.');
           // Tenta persistir no banco silenciosamente (falha sem impacto se coluna nao existir)
           var ids = mine.filter(function(r){
             return r.data_reserva < hoje || r.status === 'cancelada' || r.status === 'expirada';
@@ -2643,7 +2643,7 @@ function renderWidgetStatus() {
         statusEl.style.color = 'var(--rdt)';
         statusEl.textContent = 'Quadra ocupada';
         subEl.style.color = 'var(--rdt)';
-        subEl.textContent = 'Libera as ' + (ocupadaAgora.slot_fim||'').slice(0,5) + (ocupadaAgora.unidades ? ' â¢ Apto ' + ocupadaAgora.unidades.codigo : '');
+        subEl.textContent = 'Libera as ' + (ocupadaAgora.slot_fim||'').slice(0,5) + (ocupadaAgora.unidades ? ' Ã¢ÂÂ¢ Apto ' + ocupadaAgora.unidades.codigo : '');
         if(btnRes) btnRes.style.display = 'none';
       } else if(proximaHoje) {
         dot.style.background = '#EF9F27';
@@ -2689,8 +2689,8 @@ function renderWidgetStatus() {
               var modNome = pr.modalidades ? pr.modalidades.nome : '';
               lembreteEl.style.display = 'block';
               lembreteEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
-                + '<div><div style="font-size:12px;font-weight:600;color:var(--v)"><i class="ti ti-bell-ringing" aria-hidden="true"></i> Sua reserva comeÃ§a ' + diffTxt + '</div>'
-                + '<div style="font-size:11px;color:var(--t2)">' + (pr.slot_inicio||'').slice(0,5) + '-' + (pr.slot_fim||'').slice(0,5) + (modNome ? ' â¢ ' + modNome : '') + '</div></div>'
+                + '<div><div style="font-size:12px;font-weight:600;color:var(--v)"><i class="ti ti-bell-ringing" aria-hidden="true"></i> Sua reserva comeÃÂ§a ' + diffTxt + '</div>'
+                + '<div style="font-size:11px;color:var(--t2)">' + (pr.slot_inicio||'').slice(0,5) + '-' + (pr.slot_fim||'').slice(0,5) + (modNome ? ' Ã¢ÂÂ¢ ' + modNome : '') + '</div></div>'
                 + '<button class="btn-sm b" onclick="document.getElementById(&quot;tab-checkin&quot;).click()" style="flex-shrink:0;font-size:11px"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in</button>'
                 + '</div>';
             } else {
@@ -2796,11 +2796,11 @@ function renderAvisos() {
         }
 
         var TIPOS_ENQUETE = {
-          sim_nao:            {a:'ð Sim',        b:'ð Nao'},
-          concordo_discordo:  {a:'â Concordo',   b:'â Discordo'},
-          aprovado_reprovado: {a:'âï¸ Aprovado',   b:'âï¸ Reprovado'},
-          favoravel_contrario:{a:'ð¢ Favoravel',  b:'ð´ Contrario'},
-          gostei_nao_gostei:  {a:'ð Gostei',     b:'ð Nao gostei'},
+          sim_nao:            {a:'Ã°ÂÂÂ Sim',        b:'Ã°ÂÂÂ Nao'},
+          concordo_discordo:  {a:'Ã¢ÂÂ Concordo',   b:'Ã¢ÂÂ Discordo'},
+          aprovado_reprovado: {a:'Ã¢ÂÂÃ¯Â¸Â Aprovado',   b:'Ã¢ÂÂÃ¯Â¸Â Reprovado'},
+          favoravel_contrario:{a:'Ã°ÂÂÂ¢ Favoravel',  b:'Ã°ÂÂÂ´ Contrario'},
+          gostei_nao_gostei:  {a:'Ã°ÂÂÂ Gostei',     b:'Ã°ÂÂÂ Nao gostei'},
           personalizado:      {a: enqueteCustomA||'Opcao A', b: enqueteCustomB||'Opcao B'}
         };
         var rotulos = TIPOS_ENQUETE[enqueteTipo] || TIPOS_ENQUETE['sim_nao'];
@@ -2810,14 +2810,14 @@ function renderAvisos() {
         var pctNao = totalVotos > 0 ? (100 - pctSim) : 0;
 
         // Todos (morador e admin) podem votar.
-        // Considera "jÃ¡ votou" quem tem entrada em leituras_avisos
-        // (votar registra leitura; mas admin nÃ£o marca lido automaticamente,
-        //  entÃ£o admin vÃª botÃµes a menos que tenha votado explicitamente)
+        // Considera "jÃÂ¡ votou" quem tem entrada em leituras_avisos
+        // (votar registra leitura; mas admin nÃÂ£o marca lido automaticamente,
+        //  entÃÂ£o admin vÃÂª botÃÂµes a menos que tenha votado explicitamente)
         var jaVotou = !!(lido);
-        var podeVotar = !jaVotou; // todos podem votar enquanto nÃ£o votaram
+        var podeVotar = !jaVotou; // todos podem votar enquanto nÃÂ£o votaram
 
         html += '<div style="background:var(--bg);border-radius:8px;padding:10px 11px;margin:4px 11px 8px;border:0.5px solid var(--br)">';
-        html += '<div style="font-size:11.5px;font-weight:600;margin-bottom:8px;color:var(--tx)">ð '+enquetePergunta+'</div>';
+        html += '<div style="font-size:11.5px;font-weight:600;margin-bottom:8px;color:var(--tx)">Ã°ÂÂÂ '+enquetePergunta+'</div>';
         if(podeVotar) {
           html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
           html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="font-size:12px;padding:11px 6px;font-weight:600;border-radius:8px">'+rotulos.a+'</button>';
@@ -2982,7 +2982,7 @@ function entrarListaEspera() {
 document.getElementById('btn-fechar-espera').addEventListener('click', function() { fecharModal('m-espera'); });
 document.getElementById('btn-entrar-espera').addEventListener('click', entrarListaEspera);
 
-// -- OCORRÃNCIAS ------------------------------------------------
+// -- OCORRÃÂNCIAS ------------------------------------------------
 document.getElementById('btn-nova-oco').addEventListener('click', function() {
   if(!requireAdmin()) return;
   abrirModal('m-nova-oco');
@@ -3038,7 +3038,7 @@ function renderDispensas() {
         var nome = m ? m.nome : '---';
         var dtRes = r ? fmtD(r.data_reserva) + ' ' + (r.slot_inicio||'').slice(0,5) : '---';
         html += '<div class="oco-card aberta" style="margin-bottom:8px">';
-        html += '<div class="oco-top"><div class="oco-titulo">Apto ' + apto + ' â¢ ' + nome + '</div>';
+        html += '<div class="oco-top"><div class="oco-titulo">Apto ' + apto + ' Ã¢ÂÂ¢ ' + nome + '</div>';
         html += '<span class="badge b-warn" style="font-size:10px">Pendente</span></div>';
         html += '<div class="oco-meta" style="margin-bottom:6px">Reserva: ' + dtRes + '</div>';
         html += '<div style="font-size:11px;color:var(--t1);margin-bottom:8px;padding:6px 8px;background:var(--bg);border-radius:6px">' + (s.motivo||'') + '</div>';
@@ -3168,7 +3168,7 @@ function renderOco() {
       }
       var bc = o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray';
       html += '<div class="oco-card '+o.status+'" data-oco-id="'+o.id+'">';
-      html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'â  ':'')+o.titulo+'<span style="font-size:9.5px;font-weight:400;color:var(--t2)">'+aptoInfo+'</span></div>';
+      html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'Ã¢ÂÂ  ':'')+o.titulo+'<span style="font-size:9.5px;font-weight:400;color:var(--t2)">'+aptoInfo+'</span></div>';
       html += '<span class="badge '+bc+'">'+STL[o.status]+'</span></div>';
       html += '<div class="oco-meta"><span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span>';
       html += '<span>'+(o.local||'')+'</span><span>'+fmtD((o.created_at||'').slice(0,10))+'</span>';
@@ -3196,7 +3196,7 @@ function renderOco() {
   });
 }
 
-// -- CONFIGURAÃÃES ----------------------------------------------
+// -- CONFIGURAÃÂÃÂES ----------------------------------------------
 function renderConfig() {
   if(!requireAdmin()) return;
   var sl = function(id, val) {
@@ -3245,7 +3245,7 @@ function renderConfig() {
     if(badge) badge.textContent = pends.length > 0 ? pends.length+' pendente(s)' : '';
     var ndC = document.getElementById('nd-config');
     if(ndC) ndC.classList.toggle('show', pends.length > 0);
-    var html = pends.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhuma inscrição pendente.</div>';
+    var html = pends.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhuma inscriÃ§Ã£o pendente.</div>';
     pends.forEach(function(m) {
       var cod = m.unidades ? m.unidades.codigo : 'Sindico';
       html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:7px">';
@@ -3284,8 +3284,8 @@ function renderConfig() {
     var blqs = res.data||[];
     var html = blqs.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum bloqueio cadastrado.</div>';
     blqs.forEach(function(b) {
-      var blkIcons = {manutencao:'ð§',limpeza:'ð§¹',evento:'ð',vistoria:'ð',outro:'ð'};
-      var blkIcon = blkIcons[b.tipo] || 'ð';
+      var blkIcons = {manutencao:'Ã°ÂÂÂ§',limpeza:'Ã°ÂÂ§Â¹',evento:'Ã°ÂÂÂ',vistoria:'Ã°ÂÂÂ',outro:'Ã°ÂÂÂ'};
+      var blkIcon = blkIcons[b.tipo] || 'Ã°ÂÂÂ';
       html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
       html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+blkIcon+' '+b.motivo+'</div>';
       html += '<div style="font-size:10.5px;color:var(--t2)">'+fmtD(b.data_inicio)+(b.data_inicio!==b.data_fim?' a '+fmtD(b.data_fim):'')+'</div></div>';
@@ -3423,7 +3423,7 @@ function renderRankingPontualidade() {
     var el = document.getElementById('ranking-pontualidade');
     if(!el) return;
     if(!lista.length) { el.innerHTML='<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>'; return; }
-    var medals = ['ð¥','ð¥','ð¥'];
+    var medals = ['Ã°ÂÂ¥Â','Ã°ÂÂ¥Â','Ã°ÂÂ¥Â'];
     el.innerHTML = lista.map(function(a,i){
       var medal = medals[i] || (i+1+'.');
       var cor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 70 ? 'var(--amb)' : 'var(--rdt)';
@@ -3656,7 +3656,7 @@ function criarContrato() {
   });
 }
 
-// -- SALVAR CONFIGURAÃÃES ---------------------------------------
+// -- SALVAR CONFIGURAÃÂÃÂES ---------------------------------------
 document.getElementById('btn-salvar-config').addEventListener('click', function() {
   if(!requireAdmin()) return;
   var li = function(id, def) {
@@ -3696,7 +3696,7 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
   });
 });
 
-// -- BOTÃES CONTRATOS / FECHAMENTO ------------------------------
+// -- BOTÃÂES CONTRATOS / FECHAMENTO ------------------------------
 document.getElementById('btn-novo-contrato').addEventListener('click', function() {
   if(!requireAdmin()) return;
   abrirModalContrato(null, false);
@@ -3705,7 +3705,7 @@ document.getElementById('btn-fechar-contrato').addEventListener('click', functio
 document.getElementById('btn-criar-contrato').addEventListener('click', criarContrato);
 
 // -- BLOQUEIOS --------------------------------------------------
-// -- EXPORTAÃÃO CSV --------------------------------------------
+// -- EXPORTAÃÂÃÂO CSV --------------------------------------------
 function exportarCSV(dados, nomeArquivo) {
   if(!dados || !dados.length) { toast('Nenhum dado para exportar.'); return; }
   var cols = Object.keys(dados[0]);
@@ -3716,7 +3716,7 @@ function exportarCSV(dados, nomeArquivo) {
       return '"' + v.replace(/"/g, '""') + '"';
     }).join(';'));
   });
-  var bom = 'ï»¿';
+  var bom = 'Ã¯Â»Â¿';
   var blob = new Blob([bom + linhas.join('\n')], {type:'text/csv;charset=utf-8'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
@@ -3736,7 +3736,7 @@ document.getElementById('btn-export-reservas').addEventListener('click', functio
     .lte('data_reserva', mes+'-31')
     .order('data_reserva').order('slot_inicio')
     .then(function(res) {
-      setLoading('btn-export-reservas', false, '<i class="ti ti-table-export"></i>Reservas do Mês');
+      setLoading('btn-export-reservas', false, '<i class="ti ti-table-export"></i>Reservas do MÃªs');
       var rows = (res.data||[]).map(function(r) {
         return {
           Data: r.data_reserva,
@@ -3760,7 +3760,7 @@ document.getElementById('btn-export-faltas').addEventListener('click', function(
     .neq('tipo', 'admin')
     .order('faltas_mes', {ascending: false})
     .then(function(res) {
-      setLoading('btn-export-faltas', false, '<i class="ti ti-user-x"></i>Faltas e Suspensões');
+      setLoading('btn-export-faltas', false, '<i class="ti ti-user-x"></i>Faltas e SuspensÃµes');
       var rows = (res.data||[]).map(function(m) {
         return {
           Apartamento: m.unidades ? m.unidades.codigo : '',
@@ -3839,7 +3839,7 @@ function verificarBloqueioEmergencial() {
       if(_blkEmergId) {
         btnBlk.style.display = 'none';
         if(btnDesblk) btnDesblk.style.display = 'block';
-        if(statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'â ï¸ Quadra bloqueada para hoje por bloqueio emergencial.'; }
+        if(statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'Ã¢ÂÂ Ã¯Â¸Â Quadra bloqueada para hoje por bloqueio emergencial.'; }
       } else {
         btnBlk.style.display = 'block';
         if(btnDesblk) btnDesblk.style.display = 'none';
@@ -4154,7 +4154,7 @@ if(tglDark) {
   });
 }
 
-// -- NOTIFICAÃÃES PUSH ------------------------------------------
+// -- NOTIFICAÃÂÃÂES PUSH ------------------------------------------
 var tglPush = document.getElementById('tgl-push');
 if(tglPush) {
   if('Notification' in window && Notification.permission === 'granted') tglPush.classList.add('on');
@@ -4177,7 +4177,7 @@ if(tglPush) {
   });
 }
 
-// -- CALENDÃRIO DE RESERVAS -------------------------------------
+// -- CALENDÃÂRIO DE RESERVAS -------------------------------------
 var calVY = new Date().getFullYear(), calVM = new Date().getMonth();
 var calSelDate = null;
 
@@ -4193,7 +4193,7 @@ function renderCalendario() {
   var ini = calVY+'-'+String(calVM+1).padStart(2,'0')+'-01';
   var fim = calVY+'-'+String(calVM+1).padStart(2,'0')+'-31';
 
-  // Busca todas as reservas confirmadas do mÃªs
+  // Busca todas as reservas confirmadas do mÃÂªs
   sb.from('reservas')
     .select('data_reserva,slot_inicio,slot_fim,tipo_reserva,unidades(codigo),modalidades(nome,icone)')
     .eq('status','confirmada')
@@ -4211,7 +4211,7 @@ function renderCalendario() {
         porData[d].push(r);
       });
 
-      // Monta o grid do calendÃ¡rio
+      // Monta o grid do calendÃÂ¡rio
       var g = document.getElementById('cal-grid-cal');
       var html = DIAS_N.map(function(d){ return '<div class="cal-dn">'+d+'</div>'; }).join('');
       var first = new Date(calVY,calVM,1).getDay();
@@ -4272,13 +4272,13 @@ function renderCalendario() {
         });
       });
 
-      // Resumo do mÃªs
+      // Resumo do mÃÂªs
       var totalRes = reservasMes.length;
       var aptosUnicos = {};
       reservasMes.forEach(function(r){ if(r.unidades) aptosUnicos[r.unidades.codigo] = (aptosUnicos[r.unidades.codigo]||0)+1; });
       var rankApto = Object.entries(aptosUnicos).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
 
-      // Total de horas: usa slot_fim se disponÃ­vel, senÃ£o duracao_min, senÃ£o 60min
+      // Total de horas: usa slot_fim se disponÃÂ­vel, senÃÂ£o duracao_min, senÃÂ£o 60min
       var totalMinutos = 0;
       reservasMes.forEach(function(r) {
         if(r.slot_inicio && r.slot_fim) {
@@ -4290,8 +4290,8 @@ function renderCalendario() {
       });
       var totalHoras = (totalMinutos / 60).toFixed(1).replace('.0','');
 
-      // Taxa de ocupaÃ§Ã£o baseada em SLOTS (horÃ¡rios de 1h disponÃ­veis no mÃªs)
-      // 06:00 a 21:00 = 16 slots por dia Ã dias do mÃªs
+      // Taxa de ocupaÃÂ§ÃÂ£o baseada em SLOTS (horÃÂ¡rios de 1h disponÃÂ­veis no mÃÂªs)
+      // 06:00 a 21:00 = 16 slots por dia ÃÂ dias do mÃÂªs
       var diasMes = new Date(calVY,calVM+1,0).getDate();
       var slotsDisponiveis = 16 * diasMes;
       // Conta slots efetivamente ocupados (cada hora reservada = 1 slot)
@@ -4305,18 +4305,18 @@ function renderCalendario() {
         +'</div>'
         +'<div style="background:var(--am);border-radius:8px;padding:10px;margin-bottom:10px">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
-        +'<span style="font-size:11px;font-weight:600;color:var(--amt)">Ocupacao dos horários disponiveis do mes</span>'
+        +'<span style="font-size:11px;font-weight:600;color:var(--amt)">Ocupacao dos horÃ¡rios disponiveis do mes</span>'
         +'<span style="font-size:16px;font-weight:700;color:var(--amt)">'+taxaSlots+'%</span>'
         +'</div>'
         +'<div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden">'
         +'<div style="height:100%;background:var(--amb);width:'+taxaSlots+'%;border-radius:4px"></div>'
         +'</div>'
-        +'<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponiveis+' horários de 1h reservados</div>'
+        +'<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponiveis+' horÃ¡rios de 1h reservados</div>'
         +'</div>';
       if(rankApto.length) {
         resumoHtml += '<div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Apartamentos mais ativos</div>';
         rankApto.forEach(function(a, i) {
-          var medals = ['ð¥','ð¥','ð¥'];
+          var medals = ['Ã°ÂÂ¥Â','Ã°ÂÂ¥Â','Ã°ÂÂ¥Â'];
           var medal = medals[i] || (i+1+'.');
           resumoHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--br)">'
             +'<span style="font-size:13px">'+medal+'</span>'
@@ -4424,7 +4424,7 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
     <div id="onb-step-1" style="padding:28px 24px;text-align:center">
       <div style="font-size:44px;margin-bottom:12px">&#127934;</div>
       <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Bem-vindo ao app da quadra!</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Aqui voce reserva a quadra poliesportiva, faz check-in e acompanha seu histórico, tudo pelo celular.</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Aqui voce reserva a quadra poliesportiva, faz check-in e acompanha seu histÃ³rico, tudo pelo celular.</div>
       <button class="btn-p" onclick="onbStep(2)" style="width:100%">Proximo <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
     </div>
     <div id="onb-step-2" style="display:none;padding:28px 24px;text-align:center">
@@ -4455,13 +4455,13 @@ document.getElementById('btn-qr-checkin').addEventListener('click', function() {
 
 <div class="modal-bg" id="m-reserva-ok">
   <div class="modal" style="max-width:320px;text-align:center;padding:24px 20px">
-    <div style="font-size:36px;margin-bottom:8px">â</div>
+    <div style="font-size:36px;margin-bottom:8px">Ã¢ÂÂ</div>
     <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:var(--t1)">Reserva confirmada!</div>
     <div id="m-reserva-ok-detalhe" style="font-size:12px;color:var(--t2);margin-bottom:10px"></div>
     <div id="m-reserva-ok-convites" style="display:none;margin-bottom:12px;font-size:11px;color:var(--t2);background:var(--vl);border-radius:8px;padding:8px 10px"></div>
     <a id="btn-calendar-link" href="#" target="_blank" rel="noopener"
       style="display:block;background:#27500A;color:#fff;text-decoration:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;margin-bottom:10px">
-      ð Adicionar ao Google Calendar
+      Ã°ÂÂÂ Adicionar ao Google Calendar
     </a>
     <button id="btn-fechar-reserva-ok"
       style="background:none;border:1px solid var(--brd);border-radius:10px;padding:8px 16px;font-size:13px;color:var(--t2);width:100%;cursor:pointer">
@@ -4653,14 +4653,14 @@ function renderAcademia() {
 }
 
 function selDataAcademia(ds) {
-  if(ds < ts()) { toast('Não é possível reservar datas passadas.'); return; }
+  if(ds < ts()) { toast('NÃ£o Ã© possÃ­vel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
   if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso.'); return; }
   acSelDate = ds;
   renderAcademia();
   var sc = document.getElementById('ac-slots-card');
   sc.style.display = 'block';
-  document.getElementById('ac-slots-lbl').textContent = 'Horários - ' + fmtD(ds);
+  document.getElementById('ac-slots-lbl').textContent = 'HorÃ¡rios - ' + fmtD(ds);
   var sg = document.getElementById('ac-slot-grid');
   var ac = espacos.find(function(e){ return e.id === espacoAcademiaId; });
   var maxSimult = ac ? (ac.max_simult || 3) : 3;
@@ -4698,7 +4698,7 @@ function selDataAcademia(ds) {
           + '<div class="sh">' + slot + '</div>'
           + '<div class="sl">' + lbl + '</div></div>';
       });
-      sg.innerHTML = html || '<div class="empty">Sem horários disponiveis</div>';
+      sg.innerHTML = html || '<div class="empty">Sem horÃ¡rios disponiveis</div>';
       sg.querySelectorAll('[data-ac-slot]').forEach(function(el) {
         var act = el.dataset.acSlot;
         if(!act) return;
@@ -4890,15 +4890,15 @@ var rankingModo = 'ranking';
 document.getElementById('rpill-ranking').addEventListener('click', function() {
   rankingModo = 'ranking';
   document.getElementById('rpill-ranking').classList.add('active');
-  document.getElementById('rpill-histórico').classList.remove('active');
+  document.getElementById('rpill-histÃ³rico').classList.remove('active');
   renderRanking('ranking');
 });
 
-document.getElementById('rpill-histórico').addEventListener('click', function() {
-  rankingModo = 'histórico';
-  document.getElementById('rpill-histórico').classList.add('active');
+document.getElementById('rpill-histÃ³rico').addEventListener('click', function() {
+  rankingModo = 'histÃ³rico';
+  document.getElementById('rpill-histÃ³rico').classList.add('active');
   document.getElementById('rpill-ranking').classList.remove('active');
-  renderRanking('histórico');
+  renderRanking('histÃ³rico');
 });
 
 document.getElementById('btn-novo-placar').addEventListener('click', function() {
@@ -4982,7 +4982,7 @@ function renderRanking(modo) {
       .limit(20)
       .then(function(res) {
         var dados = res.data || [];
-        if(!dados.length) { el.innerHTML = '<div class="empty"><i class="ti ti-history"></i>Sem histórico</div>'; return; }
+        if(!dados.length) { el.innerHTML = '<div class="empty"><i class="ti ti-history"></i>Sem histÃ³rico</div>'; return; }
         var html = '';
         dados.forEach(function(p) {
           var cod = p.unidades ? p.unidades.codigo : '---';
@@ -4990,7 +4990,7 @@ function renderRanking(modo) {
           var venceu = p.vencedor === 'casa';
           var empatou = p.vencedor === 'empate';
           var bcls = venceu ? 'b-teal' : empatou ? 'b-warn' : 'b-danger';
-          var btxt = venceu ? 'Vitória' : empatou ? 'Empate' : 'Derrota';
+          var btxt = venceu ? 'VitÃ³ria' : empatou ? 'Empate' : 'Derrota';
           html += '<div class="res-card confirmada" style="' + (isMeu ? 'background:var(--vl)' : '') + '">';
           html += '<div class="res-top"><div class="res-data">Apto ' + cod + (p.adversario_apto ? ' x ' + p.adversario_apto : '') + '</div><span class="badge ' + bcls + '">' + btxt + '</span></div>';
           html += '<div class="res-info">' + p.placar_casa + ' x ' + p.placar_visitante + ' &bull; ' + (p.modalidade || '---') + '</div>';
@@ -5009,10 +5009,10 @@ function updateStepper(step){for(let i=1;i<=3;i++){const el=document.getElementB
 function loadClima(){
   const el=document.getElementById('clima-widget');
   if(!el)return;
-  fetch('https://wttr.in/Fortaleza?format=%t+%C')
-    .then(r=>r.text())
-    .then(txt=>{const p=txt.trim().split(' ');const temp=p[0]||'--';const desc=p.slice(1).join(' ')||'';const icon=desc.includes('Sun')||desc.includes('Clear')?'☀️':desc.includes('Rain')||desc.includes('Drizzle')?'🌧️':desc.includes('Cloud')?'⛅':'🌤️';el.innerHTML='<div><div class="clima-temp">'+temp+'</div><div class="clima-desc">'+desc+'</div><div style="font-size:9px;opacity:.7;margin-top:2px">Fortaleza, CE</div></div><div style="font-size:28px">'+icon+'</div>';})
-    .catch(()=>{el.innerHTML='<div><div class="clima-temp">--°C</div><div class="clima-desc">Fortaleza, CE</div></div><div style="font-size:28px">🌤️</div>';});
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=-3.7172&longitude=-38.5433&current=temperature_2m,weathercode&timezone=America/Fortaleza')
+    .then(r=>r.json())
+    .then(d=>{const temp=Math.round(d.current.temperature_2m)+'°C';const code=d.current.weathercode;const desc=code===0?'Céu limpo':code<=3?'Parcialmente nublado':code<=9?'Nevoeiro':code<=59?'Garoa leve':code<=69?'Chuva leve':'Chuva';const icon=code===0?'☀️':code<=3?'⛅':code<=49?'🌫️':'🌧️';el.innerHTML='<div><div class="clima-temp">'+temp+'</div><div class="clima-desc">'+desc+'</div><div style="font-size:9px;opacity:.7;margin-top:2px">Fortaleza, CE</div></div><div style="font-size:28px">'+icon+'</div>';})
+    .catch(()=>{el.innerHTML='<div><div class="clima-temp">26°C</div><div class="clima-desc">Fortaleza, CE</div></div><div style="font-size:28px">⛅</div>';});
 }
 
 async function loadNotificacoes(){
@@ -5041,8 +5041,8 @@ async function loadMeuPerfil(){
   const taxa=total>0?Math.round((checkins/total)*100):0;
   el.innerHTML='<div class="perfil-hero"><div class="perfil-avatar">'+iniciais+'</div><div class="perfil-nome">'+nome+'</div><div class="perfil-apto">Apto '+unid+'</div><div class="perfil-role">'+(morador.role==='admin'?'Administrador':'Morador')+'</div></div>'
     +'<div class="stat-row"><div class="stat-box"><div class="stat-num">'+total+'</div><div class="stat-lbl">Total de Reservas</div></div><div class="stat-box"><div class="stat-num">'+checkins+'</div><div class="stat-lbl">Check-ins</div></div><div class="stat-box"><div class="stat-num">'+taxa+'%</div><div class="stat-lbl">Taxa Check-in</div></div></div>'
-    +'<div class="pontos-bar"><div class="pontos-icon">🏆</div><div><div class="pontos-val">'+pts+' pts</div><div class="pontos-lbl">Pontuação de pontualidade</div></div></div>'
-    +'<div class="card"><div class="card-title"><i class="ti ti-camera"></i>Galeria dos Espaços</div><div id="galeria-content">Carregando...</div></div>';
+    +'<div class="pontos-bar"><div class="pontos-icon">ð</div><div><div class="pontos-val">'+pts+' pts</div><div class="pontos-lbl">PontuaÃ§Ã£o de pontualidade</div></div></div>'
+    +'<div class="card"><div class="card-title"><i class="ti ti-camera"></i>Galeria dos EspaÃ§os</div><div id="galeria-content">Carregando...</div></div>';
   loadGaleria();
 }
 
@@ -5050,7 +5050,7 @@ async function loadGaleria(){
   const el=document.getElementById('galeria-content');
   if(!el)return;
   const {data}=await sb.from('galeria').select('*').eq('ativo',true).order('ordem');
-  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:20px 0"><span style="font-size:32px;opacity:.25">📸</span><div style="font-size:12px;color:var(--t2);margin-top:6px">Galeria vazia</div><div style="font-size:10px;color:var(--t3)">Adicione fotos dos espaços comuns</div></div>';return;}
+  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:20px 0"><span style="font-size:32px;opacity:.25">ð¸</span><div style="font-size:12px;color:var(--t2);margin-top:6px">Galeria vazia</div><div style="font-size:10px;color:var(--t3)">Adicione fotos dos espaÃ§os comuns</div></div>';return;}
   el.innerHTML='<div class="galeria-grid">'+data.map(f=>'<div class="galeria-item"><img class="galeria-img" src="'+f.foto_url+'" loading="lazy" alt="'+(f.titulo||'Foto')+'"><div class="galeria-caption">'+(f.titulo||'')+'</div></div>').join('')+'</div>';
 }
 
@@ -5058,7 +5058,7 @@ function renderDashboardCharts(stats){
   const ocpEl=document.getElementById('chart-ocupacao');
   const modEl=document.getElementById('chart-modalidades');
   if(typeof Chart==='undefined')return;
-  const dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const dias=['Dom','Seg','Ter','Qua','Qui','Sex','SÃ¡b'];
   if(ocpEl){if(window._co)window._co.destroy();window._co=new Chart(ocpEl,{type:'bar',data:{labels:dias,datasets:[{label:'Reservas',data:dias.map((_,i)=>(stats&&stats.porDia&&stats.porDia[i])||0),backgroundColor:'rgba(39,80,10,.75)',borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:9}}},x:{ticks:{font:{size:9}}}},responsive:true,maintainAspectRatio:false}});}
   if(modEl){const mods=stats&&stats.porModalidade||{};const labels=Object.keys(mods);if(!labels.length)return;if(window._cm)window._cm.destroy();window._cm=new Chart(modEl,{type:'doughnut',data:{labels,datasets:[{data:labels.map(k=>mods[k]),backgroundColor:['#27500A','#3B6D11','#619627','#97C459','#C6E090','#EF9F27']}]},options:{plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10}}},responsive:true,maintainAspectRatio:false}});}
 }
