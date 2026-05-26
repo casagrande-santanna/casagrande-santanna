@@ -3,11 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0F5C2E">
+<meta name="theme-color" content="#27500A">
 <meta name="description" content="Casa Grande de Sant'Anna - Sistema de gestão de espaços comuns do condomínio. Reserve a quadra poliesportiva, academia e muito mais.">
 <meta property="og:title" content="Casa Grande de Sant'Anna">
 <meta property="og:description" content="Sistema de gestão de espaços comuns do condomínio">
@@ -23,27 +20,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{
-  /* Primárias — Verde Floresta (WCAG AAA) */
-  --v:#0F5C2E;  /* texto sobre branco: 8.1:1 */
-  --vl:#E6F4EB;
-  --vm:#1A7A3F;
-  /* Âmbar */
-  --am:#FDF3E3;--amb:#D97706;--amt:#92400E;
-  /* Vermelho */
-  --rd:#FEF2F2;--rdb:#FCA5A5;--rdt:#B91C1C;
-  /* Azul */
-  --bl:#EFF6FF;--blb:#93C5FD;--blt:#1D4ED8;
-  /* Cinza */
-  --gy:#F3F4F6;--gyb:#D1D5DB;--gyt:#4B5563;
-  /* Fundo e superfícies */
-  --bg:#F9FAFB;--cd:#FFFFFF;--br:#E5E7EB;
-  /* Texto — contraste mínimo 7:1 */
-  --tx:#111827;--t1:#111827;--t2:#374151;--t3:#6B7280;--bg-page:#F0F2F5;--card:#FFFFFF;
-  /* Raios */
+  --v:#27500A;--vl:#EAF3DE;--vm:#3B6D11;
+  --am:#FAEEDA;--amb:#EF9F27;--amt:#854F0B;
+  --rd:#FCEBEB;--rdb:#F09595;--rdt:#A32D2D;
+  --bl:#E6F1FB;--blb:#85B7EB;--blt:#185FA5;
+  --gy:#F1EFE8;--gyb:#B4B2A9;--gyt:#5F5E5A;
+  --bg:#F5F5F0;--cd:#fff;--br:#E0E0DA;
+  --tx:#1A1A1A;--t2:#666;--t3:#999;
   --r:10px;--rl:14px;
-  /* Tipografia */
-  --font-display:'Poppins',system-ui,sans-serif;
-  --font-body:'Inter',system-ui,sans-serif;
 }
 
 /* === MELHORIAS v2.0 === */
@@ -93,39 +77,39 @@
 .btn-p:hover{filter:brightness(1.08)}
 
 body.dark{
-  --v:#4ADE80;--vl:#052e16;--vm:#22C55E;
-  --am:#1c1107;--amb:#FBBF24;--amt:#FDE68A;
-  --rd:#1c0909;--rdb:#7F1D1D;--rdt:#FCA5A5;
-  --bl:#0c1a2e;--blb:#1E40AF;--blt:#93C5FD;
-  --gy:#1F2937;--gyb:#374151;--gyt:#D1D5DB;
-  --bg:#0f172a;--cd:#1E293B;--br:#334155;
-  --tx:#F1F5F9;--t1:#F1F5F9;--t2:#CBD5E1;--t3:#94A3B8;
+  --v:#4A8C1C;--vl:#1A2E0A;--vm:#5FA328;
+  --am:#2E2008;--amb:#EF9F27;--amt:#F5C87A;
+  --rd:#2E0808;--rdb:#8B3030;--rdt:#F09595;
+  --bl:#081828;--blb:#2B5280;--blt:#85B7EB;
+  --gy:#1A1A18;--gyb:#3A3A38;--gyt:#A0A09A;
+  --bg:#0F0F0D;--cd:#1C1C1A;--br:#2E2E2A;
+  --tx:#F0F0EC;--t2:#AAA9A4;--t3:#666;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;padding:0}body{font-family:var(--font-body);background:#f0f0ec;color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh;display:flex;flex-direction:column;align-items:stretch}
-.app{flex:1;display:flex;flex-direction:column;max-width:430px;margin:0 auto;width:100%;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.12)}
-.hdr{background:linear-gradient(135deg,#0F5C2E 0%,#1A7A3F 100%);color:#fff;padding:12px 16px 10px;position:sticky;top:0;z-index:30}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.app{flex:1;display:flex;flex-direction:column}
+.hdr{background:var(--v);color:#fff;padding:12px 16px 10px;position:sticky;top:0;z-index:30}
 .hdr-row{display:flex;align-items:center;justify-content:space-between}
 .hdr-title{font-size:15px;font-weight:600}
 .hdr-sub{font-size:10px;opacity:.75;margin-top:1px}
 .hdr-right{display:flex;align-items:center;gap:8px}
 .role-tag{font-size:9px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 8px}
 .av-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;cursor:pointer}
-.tab-bar{display:flex;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:58px;z-index:29}
-.tab{flex:1;padding:8px 2px 6px;text-align:center;font-size:9px;color:#6B7280;cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;border:none;background:none;line-height:1.2}
+.tab-bar{display:flex;background:var(--cd);border-bottom:0.5px solid var(--br);position:sticky;top:58px;z-index:29}
+.tab{flex:1;padding:8px 2px 6px;text-align:center;font-size:9px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;border:none;background:none;line-height:1.2}
 .tab i{font-size:17px}
 .tab.active{color:var(--v);border-bottom:2px solid var(--v)}
 .ndot{width:6px;height:6px;background:#E24B4A;border-radius:50%;position:absolute;top:4px;right:5px;display:none}
 .ndot.show{display:block}
-.content{flex:1;overflow-y:auto;padding:14px 16px 80px;background:var(--bg)}
+.content{flex:1;overflow-y:auto;padding:14px 16px 80px}
 .screen{display:none}.screen.active{display:block}
-.card{background:#ffffff;border:1px solid #e5e7eb;border-radius:var(--rl);padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card{background:var(--cd);border:0.5px solid var(--br);border-radius:var(--rl);padding:12px 14px;margin-bottom:10px}
 .card-title{font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .card-title i{font-size:14px;color:var(--v)}
 .sec-lbl{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 5px}
 .form-row{margin-bottom:10px}
 .form-lbl{font-size:10.5px;font-weight:600;color:var(--t2);display:block;margin-bottom:3px}
-.form-in{width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;font-size:13px;background:#ffffff;color:#111827;outline:none;transition:border-color .2s}
+.form-in{width:100%;border:0.5px solid var(--br);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--cd);color:var(--tx);outline:none}
 .form-in:focus{border-color:var(--v)}
 textarea.form-in{resize:vertical}
 .btn-p{background:var(--v);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;width:100%;justify-content:center}
@@ -171,7 +155,7 @@ textarea.form-in{resize:vertical}
 .dur-row{display:flex;gap:6px;margin:8px 0}
 .dur-btn{flex:1;border:0.5px solid var(--br);border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:var(--cd)}
 .dur-btn.sel{border:2px solid var(--v);background:var(--vl)}.dur-btn .dt{font-size:14px;font-weight:600}.dur-btn .dl{font-size:10px;color:var(--t2)}
-.res-card{border:1px solid #e5e7eb;border-radius:var(--r);padding:10px 12px;margin-bottom:7px;background:#ffffff}
+.res-card{border:0.5px solid var(--br);border-radius:var(--r);padding:10px 12px;margin-bottom:7px}
 .res-card.confirmada{border-left:3px solid #97C459;border-radius:0 var(--r) var(--r) 0}
 .res-card.cancelada{border-left:3px solid var(--rdb);border-radius:0 var(--r) var(--r) 0;opacity:.65}
 .res-card.expirada{border-left:3px solid var(--gyb);border-radius:0 var(--r) var(--r) 0;opacity:.65}
@@ -207,7 +191,7 @@ textarea.form-in{resize:vertical}
 .resumo-row:last-child{border-bottom:none;font-weight:600}.resumo-lbl{color:var(--t2)}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-end;justify-content:center}
 .modal-bg.open{display:flex}
-.modal-card{background:#ffffff;border-radius:16px 16px 0 0;padding:16px 16px 28px;width:100%;max-width:430px;max-height:88vh;overflow-y:auto}
+.modal-card{background:var(--cd);border-radius:16px 16px 0 0;padding:16px 16px 28px;width:100%;max-width:430px;max-height:88vh;overflow-y:auto}
 .modal-card.center{border-radius:14px;margin:20px;max-height:85vh}
 .mhandle{width:28px;height:3px;background:var(--br);border-radius:2px;margin:0 auto 12px}
 .mtitle{font-size:14px;font-weight:600;margin-bottom:3px}.msub{font-size:11px;color:var(--t2);margin-bottom:11px}
@@ -225,7 +209,7 @@ textarea.form-in{resize:vertical}
 .login-lbl{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:4px;display:block}
 .login-input{width:100%;border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:14px;outline:none}
 .login-input:focus{border-color:var(--v)}
-.login-btn{width:100%;background:linear-gradient(135deg,#0F5C2E,#1A7A3F);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
+.login-btn{width:100%;background:var(--v);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
 .login-err{background:var(--rd);color:var(--rdt);border-radius:7px;padding:8px 12px;font-size:11px;margin-top:8px;display:none}
 .perfil-av{width:52px;height:52px;border-radius:50%;background:var(--vl);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--v);margin-bottom:10px}
 .p-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br);font-size:12px}
@@ -244,19 +228,19 @@ textarea.form-in{resize:vertical}
 @keyframes spin{to{transform:rotate(360deg)}}
 #toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(23,52,4,.94);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:500;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
 
-.desktop-body{display:flex;flex:1;min-height:0;overflow:hidden;flex-direction:column;background:#F0F2F5}
+.desktop-body{display:flex;flex:1;min-height:0;overflow:hidden;flex-direction:column}
 
 @media(min-width:768px){
-  body{max-width:100%;flex-direction:column;align-items:stretch;background:#f0f2f5}
+  body{max-width:100%;flex-direction:column;align-items:stretch}
   .desktop-body{flex-direction:row}
-  .app{flex:1;flex-direction:column;max-width:100%;box-shadow:none}
+  .app{flex:1;flex-direction:column;max-width:100%}
   .hdr{position:sticky;top:0;z-index:30}
-  .tab-bar{width:180px;flex-direction:column;border-bottom:none;border-right:1px solid #e5e7eb;background:#fff;position:sticky;top:0;height:100%;overflow-y:auto;padding:8px 0;flex-shrink:0;align-self:flex-start;max-height:calc(100vh - 58px)}
+  .tab-bar{width:180px;flex-direction:column;border-bottom:none;border-right:0.5px solid var(--br);position:sticky;top:0;height:100%;overflow-y:auto;padding:8px 0;flex-shrink:0;align-self:flex-start;max-height:calc(100vh - 58px)}
   .tab{flex:none;flex-direction:row;justify-content:flex-start;padding:10px 16px;font-size:12px;border-bottom:none;border-left:3px solid transparent;gap:10px;text-align:left}
   .tab i{font-size:18px;flex-shrink:0}
   .tab.active{border-bottom:none;border-left:3px solid var(--v);background:var(--vl)}
   .tab .ndot{top:8px;right:8px}
-  .content{padding:16px 24px 40px;max-width:860px;height:calc(100vh - 58px);overflow-y:auto;background:#F0F2F5}
+  .content{padding:16px 24px 40px;max-width:860px;height:calc(100vh - 58px);overflow-y:auto}
   .modal-card{max-width:520px;border-radius:14px;margin:20px auto}
   .modal-bg{align-items:center}
   .slot-grid{grid-template-columns:repeat(5,1fr)}
@@ -278,7 +262,7 @@ textarea.form-in{resize:vertical}
   position: fixed;
   bottom: 0; left: 0; right: 0;
   height: 60px;
-  background: var(--cd);
+  background: var(--card);
   border-top: 1px solid var(--br);
   z-index: 1000;
   align-items: stretch;
@@ -297,140 +281,6 @@ textarea.form-in{resize:vertical}
 }
 .mobile-bottom-nav .mbn-item.active { color: var(--v); }
 .mobile-bottom-nav .mbn-item i { font-size: 20px; }
-
-/* === MELHORIAS DESIGN v3.0 === */
-.card{transition:box-shadow .2s,border-color .2s}
-.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.card-title{font-family:var(--font-display)}
-.hdr-title{font-family:var(--font-display)}
-.mtitle{font-family:var(--font-display)}
-.res-data{font-family:var(--font-display)}
-.cal-month{font-family:var(--font-display)}
-.login-title{font-family:var(--font-display)}
-
-/* Password toggle */
-.pw-wrap{position:relative;display:flex;align-items:center;margin-bottom:14px}
-.pw-wrap .login-input{margin-bottom:0;padding-right:38px;flex:1}
-.pw-toggle-btn{position:absolute;right:10px;background:none;border:none;cursor:pointer;
-  color:#999;font-size:17px;padding:4px;display:flex;align-items:center;line-height:1;
-  transition:color .2s}
-.pw-toggle-btn:hover{color:#0F5C2E}
-
-/* Salão card */
-.salao-req-card{border:.5px solid var(--amb);border-radius:10px;padding:10px 12px;
-  margin-bottom:8px;background:var(--am)}
-.salao-req-card.aprovada{border-color:#97C459;background:var(--vl)}
-.salao-req-card.recusada{border-color:var(--rdb);background:var(--rd);opacity:.7}
-
-/* Melhorias mobile bottom nav */
-.mobile-bottom-nav{background:var(--cd) !important;border-top:1px solid var(--br) !important}
-.mobile-bottom-nav .mbn-item.active{color:var(--v)}
-
-/* Inputs — melhor contraste */
-.form-in:focus{border-color:var(--v);box-shadow:0 0 0 3px var(--vl)}
-.login-input:focus{border-color:#0F5C2E;box-shadow:0 0 0 3px #E6F4EB}
-
-/* Botão primário — sombra sutil */
-.btn-p{box-shadow:0 2px 4px rgba(15,92,46,.25)}
-.btn-p:hover{filter:brightness(1.08);box-shadow:0 4px 8px rgba(15,92,46,.3)}
-
-/* === CORREÇÃO FUNDO LAYOUT === */
-html { background: #f0f2f5; }
-body { background: #f0f2f5 !important; }
-.login-wrap { background: linear-gradient(135deg,#0F5C2E 0%,#1A7A3F 100%) !important; }
-#app-main { background: #ffffff; }
-.desktop-body { background: #f0f2f5; }
-.content { background: #f0f2f5; }
-
-/* === CARDS SEMPRE BRANCOS === */
-.card { background: #ffffff !important; }
-.res-card { background: #ffffff !important; }
-.modal-card { background: #ffffff !important; }
-
-/* === TEXTOS COM CONTRASTE ADEQUADO === */
-.card-title { color: #111827 !important; }
-.res-data { color: #111827 !important; }
-.res-info { color: #374151 !important; }
-.sec-lbl { color: #374151 !important; }
-.form-lbl { color: #374151 !important; }
-.mtitle { color: #111827 !important; }
-.msub { color: #374151 !important; }
-.cal-month { color: #111827 !important; }
-.cal-dn { color: #374151 !important; }
-.cal-d { color: #374151; }
-.cal-d.today { color: #0F5C2E !important; }
-.cal-d.sel { background: #0F5C2E !important; color: #fff !important; }
-
-/* === TAB BAR DESKTOP === */
-@media (min-width: 768px) {
-  .tab-bar { background: #ffffff !important; border-right: 1px solid #e5e7eb !important; }
-  .tab { color: #6B7280; }
-  .tab.active { color: #0F5C2E !important; background: #E6F4EB !important; border-left: 3px solid #0F5C2E !important; }
-  .tab:hover:not(.active) { background: #f9fafb; color: #374151; }
-  .content { background: #f0f2f5 !important; }
-}
-
-/* === MOBILE: app centralizado, shadow, sem fundo verde ao redor === */
-@media (max-width: 767px) {
-  body { background: #f0f2f5 !important; }
-  .app { background: #ffffff; }
-  .content { background: #f0f2f5 !important; }
-  .tab-bar { background: #ffffff !important; }
-}
-
-/* === INPUTS FOCADOS === */
-.form-in:focus { border-color: #0F5C2E !important; box-shadow: 0 0 0 3px rgba(15,92,46,.12) !important; }
-.login-input:focus { border-color: #0F5C2E !important; box-shadow: 0 0 0 3px rgba(15,92,46,.12) !important; }
-
-/* === BOTÕES === */
-.btn-p { background: #0F5C2E !important; }
-.btn-p:hover { background: #0a4422 !important; filter: none !important; }
-.hdr { background: linear-gradient(135deg,#0F5C2E 0%,#1A7A3F 100%) !important; }
-
-/* === SLOTS === */
-.slot.livre { background: #E6F4EB !important; border-color: #4ade80 !important; }
-.slot.livre .sl { color: #0F5C2E !important; }
-.slot.ocupado { background: #FEE2E2 !important; border-color: #FCA5A5 !important; }
-.slot.ocupado .sl { color: #B91C1C !important; }
-.slot.meu { background: #EFF6FF !important; border-color: #93C5FD !important; }
-.slot.meu .sl { color: #1D4ED8 !important; }
-.slot.bloq { background: #F3F4F6 !important; border-color: #D1D5DB !important; }
-.slot.bloq .sl { color: #6B7280 !important; }
-.slot .sh { color: #111827 !important; }
-
-/* === INFOBOX === */
-.ib-green { background: #E6F4EB !important; color: #0F5C2E !important; border-left: 3px solid #1A7A3F !important; }
-.ib-amber { background: #FDF3E3 !important; color: #92400E !important; border-left: 3px solid #D97706 !important; }
-.ib-blue { background: #EFF6FF !important; color: #1D4ED8 !important; border-left: 3px solid #3B82F6 !important; }
-.ib-red { background: #FEF2F2 !important; color: #B91C1C !important; border-left: 3px solid #EF4444 !important; }
-
-/* === BADGES === */
-.b-ok { background: #E6F4EB !important; color: #0F5C2E !important; }
-.b-warn { background: #FDF3E3 !important; color: #92400E !important; }
-.b-danger { background: #FEF2F2 !important; color: #B91C1C !important; }
-.b-info { background: #EFF6FF !important; color: #1D4ED8 !important; }
-.b-gray { background: #F3F4F6 !important; color: #4B5563 !important; }
-.b-teal { background: #ECFDF5 !important; color: #065F46 !important; }
-
-/* === DARK MODE (manual via toggle) === */
-body.dark { background: #0f172a !important; }
-body.dark .app { background: #1e293b; }
-body.dark .card { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
-body.dark .tab-bar { background: #1e293b !important; border-color: #334155 !important; }
-body.dark .content { background: #0f172a !important; }
-body.dark .desktop-body { background: #0f172a !important; }
-body.dark .hdr { background: linear-gradient(135deg,#052e16,#0F5C2E) !important; }
-body.dark .form-in { background: #1e293b !important; color: #f1f5f9 !important; border-color: #475569 !important; }
-body.dark .modal-card { background: #1e293b !important; color: #f1f5f9 !important; }
-body.dark .res-card { background: #1e293b !important; border-color: #334155 !important; }
-body.dark .cal-d { color: #cbd5e1; }
-body.dark .cal-d.today { color: #4ade80 !important; background: #052e16 !important; }
-body.dark .cal-d.sel { background: #1A7A3F !important; color: #fff !important; }
-body.dark .mtitle, body.dark .card-title { color: #f1f5f9 !important; }
-body.dark .msub, body.dark .res-info, body.dark .sec-lbl { color: #cbd5e1 !important; }
-body.dark .btn-s { border-color: #475569 !important; color: #cbd5e1 !important; }
-body.dark .btn-sm { border-color: #475569 !important; color: #cbd5e1 !important; }
-
 </style>
 </head>
 <body>
@@ -438,17 +288,12 @@ body.dark .btn-sm { border-color: #475569 !important; color: #cbd5e1 !important;
 <div class="login-wrap" id="login-screen">
   <div class="login-logo">&#127968;</div>
   <div class="login-title">Casa Grande de Sant'Anna</div>
-  <div class="login-sub">Gestão de espaços comuns do condomínio</div>
+  <div class="login-sub">Sistema de reserva da quadra</div>
   <div class="login-card">
     <label class="login-lbl">E-mail</label>
     <input class="login-input" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
     <label class="login-lbl">Senha</label>
-    <div class="pw-wrap">
-      <input class="login-input" type="password" id="login-pass" autocomplete="current-password">
-      <button type="button" class="pw-toggle-btn" id="btn-toggle-pass" title="Mostrar/ocultar senha" aria-label="Mostrar senha">
-        <i class="ti ti-eye" id="ico-toggle-pass"></i>
-      </button>
-    </div>
+    <input class="login-input" type="password" id="login-pass" autocomplete="current-password">
     <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;font-size:11px">
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#555">
         <input type="checkbox" id="remember-checkbox" style="accent-color:var(--v)"> Lembrar-me
@@ -492,7 +337,6 @@ body.dark .btn-sm { border-color: #475569 !important; color: #cbd5e1 !important;
     <button class="tab" id="tab-calendario"><i class="ti ti-calendar-month" aria-hidden="true"></i>Calendario</button>
     <button class="tab" id="tab-quadra"><i class="ti ti-trophy" aria-hidden="true"></i>Quadra</button>
     <button class="tab" id="tab-academia" style="display:none"><i class="ti ti-barbell" aria-hidden="true"></i>Academia</button>
-    <button class="tab" id="tab-salao" style="display:none"><i class="ti ti-confetti" aria-hidden="true"></i>Salão<span class="ndot" id="nd-salao"></span></button>
     <button class="tab" id="tab-ocorrencias" style="display:none"><i class="ti ti-alert-circle" aria-hidden="true"></i>Ocorrências</button>
     <button class="tab" id="tab-perfil" style="display:none;position:relative"><i class="ti ti-user-circle" aria-hidden="true"></i>Perfil<span id="notif-count-badge" style="display:none;background:#E24B4A;color:#fff;font-size:8px;font-weight:700;border-radius:10px;padding:1px 4px;position:absolute;top:2px;right:2px;min-width:14px;text-align:center"></span></button>
     <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings" aria-hidden="true"></i>Config<span class="ndot" id="nd-config"></span></button>
@@ -500,7 +344,7 @@ body.dark .btn-sm { border-color: #475569 !important; color: #cbd5e1 !important;
   <div class="content">
     <div class="screen active" id="screen-avisos">
     <div class="clima-widget" id="clima-widget"><div><div class="clima-temp">--°C</div><div class="clima-desc">Carregando...</div><div style="font-size:9px;opacity:.7;margin-top:2px">Fortaleza, CE</div></div><div style="font-size:28px">🌤️ï¸</div></div>
-      <div id="home-hero" style="background:linear-gradient(135deg,#0F5C2E,#1A7A3F);border-radius:14px;padding:16px;margin-bottom:10px;color:#fff">
+      <div id="home-hero" style="background:var(--v);border-radius:14px;padding:16px;margin-bottom:10px;color:#fff">
         <div style="font-size:11px;opacity:.75;margin-bottom:2px" id="home-saudacao">Ola!</div>
         <div style="font-size:18px;font-weight:600;margin-bottom:10px" id="home-nome">...</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -612,83 +456,6 @@ body.dark .btn-sm { border-color: #475569 !important; color: #cbd5e1 !important;
       <div class="card" id="ac-slots-card" style="display:none">
         <div class="card-title"><i class="ti ti-clock" aria-hidden="true"></i><span id="ac-slots-lbl">Horários disponiveis</span></div>
         <div class="slot-grid" id="ac-slot-grid"></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-salao">
-      <div class="card" style="background:linear-gradient(135deg,#7C3AED18,#7C3AED0A);border-color:#C4B5FD;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="font-size:32px">🎉</div>
-          <div style="flex:1">
-            <div style="font-size:14px;font-weight:600;color:#5B21B6;font-family:var(--font-display)">Salão de Festas</div>
-            <div style="font-size:11px;color:var(--t2)" id="salao-info-cap">Capacidade e regras</div>
-          </div>
-        </div>
-      </div>
-      <div class="ib ib-amber" style="margin-bottom:10px">
-        <strong>⏳ Reservas com aprovação</strong> — Após enviar sua solicitação, o administrador precisa aprovar. Você será notificado pelo painel de Avisos.
-      </div>
-      <div class="card">
-        <div class="card-title"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Solicitar reserva do Salão</div>
-        <div class="form-row">
-          <label class="form-lbl">Data do evento</label>
-          <input type="date" class="form-in" id="salao-data">
-        </div>
-        <div style="display:flex;gap:8px">
-          <div class="form-row" style="flex:1">
-            <label class="form-lbl">Horário início</label>
-            <select class="form-in" id="salao-hora-ini">
-              <option value="08:00">08:00</option><option value="09:00">09:00</option>
-              <option value="10:00">10:00</option><option value="11:00">11:00</option>
-              <option value="12:00">12:00</option><option value="13:00">13:00</option>
-              <option value="14:00">14:00</option><option value="15:00">15:00</option>
-              <option value="16:00">16:00</option><option value="17:00">17:00</option>
-              <option value="18:00" selected>18:00</option><option value="19:00">19:00</option>
-              <option value="20:00">20:00</option>
-            </select>
-          </div>
-          <div class="form-row" style="flex:1">
-            <label class="form-lbl">Duração</label>
-            <select class="form-in" id="salao-duracao">
-              <option value="2">2 horas</option>
-              <option value="3">3 horas</option>
-              <option value="4">4 horas</option>
-              <option value="5">5 horas</option>
-              <option value="6" selected>6 horas</option>
-              <option value="8">8 horas</option>
-              <option value="12">Dia inteiro (12h)</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <label class="form-lbl">Tipo de evento</label>
-          <select class="form-in" id="salao-tipo-evento">
-            <option value="aniversario">🎂 Aniversário</option>
-            <option value="confraternizacao">🥂 Confraternização</option>
-            <option value="reuniao">📋 Reunião / Assembleia</option>
-            <option value="festa_infantil">🎈 Festa infantil</option>
-            <option value="churrasco">🍖 Churrasco / Churrasqueira</option>
-            <option value="outro">📌 Outro</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-lbl">Nº estimado de convidados</label>
-          <input type="number" class="form-in" id="salao-convidados" placeholder="Ex: 30" min="1" max="200">
-        </div>
-        <div class="form-row">
-          <label class="form-lbl">Observações (opcional)</label>
-          <textarea class="form-in" id="salao-obs" rows="2" placeholder="Decoração, necessidades especiais, música ao vivo..."></textarea>
-        </div>
-        <div id="salao-conflito-alerta" style="display:none" class="ib ib-red">
-          ⚠️ Já existe uma reserva aprovada nesta data/horário. Escolha outro período.
-        </div>
-        <button class="btn-p" id="btn-solicitar-salao" style="background:linear-gradient(135deg,#5B21B6,#7C3AED)">
-          <i class="ti ti-send" aria-hidden="true"></i>Enviar Solicitação
-        </button>
-      </div>
-      <div class="card" style="margin-top:4px">
-        <div class="card-title"><i class="ti ti-list-check" aria-hidden="true"></i>Minhas solicitações</div>
-        <div id="salao-minhas-list"><div class="empty"><i class="ti ti-confetti"></i>Nenhuma solicitação</div></div>
       </div>
     </div>
 
@@ -1012,27 +779,6 @@ body.dark .btn-sm { border-color: #475569 !important; color: #cbd5e1 !important;
             <option value="10">10 pessoas</option>
           </select>
         </div>
-
-      <div class="card">
-        <div class="card-title"><i class="ti ti-confetti" aria-hidden="true"></i>Salão de Festas</div>
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--br)">
-          <div>
-            <div style="font-size:12px;font-weight:600">Exibir aba Salão de Festas</div>
-            <div style="font-size:10px;color:var(--t2);margin-top:2px">Ativa agendamento com aprovação</div>
-          </div>
-          <div class="tgl" id="tgl-salao" style="margin-left:12px;margin-top:2px"></div>
-        </div>
-        <div id="salao-cfg-wrap" style="display:none;padding:9px 0 0;border-top:.5px solid var(--br)">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px">Capacidade máxima (pessoas)</div>
-          <input type="number" class="form-in" id="cfg-salao-cap" value="80" min="10" max="500">
-          <div style="font-size:12px;font-weight:600;margin-bottom:6px;margin-top:10px">Taxa de limpeza (R$) — 0 = gratuito</div>
-          <input type="number" class="form-in" id="cfg-salao-taxa" value="0" min="0">
-        </div>
-        <div style="margin-top:12px">
-          <div style="font-size:12px;font-weight:600;margin-bottom:8px">Solicitações pendentes de aprovação</div>
-          <div id="salao-pendentes-lista"><div style="font-size:11px;color:var(--t2)">Nenhuma pendente.</div></div>
-        </div>
-      </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-repeat" aria-hidden="true"></i>Aulas recorrentes âÂÂ regras</div>
@@ -1459,30 +1205,6 @@ if(btnInstall){
 }
 
 </script>
-
-<!-- MODAL APROVAR/RECUSAR SALÃO (Admin) -->
-<div class="modal-bg" id="m-salao-admin">
-  <div class="modal-card">
-    <div class="mhandle"></div>
-    <div class="mtitle">🎉 Solicitação de Salão de Festas</div>
-    <div class="msub" id="m-salao-admin-sub">Detalhes da solicitação</div>
-    <div id="m-salao-admin-detalhes" style="margin-bottom:12px"></div>
-    <div class="form-row">
-      <label class="form-lbl">Observação ao morador (opcional)</label>
-      <textarea class="form-in" id="salao-admin-obs" rows="2" placeholder="Motivo da recusa ou instruções especiais..."></textarea>
-    </div>
-    <div class="macts">
-      <button class="btn-s" id="btn-salao-recusar" style="color:var(--rdt);border-color:var(--rdb)">
-        <i class="ti ti-x"></i>Recusar
-      </button>
-      <button class="btn-p" id="btn-salao-aprovar" style="background:#7C3AED">
-        <i class="ti ti-check"></i>Aprovar
-      </button>
-    </div>
-    <button class="btn-s" id="btn-fechar-salao-admin" style="width:100%;margin-top:8px">Fechar</button>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 <script>
@@ -1980,7 +1702,7 @@ document.getElementById('tab-config').addEventListener('click', function() {
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
 function goScreen(name) {
-  var telas = ['avisos','dashboard','reservar','academia','salao','minhas','checkin','calendario','quadra','ocorrencias','config','perfil'];
+  var telas = ['avisos','dashboard','reservar','academia','minhas','checkin','calendario','quadra','ocorrencias','config','perfil'];
   telas.forEach(function(t) {
     document.getElementById('screen-'+t).classList.remove('active');
     var tab = document.getElementById('tab-'+t);
@@ -5499,423 +5221,13 @@ async function deleteGaleriaFoto(id,btn){
       <i class="ti ti-dots" aria-hidden="true"></i><span>Mais</span>
     </button>
   </nav>
-  <div id="menu-mais-mobile" style="display:none;position:fixed;bottom:60px;left:0;right:0;background:var(--cd);border-top:1px solid var(--br);z-index:999;padding:8px 0;box-shadow:0 -4px 16px rgba(0,0,0,.15)">
+  <div id="menu-mais-mobile" style="display:none;position:fixed;bottom:60px;left:0;right:0;background:var(--card);border-top:1px solid var(--br);z-index:999;padding:8px 0;box-shadow:0 -4px 16px rgba(0,0,0,.15)">
     <style>#menu-mais-mobile.show{display:block!important}</style>
     <div onclick="goScreen('checkin');document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-qrcode" style="font-size:20px"></i><span>Check-in</span></div>
     <div onclick="goScreen('calendario');document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-calendar" style="font-size:20px"></i><span>Calendário</span></div>
-    <div id="menu-salao-item" onclick="goScreen('salao');renderSalao();document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:none;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-confetti" style="font-size:20px"></i><span>Salão de Festas</span></div>
     <div onclick="goScreen('dashboard');renderDashboard();document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-chart-bar" style="font-size:20px"></i><span>Dashboard</span></div>
     <div onclick="goScreen('ocorrencias');document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-alert-triangle" style="font-size:20px"></i><span>Ocorrências</span></div>
     <div onclick="goScreen('config');document.getElementById('menu-mais-mobile').classList.remove('show')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--t1)"><i class="ti ti-settings" style="font-size:20px"></i><span>Configurações</span></div>
   </div>
-
-<script>
-// ============================================================
-// PASSWORD TOGGLE — LOGIN
-// ============================================================
-(function() {
-  var btn = document.getElementById('btn-toggle-pass');
-  var inp = document.getElementById('login-pass');
-  var ico = document.getElementById('ico-toggle-pass');
-  if (!btn || !inp) return;
-  btn.addEventListener('click', function() {
-    var isPass = inp.type === 'password';
-    inp.type = isPass ? 'text' : 'password';
-    ico.className = isPass ? 'ti ti-eye-off' : 'ti ti-eye';
-    btn.title = isPass ? 'Ocultar senha' : 'Mostrar senha';
-  });
-})();
-
-// ============================================================
-// SALÃO DE FESTAS
-// ============================================================
-var espacoSalaoId = null;
-var _salaoAdminPendId = null;
-
-// Detecta espaço salão ao carregar espaços
-var _origCarregarEspacos = typeof carregarEspacos === 'function' ? carregarEspacos : null;
-
-function carregarEspacosSalaoHook() {
-  sb.from('espacos').select('*').order('criado_at').then(function(res) {
-    espacos = res.data || [];
-    espacoQuadraId = null;
-    espacoAcademiaId = null;
-    espacoSalaoId = null;
-    espacos.forEach(function(e) {
-      var n = (e.nome || '').toLowerCase();
-      if (n.indexOf('quadra') >= 0) espacoQuadraId = e.id;
-      if (n.indexOf('academia') >= 0) espacoAcademiaId = e.id;
-      if (n.indexOf('sal') >= 0 && (n.indexOf('fest') >= 0 || n.indexOf('sal') >= 0)) espacoSalaoId = e.id;
-    });
-    atualizarTabAcademia();
-    atualizarTabSalao();
-  });
-}
-
-// Substitui a função original
-if (typeof carregarEspacos !== 'undefined') {
-  carregarEspacos = carregarEspacosSalaoHook;
-}
-
-function atualizarTabSalao() {
-  var tabSalao = document.getElementById('tab-salao');
-  if (!tabSalao) return;
-  var ac = espacos.find(function(e) { return e.id === espacoSalaoId; });
-  var ativo = ac ? ac.ativo : false;
-  tabSalao.style.display = (espacoSalaoId && ativo) ? 'flex' : 'none';
-  // Atualiza badge de pendentes (admin)
-  if (isAdmin && isAdmin() && espacoSalaoId) {
-    sb.from('reservas_salao').select('id', { count: 'exact', head: true })
-      .eq('status', 'pendente').then(function(r) {
-        var nd = document.getElementById('nd-salao');
-        if (nd) nd.classList.toggle('show', (r.count || 0) > 0);
-      });
-  }
-}
-
-// Tab salão — evento
-var tabSalaoEl = document.getElementById('tab-salao');
-if (tabSalaoEl) {
-  tabSalaoEl.addEventListener('click', function() {
-    goScreen('salao');
-    renderSalao();
-  });
-}
-
-// Definir data mínima como hoje
-(function() {
-  var d = document.getElementById('salao-data');
-  if (d) {
-    var hoje = new Date().toISOString().slice(0, 10);
-    d.min = hoje;
-    d.value = '';
-  }
-})();
-
-// Verificar conflito ao mudar data/hora
-function verificarConflitoProposta() {
-  var dataEl = document.getElementById('salao-data');
-  var hIniEl = document.getElementById('salao-hora-ini');
-  var durEl = document.getElementById('salao-duracao');
-  var alertEl = document.getElementById('salao-conflito-alerta');
-  if (!dataEl || !hIniEl || !durEl || !alertEl) return;
-  var data = dataEl.value;
-  var hIni = hIniEl.value;
-  var dur = parseInt(durEl.value);
-  if (!data || !hIni) { alertEl.style.display = 'none'; return; }
-  var hIniMin = parseInt(hIni.slice(0, 2)) * 60 + parseInt(hIni.slice(3, 5));
-  var hFimMin = hIniMin + dur * 60;
-  var hFimStr = String(Math.floor(hFimMin / 60)).padStart(2, '0') + ':' + String(hFimMin % 60).padStart(2, '0');
-  if (!espacoSalaoId) { alertEl.style.display = 'none'; return; }
-  sb.from('reservas_salao').select('id, hora_inicio, hora_fim')
-    .eq('data_evento', data).in('status', ['pendente', 'aprovada']).then(function(res) {
-      var conflito = (res.data || []).some(function(r) {
-        var ri = (r.hora_inicio || '00:00').slice(0, 5);
-        var rf = (r.hora_fim || '00:00').slice(0, 5);
-        return hIni < rf && hFimStr > ri;
-      });
-      alertEl.style.display = conflito ? 'block' : 'none';
-    });
-}
-
-['salao-data', 'salao-hora-ini', 'salao-duracao'].forEach(function(id) {
-  var el = document.getElementById(id);
-  if (el) el.addEventListener('change', verificarConflitoProposta);
-});
-
-// Enviar solicitação
-var btnSolicitar = document.getElementById('btn-solicitar-salao');
-if (btnSolicitar) {
-  btnSolicitar.addEventListener('click', function() {
-    if (!morador || !morador.unidade_id) { toast('Sem apartamento vinculado.'); return; }
-    if (morador.status === 'suspenso' && (!isAdmin || !isAdmin())) { toast('Apartamento suspenso.'); return; }
-    var data = (document.getElementById('salao-data') || {}).value;
-    var hIni = (document.getElementById('salao-hora-ini') || {}).value;
-    var dur = parseInt((document.getElementById('salao-duracao') || {}).value || '6');
-    var tipo = (document.getElementById('salao-tipo-evento') || {}).value;
-    var conv = parseInt((document.getElementById('salao-convidados') || {}).value || '0');
-    var obs = ((document.getElementById('salao-obs') || {}).value || '').trim();
-    if (!data) { toast('Selecione a data do evento.'); return; }
-    var hIniMin = parseInt(hIni.slice(0, 2)) * 60 + parseInt(hIni.slice(3, 5));
-    var hFimMin = hIniMin + dur * 60;
-    var hFim = String(Math.floor(hFimMin / 60)).padStart(2, '0') + ':' + String(hFimMin % 60).padStart(2, '0');
-    // Verifica conflito
-    if (document.getElementById('salao-conflito-alerta').style.display === 'block') {
-      toast('Existe conflito de horário. Escolha outra data/horário.'); return;
-    }
-    setLoading('btn-solicitar-salao', true);
-    sb.from('reservas_salao').insert({
-      unidade_id: morador.unidade_id,
-      morador_id: morador.id,
-      espaco_id: espacoSalaoId,
-      data_evento: data,
-      hora_inicio: hIni + ':00',
-      hora_fim: hFim + ':00',
-      tipo_evento: tipo,
-      num_convidados: conv || null,
-      observacoes: obs || null,
-      status: 'pendente',
-      created_at: new Date().toISOString()
-    }).then(function(r) {
-      setLoading('btn-solicitar-salao', false, '<i class="ti ti-send"></i>Enviar Solicitação');
-      if (r.error) { toast('Erro: ' + r.error.message); return; }
-      // Limpar form
-      document.getElementById('salao-data').value = '';
-      document.getElementById('salao-convidados').value = '';
-      document.getElementById('salao-obs').value = '';
-      toast('✅ Solicitação enviada! Aguarde aprovação do administrador.');
-      renderSalaoMinhas();
-      atualizarTabSalao();
-    });
-  });
-}
-
-function renderSalao() {
-  if (!morador) return;
-  // Info capacidade
-  var ac = espacos.find(function(e) { return e.id === espacoSalaoId; });
-  var cap = ac ? (ac.capacidade || ac.max_simult || '—') : '—';
-  var infoEl = document.getElementById('salao-info-cap');
-  if (infoEl) infoEl.textContent = 'Capacidade: até ' + cap + ' pessoas • Sujeito a aprovação';
-  renderSalaoMinhas();
-  // Admin vê pendentes no config
-  if (isAdmin && isAdmin()) renderSalaoPendentesAdmin();
-}
-
-function renderSalaoMinhas() {
-  var el = document.getElementById('salao-minhas-list');
-  if (!el || !morador || !morador.unidade_id) return;
-  sb.from('reservas_salao').select('*')
-    .eq('unidade_id', morador.unidade_id)
-    .order('data_evento', { ascending: false })
-    .limit(20)
-    .then(function(res) {
-      var lista = res.data || [];
-      if (!lista.length) {
-        el.innerHTML = '<div class="empty"><i class="ti ti-confetti"></i>Nenhuma solicitação</div>';
-        return;
-      }
-      var TIPOS = {
-        aniversario: '🎂 Aniversário',
-        confraternizacao: '🥂 Confraternização',
-        reuniao: '📋 Reunião',
-        festa_infantil: '🎈 Festa infantil',
-        churrasco: '🍖 Churrasco',
-        outro: '📌 Outro'
-      };
-      var STATUS_LABEL = { pendente: 'Aguardando', aprovada: 'Aprovada', recusada: 'Recusada', cancelada: 'Cancelada' };
-      var STATUS_CLS = { pendente: 'b-warn', aprovada: 'b-ok', recusada: 'b-danger', cancelada: 'b-gray' };
-      var html = '';
-      lista.forEach(function(s) {
-        var bc = STATUS_CLS[s.status] || 'b-gray';
-        var bl = STATUS_LABEL[s.status] || s.status;
-        var tipo = TIPOS[s.tipo_evento] || s.tipo_evento || '';
-        var hIni = (s.hora_inicio || '').slice(0, 5);
-        var hFim = (s.hora_fim || '').slice(0, 5);
-        var cls = s.status === 'aprovada' ? 'salao-req-card aprovada' :
-                  s.status === 'recusada' ? 'salao-req-card recusada' : 'salao-req-card';
-        html += '<div class="' + cls + '">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
-        html += '<div style="font-size:12px;font-weight:600">' + tipo + '</div>';
-        html += '<span class="badge ' + bc + '">' + bl + '</span></div>';
-        html += '<div style="font-size:11px;color:var(--t2)">';
-        html += fmtD(s.data_evento) + ' • ' + hIni + '–' + hFim;
-        if (s.num_convidados) html += ' • ' + s.num_convidados + ' convidados';
-        html += '</div>';
-        if (s.obs_admin) {
-          html += '<div style="font-size:10.5px;margin-top:5px;padding:5px 8px;background:rgba(0,0,0,.05);border-radius:6px;color:var(--t2)"><strong>Admin:</strong> ' + s.obs_admin + '</div>';
-        }
-        if (s.status === 'pendente') {
-          html += '<button class="btn-sm r" data-salao-cancel="' + s.id + '" style="margin-top:6px;font-size:10px"><i class="ti ti-x"></i>Cancelar</button>';
-        }
-        html += '</div>';
-      });
-      el.innerHTML = html;
-      el.querySelectorAll('[data-salao-cancel]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          if (!confirm('Cancelar esta solicitação?')) return;
-          sb.from('reservas_salao').update({ status: 'cancelada' }).eq('id', btn.dataset.salaoCancel).then(function(r) {
-            if (r.error) { toast('Erro ao cancelar.'); return; }
-            toast('Solicitação cancelada.');
-            renderSalaoMinhas();
-          });
-        });
-      });
-    });
-}
-
-// ADMIN — Pendentes na tela de Config
-function renderSalaoPendentesAdmin() {
-  var el = document.getElementById('salao-pendentes-lista');
-  if (!el) return;
-  sb.from('reservas_salao').select('*,moradores(nome,unidades(codigo))')
-    .eq('status', 'pendente')
-    .order('data_evento', { ascending: true })
-    .then(function(res) {
-      var lista = res.data || [];
-      // Atualiza badge
-      var nd = document.getElementById('nd-salao');
-      if (nd) nd.classList.toggle('show', lista.length > 0);
-      if (!lista.length) {
-        el.innerHTML = '<div style="font-size:11px;color:var(--t2)">Nenhuma pendente.</div>';
-        return;
-      }
-      var TIPOS = {
-        aniversario: '🎂 Aniversário', confraternizacao: '🥂 Confraternização',
-        reuniao: '📋 Reunião', festa_infantil: '🎈 Festa infantil',
-        churrasco: '🍖 Churrasco', outro: '📌 Outro'
-      };
-      var html = '';
-      lista.forEach(function(s) {
-        var m = s.moradores;
-        var cod = m && m.unidades ? m.unidades.codigo : '---';
-        var nome = m ? m.nome : '---';
-        var tipo = TIPOS[s.tipo_evento] || s.tipo_evento || '';
-        html += '<div class="salao-req-card" data-salao-rev="' + s.id + '">';
-        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
-        html += '<div style="font-size:12px;font-weight:600">Apto ' + cod + ' — ' + nome + '</div>';
-        html += '<span class="badge b-warn">Pendente</span></div>';
-        html += '<div style="font-size:11px;color:var(--t2);margin-bottom:4px">' + tipo + ' • ' + fmtD(s.data_evento) + ' • ' + (s.hora_inicio || '').slice(0, 5) + '–' + (s.hora_fim || '').slice(0, 5) + '</div>';
-        if (s.num_convidados) html += '<div style="font-size:10.5px;color:var(--t2)">' + s.num_convidados + ' convidados</div>';
-        if (s.observacoes) html += '<div style="font-size:10.5px;color:var(--t2);font-style:italic">' + s.observacoes + '</div>';
-        html += '<button class="btn-sm b" data-salao-rev="' + s.id + '" style="margin-top:7px;width:100%"><i class="ti ti-eye"></i>Revisar / Aprovar</button>';
-        html += '</div>';
-      });
-      el.innerHTML = html;
-      el.querySelectorAll('[data-salao-rev]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var sid = btn.dataset.salaoRev;
-          var sObj = lista.find(function(x) { return x.id == sid; });
-          if (!sObj) return;
-          _salaoAdminPendId = sid;
-          var TIPOS2 = {
-            aniversario: '🎂 Aniversário', confraternizacao: '🥂 Confraternização',
-            reuniao: '📋 Reunião', festa_infantil: '🎈 Festa infantil',
-            churrasco: '🍖 Churrasco', outro: '📌 Outro'
-          };
-          var m2 = sObj.moradores;
-          var cod2 = m2 && m2.unidades ? m2.unidades.codigo : '---';
-          var subEl = document.getElementById('m-salao-admin-sub');
-          if (subEl) subEl.textContent = 'Apto ' + cod2 + ' — ' + fmtD(sObj.data_evento);
-          var detEl = document.getElementById('m-salao-admin-detalhes');
-          if (detEl) {
-            detEl.innerHTML =
-              '<div style="font-size:12px;padding:6px 0;border-bottom:.5px solid var(--br)"><b>Tipo:</b> ' + (TIPOS2[sObj.tipo_evento] || sObj.tipo_evento) + '</div>' +
-              '<div style="font-size:12px;padding:6px 0;border-bottom:.5px solid var(--br)"><b>Data:</b> ' + fmtD(sObj.data_evento) + '</div>' +
-              '<div style="font-size:12px;padding:6px 0;border-bottom:.5px solid var(--br)"><b>Horário:</b> ' + (sObj.hora_inicio || '').slice(0, 5) + ' – ' + (sObj.hora_fim || '').slice(0, 5) + '</div>' +
-              '<div style="font-size:12px;padding:6px 0;border-bottom:.5px solid var(--br)"><b>Convidados:</b> ' + (sObj.num_convidados || '—') + '</div>' +
-              (sObj.observacoes ? '<div style="font-size:11px;padding:6px 0;color:var(--t2);font-style:italic">' + sObj.observacoes + '</div>' : '');
-          }
-          var obsEl = document.getElementById('salao-admin-obs');
-          if (obsEl) obsEl.value = '';
-          abrirModal('m-salao-admin');
-        });
-      });
-    });
-}
-
-// Aprovar
-var btnSalaoAprovar = document.getElementById('btn-salao-aprovar');
-if (btnSalaoAprovar) {
-  btnSalaoAprovar.addEventListener('click', function() {
-    if (!_salaoAdminPendId) return;
-    var obsEl = document.getElementById('salao-admin-obs');
-    var obs = obsEl ? obsEl.value.trim() : '';
-    sb.from('reservas_salao').update({ status: 'aprovada', obs_admin: obs || null, aprovado_por: morador.id, aprovado_em: new Date().toISOString() })
-      .eq('id', _salaoAdminPendId).then(function(r) {
-        if (r.error) { toast('Erro: ' + r.error.message); return; }
-        fecharModal('m-salao-admin');
-        toast('✅ Reserva do salão aprovada!');
-        renderSalaoPendentesAdmin();
-        atualizarTabSalao();
-      });
-  });
-}
-
-// Recusar
-var btnSalaoRecusar = document.getElementById('btn-salao-recusar');
-if (btnSalaoRecusar) {
-  btnSalaoRecusar.addEventListener('click', function() {
-    if (!_salaoAdminPendId) return;
-    var obsEl = document.getElementById('salao-admin-obs');
-    var obs = obsEl ? obsEl.value.trim() : '';
-    if (!obs) { toast('Informe o motivo da recusa para o morador.'); return; }
-    sb.from('reservas_salao').update({ status: 'recusada', obs_admin: obs, recusado_por: morador.id }).eq('id', _salaoAdminPendId).then(function(r) {
-      if (r.error) { toast('Erro: ' + r.error.message); return; }
-      fecharModal('m-salao-admin');
-      toast('Solicitação recusada. O morador será notificado.');
-      renderSalaoPendentesAdmin();
-      atualizarTabSalao();
-    });
-  });
-}
-
-var btnFSalaoAdmin = document.getElementById('btn-fechar-salao-admin');
-if (btnFSalaoAdmin) {
-  btnFSalaoAdmin.addEventListener('click', function() { fecharModal('m-salao-admin'); });
-}
-
-// Toggle Salão na config
-(function() {
-  var tglSalao = document.getElementById('tgl-salao');
-  var wrapSalao = document.getElementById('salao-cfg-wrap');
-  function syncSalaoCfg() {
-    if (!tglSalao || !wrapSalao) return;
-    wrapSalao.style.display = tglSalao.classList.contains('on') ? 'block' : 'none';
-  }
-  if (tglSalao) {
-    tglSalao.addEventListener('click', function() {
-      tglSalao.classList.toggle('on');
-      syncSalaoCfg();
-      var ativo = tglSalao.classList.contains('on');
-      if (espacoSalaoId) {
-        sb.from('espacos').update({ ativo: ativo }).eq('id', espacoSalaoId).then(function() {
-          atualizarTabSalao();
-          toast(ativo ? 'Salão de Festas ativado.' : 'Salão de Festas desativado.');
-        });
-      } else if (ativo) {
-        // Cria o espaço se não existe
-        sb.from('espacos').insert({ nome: 'Salão de Festas', ativo: true, capacidade: 80 }).select('id').then(function(r) {
-          if (!r.error && r.data && r.data[0]) {
-            espacoSalaoId = r.data[0].id;
-            espacos.push({ id: espacoSalaoId, nome: 'Salão de Festas', ativo: true, capacidade: 80 });
-            atualizarTabSalao();
-            toast('Salão de Festas criado e ativado!');
-          }
-        });
-      }
-    });
-    syncSalaoCfg();
-  }
-})();
-
-// Hook para renderConfig incluir salão
-var _origRenderConfig = typeof renderConfig === 'function' ? renderConfig : null;
-window.addEventListener('load', function() {
-  if (typeof renderConfig === 'function') {
-    var origRC = renderConfig;
-    renderConfig = function() {
-      origRC();
-      // Sincroniza toggle salão
-      var tglSalao = document.getElementById('tgl-salao');
-      if (tglSalao) {
-        var ac = espacos.find(function(e) { return e.id === espacoSalaoId; });
-        if (ac && ac.ativo) tglSalao.classList.add('on');
-        else tglSalao.classList.remove('on');
-        var wrapSalao = document.getElementById('salao-cfg-wrap');
-        if (wrapSalao) wrapSalao.style.display = (ac && ac.ativo) ? 'block' : 'none';
-        var capEl = document.getElementById('cfg-salao-cap');
-        if (capEl && ac) capEl.value = ac.capacidade || 80;
-      }
-      renderSalaoPendentesAdmin();
-    };
-  }
-  // Hook carregarEspacos
-  if (typeof carregarEspacos === 'function' && carregarEspacos !== carregarEspacosSalaoHook) {
-    carregarEspacos = carregarEspacosSalaoHook;
-  }
-});
-</script>
-
 </body>
 </html>
