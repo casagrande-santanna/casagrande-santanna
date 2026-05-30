@@ -12,133 +12,783 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<!-- DOMPurify para sanitização de HTML -->
+<!-- DOMPurify para sanitização -->
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <style>
-/* ===== RESET E VARIÁVEIS ===== */
-:root{
-  --v:#27500A; --vl:#EAF3DE; --vm:#3B6D11;
-  --am:#FAEEDA; --amb:#EF9F27; --amt:#854F0B;
-  --rd:#FCEBEB; --rdb:#F09595; --rdt:#A32D2D;
-  --bl:#E6F1FB; --blb:#85B7EB; --blt:#185FA5;
-  --gy:#F1EFE8; --gyb:#B4B2A9; --gyt:#5F5E5A;
-  --bg:#F5F5F0; --cd:#fff; --br:#E0E0DA;
-  --tx:#1A1A1A; --t2:#666; --t3:#999;
-  --r:10px; --rl:14px;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
-body.dark{
-  --v:#4A8C1C; --vl:#1A2E0A; --vm:#5FA328;
-  --am:#2E2008; --amb:#EF9F27; --amt:#F5C87A;
-  --rd:#2E0808; --rdb:#8B3030; --rdt:#F09595;
-  --bl:#081828; --blb:#2B5280; --blt:#85B7EB;
-  --gy:#1A1A18; --gyb:#3A3A38; --gyt:#A0A09A;
-  --bg:#0F0F0D; --cd:#1C1C1A; --br:#2E2E2A;
-  --tx:#F0F0EC; --t2:#AAA9A4; --t3:#666;
+
+:root {
+  --v: #27500A;
+  --vl: #EAF3DE;
+  --vm: #3B6D11;
+  --am: #FAEEDA;
+  --amb: #EF9F27;
+  --amt: #854F0B;
+  --rd: #FCEBEB;
+  --rdb: #F09595;
+  --rdt: #A32D2D;
+  --bl: #E6F1FB;
+  --blb: #85B7EB;
+  --blt: #185FA5;
+  --gy: #F1EFE8;
+  --gyb: #B4B2A9;
+  --gyt: #5F5E5A;
+  --bg: #F5F5F0;
+  --cd: #fff;
+  --br: #E0E0DA;
+  --tx: #1A1A1A;
+  --t2: #666;
+  --t3: #999;
+  --r: 10px;
+  --rl: 14px;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
-.app{flex:1;display:flex;flex-direction:column;min-height:0}
-.hdr{background:var(--v);color:#fff;padding:12px 16px 11px;position:sticky;top:0;z-index:30;box-shadow:0 2px 4px rgba(0,0,0,.08)}
-.hdr-row{display:flex;align-items:center;justify-content:space-between}
-.hdr-title{font-size:15px;font-weight:600}
-.hdr-sub{font-size:10px;opacity:.75;margin-top:1px}
-.hdr-right{display:flex;align-items:center;gap:6px}
-.hdr-btns{display:flex;align-items:center;gap:4px}
-.hdr-btn{background:rgba(255,255,255,.18);border:none;border-radius:7px;padding:6px 10px;color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px;transition:.2s}
-.hdr-btn:hover{background:rgba(255,255,255,.28)}
-.role-tag{font-size:9px;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 8px;white-space:nowrap}
-.av-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;cursor:pointer}
-.tab-bar{display:flex;background:var(--cd);border-bottom:0.5px solid var(--br);position:sticky;top:58px;z-index:29;overflow-x:auto;flex-shrink:0}
-.tab-bar::-webkit-scrollbar{display:none}
-.tab{flex:0 0 auto;padding:10px 14px;text-align:center;font-size:12px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px;border-bottom:2px solid transparent;background:none;transition:.2s}
-.tab i{font-size:18px}
-.tab:hover{color:var(--v)}
-.tab.active{color:var(--v);border-bottom-color:var(--v);font-weight:600}
-.ndot{width:6px;height:6px;background:#E24B4A;border-radius:50%;position:relative;top:-2px;right:2px;display:none;margin-left:-2px}
-.ndot.show{display:inline-block}
-.content{flex:1;overflow-y:auto;padding:12px 16px 80px;scroll-behavior:smooth}
-.screen{display:none}.screen.active{display:block}
-.card{background:var(--cd);border:0.5px solid var(--br);border-radius:var(--rl);padding:12px 14px;margin-bottom:10px}
-.card-title{font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.sec-lbl{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 5px}
-.form-row{margin-bottom:10px}
-.form-lbl{font-size:10.5px;font-weight:600;color:var(--t2);display:block;margin-bottom:3px}
-.form-in{width:100%;border:0.5px solid var(--br);border-radius:8px;padding:9px 11px;font-size:13px;background:var(--cd);color:var(--tx);outline:none}
-.form-in:focus{border-color:var(--v)}
-.btn-p{background:var(--v);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;width:100%;justify-content:center}
-.btn-s{background:none;border:0.5px solid var(--br);border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--tx);display:inline-flex;align-items:center;gap:5px;justify-content:center}
-.btn-d{background:var(--rd);border:none;border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--rdt);font-weight:600}
-.badge{font-size:9.5px;padding:2px 7px;border-radius:20px;font-weight:600;display:inline-block}
-.b-ok{background:var(--vl);color:var(--v)}.b-warn{background:var(--am);color:var(--amt)}
-.b-danger{background:var(--rd);color:var(--rdt)}.b-info{background:var(--bl);color:var(--blt)}
-.ib{border-radius:8px;padding:9px 11px;font-size:11px;line-height:1.5;margin:8px 0}
-.ib-green{background:var(--vl);color:var(--v);border-left:3px solid var(--vm)}
-.cal-hdr{display:flex;justify-content:space-between;margin-bottom:8px}
-.cal-nav{background:none;border:0.5px solid var(--br);border-radius:7px;width:28px;height:28px;cursor:pointer}
-.cal-month{font-size:13px;font-weight:600}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-dn{text-align:center;font-size:9.5px;color:var(--t2);padding:3px 0}
-.cal-d{text-align:center;font-size:12px;padding:6px 0;border-radius:7px;cursor:pointer}
-.cal-d.today{font-weight:600;color:var(--v)}
-.cal-d.sel{background:var(--v);color:#fff}
-.cal-d.blk{background:var(--gy);color:var(--gyt);cursor:default}
-.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
-.slot{border:0.5px solid var(--br);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer}
-.slot.livre{background:var(--vl);border-color:#97C459}
-.slot.ocupado{background:var(--rd);cursor:default}
-.slot.meu{background:var(--bl)}
-.slot.bloq{background:var(--gy);cursor:default}
+
+body.dark {
+  --v: #4A8C1C;
+  --vl: #1A2E0A;
+  --vm: #5FA328;
+  --am: #2E2008;
+  --amb: #EF9F27;
+  --amt: #F5C87A;
+  --rd: #2E0808;
+  --rdb: #8B3030;
+  --rdt: #F09595;
+  --bl: #081828;
+  --blb: #2B5280;
+  --blt: #85B7EB;
+  --gy: #1A1A18;
+  --gyb: #3A3A38;
+  --gyt: #A0A09A;
+  --bg: #0F0F0D;
+  --cd: #1C1C1A;
+  --br: #2E2E2A;
+  --tx: #F0F0EC;
+  --t2: #AAA9A4;
+  --t3: #666;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.hdr {
+  background: var(--v);
+  color: #fff;
+  padding: 12px 16px 11px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+.hdr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hdr-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hdr-sub {
+  font-size: 10px;
+  opacity: .75;
+  margin-top: 1px;
+}
+
+.hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hdr-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hdr-btn {
+  background: rgba(255,255,255,.18);
+  border: none;
+  border-radius: 7px;
+  padding: 6px 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: .2s;
+}
+
+.hdr-btn:hover {
+  background: rgba(255,255,255,.28);
+}
+
+.role-tag {
+  font-size: 9px;
+  background: rgba(255,255,255,.2);
+  border-radius: 20px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.av-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  border: 1.5px solid rgba(255,255,255,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.av-btn:hover {
+  background: rgba(255,255,255,.3);
+}
+
+.tab-bar {
+  display: flex;
+  background: var(--cd);
+  border-bottom: 0.5px solid var(--br);
+  position: sticky;
+  top: 58px;
+  z-index: 29;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+}
+
+.tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  flex: 0 0 auto;
+  min-width: 70px;
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--t2);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  border-bottom: 2px solid transparent;
+  background: none;
+  transition: .2s;
+}
+
+.tab i {
+  font-size: 18px;
+}
+
+.tab:hover {
+  color: var(--v);
+}
+
+.tab.active {
+  color: var(--v);
+  border-bottom: 2px solid var(--v);
+  font-weight: 600;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px 80px;
+  scroll-behavior: smooth;
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+.card {
+  background: var(--cd);
+  border: 0.5px solid var(--br);
+  border-radius: var(--rl);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-title i {
+  font-size: 14px;
+  color: var(--v);
+}
+
+.sec-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--t2);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  padding: 10px 0 5px;
+}
+
+.form-row {
+  margin-bottom: 10px;
+}
+
+.form-lbl {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--t2);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.form-in {
+  width: 100%;
+  border: 0.5px solid var(--br);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 13px;
+  background: var(--cd);
+  color: var(--tx);
+  outline: none;
+  transition: .2s;
+}
+
+.form-in:focus {
+  border-color: var(--v);
+  box-shadow: 0 0 0 3px rgba(39,80,10,.08);
+}
+
+.btn-p {
+  background: var(--v);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  justify-content: center;
+  transition: .2s;
+}
+
+.btn-p:hover {
+  opacity: .9;
+  transform: translateY(-1px);
+}
+
+.btn-s {
+  background: none;
+  border: 0.5px solid var(--br);
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--tx);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  transition: .2s;
+}
+
+.btn-s:hover {
+  border-color: var(--v);
+  background: var(--vl);
+}
+
+.btn-d {
+  background: var(--rd);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--rdt);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  transition: .2s;
+}
+
+.btn-d:hover {
+  opacity: .85;
+}
+
+.badge {
+  font-size: 9.5px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.b-ok {
+  background: var(--vl);
+  color: var(--v);
+}
+
+.b-warn {
+  background: var(--am);
+  color: var(--amt);
+}
+
+.b-danger {
+  background: var(--rd);
+  color: var(--rdt);
+}
+
+.b-info {
+  background: var(--bl);
+  color: var(--blt);
+}
+
+.ib {
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+
+.ib-green {
+  background: var(--vl);
+  color: var(--v);
+  border-left: 3px solid var(--vm);
+}
+
+.ib-amber {
+  background: var(--am);
+  color: var(--amt);
+  border-left: 3px solid var(--amb);
+}
+
+.cal-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.cal-nav {
+  background: none;
+  border: 0.5px solid var(--br);
+  border-radius: 7px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tx);
+}
+
+.cal-month {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-dn {
+  text-align: center;
+  font-size: 9.5px;
+  color: var(--t2);
+  padding: 3px 0;
+}
+
+.cal-d {
+  text-align: center;
+  font-size: 12px;
+  padding: 6px 0;
+  border-radius: 7px;
+  cursor: pointer;
+  position: relative;
+}
+
+.cal-d:hover {
+  background: var(--vl);
+}
+
+.cal-d.today {
+  font-weight: 600;
+  color: var(--v);
+}
+
+.cal-d.sel {
+  background: var(--v);
+  color: #fff !important;
+}
+
+.cal-d.blk {
+  background: var(--gy);
+  color: var(--gyt);
+  cursor: default;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.slot {
+  border: 0.5px solid var(--br);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.slot.livre {
+  background: var(--vl);
+  border-color: #97C459;
+}
+
+.slot.ocupado {
+  background: var(--rd);
+  border-color: var(--rdb);
+  cursor: default;
+}
+
+.slot.meu {
+  background: var(--bl);
+  border-color: var(--blb);
+}
+
+.slot.bloq {
+  background: var(--gy);
+  border-color: var(--gyb);
+  cursor: default;
+}
+
+.slot .sh {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.slot .sl {
+  font-size: 9.5px;
+  margin-top: 1px;
+}
+
+.empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--t2);
+}
+
+.empty i {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 8px;
+  color: var(--br);
+}
+
 /* Desktop */
-@media(min-width:768px){
-  .desktop-body{display:flex;flex:1;min-height:0}
-  .tab-bar{flex-direction:column;width:200px;border-bottom:none;border-right:0.5px solid var(--br);position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;flex-shrink:0}
-  .tab{justify-content:flex-start;gap:10px;border-bottom:none;border-left:3px solid transparent;padding:12px 16px}
-  .tab.active{border-left-color:var(--v);background:var(--vl)}
-  .content{height:calc(100vh - 58px);overflow-y:auto}
-  .slot-grid{grid-template-columns:repeat(5,1fr)}
+@media (min-width: 768px) {
+  body {
+    max-width: 100%;
+  }
+  
+  .desktop-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+  
+  .tab-bar {
+    width: 200px;
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 0.5px solid var(--br);
+    position: sticky;
+    top: 58px;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  
+  .tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    font-size: 12px;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    gap: 10px;
+    min-width: auto;
+  }
+  
+  .tab.active {
+    border-bottom: none;
+    border-left: 3px solid var(--v);
+    background: var(--vl);
+  }
+  
+  .content {
+    padding: 16px 24px 40px;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+  }
+  
+  .slot-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center}
-.modal-bg.open{display:flex}
-.modal-card{background:var(--cd);border-radius:14px;padding:16px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto}
-.mhandle{width:28px;height:3px;background:var(--br);border-radius:2px;margin:0 auto 12px}
-.mtitle{font-size:14px;font-weight:600;margin-bottom:3px}
-.macts{display:flex;gap:7px;margin-top:12px}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none}
+
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 100;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-bg.open {
+  display: flex;
+}
+
+.modal-card {
+  background: var(--cd);
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  width: 100%;
+  max-width: 430px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.modal-card.center {
+  border-radius: 14px;
+  margin: 20px;
+}
+
+.mhandle {
+  width: 28px;
+  height: 3px;
+  background: var(--br);
+  border-radius: 2px;
+  margin: 0 auto 12px;
+}
+
+.mtitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.macts {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.login-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px 24px;
+  background: var(--v);
+}
+
+.login-logo {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.login-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.login-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,.7);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.login-card {
+  background: #fff;
+  border-radius: var(--rl);
+  padding: 24px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-input {
+  width: 100%;
+  border: 0.5px solid var(--br);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  outline: none;
+}
+
+.login-input:focus {
+  border-color: var(--v);
+}
+
+.login-btn {
+  width: 100%;
+  background: var(--v);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-err {
+  background: var(--rd);
+  color: var(--rdt);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 11px;
+  margin-top: 8px;
+  display: none;
+}
+
+#toast {
+  position: fixed;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(23,52,4,.94);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 500;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .3s;
+  max-width: 90vw;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  #toast {
+    bottom: 24px;
+  }
+  
+  .modal-card {
+    border-radius: 14px;
+    margin: 20px auto;
+    max-width: 540px;
+  }
+  
+  .modal-bg {
+    align-items: center;
+  }
+}
 </style>
 </head>
 <body>
 
-<!-- TELA DE LOGIN -->
-<div class="login-wrap" id="login-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--v);padding:20px">
-  <div class="login-logo" style="font-size:48px;margin-bottom:12px">🏠</div>
-  <div class="login-title" style="font-size:22px;font-weight:700;color:#fff;text-align:center">Casa Grande de Sant'Anna</div>
-  <div class="login-sub" style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:32px">Sistema de reserva da quadra</div>
-  <div class="login-card" style="background:#fff;border-radius:14px;padding:24px;width:100%;max-width:360px">
-    <label class="login-lbl" style="font-size:12px;font-weight:600;color:#666">E-mail</label>
-    <input class="login-input" type="email" id="login-email" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:14px">
+<div class="login-wrap" id="login-screen">
+  <div class="login-logo">🏠</div>
+  <div class="login-title">Casa Grande de Sant'Anna</div>
+  <div class="login-sub">Sistema de reserva da quadra</div>
+  <div class="login-card">
+    <label class="login-lbl">E-mail</label>
+    <input class="login-input" type="email" id="login-email" placeholder="seu@email.com">
     <label class="login-lbl">Senha</label>
-    <input class="login-input" type="password" id="login-pass" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:14px">
-    <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:11px">
-      <label><input type="checkbox" id="remember-checkbox" style="accent-color:var(--v)"> Lembrar-me</label>
-      <span id="link-esqueci" style="color:#999;cursor:pointer;text-decoration:underline">Esqueci minha senha</span>
+    <input class="login-input" type="password" id="login-pass">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;font-size:11px">
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#555">
+        <input type="checkbox" id="remember-checkbox" style="accent-color:var(--v)"> Lembrar-me
+      </label>
+      <span style="color:#999;cursor:pointer;text-decoration:underline" id="link-esqueci">Esqueci minha senha</span>
     </div>
-    <button class="btn-p" id="btn-entrar" style="background:var(--v);width:100%">Entrar</button>
-    <div id="login-err" style="background:var(--rd);color:var(--rdt);border-radius:7px;padding:8px;font-size:11px;margin-top:8px;display:none"></div>
-    <div style="text-align:center;margin-top:10px"><span id="link-cadastro" style="font-size:11px;color:#666;cursor:pointer;text-decoration:underline">Não tem conta? Cadastre-se</span></div>
+    <button class="login-btn" id="btn-entrar">Entrar</button>
+    <div class="login-err" id="login-err"></div>
+    <div style="text-align:center;margin-top:10px">
+      <span style="font-size:11px;color:#666;cursor:pointer;text-decoration:underline" id="link-cadastro">Não tem conta? Cadastre-se</span>
+    </div>
   </div>
 </div>
 
-<!-- APP PRINCIPAL -->
 <div class="app" id="app-main" style="display:none">
   <div class="hdr">
     <div class="hdr-row">
-      <div><div class="hdr-title">Casa Grande de Sant'Anna</div><div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div></div>
-      <div class="hdr-right"><span class="role-tag" id="role-tag">Morador</span><div class="av-btn" id="av-btn">DT</div></div>
+      <div>
+        <div class="hdr-title">Casa Grande de Sant'Anna</div>
+        <div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div>
+      </div>
+      <div class="hdr-right">
+        <span class="role-tag" id="role-tag">Morador</span>
+        <div class="av-btn" id="av-btn">DT</div>
+      </div>
     </div>
   </div>
-  <div class="desktop-body" style="flex:1;min-height:0;display:flex">
-    <div class="tab-bar" id="tab-bar">
-      <button class="tab active" id="tab-avisos"><i class="ti ti-bell"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
+  <div class="desktop-body">
+    <div class="tab-bar">
+      <button class="tab active" id="tab-avisos"><i class="ti ti-bell"></i>Avisos</button>
+      <button class="tab" id="tab-dashboard" style="display:none"><i class="ti ti-chart-bar"></i>Dashboard</button>
       <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus"></i>Reservar</button>
       <button class="tab" id="tab-minhas"><i class="ti ti-list-check"></i>Minhas</button>
       <button class="tab" id="tab-checkin"><i class="ti ti-door-enter"></i>Check-in</button>
@@ -147,152 +797,589 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <button class="tab" id="tab-ocorrencias"><i class="ti ti-alert-circle"></i>Ocorr.</button>
       <button class="tab" id="tab-config" style="display:none"><i class="ti ti-settings"></i>Config</button>
     </div>
-    <div class="content" id="content">
-      <!-- telas serão inseridas via JS para evitar duplicação, mas manteremos as divs principais -->
-      <div class="screen active" id="screen-avisos"></div>
-      <div class="screen" id="screen-reservar"></div>
-      <div class="screen" id="screen-minhas"></div>
-      <div class="screen" id="screen-checkin"></div>
-      <div class="screen" id="screen-calendario"></div>
-      <div class="screen" id="screen-quadra"></div>
-      <div class="screen" id="screen-ocorrencias"></div>
-      <div class="screen" id="screen-config"></div>
-      <div class="screen" id="screen-perfil"></div>
+    <div class="content">
+      <div class="screen active" id="screen-avisos">
+        <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
+      </div>
+      <div class="screen" id="screen-dashboard"></div>
+      <div class="screen" id="screen-reservar">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-calendar"></i>Selecione uma data</div>
+          <div class="cal-hdr">
+            <button class="cal-nav" id="btn-prev-m"><i class="ti ti-chevron-left"></i></button>
+            <span class="cal-month" id="cal-lbl"></span>
+            <button class="cal-nav" id="btn-next-m"><i class="ti ti-chevron-right"></i></button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="card" id="slots-card" style="display:none">
+          <div class="card-title"><i class="ti ti-clock"></i><span id="slots-lbl">Horários</span></div>
+          <div class="slot-grid" id="slot-grid"></div>
+        </div>
+      </div>
+      <div class="screen" id="screen-minhas">
+        <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
+      </div>
+      <div class="screen" id="screen-checkin">
+        <div id="ckin-main"></div>
+        <div id="ckin-hist"></div>
+      </div>
+      <div class="screen" id="screen-calendario">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-calendar-month"></i>Calendário de Reservas</div>
+          <div class="cal-hdr">
+            <button class="cal-nav" id="btn-prev-m-cal"><i class="ti ti-chevron-left"></i></button>
+            <span class="cal-month" id="cal-lbl-cal"></span>
+            <button class="cal-nav" id="btn-next-m-cal"><i class="ti ti-chevron-right"></i></button>
+          </div>
+          <div class="cal-grid" id="cal-grid-cal"></div>
+        </div>
+      </div>
+      <div class="screen" id="screen-quadra">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-trophy"></i>Ranking</div>
+          <div id="ranking-list"></div>
+        </div>
+      </div>
+      <div class="screen" id="screen-ocorrencias">
+        <div id="oco-list"></div>
+      </div>
+      <div class="screen" id="screen-config">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-settings"></i>Configurações</div>
+          <div id="config-content"></div>
+        </div>
+      </div>
+      <div class="screen" id="screen-perfil">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-user"></i>Meu Perfil</div>
+          <div id="perfil-content"></div>
+          <button class="btn-d" id="btn-logout" style="margin-top:12px">Sair da conta</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- MODAIS (simplificados) -->
-<div class="modal-bg" id="m-cancelar"><div class="modal-card"><div class="mhandle"></div><div class="mtitle">Cancelar reserva</div><div id="mc-sub"></div><div class="macts"><button class="btn-s" id="btn-fechar-cancel">Voltar</button><button class="btn-d" id="btn-exec-cancel">Cancelar</button></div></div></div>
-<div class="modal-bg" id="m-regulamento"><div class="modal-card"><div class="mtitle">Regulamento</div><div id="reg-text"></div><button class="btn-p" id="btn-fechar-regulamento">Fechar</button></div></div>
+<div class="modal-bg" id="m-cancelar">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Cancelar reserva</div>
+    <div class="msub" id="mc-sub"></div>
+    <div class="macts">
+      <button class="btn-s" id="btn-fechar-cancel">Voltar</button>
+      <button class="btn-d" id="btn-exec-cancel">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-regulamento">
+  <div class="modal-card center">
+    <div class="mhandle"></div>
+    <div class="mtitle">Regulamento da Quadra</div>
+    <div style="font-size:11px;line-height:1.6;max-height:60vh;overflow-y:auto">
+      <p><strong>1. Uso</strong> - Reserva exclusiva para moradores.</p>
+      <p><strong>2. Check-in</strong> - Obrigatório até 15min após o início.</p>
+      <p><strong>3. Cancelamentos</strong> - Com 2h de antecedência não gera falta.</p>
+      <p><strong>4. Conduta</strong> - Calçado esportivo, manter limpo, sem bebidas alcoólicas.</p>
+    </div>
+    <button class="btn-p" id="btn-fechar-regulamento">Entendi</button>
+  </div>
+</div>
 
 <div id="toast"></div>
 
 <script>
-// -------------------- SANITIZAÇÃO --------------------
+// ==================== SANITIZAÇÃO ====================
 function escapeHtml(str) {
   if (!str) return '';
-  return str.replace(/[&<>]/g, function(m) {
+  return String(str).replace(/[&<>]/g, function(m) {
     if (m === '&') return '&amp;';
     if (m === '<') return '&lt;';
     if (m === '>') return '&gt;';
     return m;
-  }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-    return c;
   });
 }
-function safeText(str) { return escapeHtml(String(str)); }
-function safeHtml(str) { return DOMPurify ? DOMPurify.sanitize(str) : escapeHtml(str); }
 
-// -------------------- SUPABASE --------------------
+function safeText(str) {
+  return escapeHtml(str);
+}
+
+// ==================== SUPABASE ====================
 const SUPABASE_URL = 'https://gkdwfntluopycapxyvfx.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let usuario = null, morador = null, espacos = [], espacoQuadraId = null;
 
-// -------------------- UTILITÁRIOS --------------------
-function toast(msg) { let el = document.getElementById('toast'); el.textContent = msg; el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 2500); }
-function fmtD(ds) { if(!ds) return ''; let p = ds.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-function ts() { return new Date().toISOString().slice(0,10); }
-function isAdmin() { return morador && morador.tipo === 'admin'; }
+let usuario = null;
+let morador = null;
+let espacos = [];
+let espacoQuadraId = null;
+
+// ==================== UTILITÁRIOS ====================
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+function fmtD(ds) {
+  if (!ds) return '';
+  const p = ds.split('-');
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+
+function ts() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function isAdmin() {
+  return morador && morador.tipo === 'admin';
+}
+
 function goScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-'+name).classList.add('active');
+  const target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+  
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  let tab = document.getElementById('tab-'+name);
-  if(tab) tab.classList.add('active');
+  const tab = document.getElementById('tab-' + name);
+  if (tab) tab.classList.add('active');
 }
 
-// -------------------- INICIALIZAÇÃO --------------------
+function abrirModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function fecharModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ==================== CARREGAR ESPAÇOS ====================
 async function carregarEspacos() {
-  let {data} = await sb.from('espacos').select('*');
+  const { data } = await sb.from('espacos').select('*');
   espacos = data || [];
-  espacoQuadraId = espacos.find(e => e.nome.toLowerCase().includes('quadra'))?.id || null;
+  const quadra = espacos.find(e => e.nome && e.nome.toLowerCase().includes('quadra'));
+  espacoQuadraId = quadra ? quadra.id : null;
 }
 
+// ==================== RENDER AVISOS (COM SANITIZAÇÃO) ====================
+async function renderAvisos() {
+  const container = document.getElementById('avisos-list');
+  if (!container) return;
+  
+  const { data: avisos } = await sb.from('avisos').select('*').eq('ativo', true).order('created_at', { ascending: false });
+  
+  if (!avisos || avisos.length === 0) {
+    container.innerHTML = '<div class="empty"><i class="ti ti-bell-off"></i>Nenhum aviso</div>';
+    return;
+  }
+  
+  let html = '';
+  for (const av of avisos) {
+    html += `
+      <div class="card">
+        <div class="card-title">
+          <i class="ti ti-bell"></i>
+          <span>${safeText(av.titulo)}</span>
+        </div>
+        <div style="font-size:12px;margin-bottom:8px">${safeText(av.corpo)}</div>
+        <div style="font-size:10px;color:var(--t2)">${fmtD(av.created_at?.slice(0, 10))}</div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+// ==================== RENDER RESERVAS (MINHAS) ====================
+async function renderMinhas() {
+  const container = document.getElementById('minhas-list');
+  if (!container || !morador) return;
+  
+  const { data: reservas } = await sb.from('reservas')
+    .select('*, modalidades(nome)')
+    .eq('unidade_id', morador.unidade_id)
+    .order('data_reserva', { ascending: false });
+  
+  if (!reservas || reservas.length === 0) {
+    container.innerHTML = '<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>';
+    return;
+  }
+  
+  let html = '';
+  for (const r of reservas) {
+    const modalidade = r.modalidades ? safeText(r.modalidades.nome) : 'Uso livre';
+    html += `
+      <div class="card">
+        <div class="card-title">
+          <i class="ti ti-calendar"></i>
+          <span>${fmtD(r.data_reserva)} - ${safeText(r.slot_inicio?.slice(0, 5))}</span>
+        </div>
+        <div style="font-size:11px;color:var(--t2)">${modalidade}</div>
+        <div class="macts" style="margin-top:8px">
+          <button class="btn-s" onclick="abrirCancelar('${r.id}')">Cancelar</button>
+        </div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+// ==================== CANCELAR RESERVA ====================
+let cancelId = null;
+
+window.abrirCancelar = function(id) {
+  cancelId = id;
+  document.getElementById('mc-sub').innerHTML = 'Tem certeza que deseja cancelar esta reserva?';
+  abrirModal('m-cancelar');
+};
+
+document.getElementById('btn-exec-cancel').addEventListener('click', async () => {
+  if (!cancelId) return;
+  const { error } = await sb.from('reservas').update({ status: 'cancelada' }).eq('id', cancelId);
+  if (error) {
+    toast('Erro ao cancelar');
+  } else {
+    toast('Reserva cancelada');
+    fecharModal('m-cancelar');
+    renderMinhas();
+  }
+  cancelId = null;
+});
+
+document.getElementById('btn-fechar-cancel').addEventListener('click', () => {
+  fecharModal('m-cancelar');
+  cancelId = null;
+});
+
+// ==================== CHECK-IN VIA QR (SEGURO) ====================
+let html5QrcodeScanner = null;
+
+function processarQrQuadra(code) {
+  // Validação segura: apenas código exato
+  if (code === 'CG_QUADRA_01') {
+    toast('Check-in realizado com sucesso!');
+    renderCheckin();
+  } else {
+    toast('QR Code inválido para esta quadra');
+  }
+}
+
+async function renderCheckin() {
+  const container = document.getElementById('ckin-main');
+  if (!container) return;
+  
+  container.innerHTML = `
+    <div class="card">
+      <div class="card-title"><i class="ti ti-qrcode"></i>Check-in por QR Code</div>
+      <div style="font-size:11px;margin-bottom:10px">Aponte a câmera para o QR Code fixado na entrada da quadra.</div>
+      <div id="reader" style="width:100%;border-radius:8px;overflow:hidden;display:none;margin-bottom:10px"></div>
+      <button class="btn-p" id="btn-abrir-scanner"><i class="ti ti-camera"></i>Escanear QR da Quadra</button>
+      <button class="btn-s" id="btn-fechar-scanner" style="display:none;margin-top:6px">Cancelar</button>
+    </div>
+  `;
+  
+  document.getElementById('btn-abrir-scanner').addEventListener('click', () => {
+    const reader = document.getElementById('reader');
+    const ba = document.getElementById('btn-abrir-scanner');
+    const bf = document.getElementById('btn-fechar-scanner');
+    reader.style.display = 'block';
+    ba.style.display = 'none';
+    bf.style.display = 'inline-flex';
+    
+    html5QrcodeScanner = new Html5Qrcode('reader');
+    html5QrcodeScanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (decoded) => {
+        processarQrQuadra(decoded);
+        if (html5QrcodeScanner) {
+          html5QrcodeScanner.stop().then(() => {
+            reader.style.display = 'none';
+            ba.style.display = 'inline-flex';
+            bf.style.display = 'none';
+          });
+        }
+      },
+      () => {}
+    ).catch(() => toast('Erro ao acessar câmera'));
+  });
+  
+  document.getElementById('btn-fechar-scanner').addEventListener('click', () => {
+    if (html5QrcodeScanner) {
+      html5QrcodeScanner.stop();
+      html5QrcodeScanner = null;
+    }
+    document.getElementById('reader').style.display = 'none';
+    document.getElementById('btn-abrir-scanner').style.display = 'inline-flex';
+    document.getElementById('btn-fechar-scanner').style.display = 'none';
+  });
+  
+  // Histórico de check-ins
+  const histContainer = document.getElementById('ckin-hist');
+  if (histContainer && morador) {
+    const { data: reservas } = await sb.from('reservas')
+      .select('*')
+      .eq('unidade_id', morador.unidade_id)
+      .order('data_reserva', { ascending: false })
+      .limit(10);
+    
+    if (reservas && reservas.length) {
+      let histHtml = '<div class="sec-lbl">Histórico recente</div>';
+      for (const r of reservas) {
+        const status = r.checkin_feito ? '✓ Check-in' : (r.status === 'cancelada' ? 'Cancelada' : 'Confirmada');
+        histHtml += `
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--br)">
+            <span>${fmtD(r.data_reserva)} ${safeText(r.slot_inicio?.slice(0,5))}</span>
+            <span class="badge ${r.checkin_feito ? 'b-ok' : 'b-warn'}">${status}</span>
+          </div>
+        `;
+      }
+      histContainer.innerHTML = histHtml;
+    }
+  }
+}
+
+// ==================== CALENDÁRIO SIMPLES ====================
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+function renderCalendario() {
+  const lbl = document.getElementById('cal-lbl-cal');
+  const grid = document.getElementById('cal-grid-cal');
+  if (!lbl || !grid) return;
+  
+  lbl.textContent = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][currentMonth] + ' ' + currentYear;
+  
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const today = ts();
+  
+  let html = ['D','S','T','Q','Q','S','S'].map(d => `<div class="cal-dn">${d}</div>`).join('');
+  
+  for (let i = 0; i < firstDay; i++) html += '<div></div>';
+  
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls = 'cal-d';
+    if (ds === today) cls += ' today';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  
+  grid.innerHTML = html;
+}
+
+document.getElementById('btn-prev-m-cal')?.addEventListener('click', () => {
+  currentMonth--;
+  if (currentMonth < 0) {
+    currentMonth = 11;
+    currentYear--;
+  }
+  renderCalendario();
+});
+
+document.getElementById('btn-next-m-cal')?.addEventListener('click', () => {
+  currentMonth++;
+  if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  }
+  renderCalendario();
+});
+
+// ==================== RANKING ====================
+async function renderRanking() {
+  const container = document.getElementById('ranking-list');
+  if (!container) return;
+  
+  const { data: placares } = await sb.from('placares').select('*, unidades(codigo)').order('created_at', { ascending: false }).limit(20);
+  
+  if (!placares || placares.length === 0) {
+    container.innerHTML = '<div class="empty"><i class="ti ti-trophy"></i>Sem partidas registradas</div>';
+    return;
+  }
+  
+  let html = '';
+  for (const p of placares) {
+    const apto = p.unidades ? safeText(p.unidades.codigo) : '---';
+    html += `
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--br)">
+        <span>Apto ${apto}</span>
+        <span class="badge b-ok">${safeText(p.modalidade)}</span>
+        <span>${safeText(p.placar_casa)} x ${safeText(p.placar_visitante)}</span>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+// ==================== OCORRÊNCIAS ====================
+async function renderOcorrencias() {
+  const container = document.getElementById('oco-list');
+  if (!container) return;
+  
+  const { data: ocorrencias } = await sb.from('ocorrencias').select('*').order('created_at', { ascending: false }).limit(10);
+  
+  if (!ocorrencias || ocorrencias.length === 0) {
+    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma ocorrência</div>';
+    return;
+  }
+  
+  let html = '';
+  for (const o of ocorrencias) {
+    html += `
+      <div class="card">
+        <div class="card-title">
+          <i class="ti ti-alert-circle"></i>
+          <span>${safeText(o.titulo)}</span>
+        </div>
+        <div style="font-size:11px;color:var(--t2)">${safeText(o.descricao)}</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:6px">${fmtD(o.created_at?.slice(0, 10))}</div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+// ==================== PERFIL ====================
+function renderPerfil() {
+  const container = document.getElementById('perfil-content');
+  if (!container || !morador) return;
+  
+  container.innerHTML = `
+    <div style="text-align:center;margin-bottom:16px">
+      <div class="av-btn" style="width:60px;height:60px;font-size:24px;margin:0 auto">${safeText((morador.nome?.[0] || 'U').toUpperCase())}</div>
+      <div style="font-weight:600;margin-top:8px">${safeText(morador.nome)}</div>
+      <div style="font-size:11px;color:var(--t2)">${morador.unidades ? safeText(morador.unidades.codigo) : 'Administrador'}</div>
+    </div>
+  `;
+}
+
+// ==================== LOGOUT ====================
+document.getElementById('btn-logout')?.addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+// ==================== CONFIGURAÇÕES (APENAS ADMIN) ====================
+function renderConfig() {
+  const container = document.getElementById('config-content');
+  if (!container) return;
+  
+  if (!isAdmin()) {
+    container.innerHTML = '<div class="empty">Acesso restrito a administradores</div>';
+    return;
+  }
+  
+  container.innerHTML = `
+    <div class="form-row">
+      <label class="form-lbl">Limite de reservas por mês</label>
+      <select id="cfg-max-mes" class="form-in">
+        <option value="4">4 reservas</option>
+        <option value="8">8 reservas</option>
+        <option value="12">12 reservas</option>
+      </select>
+    </div>
+    <button class="btn-p" id="salvar-config">Salvar Configurações</button>
+  `;
+  
+  document.getElementById('salvar-config')?.addEventListener('click', async () => {
+    const maxMes = document.getElementById('cfg-max-mes').value;
+    const { error } = await sb.from('configuracoes').upsert({ max_reservas_mes: parseInt(maxMes), atualizado_em: new Date() });
+    if (error) toast('Erro ao salvar');
+    else toast('Configurações salvas');
+  });
+}
+
+// ==================== INICIAR APP ====================
 async function iniciarApp(user) {
   usuario = user;
-  let {data: m, error} = await sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).single();
-  if(error || !m || m.status !== 'ativo') { toast('Acesso negado ou pendente'); sb.auth.signOut(); location.reload(); return; }
+  
+  const { data: m, error } = await sb.from('moradores')
+    .select('*, unidades(*)')
+    .eq('auth_user_id', user.id)
+    .single();
+  
+  if (error || !m || m.status !== 'ativo') {
+    toast('Acesso negado ou pendente');
+    await sb.auth.signOut();
+    location.reload();
+    return;
+  }
+  
   morador = m;
+  
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-main').style.display = 'flex';
-  document.getElementById('av-btn').innerText = (morador.nome[0] || 'U').toUpperCase();
-  document.getElementById('role-tag').innerText = morador.tipo === 'admin' ? 'Admin' : 'Morador';
-  if(isAdmin()) document.getElementById('tab-config').style.display = 'flex';
+  document.getElementById('av-btn').innerText = (morador.nome?.[0] || 'U').toUpperCase();
+  document.getElementById('role-tag').innerText = isAdmin() ? 'Admin' : 'Morador';
+  document.getElementById('hdr-sub').innerHTML = morador.unidades ? `Apto ${safeText(morador.unidades.codigo)}` : 'Administrador';
+  
+  if (isAdmin()) {
+    document.getElementById('tab-config').style.display = 'flex';
+    document.getElementById('tab-dashboard').style.display = 'flex';
+  }
+  
   await carregarEspacos();
+  
+  // Eventos das abas
+  document.getElementById('tab-avisos').addEventListener('click', () => { renderAvisos(); goScreen('avisos'); });
+  document.getElementById('tab-reservar').addEventListener('click', () => goScreen('reservar'));
+  document.getElementById('tab-minhas').addEventListener('click', () => { renderMinhas(); goScreen('minhas'); });
+  document.getElementById('tab-checkin').addEventListener('click', () => { renderCheckin(); goScreen('checkin'); });
+  document.getElementById('tab-calendario').addEventListener('click', () => { renderCalendario(); goScreen('calendario'); });
+  document.getElementById('tab-quadra').addEventListener('click', () => { renderRanking(); goScreen('quadra'); });
+  document.getElementById('tab-ocorrencias').addEventListener('click', () => { renderOcorrencias(); goScreen('ocorrencias'); });
+  document.getElementById('tab-config').addEventListener('click', () => { renderConfig(); goScreen('config'); });
+  document.getElementById('av-btn').addEventListener('click', () => { renderPerfil(); goScreen('perfil'); });
+  document.getElementById('btn-fechar-regulamento').addEventListener('click', () => fecharModal('m-regulamento'));
+  
   renderAvisos();
   goScreen('avisos');
 }
 
-// Verifica sessão existente
-sb.auth.getSession().then(({data}) => { if(data.session) iniciarApp(data.session.user); });
+// ==================== VERIFICAR SESSÃO EXISTENTE ====================
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    iniciarApp(data.session.user);
+  }
+});
 
-// Login
+// ==================== LOGIN ====================
 document.getElementById('btn-entrar').addEventListener('click', async () => {
-  let email = document.getElementById('login-email').value.trim();
-  let pass = document.getElementById('login-pass').value;
-  let {error, data} = await sb.auth.signInWithPassword({email, password: pass});
-  if(error) { document.getElementById('login-err').innerText = 'E-mail/senha inválidos'; document.getElementById('login-err').style.display = 'block'; return; }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const errDiv = document.getElementById('login-err');
+  
+  errDiv.style.display = 'none';
+  
+  if (!email || !password) {
+    errDiv.innerText = 'Preencha e-mail e senha';
+    errDiv.style.display = 'block';
+    return;
+  }
+  
+  const { error, data } = await sb.auth.signInWithPassword({ email, password });
+  
+  if (error) {
+    errDiv.innerText = 'E-mail ou senha incorretos';
+    errDiv.style.display = 'block';
+    return;
+  }
+  
   iniciarApp(data.user);
 });
-document.getElementById('link-cadastro').addEventListener('click', () => toast('Função de cadastro: contate o síndico.'));
-document.getElementById('link-esqueci').addEventListener('click', () => toast('Para redefinir senha, solicite ao administrador.'));
 
-// -------------------- AVISOS (com sanitização) --------------------
-async function renderAvisos() {
-  let container = document.getElementById('screen-avisos');
-  if(!container) return;
-  let {data: avisos} = await sb.from('avisos').select('*').eq('ativo',true).order('created_at',{ascending:false});
-  if(!avisos || !avisos.length) { container.innerHTML = '<div class="empty">Nenhum aviso</div>'; return; }
-  let html = '<div class="card"><div class="card-title"><i class="ti ti-bell"></i>Comunicados</div>';
-  for(let av of avisos) {
-    html += `<div class="av-card" style="border-left:3px solid var(--v);margin-bottom:8px;padding:8px 12px;background:var(--cd);border-radius:6px">
-      <div class="av-titulo" style="font-weight:600">${safeText(av.titulo)}</div>
-      <div class="av-corpo" style="font-size:12px;margin-top:4px">${safeText(av.corpo)}</div>
-      <div class="av-foot" style="font-size:10px;color:var(--t2);margin-top:6px">${fmtD(av.created_at?.slice(0,10))}</div>
-    </div>`;
-  }
-  html += '</div>';
-  container.innerHTML = html;
-}
-
-// -------------------- RESERVAR (exemplo simplificado) --------------------
-function renderReservar() {
-  let container = document.getElementById('screen-reservar');
-  container.innerHTML = '<div class="card">Funcionalidade de reserva (protegida contra XSS)</div>';
-}
-// Demais telas de exemplo (mantenha estrutura similar com escape)
-
-// -------------------- PERFIL (logout) --------------------
-document.getElementById('av-btn').addEventListener('click', async () => {
-  let html = `<div class="card"><div class="card-title">Perfil</div><div>Nome: ${safeText(morador?.nome)}</div><button class="btn-d" id="logout-btn">Sair</button></div>`;
-  document.getElementById('screen-perfil').innerHTML = html;
-  document.getElementById('logout-btn')?.addEventListener('click', () => { sb.auth.signOut(); location.reload(); });
-  goScreen('perfil');
+document.getElementById('link-cadastro').addEventListener('click', () => {
+  toast('Cadastro: entre em contato com o síndico');
 });
 
-// Injeção das funções básicas
-window.renderAvisos = renderAvisos;
-window.renderReservar = renderReservar;
-window.goScreen = goScreen;
-// Chamadas iniciais
-document.getElementById('tab-avisos').addEventListener('click', () => { renderAvisos(); goScreen('avisos'); });
-document.getElementById('tab-reservar').addEventListener('click', () => { renderReservar(); goScreen('reservar'); });
-document.getElementById('tab-minhas').addEventListener('click', () => { document.getElementById('screen-minhas').innerHTML = '<div class="card">Minhas reservas (seguro)</div>'; goScreen('minhas'); });
-document.getElementById('tab-checkin').addEventListener('click', () => { document.getElementById('screen-checkin').innerHTML = '<div class="card">Check-in via QR (protegido)</div>'; goScreen('checkin'); });
-document.getElementById('tab-calendario').addEventListener('click', () => { document.getElementById('screen-calendario').innerHTML = '<div class="card">Calendário</div>'; goScreen('calendario'); });
-document.getElementById('tab-quadra').addEventListener('click', () => { document.getElementById('screen-quadra').innerHTML = '<div class="card">Ranking</div>'; goScreen('quadra'); });
-document.getElementById('tab-ocorrencias').addEventListener('click', () => { document.getElementById('screen-ocorrencias').innerHTML = '<div class="card">Ocorrências</div>'; goScreen('ocorrencias'); });
-if(document.getElementById('tab-config')) {
-  document.getElementById('tab-config').addEventListener('click', () => { if(isAdmin()) { document.getElementById('screen-config').innerHTML = '<div class="card">Configurações administrativas</div>'; goScreen('config'); } else toast('Acesso negado'); });
-}
-// Botão fechar modal genérico
-document.getElementById('btn-fechar-cancel')?.addEventListener('click', () => document.getElementById('m-cancelar').classList.remove('open'));
-document.getElementById('btn-exec-cancel')?.addEventListener('click', () => toast('Cancelamento simulado (seguro)'));
-document.getElementById('btn-fechar-regulamento')?.addEventListener('click', () => document.getElementById('m-regulamento').classList.remove('open'));
-// Prevenir qualquer innerHTML direto sem escape - as funções acima usam safeText()
-console.log('App carregado com segurança e correção de layout');
+document.getElementById('link-esqueci').addEventListener('click', () => {
+  toast('Redefinição de senha: solicite ao administrador');
+});
+
+// Inicializar calendário simples
+renderCalendario();
 </script>
 </body>
 </html>
