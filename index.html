@@ -620,7 +620,7 @@ textarea.form-in{resize:vertical}
           <div><div style="font-size:12px;font-weight:600">Bloquear aulas recorrentes nos fins de semana</div></div>
           <div class="tgl on" id="tgl-blk-aulas-fds" style="margin-left:12px;margin-top:2px"></div>
         </div>
-        <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
+        <div style="padding:9px 0;border-bottom:0.5px solid var(--br);display:none">
           <div style="font-size:12px;font-weight:600;margin-bottom:6px">Antecedencia minima para reservas pontuais no fim de semana</div>
           <select class="form-in" id="cfg-ant-fds">
             <option value="0">Sem restricao</option><option value="1">1 hora antes</option>
@@ -1172,7 +1172,6 @@ var appCfg = {
   blk_aulas_fds: true,
   blk_sabado: false,
   blk_domingo: false,
-  ant_fds_h: 0,
   aulas_rec_ativo: true,
   aula_duracao_max_meses: 6,
   aula_aviso_dias: 30,
@@ -3231,7 +3230,7 @@ function renderConfig() {
   sl('cfg-faltas-susp',    appCfg.faltas_suspensao);
   sl('cfg-carencia',       appCfg.carencia_cancel_min);
   sl('cfg-susp-dias',      appCfg.suspensao_dias);
-  sl('cfg-ant-fds',        appCfg.ant_fds_h !== undefined ? appCfg.ant_fds_h : 0);
+  // sl('cfg-ant-fds',        appCfg.ant_fds_h !== undefined ? appCfg.ant_fds_h : 0); // Campo removido - coluna não existe no banco
   sl('cfg-aula-duracao',   appCfg.aula_duracao_max_meses);
   sl('cfg-aula-aviso',     appCfg.aula_aviso_dias);
   sl('cfg-aula-max-contr', appCfg.aula_max_contratos);
@@ -3691,7 +3690,6 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
     blk_aulas_fds:  tg('tgl-blk-aulas-fds'),
     blk_sabado:     tg('tgl-blk-sab'),
     blk_domingo:    tg('tgl-blk-dom'),
-    ant_fds_h:              li('cfg-ant-fds', 0),
     aulas_rec_ativo: tg('tgl-aulas-rec'),
     aula_duracao_max_meses: li('cfg-aula-duracao', 6),
     aula_aviso_dias:        li('cfg-aula-aviso', 30),
