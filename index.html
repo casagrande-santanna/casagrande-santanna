@@ -9,7 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root {
   --v: #27500A;
@@ -17,7 +16,6 @@
   --vm: #3B6D11;
   --am: #FAEEDA;
   --amb: #EF9F27;
-  --amt: #854F0B;
   --rd: #FCEBEB;
   --rdb: #F09595;
   --rdt: #A32D2D;
@@ -33,39 +31,12 @@
   --tx: #1A1A1A;
   --t2: #666;
   --t3: #999;
-  --r: 10px;
-  --rl: 14px;
-}
-
-body.dark {
-  --v: #4A8C1C;
-  --vl: #1A2E0A;
-  --vm: #5FA328;
-  --am: #2E2008;
-  --amb: #EF9F27;
-  --amt: #F5C87A;
-  --rd: #2E0808;
-  --rdb: #8B3030;
-  --rdt: #F09595;
-  --bl: #081828;
-  --blb: #2B5280;
-  --blt: #85B7EB;
-  --gy: #1A1A18;
-  --gyb: #3A3A38;
-  --gyt: #A0A09A;
-  --bg: #0F0F0D;
-  --cd: #1C1C1A;
-  --br: #2E2E2A;
-  --tx: #F0F0EC;
-  --t2: #AAA9A4;
-  --t3: #666;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -94,7 +65,6 @@ body {
   position: sticky;
   top: 0;
   z-index: 30;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .hdr-title {
@@ -105,13 +75,13 @@ body {
 .hdr-sub {
   font-size: 10px;
   opacity: 0.75;
-  margin-top: 1px;
 }
 
 .hdr-right {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-left: auto;
 }
 
 .role-tag {
@@ -196,14 +166,9 @@ body {
 .card {
   background: var(--cd);
   border: 0.5px solid var(--br);
-  border-radius: var(--rl);
+  border-radius: 10px;
   padding: 12px 14px;
   margin-bottom: 10px;
-  transition: 0.2s;
-}
-
-.card:hover {
-  border-color: #B4B2A9;
 }
 
 .card-title {
@@ -264,11 +229,11 @@ body {
   width: 100%;
   justify-content: center;
   transition: 0.2s;
+  margin-top: 8px;
 }
 
 .btn-p:hover {
   opacity: 0.9;
-  transform: translateY(-1px);
 }
 
 .btn-s {
@@ -292,52 +257,12 @@ body {
   background: var(--vl);
 }
 
-.btn-d {
-  background: var(--rd);
-  border: none;
-  border-radius: 8px;
-  padding: 9px 14px;
-  font-size: 12px;
-  cursor: pointer;
-  color: var(--rdt);
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  flex: 1;
-  justify-content: center;
-  transition: 0.2s;
-}
-
 .badge {
   font-size: 9.5px;
   padding: 2px 7px;
   border-radius: 20px;
   font-weight: 600;
   display: inline-block;
-}
-
-.b-ok {
-  background: var(--vl);
-  color: var(--v);
-}
-
-.b-warn {
-  background: var(--am);
-  color: var(--amt);
-}
-
-.b-danger {
-  background: var(--rd);
-  color: var(--rdt);
-}
-
-.b-info {
-  background: var(--bl);
-  color: var(--blt);
-}
-
-.b-gray {
   background: var(--gy);
   color: var(--gyt);
 }
@@ -393,12 +318,6 @@ body {
   margin-bottom: 8px;
 }
 
-.msub {
-  font-size: 12px;
-  color: var(--t2);
-  margin-bottom: 12px;
-}
-
 #toast {
   position: fixed;
   bottom: 72px;
@@ -411,11 +330,9 @@ body {
   font-size: 12px;
   z-index: 500;
   pointer-events: none;
-  white-space: nowrap;
   opacity: 0;
   transition: opacity 0.3s;
   max-width: 90vw;
-  text-align: center;
 }
 
 #toast.toast-sucesso {
@@ -429,10 +346,6 @@ body {
 #toast.toast-aviso {
   background: rgba(239, 159, 39, 0.95);
   color: #1a1a1a;
-}
-
-#toast.toast-info {
-  background: rgba(24, 95, 165, 0.95);
 }
 
 .login-wrap {
@@ -467,7 +380,7 @@ body {
 
 .login-card {
   background: #fff;
-  border-radius: var(--rl);
+  border-radius: 14px;
   padding: 24px;
   width: 100%;
   max-width: 360px;
@@ -493,6 +406,7 @@ body {
 
 .login-input:focus {
   border-color: var(--v);
+  box-shadow: 0 0 0 3px rgba(39, 80, 10, 0.08);
 }
 
 .login-btn {
@@ -505,7 +419,11 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 8px;
+  transition: 0.2s;
+}
+
+.login-btn:hover {
+  opacity: 0.9;
 }
 
 .login-err {
@@ -518,30 +436,59 @@ body {
   display: none;
 }
 
-.macts {
+.login-links {
   display: flex;
-  gap: 7px;
-  margin-top: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 12px;
+  font-size: 11px;
 }
 
-.sec-lbl {
-  font-size: 10px;
-  font-weight: 600;
+.login-link {
+  color: var(--v);
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 11px;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+.login-divider {
+  text-align: center;
+  margin: 16px 0;
   color: var(--t2);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 10px 0 5px;
+  font-size: 11px;
+}
+
+.login-cadastro {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--t2);
+}
+
+.login-cadastro button {
+  color: var(--v);
+  cursor: pointer;
+  text-decoration: underline;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 11px;
 }
 
 @media (min-width: 768px) {
   body {
     max-width: 100%;
   }
-
   #toast {
     bottom: 24px;
   }
-
   .modal-card {
     max-width: 500px;
   }
@@ -550,6 +497,7 @@ body {
 </head>
 <body>
 
+<!-- ==================== LOGIN ====================  -->
 <div class="login-wrap" id="login-screen">
   <div class="login-logo">🏠</div>
   <div class="login-title">Casa Grande de Sant'Anna</div>
@@ -557,13 +505,92 @@ body {
   <div class="login-card">
     <label class="login-lbl">E-mail</label>
     <input class="login-input" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+    
     <label class="login-lbl">Senha</label>
     <input class="login-input" type="password" id="login-pass" autocomplete="current-password">
+    
+    <div class="login-links">
+      <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:#555;">
+        <input type="checkbox" id="remember-checkbox"> Lembrar-me
+      </label>
+      <button class="login-link" id="link-esqueci">Esqueci a senha</button>
+    </div>
+    
     <button class="login-btn" id="btn-entrar">Entrar</button>
+    
     <div class="login-err" id="login-err"></div>
+    
+    <div class="login-cadastro">
+      Não tem conta? <button class="login-link" id="link-cadastro">Cadastre-se</button>
+    </div>
   </div>
 </div>
 
+<!-- ==================== MODAL: ESQUECI SENHA ====================  -->
+<div class="modal-bg" id="m-esqueci">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Recuperar Senha</div>
+    <div style="font-size:11px; color:var(--t2); margin-bottom:12px;">Informe seu e-mail para receber um link de recuperação.</div>
+    <div class="form-row">
+      <label class="form-lbl">E-mail</label>
+      <input type="email" class="form-in" id="esqueci-email" placeholder="seu@email.com">
+    </div>
+    <div style="display:flex; gap:6px;">
+      <button class="btn-s" id="btn-fechar-esqueci" style="flex:1;">Voltar</button>
+      <button class="btn-p" id="btn-enviar-reset" style="flex:1; margin-top:0;">Enviar</button>
+    </div>
+    <div class="login-err" id="esqueci-err" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: CADASTRO ====================  -->
+<div class="modal-bg" id="m-cadastro">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Criar Conta</div>
+    <div style="font-size:11px; color:var(--t2); margin-bottom:12px;">Cadastre-se para usar o sistema. O síndico precisa ativar sua conta.</div>
+    
+    <div class="form-row">
+      <label class="form-lbl">Nome Completo</label>
+      <input type="text" class="form-in" id="cad-nome" placeholder="Seu nome">
+    </div>
+    
+    <div class="form-row">
+      <label class="form-lbl">E-mail</label>
+      <input type="email" class="form-in" id="cad-email" placeholder="seu@email.com">
+    </div>
+    
+    <div class="form-row">
+      <label class="form-lbl">Telefone</label>
+      <input type="tel" class="form-in" id="cad-fone" placeholder="(81) 99999-9999">
+    </div>
+    
+    <div class="form-row">
+      <label class="form-lbl">Apartamento (código)</label>
+      <input type="text" class="form-in" id="cad-apto" placeholder="Ex: 101">
+    </div>
+    
+    <div class="form-row">
+      <label class="form-lbl">Senha</label>
+      <input type="password" class="form-in" id="cad-pass" placeholder="Mínimo 6 caracteres">
+    </div>
+    
+    <div class="form-row">
+      <label class="form-lbl">Confirmar Senha</label>
+      <input type="password" class="form-in" id="cad-pass-confirm" placeholder="Repita a senha">
+    </div>
+    
+    <div style="display:flex; gap:6px; margin-top:10px;">
+      <button class="btn-s" id="btn-fechar-cadastro" style="flex:1;">Voltar</button>
+      <button class="btn-p" id="btn-criar-conta" style="flex:1; margin-top:0;">Criar Conta</button>
+    </div>
+    
+    <div class="login-err" id="cadastro-err" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ==================== APP PRINCIPAL ====================  -->
 <div class="app" id="app-main" style="display: none;">
   <div class="hdr">
     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -573,7 +600,7 @@ body {
       </div>
       <div style="display:flex; align-items:center; gap:10px;">
         <span class="role-tag" id="role-tag">Morador</span>
-        <div class="av-btn" id="av-btn">DT</div>
+        <div class="av-btn" id="av-btn" style="cursor:pointer;">DT</div>
       </div>
     </div>
   </div>
@@ -584,26 +611,22 @@ body {
     <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus"></i>Reservar</button>
     <button class="tab" id="tab-checkin"><i class="ti ti-door-enter"></i>Check-in</button>
     <button class="tab" id="tab-quadra"><i class="ti ti-trophy"></i>Quadra</button>
-    <button class="tab" id="tab-ocorrencias" style="display:none;"><i class="ti ti-alert-circle"></i>Ocorr.</button>
     <button class="tab" id="tab-config" style="display:none;"><i class="ti ti-settings"></i>Config</button>
     <button class="tab" id="tab-perfil"><i class="ti ti-user"></i>Perfil</button>
   </div>
 
   <div class="content">
-    <!-- SCREEN: AVISOS -->
     <div class="screen active" id="screen-avisos">
       <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
     </div>
 
-    <!-- SCREEN: MINHAS RESERVAS -->
     <div class="screen" id="screen-minhas">
       <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
     </div>
 
-    <!-- SCREEN: RESERVAR -->
     <div class="screen" id="screen-reservar">
       <div class="card">
-        <div class="card-title"><i class="ti ti-calendar"></i>Nova Reserva</div>
+        <div class="card-title"><i class="ti ti-calendar-plus"></i>Nova Reserva</div>
         <div class="form-row">
           <label class="form-lbl">Data</label>
           <input type="date" class="form-in" id="res-data">
@@ -611,7 +634,7 @@ body {
         <div class="form-row">
           <label class="form-lbl">Horário</label>
           <select class="form-in" id="res-slot">
-            <option>Selecione um horário</option>
+            <option>Selecione...</option>
             <option value="06:00">06:00</option>
             <option value="07:00">07:00</option>
             <option value="08:00">08:00</option>
@@ -630,68 +653,42 @@ body {
             <option value="21:00">21:00</option>
           </select>
         </div>
-        <button class="btn-p" id="btn-criar-reserva"><i class="ti ti-plus"></i>Criar Reserva</button>
-      </div>
-      <div id="reservas-dia" style="display:none; margin-top:10px;">
-        <div class="sec-lbl">Reservas deste dia</div>
-        <div id="lista-reservas-dia"></div>
+        <button class="btn-p" id="btn-criar-reserva"><i class="ti ti-plus"></i>Criar</button>
       </div>
     </div>
 
-    <!-- SCREEN: CHECK-IN -->
     <div class="screen" id="screen-checkin">
-      <div class="card" style="background:var(--vl); border-color:#97C459; margin-bottom:10px;">
-        <div class="card-title"><i class="ti ti-qrcode" style="color:var(--vm)"></i>Escanear QR Code</div>
-        <div style="font-size:11px; margin-bottom:10px;">Aponte a câmera para o QR Code da quadra.</div>
+      <div class="card" style="background:var(--vl); border-color:#97C459;">
+        <div class="card-title"><i class="ti ti-qrcode" style="color:var(--vm);"></i>Check-in QR</div>
         <div id="reader" style="width:100%; border-radius:8px; overflow:hidden; display:none; margin-bottom:10px;"></div>
-        <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm); width:100%;"><i class="ti ti-camera"></i>Escanear</button>
-        <button class="btn-s" id="btn-fechar-scanner" style="display:none; width:100%; margin-top:6px; border-color:var(--rdb); color:var(--rdt);"><i class="ti ti-x"></i>Cancelar</button>
+        <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm); width:100%; margin-top:0;"><i class="ti ti-camera"></i>Escanear</button>
+        <button class="btn-s" id="btn-fechar-scanner" style="display:none; width:100%; margin-top:8px;"><i class="ti ti-x"></i>Cancelar</button>
       </div>
       <div id="checkin-hist"></div>
     </div>
 
-    <!-- SCREEN: QUADRA -->
     <div class="screen" id="screen-quadra">
-      <div class="card">
-        <div class="card-title"><i class="ti ti-trophy"></i>Placar e Ranking</div>
-        <div id="ranking-list"><div class="empty"><i class="ti ti-trophy"></i>Sem partidas</div></div>
-      </div>
+      <div id="ranking-list"><div class="empty"><i class="ti ti-trophy"></i>Sem partidas</div></div>
     </div>
 
-    <!-- SCREEN: OCORRÊNCIAS -->
-    <div class="screen" id="screen-ocorrencias">
-      <div id="oco-list"><div class="empty"><i class="ti ti-alert-circle"></i>Sem ocorrências</div></div>
-    </div>
-
-    <!-- SCREEN: CONFIGURAÇÕES (ADMIN) -->
     <div class="screen" id="screen-config">
       <div class="card">
         <div class="card-title"><i class="ti ti-settings"></i>Configurações</div>
         <div class="form-row">
-          <label class="form-lbl">Reservas máximas por mês</label>
+          <label class="form-lbl">Reservas máximas/mês</label>
           <select class="form-in" id="cfg-max-mes">
-            <option value="1">1 reserva</option>
-            <option value="2">2 reservas</option>
-            <option value="3">3 reservas</option>
-            <option value="4" selected>4 reservas</option>
-            <option value="6">6 reservas</option>
-            <option value="8">8 reservas</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-lbl">Faltas para suspensão</label>
-          <select class="form-in" id="cfg-faltas-susp">
-            <option value="1">1 falta</option>
-            <option value="2" selected>2 faltas</option>
-            <option value="3">3 faltas</option>
-            <option value="5">5 faltas</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
           </select>
         </div>
         <button class="btn-p" id="btn-salvar-config"><i class="ti ti-device-floppy"></i>Salvar</button>
       </div>
     </div>
 
-    <!-- SCREEN: PERFIL -->
     <div class="screen" id="screen-perfil">
       <div class="card">
         <div style="text-align:center; margin-bottom:16px;">
@@ -699,23 +696,21 @@ body {
           <div style="font-weight:600; margin-top:8px;" id="pf-nome">Carregando...</div>
           <div style="font-size:11px; color:var(--t2);" id="pf-apto"></div>
         </div>
-        <button class="btn-d" id="btn-logout" style="width:100%;"><i class="ti ti-logout"></i>Sair</button>
+        <button class="btn-p" id="btn-logout"><i class="ti ti-logout"></i>Sair</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAIS -->
-
-<!-- Modal: Cancelar Reserva -->
+<!-- ==================== MODAL: CANCELAR RESERVA ====================  -->
 <div class="modal-bg" id="m-cancelar">
   <div class="modal-card">
     <div class="mhandle"></div>
     <div class="mtitle">Cancelar Reserva</div>
-    <div class="msub" id="mc-sub">Tem certeza?</div>
-    <div style="display:flex; gap:6px; margin-top:16px;">
+    <div style="font-size:12px; color:var(--t2); margin-bottom:12px;" id="mc-sub">Tem certeza?</div>
+    <div style="display:flex; gap:6px;">
       <button class="btn-s" id="btn-fechar-cancel" style="flex:1;">Voltar</button>
-      <button class="btn-d" id="btn-exec-cancel" style="flex:1;">Cancelar</button>
+      <button class="btn-p" id="btn-exec-cancel" style="flex:1; margin-top:0;">Cancelar</button>
     </div>
   </div>
 </div>
@@ -731,16 +726,12 @@ var sb = supabase.createClient(SURL, SKEY);
 
 var usuario = null, morador = null;
 var espacoQuadraId = null;
-var configGlobal = {};
 
-// ==================== FUNÇÕES UTILITÁRIAS ====================
+// ==================== FUNÇÕES ====================
 
 function safeText(str) {
   if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function toast(msg, tipo = 'info') {
@@ -770,7 +761,7 @@ function isAdmin() {
 }
 
 function goScreen(name) {
-  var screens = ['avisos', 'minhas', 'reservar', 'checkin', 'quadra', 'ocorrencias', 'config', 'perfil'];
+  var screens = ['avisos', 'minhas', 'reservar', 'checkin', 'quadra', 'config', 'perfil'];
   screens.forEach(s => {
     document.getElementById('screen-' + s)?.classList.remove('active');
     document.getElementById('tab-' + s)?.classList.remove('active');
@@ -785,39 +776,6 @@ function abrirModal(id) {
 
 function fecharModal(id) {
   document.getElementById(id)?.classList.remove('open');
-}
-
-// ==================== CARREGAR CONFIGURAÇÕES ====================
-
-async function carregarConfiguracoes() {
-  try {
-    var {data} = await sb.from('configuracoes').select('chave, valor_inteiro');
-    configGlobal = {};
-    (data || []).forEach(cfg => {
-      configGlobal[cfg.chave] = cfg.valor_inteiro;
-    });
-  } catch (err) {
-    console.error('Erro ao carregar configurações:', err);
-  }
-}
-
-// ==================== REGISTRAR AUDITORIA ====================
-
-async function registrarAuditoria(acao, tabela, registroId, valoresNovos) {
-  if (!isAdmin() || !morador) return;
-  try {
-    await sb.from('auditoria_operacoes').insert({
-      admin_id: morador.id,
-      acao: acao,
-      tabela_afetada: tabela,
-      registro_id: registroId,
-      valores_novos: valoresNovos,
-      resultado: 'sucesso',
-      timestamp: new Date().toISOString()
-    });
-  } catch (err) {
-    console.error('Erro ao registrar auditoria:', err);
-  }
 }
 
 // ==================== LOGIN ====================
@@ -837,14 +795,162 @@ document.getElementById('btn-entrar').addEventListener('click', async () => {
   try {
     var {data, error} = await sb.auth.signInWithPassword({email, password: pass});
     if (error) {
-      err.textContent = 'Credenciais incorretas.';
+      err.textContent = 'E-mail ou senha incorretos.';
+      err.style.display = 'block';
+      console.error('Erro de login:', error);
+      return;
+    }
+    
+    // Guardar token se marcar "lembrar-me"
+    if (document.getElementById('remember-checkbox').checked) {
+      localStorage.setItem('sb_session', JSON.stringify(data.session));
+    }
+    
+    iniciarApp(data.user);
+  } catch (e) {
+    err.textContent = 'Erro ao conectar. Tente novamente.';
+    err.style.display = 'block';
+    console.error('Erro:', e);
+  }
+});
+
+// ==================== ESQUECI SENHA ====================
+
+document.getElementById('link-esqueci').addEventListener('click', () => {
+  abrirModal('m-esqueci');
+});
+
+document.getElementById('btn-fechar-esqueci').addEventListener('click', () => {
+  fecharModal('m-esqueci');
+});
+
+document.getElementById('btn-enviar-reset').addEventListener('click', async () => {
+  var email = document.getElementById('esqueci-email').value.trim();
+  var err = document.getElementById('esqueci-err');
+  err.style.display = 'none';
+
+  if (!email) {
+    err.textContent = 'Informe seu e-mail.';
+    err.style.display = 'block';
+    return;
+  }
+
+  try {
+    var {error} = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '?reset=true'
+    });
+
+    if (error) {
+      err.textContent = 'Erro: ' + error.message;
       err.style.display = 'block';
       return;
     }
-    iniciarApp(data.user);
+
+    toast('E-mail de recuperação enviado!', 'sucesso');
+    fecharModal('m-esqueci');
   } catch (e) {
-    err.textContent = 'Erro ao conectar.';
+    err.textContent = 'Erro ao enviar e-mail.';
     err.style.display = 'block';
+  }
+});
+
+// ==================== CADASTRO ====================
+
+document.getElementById('link-cadastro').addEventListener('click', () => {
+  abrirModal('m-cadastro');
+});
+
+document.getElementById('btn-fechar-cadastro').addEventListener('click', () => {
+  fecharModal('m-cadastro');
+});
+
+document.getElementById('btn-criar-conta').addEventListener('click', async () => {
+  var nome = document.getElementById('cad-nome').value.trim();
+  var email = document.getElementById('cad-email').value.trim();
+  var fone = document.getElementById('cad-fone').value.trim();
+  var apto = document.getElementById('cad-apto').value.trim();
+  var pass = document.getElementById('cad-pass').value;
+  var pass2 = document.getElementById('cad-pass-confirm').value;
+  var err = document.getElementById('cadastro-err');
+  err.style.display = 'none';
+
+  if (!nome || !email || !apto || !pass) {
+    err.textContent = 'Preencha todos os campos obrigatórios.';
+    err.style.display = 'block';
+    return;
+  }
+
+  if (pass.length < 6) {
+    err.textContent = 'Senha deve ter mínimo 6 caracteres.';
+    err.style.display = 'block';
+    return;
+  }
+
+  if (pass !== pass2) {
+    err.textContent = 'As senhas não coincidem.';
+    err.style.display = 'block';
+    return;
+  }
+
+  try {
+    // 1. Criar usuário
+    var {data: authData, error: errAuth} = await sb.auth.signUp({
+      email: email,
+      password: pass,
+      options: {
+        data: {
+          nome: nome,
+          telefone: fone,
+          apto: apto
+        }
+      }
+    });
+
+    if (errAuth) {
+      err.textContent = 'Erro: ' + errAuth.message;
+      err.style.display = 'block';
+      return;
+    }
+
+    // 2. Buscar unidade
+    var {data: unidade} = await sb.from('unidades').select('id').eq('codigo', apto).single();
+    if (!unidade) {
+      err.textContent = 'Apartamento não encontrado no sistema.';
+      err.style.display = 'block';
+      return;
+    }
+
+    // 3. Criar morador com status "pendente"
+    var {error: errMorador} = await sb.from('moradores').insert({
+      auth_user_id: authData.user.id,
+      unidade_id: unidade.id,
+      nome: nome,
+      email: email,
+      tipo: 'morador',
+      status: 'pendente'
+    });
+
+    if (errMorador) {
+      err.textContent = 'Erro ao criar perfil.';
+      err.style.display = 'block';
+      return;
+    }
+
+    toast('Cadastro realizado! Aguarde aprovação do síndico.', 'sucesso');
+    fecharModal('m-cadastro');
+
+    // Limpar formulário
+    document.getElementById('cad-nome').value = '';
+    document.getElementById('cad-email').value = '';
+    document.getElementById('cad-fone').value = '';
+    document.getElementById('cad-apto').value = '';
+    document.getElementById('cad-pass').value = '';
+    document.getElementById('cad-pass-confirm').value = '';
+
+  } catch (e) {
+    err.textContent = 'Erro ao criar conta.';
+    err.style.display = 'block';
+    console.error('Erro:', e);
   }
 });
 
@@ -857,14 +963,12 @@ async function iniciarApp(user) {
     var {data: m, error} = await sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).single();
 
     if (error || !m || m.status !== 'ativo') {
-      toast('Acesso negado.', 'erro');
+      toast('Acesso negado ou conta pendente de aprovação.', 'erro');
       await sb.auth.signOut();
-      location.reload();
       return;
     }
 
     morador = m;
-    await carregarConfiguracoes();
 
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-main').style.display = 'flex';
@@ -878,7 +982,6 @@ async function iniciarApp(user) {
 
     if (isAdmin()) {
       document.getElementById('tab-config').style.display = 'flex';
-      document.getElementById('tab-ocorrencias').style.display = 'flex';
     }
 
     var {data: esp} = await sb.from('espacos').select('*');
@@ -887,15 +990,24 @@ async function iniciarApp(user) {
       espacoQuadraId = quadra ? quadra.id : null;
     }
 
-    // Registrar listeners das tabs
+    // Registrar listeners
     document.getElementById('tab-avisos').onclick = () => { renderAvisos(); goScreen('avisos'); };
     document.getElementById('tab-minhas').onclick = () => { renderMinhas(); goScreen('minhas'); };
     document.getElementById('tab-reservar').onclick = () => goScreen('reservar');
-    document.getElementById('tab-checkin').onclick = () => { renderCheckin(); goScreen('checkin'); };
+    document.getElementById('tab-checkin').onclick = () => goScreen('checkin');
     document.getElementById('tab-quadra').onclick = () => { renderQuadra(); goScreen('quadra'); };
-    document.getElementById('tab-ocorrencias').onclick = () => { renderOcorrencias(); goScreen('ocorrencias'); };
-    document.getElementById('tab-config').onclick = () => { if (isAdmin()) { renderConfig(); goScreen('config'); } };
+    document.getElementById('tab-config').onclick = () => goScreen('config');
     document.getElementById('tab-perfil').onclick = () => goScreen('perfil');
+    document.getElementById('av-btn').onclick = () => goScreen('perfil');
+
+    // Listeners de botões
+    document.getElementById('btn-criar-reserva')?.addEventListener('click', criarReserva);
+    document.getElementById('btn-logout')?.addEventListener('click', logout);
+    document.getElementById('btn-abrir-scanner')?.addEventListener('click', abrirScanner);
+    document.getElementById('btn-fechar-scanner')?.addEventListener('click', fecharScanner);
+    document.getElementById('btn-fechar-cancel')?.addEventListener('click', () => fecharModal('m-cancelar'));
+    document.getElementById('btn-exec-cancel')?.addEventListener('click', executarCancelar);
+    document.getElementById('btn-salvar-config')?.addEventListener('click', salvarConfig);
 
     renderAvisos();
 
@@ -925,15 +1037,13 @@ async function renderAvisos() {
       html += '<div style="font-size:10px; color:var(--t2);">' + fmtD(av.created_at?.slice(0, 10)) + '</div>';
       html += '</div>';
     });
-
     container.innerHTML = html;
   } catch (err) {
-    console.error('Erro ao renderizar avisos:', err);
-    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro ao carregar</div>';
+    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro</div>';
   }
 }
 
-// ==================== RENDER MINHAS RESERVAS ====================
+// ==================== RENDER MINHAS ====================
 
 async function renderMinhas() {
   var container = document.getElementById('minhas-list');
@@ -948,28 +1058,23 @@ async function renderMinhas() {
       .limit(50);
 
     if (!reservas || reservas.length === 0) {
-      container.innerHTML = '<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>';
+      container.innerHTML = '<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma</div>';
       return;
     }
 
     var html = '';
     reservas.forEach(r => {
-      var modalidade = r.modalidades?.nome || 'Uso livre';
       var podeCancel = new Date(r.data_reserva) > new Date();
-
       html += '<div class="card">';
       html += '<div class="card-title"><i class="ti ti-calendar"></i>' + fmtD(r.data_reserva) + ' - ' + r.slot_inicio.slice(0, 5) + '</div>';
-      html += '<div style="font-size:11px; color:var(--t2);">' + safeText(modalidade) + '</div>';
       if (podeCancel) {
-        html += '<div class="macts"><button class="btn-s" onclick="abrirModalCancelar(\'' + r.id + '\')">Cancelar</button></div>';
+        html += '<button class="btn-s" onclick="abrirModalCancelar(\'' + r.id + '\')" style="width:100%; margin-top:8px;"><i class="ti ti-trash"></i>Cancelar</button>';
       }
       html += '</div>';
     });
-
     container.innerHTML = html;
   } catch (err) {
-    console.error('Erro ao renderizar minhas reservas:', err);
-    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro ao carregar</div>';
+    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro</div>';
   }
 }
 
@@ -978,35 +1083,30 @@ window.abrirModalCancelar = function(id) {
   abrirModal('m-cancelar');
 };
 
-document.getElementById('btn-fechar-cancel').addEventListener('click', () => {
-  fecharModal('m-cancelar');
-});
-
-document.getElementById('btn-exec-cancel').addEventListener('click', async () => {
+async function executarCancelar() {
   if (!window.cancelReservaId) return;
   try {
     await sb.from('reservas').update({status: 'cancelada_morador', cancelada_em: new Date().toISOString(), cancelada_por: morador.id}).eq('id', window.cancelReservaId);
-    toast('Reserva cancelada', 'sucesso');
+    toast('Cancelada!', 'sucesso');
     fecharModal('m-cancelar');
     renderMinhas();
   } catch (err) {
-    toast('Erro ao cancelar', 'erro');
+    toast('Erro', 'erro');
   }
-});
+}
 
 // ==================== CRIAR RESERVA ====================
 
-document.getElementById('btn-criar-reserva')?.addEventListener('click', async () => {
+async function criarReserva() {
   var data = document.getElementById('res-data').value;
   var slot = document.getElementById('res-slot').value;
 
-  if (!data || slot === 'Selecione um horário') {
-    toast('Preencha data e horário', 'aviso');
+  if (!data || slot === 'Selecione...') {
+    toast('Preencha os campos', 'aviso');
     return;
   }
 
   try {
-    // Calcular slot_fim (60 minutos depois)
     var [h, m] = slot.split(':');
     var fimDate = new Date(2000, 0, 1, parseInt(h), parseInt(m));
     fimDate.setMinutes(fimDate.getMinutes() + 60);
@@ -1023,18 +1123,18 @@ document.getElementById('btn-criar-reserva')?.addEventListener('click', async ()
     });
 
     if (error) {
-      toast('Erro: ' + (error.message || 'não permitido'), 'erro');
+      toast('Erro: ' + error.message, 'erro');
     } else {
       toast('Reserva criada!', 'sucesso');
       document.getElementById('res-data').value = '';
       document.getElementById('res-slot').value = '';
     }
   } catch (err) {
-    toast('Erro ao criar reserva', 'erro');
+    toast('Erro', 'erro');
   }
-});
+}
 
-// ==================== RENDER CHECK-IN ====================
+// ==================== CHECK-IN ====================
 
 var html5QrcodeScanner = null;
 
@@ -1051,222 +1151,84 @@ function fecharScanner() {
   if (bf) bf.style.display = 'none';
 }
 
-async function processarQrQuadra(code) {
-  if (code !== 'CG_QUADRA_01') {
-    toast('QR Code inválido', 'aviso');
-    return;
-  }
+async function abrirScanner() {
+  var reader = document.getElementById('reader');
+  reader.style.display = 'block';
+  document.getElementById('btn-abrir-scanner').style.display = 'none';
+  document.getElementById('btn-fechar-scanner').style.display = 'inline-flex';
 
-  try {
-    var agora = new Date();
-    var dataHoje = ts();
-    var horaAtual = String(agora.getHours()).padStart(2, '0') + ':00';
+  html5QrcodeScanner = new Html5Qrcode('reader');
+  html5QrcodeScanner.start(
+    {facingMode: 'environment'},
+    {fps: 10, qrbox: {width: 250, height: 250}},
+    async (decoded) => {
+      if (decoded === 'CG_QUADRA_01') {
+        var dataHoje = ts();
+        var {data: reservas} = await sb.from('reservas')
+          .select('*')
+          .eq('unidade_id', morador.unidade_id)
+          .eq('data_reserva', dataHoje)
+          .eq('status', 'confirmada');
 
-    var {data: reservas} = await sb.from('reservas')
-      .select('*')
-      .eq('unidade_id', morador.unidade_id)
-      .eq('data_reserva', dataHoje)
-      .eq('status', 'confirmada')
-      .gte('slot_inicio', horaAtual);
-
-    if (!reservas || reservas.length === 0) {
-      toast('Nenhuma reserva ativa agora', 'aviso');
-      return;
-    }
-
-    var reserva = reservas[0];
-    await sb.from('checkins').insert({
-      reserva_id: reserva.id,
-      morador_id: morador.id,
-      metodo: 'qr_code',
-      timestamp: new Date().toISOString()
-    });
-
-    toast('✓ Check-in realizado!', 'sucesso');
-    fecharScanner();
-    renderCheckin();
-
-  } catch (err) {
-    toast('Erro ao processar QR', 'erro');
-  }
+        if (reservas && reservas.length > 0) {
+          await sb.from('checkins').insert({
+            reserva_id: reservas[0].id,
+            morador_id: morador.id,
+            metodo: 'qr_code'
+          });
+          toast('✓ Check-in!', 'sucesso');
+          fecharScanner();
+        } else {
+          toast('Nenhuma reserva ativa', 'aviso');
+        }
+      } else {
+        toast('QR inválido', 'aviso');
+      }
+    },
+    () => {}
+  ).catch(() => { toast('Erro na câmera', 'erro'); });
 }
 
-async function renderCheckin() {
-  var container = document.getElementById('ckin-main') || document.createElement('div');
-  container.id = 'ckin-main';
-
-  try {
-    var {data: checkins} = await sb.from('checkins')
-      .select('*, reservas(data_reserva, slot_inicio)')
-      .eq('morador_id', morador.id)
-      .order('timestamp', {ascending: false})
-      .limit(10);
-
-    var html = `
-      <div class="card" style="background:var(--vl); border-color:#97C459; margin-bottom:10px;">
-        <div class="card-title"><i class="ti ti-qrcode" style="color:var(--vm)"></i>Escanear</div>
-        <div id="reader" style="width:100%; border-radius:8px; overflow:hidden; display:none; margin-bottom:10px;"></div>
-        <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm); width:100%;"><i class="ti ti-camera"></i>Escanear</button>
-        <button class="btn-s" id="btn-fechar-scanner" style="display:none; width:100%; margin-top:6px;"><i class="ti ti-x"></i>Cancelar</button>
-      </div>
-    `;
-
-    if (checkins && checkins.length > 0) {
-      html += '<div class="sec-lbl">Histórico</div>';
-      checkins.forEach(c => {
-        var dataHora = new Date(c.timestamp).toLocaleString('pt-BR');
-        html += '<div class="card">';
-        html += '<div style="font-size:11px; font-weight:600;">' + dataHora + '</div>';
-        html += '<div style="font-size:10px; color:var(--t2);">' + fmtD(c.reservas?.data_reserva) + ' às ' + (c.reservas?.slot_inicio?.slice(0, 5) || '??:??') + '</div>';
-        html += '</div>';
-      });
-    }
-
-    document.getElementById('screen-checkin').innerHTML = html;
-
-    document.getElementById('btn-abrir-scanner').onclick = () => {
-      var reader = document.getElementById('reader');
-      reader.style.display = 'block';
-      document.getElementById('btn-abrir-scanner').style.display = 'none';
-      document.getElementById('btn-fechar-scanner').style.display = 'inline-flex';
-
-      html5QrcodeScanner = new Html5Qrcode('reader');
-      html5QrcodeScanner.start(
-        {facingMode: 'environment'},
-        {fps: 10, qrbox: {width: 250, height: 250}},
-        decoded => { processarQrQuadra(decoded); fecharScanner(); },
-        () => {}
-      ).catch(err => { toast('Erro ao acessar câmera', 'erro'); fecharScanner(); });
-    };
-
-    document.getElementById('btn-fechar-scanner').onclick = fecharScanner;
-
-  } catch (err) {
-    document.getElementById('screen-checkin').innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro</div>';
-  }
-}
-
-// ==================== RENDER QUADRA ====================
+// ==================== QUADRA ====================
 
 async function renderQuadra() {
   var container = document.getElementById('ranking-list');
   try {
-    var {data: placares} = await sb.from('placares').select('*,unidades(codigo)').order('created_at', {ascending: false}).limit(30);
-
+    var {data: placares} = await sb.from('placares').select('*').order('created_at', {ascending: false}).limit(20);
     if (!placares || placares.length === 0) {
       container.innerHTML = '<div class="empty"><i class="ti ti-trophy"></i>Sem partidas</div>';
       return;
     }
-
     var html = '';
     placares.forEach(p => {
-      var apto = p.unidades?.codigo || '---';
-      html += '<div class="card">';
-      html += '<div class="card-title">Apto ' + safeText(apto) + '</div>';
-      html += '<div style="font-size:18px; font-weight:600;">' + (p.placar_casa || 0) + ' × ' + (p.placar_visitante || 0) + '</div>';
-      html += '</div>';
+      html += '<div class="card"><div style="font-size:14px; font-weight:600;">' + (p.placar_casa || 0) + ' × ' + (p.placar_visitante || 0) + '</div></div>';
     });
-
     container.innerHTML = html;
   } catch (err) {
     container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro</div>';
   }
 }
 
-// ==================== RENDER OCORRÊNCIAS ====================
+// ==================== CONFIG ====================
 
-async function renderOcorrencias() {
-  var container = document.getElementById('oco-list');
-  try {
-    var {data: ocorrencias} = await sb.from('ocorrencias').select('*').order('created_at', {ascending: false}).limit(50);
-
-    if (!ocorrencias || ocorrencias.length === 0) {
-      container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma</div>';
-      return;
-    }
-
-    var html = '';
-    ocorrencias.forEach(o => {
-      html += '<div class="card">';
-      html += '<div class="card-title"><i class="ti ti-alert-circle"></i>' + safeText(o.titulo) + ' <span class="badge b-gray">' + o.status + '</span></div>';
-      html += '<div style="font-size:11px; color:var(--t2);">' + safeText(o.descricao) + '</div>';
-      html += '<div style="font-size:10px; color:var(--t2); margin-top:6px;">' + fmtD(o.created_at?.slice(0, 10)) + '</div>';
-      html += '</div>';
-    });
-
-    container.innerHTML = html;
-  } catch (err) {
-    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro</div>';
-  }
-}
-
-// ==================== RENDER CONFIG (ADMIN) ====================
-
-async function renderConfig() {
-  var container = document.getElementById('screen-config');
+async function salvarConfig() {
   if (!isAdmin()) return;
-
   try {
-    var {data: cfgs} = await sb.from('configuracoes').select('*');
-    var maxMes = cfgs?.find(c => c.chave === 'max_reservas_mes')?.valor_inteiro || 4;
-    var faltasSusp = cfgs?.find(c => c.chave === 'faltas_para_susp')?.valor_inteiro || 2;
-
-    container.innerHTML = `
-      <div class="card">
-        <div class="card-title"><i class="ti ti-settings"></i>Configurações</div>
-        <div class="form-row">
-          <label class="form-lbl">Reservas máximas por mês</label>
-          <select class="form-in" id="cfg-max-mes">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4" ${maxMes === 4 ? 'selected' : ''}>4</option>
-            <option value="6">6</option>
-            <option value="8">8</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-lbl">Faltas para suspensão</label>
-          <select class="form-in" id="cfg-faltas-susp">
-            <option value="1">1</option>
-            <option value="2" ${faltasSusp === 2 ? 'selected' : ''}>2</option>
-            <option value="3">3</option>
-            <option value="5">5</option>
-          </select>
-        </div>
-        <button class="btn-p" id="btn-salvar-config"><i class="ti ti-device-floppy"></i>Salvar</button>
-      </div>
-    `;
-
-    document.getElementById('btn-salvar-config').addEventListener('click', async () => {
-      try {
-        var max = parseInt(document.getElementById('cfg-max-mes').value);
-        var faltas = parseInt(document.getElementById('cfg-faltas-susp').value);
-
-        await sb.from('configuracoes').update({valor_inteiro: max, atualizado_por: morador.id, atualizado_em: new Date().toISOString()}).eq('chave', 'max_reservas_mes');
-        await sb.from('configuracoes').update({valor_inteiro: faltas, atualizado_por: morador.id, atualizado_em: new Date().toISOString()}).eq('chave', 'faltas_para_susp');
-
-        await registrarAuditoria('editar_config', 'configuracoes', null, {max_reservas_mes: max, faltas_para_susp: faltas});
-
-        toast('Configurações salvas!', 'sucesso');
-        await carregarConfiguracoes();
-
-      } catch (err) {
-        toast('Erro ao salvar', 'erro');
-      }
-    });
-
+    var max = parseInt(document.getElementById('cfg-max-mes').value);
+    await sb.from('configuracoes').update({valor_inteiro: max, atualizado_por: morador.id}).eq('chave', 'max_reservas_mes');
+    toast('Salvo!', 'sucesso');
   } catch (err) {
-    toast('Erro ao carregar', 'erro');
+    toast('Erro', 'erro');
   }
 }
 
 // ==================== LOGOUT ====================
 
-document.getElementById('btn-logout')?.addEventListener('click', async () => {
+async function logout() {
   await sb.auth.signOut();
+  localStorage.removeItem('sb_session');
   location.reload();
-});
+}
 
 // ==================== INICIALIZAR ====================
 
