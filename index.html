@@ -1,70 +1,747 @@
-<!-- SUBSTITUIR TODA A SEÇÃO <script> EXISTENTE POR ISTO: -->
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#27500A">
+<title>Casa Grande de Sant'Anna</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --v: #27500A;
+  --vl: #EAF3DE;
+  --vm: #3B6D11;
+  --am: #FAEEDA;
+  --amb: #EF9F27;
+  --amt: #854F0B;
+  --rd: #FCEBEB;
+  --rdb: #F09595;
+  --rdt: #A32D2D;
+  --bl: #E6F1FB;
+  --blb: #85B7EB;
+  --blt: #185FA5;
+  --gy: #F1EFE8;
+  --gyb: #B4B2A9;
+  --gyt: #5F5E5A;
+  --bg: #F5F5F0;
+  --cd: #fff;
+  --br: #E0E0DA;
+  --tx: #1A1A1A;
+  --t2: #666;
+  --t3: #999;
+  --r: 10px;
+  --rl: 14px;
+}
+
+body.dark {
+  --v: #4A8C1C;
+  --vl: #1A2E0A;
+  --vm: #5FA328;
+  --am: #2E2008;
+  --amb: #EF9F27;
+  --amt: #F5C87A;
+  --rd: #2E0808;
+  --rdb: #8B3030;
+  --rdt: #F09595;
+  --bl: #081828;
+  --blb: #2B5280;
+  --blt: #85B7EB;
+  --gy: #1A1A18;
+  --gyb: #3A3A38;
+  --gyt: #A0A09A;
+  --bg: #0F0F0D;
+  --cd: #1C1C1A;
+  --br: #2E2E2A;
+  --tx: #F0F0EC;
+  --t2: #AAA9A4;
+  --t3: #666;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.hdr {
+  background: var(--v);
+  color: #fff;
+  padding: 12px 16px 11px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.hdr-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hdr-sub {
+  font-size: 10px;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+
+.hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.role-tag {
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 3px 8px;
+}
+
+.av-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+.tab-bar {
+  display: flex;
+  background: var(--cd);
+  border-bottom: 0.5px solid var(--br);
+  position: sticky;
+  top: 58px;
+  z-index: 29;
+  overflow-x: auto;
+}
+
+.tab {
+  flex: 1;
+  min-width: 70px;
+  padding: 10px 2px 8px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--t2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  border: none;
+  background: none;
+  line-height: 1.2;
+  transition: 0.2s;
+}
+
+.tab i {
+  font-size: 18px;
+}
+
+.tab:hover {
+  color: var(--v);
+}
+
+.tab.active {
+  color: var(--v);
+  border-bottom: 2px solid var(--v);
+  font-weight: 600;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px 80px;
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+.card {
+  background: var(--cd);
+  border: 0.5px solid var(--br);
+  border-radius: var(--rl);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  transition: 0.2s;
+}
+
+.card:hover {
+  border-color: #B4B2A9;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-title i {
+  font-size: 14px;
+  color: var(--v);
+}
+
+.form-row {
+  margin-bottom: 10px;
+}
+
+.form-lbl {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--t2);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.form-in {
+  width: 100%;
+  border: 0.5px solid var(--br);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 13px;
+  background: var(--cd);
+  color: var(--tx);
+  outline: none;
+  transition: 0.2s;
+}
+
+.form-in:focus {
+  border-color: var(--v);
+  box-shadow: 0 0 0 3px rgba(39, 80, 10, 0.08);
+}
+
+.btn-p {
+  background: var(--v);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.btn-p:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-s {
+  background: none;
+  border: 0.5px solid var(--br);
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--tx);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.btn-s:hover {
+  border-color: var(--v);
+  background: var(--vl);
+}
+
+.btn-d {
+  background: var(--rd);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--rdt);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.badge {
+  font-size: 9.5px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.b-ok {
+  background: var(--vl);
+  color: var(--v);
+}
+
+.b-warn {
+  background: var(--am);
+  color: var(--amt);
+}
+
+.b-danger {
+  background: var(--rd);
+  color: var(--rdt);
+}
+
+.b-info {
+  background: var(--bl);
+  color: var(--blt);
+}
+
+.b-gray {
+  background: var(--gy);
+  color: var(--gyt);
+}
+
+.empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--t2);
+}
+
+.empty i {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 8px;
+  color: var(--br);
+}
+
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-bg.open {
+  display: flex;
+}
+
+.modal-card {
+  background: var(--cd);
+  border-radius: 14px;
+  padding: 16px 16px 28px;
+  width: 90%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.mhandle {
+  width: 28px;
+  height: 3px;
+  background: var(--br);
+  border-radius: 2px;
+  margin: 0 auto 12px;
+}
+
+.mtitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.msub {
+  font-size: 12px;
+  color: var(--t2);
+  margin-bottom: 12px;
+}
+
+#toast {
+  position: fixed;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(23, 52, 4, 0.94);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 500;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  max-width: 90vw;
+  text-align: center;
+}
+
+#toast.toast-sucesso {
+  background: rgba(39, 80, 10, 0.95);
+}
+
+#toast.toast-erro {
+  background: rgba(160, 45, 45, 0.95);
+}
+
+#toast.toast-aviso {
+  background: rgba(239, 159, 39, 0.95);
+  color: #1a1a1a;
+}
+
+#toast.toast-info {
+  background: rgba(24, 95, 165, 0.95);
+}
+
+.login-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px 24px;
+  background: var(--v);
+}
+
+.login-logo {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.login-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.login-sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.login-card {
+  background: #fff;
+  border-radius: var(--rl);
+  padding: 24px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-lbl {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t2);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.login-input {
+  width: 100%;
+  border: 0.5px solid var(--br);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  outline: none;
+}
+
+.login-input:focus {
+  border-color: var(--v);
+}
+
+.login-btn {
+  width: 100%;
+  background: var(--v);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.login-err {
+  background: var(--rd);
+  color: var(--rdt);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 11px;
+  margin-top: 8px;
+  display: none;
+}
+
+.macts {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.sec-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--t2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 0 5px;
+}
+
+@media (min-width: 768px) {
+  body {
+    max-width: 100%;
+  }
+
+  #toast {
+    bottom: 24px;
+  }
+
+  .modal-card {
+    max-width: 500px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-screen">
+  <div class="login-logo">🏠</div>
+  <div class="login-title">Casa Grande de Sant'Anna</div>
+  <div class="login-sub">Sistema de reserva da quadra</div>
+  <div class="login-card">
+    <label class="login-lbl">E-mail</label>
+    <input class="login-input" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+    <label class="login-lbl">Senha</label>
+    <input class="login-input" type="password" id="login-pass" autocomplete="current-password">
+    <button class="login-btn" id="btn-entrar">Entrar</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<div class="app" id="app-main" style="display: none;">
+  <div class="hdr">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="hdr-title">Casa Grande de Sant'Anna</div>
+        <div class="hdr-sub">Quadra Poliesportiva</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="role-tag" id="role-tag">Morador</span>
+        <div class="av-btn" id="av-btn">DT</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" id="tab-avisos"><i class="ti ti-bell"></i>Avisos</button>
+    <button class="tab" id="tab-minhas"><i class="ti ti-list-check"></i>Minhas</button>
+    <button class="tab" id="tab-reservar"><i class="ti ti-calendar-plus"></i>Reservar</button>
+    <button class="tab" id="tab-checkin"><i class="ti ti-door-enter"></i>Check-in</button>
+    <button class="tab" id="tab-quadra"><i class="ti ti-trophy"></i>Quadra</button>
+    <button class="tab" id="tab-ocorrencias" style="display:none;"><i class="ti ti-alert-circle"></i>Ocorr.</button>
+    <button class="tab" id="tab-config" style="display:none;"><i class="ti ti-settings"></i>Config</button>
+    <button class="tab" id="tab-perfil"><i class="ti ti-user"></i>Perfil</button>
+  </div>
+
+  <div class="content">
+    <!-- SCREEN: AVISOS -->
+    <div class="screen active" id="screen-avisos">
+      <div id="avisos-list"><div class="empty"><i class="ti ti-bell-off"></i>Carregando...</div></div>
+    </div>
+
+    <!-- SCREEN: MINHAS RESERVAS -->
+    <div class="screen" id="screen-minhas">
+      <div id="minhas-list"><div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div></div>
+    </div>
+
+    <!-- SCREEN: RESERVAR -->
+    <div class="screen" id="screen-reservar">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar"></i>Nova Reserva</div>
+        <div class="form-row">
+          <label class="form-lbl">Data</label>
+          <input type="date" class="form-in" id="res-data">
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Horário</label>
+          <select class="form-in" id="res-slot">
+            <option>Selecione um horário</option>
+            <option value="06:00">06:00</option>
+            <option value="07:00">07:00</option>
+            <option value="08:00">08:00</option>
+            <option value="09:00">09:00</option>
+            <option value="10:00">10:00</option>
+            <option value="11:00">11:00</option>
+            <option value="12:00">12:00</option>
+            <option value="13:00">13:00</option>
+            <option value="14:00">14:00</option>
+            <option value="15:00">15:00</option>
+            <option value="16:00">16:00</option>
+            <option value="17:00">17:00</option>
+            <option value="18:00">18:00</option>
+            <option value="19:00">19:00</option>
+            <option value="20:00">20:00</option>
+            <option value="21:00">21:00</option>
+          </select>
+        </div>
+        <button class="btn-p" id="btn-criar-reserva"><i class="ti ti-plus"></i>Criar Reserva</button>
+      </div>
+      <div id="reservas-dia" style="display:none; margin-top:10px;">
+        <div class="sec-lbl">Reservas deste dia</div>
+        <div id="lista-reservas-dia"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: CHECK-IN -->
+    <div class="screen" id="screen-checkin">
+      <div class="card" style="background:var(--vl); border-color:#97C459; margin-bottom:10px;">
+        <div class="card-title"><i class="ti ti-qrcode" style="color:var(--vm)"></i>Escanear QR Code</div>
+        <div style="font-size:11px; margin-bottom:10px;">Aponte a câmera para o QR Code da quadra.</div>
+        <div id="reader" style="width:100%; border-radius:8px; overflow:hidden; display:none; margin-bottom:10px;"></div>
+        <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm); width:100%;"><i class="ti ti-camera"></i>Escanear</button>
+        <button class="btn-s" id="btn-fechar-scanner" style="display:none; width:100%; margin-top:6px; border-color:var(--rdb); color:var(--rdt);"><i class="ti ti-x"></i>Cancelar</button>
+      </div>
+      <div id="checkin-hist"></div>
+    </div>
+
+    <!-- SCREEN: QUADRA -->
+    <div class="screen" id="screen-quadra">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-trophy"></i>Placar e Ranking</div>
+        <div id="ranking-list"><div class="empty"><i class="ti ti-trophy"></i>Sem partidas</div></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: OCORRÊNCIAS -->
+    <div class="screen" id="screen-ocorrencias">
+      <div id="oco-list"><div class="empty"><i class="ti ti-alert-circle"></i>Sem ocorrências</div></div>
+    </div>
+
+    <!-- SCREEN: CONFIGURAÇÕES (ADMIN) -->
+    <div class="screen" id="screen-config">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-settings"></i>Configurações</div>
+        <div class="form-row">
+          <label class="form-lbl">Reservas máximas por mês</label>
+          <select class="form-in" id="cfg-max-mes">
+            <option value="1">1 reserva</option>
+            <option value="2">2 reservas</option>
+            <option value="3">3 reservas</option>
+            <option value="4" selected>4 reservas</option>
+            <option value="6">6 reservas</option>
+            <option value="8">8 reservas</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Faltas para suspensão</label>
+          <select class="form-in" id="cfg-faltas-susp">
+            <option value="1">1 falta</option>
+            <option value="2" selected>2 faltas</option>
+            <option value="3">3 faltas</option>
+            <option value="5">5 faltas</option>
+          </select>
+        </div>
+        <button class="btn-p" id="btn-salvar-config"><i class="ti ti-device-floppy"></i>Salvar</button>
+      </div>
+    </div>
+
+    <!-- SCREEN: PERFIL -->
+    <div class="screen" id="screen-perfil">
+      <div class="card">
+        <div style="text-align:center; margin-bottom:16px;">
+          <div class="av-btn" style="width:60px; height:60px; font-size:24px; margin:0 auto;" id="pf-av">DT</div>
+          <div style="font-weight:600; margin-top:8px;" id="pf-nome">Carregando...</div>
+          <div style="font-size:11px; color:var(--t2);" id="pf-apto"></div>
+        </div>
+        <button class="btn-d" id="btn-logout" style="width:100%;"><i class="ti ti-logout"></i>Sair</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAIS -->
+
+<!-- Modal: Cancelar Reserva -->
+<div class="modal-bg" id="m-cancelar">
+  <div class="modal-card">
+    <div class="mhandle"></div>
+    <div class="mtitle">Cancelar Reserva</div>
+    <div class="msub" id="mc-sub">Tem certeza?</div>
+    <div style="display:flex; gap:6px; margin-top:16px;">
+      <button class="btn-s" id="btn-fechar-cancel" style="flex:1;">Voltar</button>
+      <button class="btn-d" id="btn-exec-cancel" style="flex:1;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
-// ==================== SANITIZAÇÃO E VALIDAÇÃO ====================
+// ==================== SUPABASE ====================
+
+var SURL = 'https://gkdwfntluopycapxyvfx.supabase.co';
+var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
+var sb = supabase.createClient(SURL, SKEY);
+
+var usuario = null, morador = null;
+var espacoQuadraId = null;
+var configGlobal = {};
+
+// ==================== FUNÇÕES UTILITÁRIAS ====================
 
 function safeText(str) {
   if (!str) return '';
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+    .replace(/>/g, '&gt;');
 }
-
-function validarTexto(texto, minimo = 1, maximo = 500) {
-  if (!texto || texto.trim().length === 0) {
-    throw new Error(`Campo obrigatório`);
-  }
-  if (texto.trim().length < minimo) {
-    throw new Error(`Mínimo de ${minimo} caracteres`);
-  }
-  if (texto.length > maximo) {
-    throw new Error(`Máximo de ${maximo} caracteres`);
-  }
-  if (/<[^>]*>/g.test(texto)) {
-    throw new Error('HTML não permitido');
-  }
-  return DOMPurify.sanitize(texto.trim());
-}
-
-function validarEmail(email) {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!regex.test(email)) {
-    throw new Error('Email inválido');
-  }
-  return email.trim();
-}
-
-function validarData(dataString) {
-  const data = new Date(dataString);
-  if (isNaN(data.getTime())) {
-    throw new Error('Data inválida');
-  }
-  if (data < new Date().setHours(0, 0, 0, 0)) {
-    throw new Error('Data não pode ser no passado');
-  }
-  return dataString;
-}
-
-// ==================== CONFIGURAÇÕES SUPABASE ====================
-
-var SURL = 'https://gkdwfntluopycapxyvfx.supabase.co';
-var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrZHdmbnRsdW9weWNhcHh5dmZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyOTQxMTYsImV4cCI6MjA5Mzg3MDExNn0.WkrshkvWATT2wyAbPiIRzBaIFIwe9YqKt4er-_AcjKI';
-var sb = supabase.createClient(SURL, SKEY);
-
-var MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-var DIAS_N = ['D','S','T','Q','Q','S','S'];
-var SLOTS = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
-
-var usuario = null, morador = null;
-var espacoQuadraId = null, espacoAcademiaId = null;
-var configGlobal = {};
-
-// ==================== UTILITÁRIOS ====================
 
 function toast(msg, tipo = 'info') {
   var el = document.getElementById('toast');
@@ -72,14 +749,14 @@ function toast(msg, tipo = 'info') {
   el.className = 'toast-' + tipo;
   el.style.opacity = '1';
   clearTimeout(window.toastTimeout);
-  window.toastTimeout = setTimeout(function() {
+  window.toastTimeout = setTimeout(() => {
     el.style.opacity = '0';
   }, 3500);
 }
 
 function ts() {
   var d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
 function fmtD(ds) {
@@ -93,67 +770,46 @@ function isAdmin() {
 }
 
 function goScreen(name) {
-  var screens = ['avisos','dashboard','reservar','academia','minhas','checkin','calendario','quadra','ocorrencias','config','perfil'];
-  for (var i = 0; i < screens.length; i++) {
-    var s = document.getElementById('screen-' + screens[i]);
-    if (s) s.classList.remove('active');
-    var t = document.getElementById('tab-' + screens[i]);
-    if (t) t.classList.remove('active');
-  }
-  var target = document.getElementById('screen-' + name);
-  if (target) target.classList.add('active');
-  var tab = document.getElementById('tab-' + name);
-  if (tab) tab.classList.add('active');
-  if (name !== 'checkin') fecharScanner();
+  var screens = ['avisos', 'minhas', 'reservar', 'checkin', 'quadra', 'ocorrencias', 'config', 'perfil'];
+  screens.forEach(s => {
+    document.getElementById('screen-' + s)?.classList.remove('active');
+    document.getElementById('tab-' + s)?.classList.remove('active');
+  });
+  document.getElementById('screen-' + name)?.classList.add('active');
+  document.getElementById('tab-' + name)?.classList.add('active');
 }
 
 function abrirModal(id) {
-  var el = document.getElementById(id);
-  if (el) el.classList.add('open');
+  document.getElementById(id)?.classList.add('open');
 }
 
 function fecharModal(id) {
-  var el = document.getElementById(id);
-  if (el) el.classList.remove('open');
+  document.getElementById(id)?.classList.remove('open');
 }
 
-// ==================== CARREGAMENTO DE CONFIGURAÇÕES ====================
+// ==================== CARREGAR CONFIGURAÇÕES ====================
 
 async function carregarConfiguracoes() {
   try {
-    var {data: configs, error} = await sb
-      .from('configuracoes')
-      .select('chave, valor_inteiro, valor_booleano, valor_texto');
-    
-    if (error) {
-      console.error('Erro ao carregar configurações:', error);
-      return;
-    }
-
+    var {data} = await sb.from('configuracoes').select('chave, valor_inteiro');
     configGlobal = {};
-    for (var i = 0; i < configs.length; i++) {
-      var cfg = configs[i];
-      var valor = cfg.valor_inteiro !== null ? cfg.valor_inteiro 
-                : cfg.valor_booleano !== null ? cfg.valor_booleano 
-                : cfg.valor_texto;
-      configGlobal[cfg.chave] = valor;
-    }
+    (data || []).forEach(cfg => {
+      configGlobal[cfg.chave] = cfg.valor_inteiro;
+    });
   } catch (err) {
-    console.error('Erro crítico ao carregar configurações:', err);
-    toast('Erro ao carregar configurações do sistema', 'erro');
+    console.error('Erro ao carregar configurações:', err);
   }
 }
 
-// ==================== REGISTRO DE AUDITORIA ====================
+// ==================== REGISTRAR AUDITORIA ====================
 
-async function registrarAuditoria(acao, tabelaAfetada, registroId, valoresNovos, descricao = null) {
+async function registrarAuditoria(acao, tabela, registroId, valoresNovos) {
   if (!isAdmin() || !morador) return;
-
   try {
     await sb.from('auditoria_operacoes').insert({
       admin_id: morador.id,
       acao: acao,
-      tabela_afetada: tabelaAfetada,
+      tabela_afetada: tabela,
       registro_id: registroId,
       valores_novos: valoresNovos,
       resultado: 'sucesso',
@@ -166,7 +822,7 @@ async function registrarAuditoria(acao, tabelaAfetada, registroId, valoresNovos,
 
 // ==================== LOGIN ====================
 
-document.getElementById('btn-entrar').addEventListener('click', async function() {
+document.getElementById('btn-entrar').addEventListener('click', async () => {
   var email = document.getElementById('login-email').value.trim();
   var pass = document.getElementById('login-pass').value;
   var err = document.getElementById('login-err');
@@ -179,16 +835,15 @@ document.getElementById('btn-entrar').addEventListener('click', async function()
   }
 
   try {
-    var {data, error} = await sb.auth.signInWithPassword({email: email, password: pass});
+    var {data, error} = await sb.auth.signInWithPassword({email, password: pass});
     if (error) {
-      err.textContent = 'E-mail ou senha incorretos.';
+      err.textContent = 'Credenciais incorretas.';
       err.style.display = 'block';
       return;
     }
     iniciarApp(data.user);
-  } catch (err) {
-    console.error('Erro de autenticação:', err);
-    err.textContent = 'Erro ao conectar. Tente novamente.';
+  } catch (e) {
+    err.textContent = 'Erro ao conectar.';
     err.style.display = 'block';
   }
 });
@@ -199,92 +854,63 @@ async function iniciarApp(user) {
   usuario = user;
 
   try {
-    // 1. Carregar dados do morador
-    var {data: m, error: errMorador} = await sb
-      .from('moradores')
-      .select('*,unidades(*)')
-      .eq('auth_user_id', user.id)
-      .single();
+    var {data: m, error} = await sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).single();
 
-    if (errMorador || !m || m.status !== 'ativo') {
-      toast('Acesso negado ou pendente.', 'erro');
+    if (error || !m || m.status !== 'ativo') {
+      toast('Acesso negado.', 'erro');
       await sb.auth.signOut();
       location.reload();
       return;
     }
 
     morador = m;
-
-    // 2. Carregar configurações
     await carregarConfiguracoes();
 
-    // 3. Mostrar app
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-main').style.display = 'flex';
 
-    // 4. Configurar UI
     var ini = ((morador.nome || 'U')[0] + ((morador.nome || '').split(' ').pop() || '')[0]).toUpperCase();
     document.getElementById('av-btn').textContent = ini;
     document.getElementById('pf-av').textContent = ini;
     document.getElementById('pf-nome').textContent = safeText(morador.nome);
-
-    var aptoLabel = morador.unidades ? ('Apto ' + safeText(morador.unidades.codigo)) : 'Administrador';
-    document.getElementById('pf-apto').textContent = aptoLabel;
+    document.getElementById('pf-apto').textContent = morador.unidades ? 'Apto ' + safeText(morador.unidades.codigo) : 'Admin';
     document.getElementById('role-tag').textContent = isAdmin() ? 'Admin' : 'Morador';
-    document.getElementById('home-nome').textContent = safeText(morador.nome);
 
     if (isAdmin()) {
       document.getElementById('tab-config').style.display = 'flex';
-      document.getElementById('tab-dashboard').style.display = 'flex';
       document.getElementById('tab-ocorrencias').style.display = 'flex';
     }
 
-    // 5. Carregaçar espaços
     var {data: esp} = await sb.from('espacos').select('*');
     if (esp) {
       var quadra = esp.find(e => e.tipo === 'quadra');
       espacoQuadraId = quadra ? quadra.id : null;
-      var academia = esp.find(e => e.tipo === 'academia');
-      espacoAcademiaId = academia ? academia.id : null;
     }
 
-    // 6. Registrar event listeners das tabs
-    document.getElementById('tab-avisos').onclick = function() { renderAvisos(); goScreen('avisos'); };
-    document.getElementById('tab-reservar').onclick = function() { renderCalendarioReservas(); goScreen('reservar'); };
-    document.getElementById('tab-minhas').onclick = function() { renderMinhas(); goScreen('minhas'); };
-    document.getElementById('tab-checkin').onclick = function() { renderCheckin(); goScreen('checkin'); };
-    document.getElementById('tab-calendario').onclick = function() { renderCalendarioGeral(); goScreen('calendario'); };
-    document.getElementById('tab-quadra').onclick = function() { renderQuadra(); goScreen('quadra'); };
-    document.getElementById('tab-config').onclick = function() { if (isAdmin()) { renderConfig(); goScreen('config'); } };
-    document.getElementById('tab-ocorrencias').onclick = function() { renderOcorrencias(); goScreen('ocorrencias'); };
-    document.getElementById('av-btn').onclick = function() { goScreen('perfil'); };
+    // Registrar listeners das tabs
+    document.getElementById('tab-avisos').onclick = () => { renderAvisos(); goScreen('avisos'); };
+    document.getElementById('tab-minhas').onclick = () => { renderMinhas(); goScreen('minhas'); };
+    document.getElementById('tab-reservar').onclick = () => goScreen('reservar');
+    document.getElementById('tab-checkin').onclick = () => { renderCheckin(); goScreen('checkin'); };
+    document.getElementById('tab-quadra').onclick = () => { renderQuadra(); goScreen('quadra'); };
+    document.getElementById('tab-ocorrencias').onclick = () => { renderOcorrencias(); goScreen('ocorrencias'); };
+    document.getElementById('tab-config').onclick = () => { if (isAdmin()) { renderConfig(); goScreen('config'); } };
+    document.getElementById('tab-perfil').onclick = () => goScreen('perfil');
 
-    // 7. Renderizar tela inicial
     renderAvisos();
-    goScreen('avisos');
 
   } catch (err) {
-    console.error('Erro ao iniciar app:', err);
-    toast('Erro ao conectar. Tente novamente.', 'erro');
+    console.error('Erro ao iniciar:', err);
+    toast('Erro ao conectar.', 'erro');
   }
 }
 
 // ==================== RENDER AVISOS ====================
 
-async function renderAvisos(pagina = 0) {
+async function renderAvisos() {
   var container = document.getElementById('avisos-list');
-  if (!container) return;
-
-  const ITEMS_PER_PAGE = 20;
-  const offset = pagina * ITEMS_PER_PAGE;
-
   try {
-    var {data: avisos, count} = await sb
-      .from('avisos')
-      .select('*', {count: 'exact'})
-      .eq('ativo', true)
-      .order('created_at', {ascending: false})
-      .range(offset, offset + ITEMS_PER_PAGE - 1);
+    var {data: avisos} = await sb.from('avisos').select('*').eq('ativo', true).order('created_at', {ascending: false}).limit(50);
 
     if (!avisos || avisos.length === 0) {
       container.innerHTML = '<div class="empty"><i class="ti ti-bell-off"></i>Nenhum aviso</div>';
@@ -292,47 +918,34 @@ async function renderAvisos(pagina = 0) {
     }
 
     var html = '';
-    for (var i = 0; i < avisos.length; i++) {
-      var av = avisos[i];
+    avisos.forEach(av => {
       html += '<div class="card">';
       html += '<div class="card-title"><i class="ti ti-bell"></i>' + safeText(av.titulo) + '</div>';
-      html += '<div style="font-size:12px;margin-bottom:8px">' + safeText(av.corpo) + '</div>';
-      html += '<div style="font-size:10px;color:var(--t2)">' + fmtD(av.created_at?.slice(0, 10)) + '</div>';
+      html += '<div style="font-size:12px; margin-bottom:8px;">' + safeText(av.corpo) + '</div>';
+      html += '<div style="font-size:10px; color:var(--t2);">' + fmtD(av.created_at?.slice(0, 10)) + '</div>';
       html += '</div>';
-    }
-
-    // Paginação
-    if (pagina > 0) {
-      html += '<button class="btn-s" onclick="renderAvisos(' + (pagina - 1) + ')" style="width:100%;margin-top:10px">← Anterior</button>';
-    }
-    if ((pagina + 1) * ITEMS_PER_PAGE < count) {
-      html += '<button class="btn-s" onclick="renderAvisos(' + (pagina + 1) + ')" style="width:100%;margin-top:6px">Próximo →</button>';
-    }
+    });
 
     container.innerHTML = html;
   } catch (err) {
     console.error('Erro ao renderizar avisos:', err);
-    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro ao carregar avisos</div>';
+    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro ao carregar</div>';
   }
 }
 
 // ==================== RENDER MINHAS RESERVAS ====================
 
-async function renderMinhas(pagina = 0) {
+async function renderMinhas() {
   var container = document.getElementById('minhas-list');
-  if (!container || !morador) return;
-
-  const ITEMS_PER_PAGE = 15;
-  const offset = pagina * ITEMS_PER_PAGE;
+  if (!morador) return;
 
   try {
-    var {data: reservas, count} = await sb
-      .from('reservas')
-      .select('*, modalidades(nome)', {count: 'exact'})
+    var {data: reservas} = await sb.from('reservas')
+      .select('*,modalidades(nome)')
       .eq('unidade_id', morador.unidade_id)
       .in('status', ['confirmada', 'nao_compareceu'])
       .order('data_reserva', {ascending: false})
-      .range(offset, offset + ITEMS_PER_PAGE - 1);
+      .limit(50);
 
     if (!reservas || reservas.length === 0) {
       container.innerHTML = '<div class="empty"><i class="ti ti-calendar-off"></i>Nenhuma reserva</div>';
@@ -340,26 +953,18 @@ async function renderMinhas(pagina = 0) {
     }
 
     var html = '';
-    for (var i = 0; i < reservas.length; i++) {
-      var r = reservas[i];
-      var modalidade = r.modalidades ? safeText(r.modalidades.nome) : 'Uso livre';
+    reservas.forEach(r => {
+      var modalidade = r.modalidades?.nome || 'Uso livre';
       var podeCancel = new Date(r.data_reserva) > new Date();
 
       html += '<div class="card">';
-      html += '<div class="card-title"><i class="ti ti-calendar"></i>' + fmtD(r.data_reserva) + ' - ' + safeText(r.slot_inicio.slice(0, 5)) + '</div>';
-      html += '<div style="font-size:11px;color:var(--t2)">' + modalidade + '</div>';
+      html += '<div class="card-title"><i class="ti ti-calendar"></i>' + fmtD(r.data_reserva) + ' - ' + r.slot_inicio.slice(0, 5) + '</div>';
+      html += '<div style="font-size:11px; color:var(--t2);">' + safeText(modalidade) + '</div>';
       if (podeCancel) {
-        html += '<div class="macts" style="margin-top:8px"><button class="btn-s" onclick="abrirModalCancelar(\'' + r.id + '\')">Cancelar</button></div>';
+        html += '<div class="macts"><button class="btn-s" onclick="abrirModalCancelar(\'' + r.id + '\')">Cancelar</button></div>';
       }
       html += '</div>';
-    }
-
-    if (pagina > 0) {
-      html += '<button class="btn-s" onclick="renderMinhas(' + (pagina - 1) + ')" style="width:100%;margin-top:10px">← Anterior</button>';
-    }
-    if ((pagina + 1) * ITEMS_PER_PAGE < count) {
-      html += '<button class="btn-s" onclick="renderMinhas(' + (pagina + 1) + ')" style="width:100%;margin-top:6px">Próximo →</button>';
-    }
+    });
 
     container.innerHTML = html;
   } catch (err) {
@@ -370,42 +975,63 @@ async function renderMinhas(pagina = 0) {
 
 window.abrirModalCancelar = function(id) {
   window.cancelReservaId = id;
-  document.getElementById('mc-sub').innerHTML = 'Tem certeza que deseja cancelar esta reserva?';
   abrirModal('m-cancelar');
 };
 
-document.getElementById('btn-fechar-cancel')?.addEventListener('click', function() {
+document.getElementById('btn-fechar-cancel').addEventListener('click', () => {
   fecharModal('m-cancelar');
-  window.cancelReservaId = null;
 });
 
-document.getElementById('btn-exec-cancel')?.addEventListener('click', async function() {
+document.getElementById('btn-exec-cancel').addEventListener('click', async () => {
   if (!window.cancelReservaId) return;
-
   try {
-    var {error} = await sb
-      .from('reservas')
-      .update({
-        status: 'cancelada_morador',
-        cancelada_em: new Date().toISOString(),
-        cancelada_por: morador.id
-      })
-      .eq('id', window.cancelReservaId);
-
-    if (error) {
-      toast('Erro ao cancelar: ' + error.message, 'erro');
-    } else {
-      toast('Reserva cancelada com sucesso', 'sucesso');
-      await registrarAuditoria('editar_reserva', 'reservas', window.cancelReservaId, {status: 'cancelada_morador'});
-      fecharModal('m-cancelar');
-      renderMinhas();
-    }
+    await sb.from('reservas').update({status: 'cancelada_morador', cancelada_em: new Date().toISOString(), cancelada_por: morador.id}).eq('id', window.cancelReservaId);
+    toast('Reserva cancelada', 'sucesso');
+    fecharModal('m-cancelar');
+    renderMinhas();
   } catch (err) {
-    console.error('Erro ao cancelar reserva:', err);
-    toast('Erro ao processar cancelamento', 'erro');
+    toast('Erro ao cancelar', 'erro');
+  }
+});
+
+// ==================== CRIAR RESERVA ====================
+
+document.getElementById('btn-criar-reserva')?.addEventListener('click', async () => {
+  var data = document.getElementById('res-data').value;
+  var slot = document.getElementById('res-slot').value;
+
+  if (!data || slot === 'Selecione um horário') {
+    toast('Preencha data e horário', 'aviso');
+    return;
   }
 
-  window.cancelReservaId = null;
+  try {
+    // Calcular slot_fim (60 minutos depois)
+    var [h, m] = slot.split(':');
+    var fimDate = new Date(2000, 0, 1, parseInt(h), parseInt(m));
+    fimDate.setMinutes(fimDate.getMinutes() + 60);
+    var slotFim = String(fimDate.getHours()).padStart(2, '0') + ':' + String(fimDate.getMinutes()).padStart(2, '0');
+
+    var {error} = await sb.from('reservas').insert({
+      unidade_id: morador.unidade_id,
+      espaco_id: espacoQuadraId,
+      data_reserva: data,
+      slot_inicio: slot,
+      slot_fim: slotFim,
+      duracao_minutos: 60,
+      status: 'confirmada'
+    });
+
+    if (error) {
+      toast('Erro: ' + (error.message || 'não permitido'), 'erro');
+    } else {
+      toast('Reserva criada!', 'sucesso');
+      document.getElementById('res-data').value = '';
+      document.getElementById('res-slot').value = '';
+    }
+  } catch (err) {
+    toast('Erro ao criar reserva', 'erro');
+  }
 });
 
 // ==================== RENDER CHECK-IN ====================
@@ -414,31 +1040,29 @@ var html5QrcodeScanner = null;
 
 function fecharScanner() {
   if (html5QrcodeScanner) {
-    html5QrcodeScanner.stop().catch(function() {});
+    html5QrcodeScanner.stop().catch(() => {});
     html5QrcodeScanner = null;
   }
   var reader = document.getElementById('reader');
-  var ba = document.getElementById('btn-abrir-scanner');
-  var bf = document.getElementById('btn-fechar-scanner');
   if (reader) reader.style.display = 'none';
+  var ba = document.getElementById('btn-abrir-scanner');
   if (ba) ba.style.display = 'inline-flex';
+  var bf = document.getElementById('btn-fechar-scanner');
   if (bf) bf.style.display = 'none';
 }
 
 async function processarQrQuadra(code) {
-  try {
-    if (code !== 'CG_QUADRA_01') {
-      toast('QR Code inválido para esta quadra', 'aviso');
-      return;
-    }
+  if (code !== 'CG_QUADRA_01') {
+    toast('QR Code inválido', 'aviso');
+    return;
+  }
 
-    // Buscar reserva do morador para hoje no horário atual
+  try {
     var agora = new Date();
     var dataHoje = ts();
     var horaAtual = String(agora.getHours()).padStart(2, '0') + ':00';
 
-    var {data: reservas} = await sb
-      .from('reservas')
+    var {data: reservas} = await sb.from('reservas')
       .select('*')
       .eq('unidade_id', morador.unidade_id)
       .eq('data_reserva', dataHoje)
@@ -446,437 +1070,213 @@ async function processarQrQuadra(code) {
       .gte('slot_inicio', horaAtual);
 
     if (!reservas || reservas.length === 0) {
-      toast('Nenhuma reserva ativa no momento', 'aviso');
+      toast('Nenhuma reserva ativa agora', 'aviso');
       return;
     }
 
     var reserva = reservas[0];
-
-    // Registrar check-in
-    var {error} = await sb.from('checkins').insert({
+    await sb.from('checkins').insert({
       reserva_id: reserva.id,
       morador_id: morador.id,
       metodo: 'qr_code',
       timestamp: new Date().toISOString()
     });
 
-    if (error) {
-      toast('Erro ao fazer check-in: ' + error.message, 'erro');
-    } else {
-      toast('✓ Check-in realizado com sucesso!', 'sucesso');
-      fecharScanner();
-      renderCheckin();
-    }
+    toast('✓ Check-in realizado!', 'sucesso');
+    fecharScanner();
+    renderCheckin();
+
   } catch (err) {
-    console.error('Erro ao processar QR:', err);
-    toast('Erro ao processar check-in', 'erro');
+    toast('Erro ao processar QR', 'erro');
   }
 }
 
 async function renderCheckin() {
-  var container = document.getElementById('ckin-main');
-  if (!container) return;
+  var container = document.getElementById('ckin-main') || document.createElement('div');
+  container.id = 'ckin-main';
 
   try {
-    var {data: checkins} = await sb
-      .from('checkins')
+    var {data: checkins} = await sb.from('checkins')
       .select('*, reservas(data_reserva, slot_inicio)')
       .eq('morador_id', morador.id)
       .order('timestamp', {ascending: false})
-      .limit(20);
+      .limit(10);
 
     var html = `
-      <div class="card" style="background:var(--vl);border-color:#97C459;margin-bottom:10px">
-        <div class="card-title"><i class="ti ti-qrcode" style="color:var(--vm)"></i>Escanear QR Code</div>
-        <div style="font-size:11px;margin-bottom:10px">Aponte a câmera para o QR Code da quadra.</div>
-        <div id="reader" style="width:100%;border-radius:8px;overflow:hidden;display:none;margin-bottom:10px"></div>
-        <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm);width:100%"><i class="ti ti-camera"></i>Escanear</button>
-        <button class="btn-s" id="btn-fechar-scanner" style="display:none;width:100%;margin-top:6px;border-color:var(--rdb);color:var(--rdt)"><i class="ti ti-x"></i>Cancelar</button>
+      <div class="card" style="background:var(--vl); border-color:#97C459; margin-bottom:10px;">
+        <div class="card-title"><i class="ti ti-qrcode" style="color:var(--vm)"></i>Escanear</div>
+        <div id="reader" style="width:100%; border-radius:8px; overflow:hidden; display:none; margin-bottom:10px;"></div>
+        <button class="btn-p" id="btn-abrir-scanner" style="background:var(--vm); width:100%;"><i class="ti ti-camera"></i>Escanear</button>
+        <button class="btn-s" id="btn-fechar-scanner" style="display:none; width:100%; margin-top:6px;"><i class="ti ti-x"></i>Cancelar</button>
       </div>
     `;
 
     if (checkins && checkins.length > 0) {
-      html += '<div class="sec-lbl" style="padding:10px 0 5px">Histórico recente</div>';
-      for (var i = 0; i < checkins.length; i++) {
-        var c = checkins[i];
+      html += '<div class="sec-lbl">Histórico</div>';
+      checkins.forEach(c => {
         var dataHora = new Date(c.timestamp).toLocaleString('pt-BR');
         html += '<div class="card">';
-        html += '<div style="font-size:11px;font-weight:600">' + dataHora + '</div>';
-        html += '<div style="font-size:10px;color:var(--t2)">Reserva: ' + fmtD(c.reservas?.data_reserva) + ' às ' + (c.reservas?.slot_inicio?.slice(0, 5) || '??:??') + '</div>';
+        html += '<div style="font-size:11px; font-weight:600;">' + dataHora + '</div>';
+        html += '<div style="font-size:10px; color:var(--t2);">' + fmtD(c.reservas?.data_reserva) + ' às ' + (c.reservas?.slot_inicio?.slice(0, 5) || '??:??') + '</div>';
         html += '</div>';
-      }
+      });
     }
 
-    container.innerHTML = html;
+    document.getElementById('screen-checkin').innerHTML = html;
 
-    // Registrar listeners
-    document.getElementById('btn-abrir-scanner').onclick = function() {
+    document.getElementById('btn-abrir-scanner').onclick = () => {
       var reader = document.getElementById('reader');
       reader.style.display = 'block';
-      this.style.display = 'none';
+      document.getElementById('btn-abrir-scanner').style.display = 'none';
       document.getElementById('btn-fechar-scanner').style.display = 'inline-flex';
 
       html5QrcodeScanner = new Html5Qrcode('reader');
       html5QrcodeScanner.start(
         {facingMode: 'environment'},
         {fps: 10, qrbox: {width: 250, height: 250}},
-        function(decoded) {
-          processarQrQuadra(decoded);
-          fecharScanner();
-        },
-        function(err) {}
-      ).catch(function(err) {
-        toast('Erro ao acessar câmera: ' + err.message, 'erro');
-        fecharScanner();
-      });
+        decoded => { processarQrQuadra(decoded); fecharScanner(); },
+        () => {}
+      ).catch(err => { toast('Erro ao acessar câmera', 'erro'); fecharScanner(); });
     };
 
     document.getElementById('btn-fechar-scanner').onclick = fecharScanner;
 
   } catch (err) {
-    console.error('Erro ao renderizar check-in:', err);
-    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro ao carregar</div>';
+    document.getElementById('screen-checkin').innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro</div>';
   }
 }
-
-// ==================== RENDER CALENDÁRIOS ====================
-
-var currentYear = new Date().getFullYear();
-var currentMonth = new Date().getMonth();
-
-function renderCalendarioReservas() {
-  var lbl = document.getElementById('cal-lbl');
-  var grid = document.getElementById('cal-grid');
-  if (!lbl || !grid) return;
-
-  lbl.textContent = MESES[currentMonth] + ' ' + currentYear;
-
-  var firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  var daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  var today = ts();
-
-  var html = DIAS_N.map(function(d) { return '<div class="cal-dn">' + d + '</div>'; }).join('');
-
-  for (var i = 0; i < firstDay; i++) html += '<div></div>';
-
-  for (var d = 1; d <= daysInMonth; d++) {
-    var ds = currentYear + '-' + String(currentMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-    var cls = 'cal-d';
-    if (ds === today) cls += ' today';
-    html += '<div class="' + cls + '">' + d + '</div>';
-  }
-  grid.innerHTML = html;
-}
-
-document.getElementById('btn-prev-m')?.addEventListener('click', function() {
-  currentMonth--;
-  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-  renderCalendarioReservas();
-});
-
-document.getElementById('btn-next-m')?.addEventListener('click', function() {
-  currentMonth++;
-  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-  renderCalendarioReservas();
-});
-
-function renderCalendarioGeral() {
-  var lbl = document.getElementById('cal-lbl-cal');
-  var grid = document.getElementById('cal-grid-cal');
-  if (!lbl || !grid) return;
-
-  lbl.textContent = MESES[currentMonth] + ' ' + currentYear;
-
-  var firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  var daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  var today = ts();
-
-  var html = DIAS_N.map(function(d) { return '<div class="cal-dn">' + d + '</div>'; }).join('');
-
-  for (var i = 0; i < firstDay; i++) html += '<div></div>';
-
-  for (var d = 1; d <= daysInMonth; d++) {
-    var ds = currentYear + '-' + String(currentMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-    var cls = 'cal-d';
-    if (ds === today) cls += ' today';
-    html += '<div class="' + cls + '">' + d + '</div>';
-  }
-  grid.innerHTML = html;
-}
-
-document.getElementById('btn-prev-m-cal')?.addEventListener('click', function() {
-  currentMonth--;
-  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-  renderCalendarioGeral();
-});
-
-document.getElementById('btn-next-m-cal')?.addEventListener('click', function() {
-  currentMonth++;
-  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-  renderCalendarioGeral();
-});
 
 // ==================== RENDER QUADRA ====================
 
 async function renderQuadra() {
   var container = document.getElementById('ranking-list');
-  if (!container) return;
-
   try {
-    var {data: placares} = await sb
-      .from('placares')
-      .select('*, unidades(codigo)')
-      .order('created_at', {ascending: false})
-      .limit(30);
+    var {data: placares} = await sb.from('placares').select('*,unidades(codigo)').order('created_at', {ascending: false}).limit(30);
 
     if (!placares || placares.length === 0) {
-      container.innerHTML = '<div class="empty"><i class="ti ti-trophy"></i>Sem partidas registradas</div>';
+      container.innerHTML = '<div class="empty"><i class="ti ti-trophy"></i>Sem partidas</div>';
       return;
     }
 
     var html = '';
-    for (var i = 0; i < placares.length; i++) {
-      var p = placares[i];
-      var apto = p.unidades ? safeText(p.unidades.codigo) : '---';
+    placares.forEach(p => {
+      var apto = p.unidades?.codigo || '---';
       html += '<div class="card">';
-      html += '<div class="card-title">Apto ' + apto + '</div>';
-      html += '<div style="font-size:12px;margin-bottom:4px">' + safeText(p.modalidade || 'Esporte') + '</div>';
-      html += '<div style="font-size:18px;font-weight:600">' + (p.placar_casa || 0) + ' × ' + (p.placar_visitante || 0) + '</div>';
+      html += '<div class="card-title">Apto ' + safeText(apto) + '</div>';
+      html += '<div style="font-size:18px; font-weight:600;">' + (p.placar_casa || 0) + ' × ' + (p.placar_visitante || 0) + '</div>';
       html += '</div>';
-    }
+    });
 
     container.innerHTML = html;
   } catch (err) {
-    console.error('Erro ao renderizar quadra:', err);
-    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro ao carregar</div>';
+    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro</div>';
   }
 }
 
 // ==================== RENDER OCORRÊNCIAS ====================
 
-async function renderOcorrencias(status = 'aberta') {
+async function renderOcorrencias() {
   var container = document.getElementById('oco-list');
-  if (!container) return;
-
   try {
-    var query = sb.from('ocorrencias').select('*').order('created_at', {ascending: false});
-
-    if (status !== 'todas') {
-      query = query.eq('status', status);
-    }
-
-    var {data: ocorrencias} = await query.limit(50);
+    var {data: ocorrencias} = await sb.from('ocorrencias').select('*').order('created_at', {ascending: false}).limit(50);
 
     if (!ocorrencias || ocorrencias.length === 0) {
-      container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma ocorrência</div>';
+      container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Nenhuma</div>';
       return;
     }
 
     var html = '';
-    for (var i = 0; i < ocorrencias.length; i++) {
-      var o = ocorrencias[i];
-      html += '<div class="card oco-card ' + safeText(o.status) + '">';
-      html += '<div class="oco-top">';
-      html += '<div class="oco-titulo">' + safeText(o.titulo) + '</div>';
-      html += '<span class="badge b-gray">' + safeText(o.status) + '</span>';
+    ocorrencias.forEach(o => {
+      html += '<div class="card">';
+      html += '<div class="card-title"><i class="ti ti-alert-circle"></i>' + safeText(o.titulo) + ' <span class="badge b-gray">' + o.status + '</span></div>';
+      html += '<div style="font-size:11px; color:var(--t2);">' + safeText(o.descricao) + '</div>';
+      html += '<div style="font-size:10px; color:var(--t2); margin-top:6px;">' + fmtD(o.created_at?.slice(0, 10)) + '</div>';
       html += '</div>';
-      html += '<div style="font-size:11px;color:var(--t2);margin:6px 0">' + safeText(o.descricao) + '</div>';
-      html += '<div style="font-size:10px;color:var(--t2)">' + fmtD(o.created_at?.slice(0, 10)) + '</div>';
-      html += '</div>';
-    }
+    });
 
     container.innerHTML = html;
   } catch (err) {
-    console.error('Erro ao renderizar ocorrências:', err);
-    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro ao carregar</div>';
+    container.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Erro</div>';
   }
 }
 
-document.getElementById('tab-ocorrencias')?.addEventListener('click', function() {
-  var pills = document.querySelectorAll('.fpill');
-  if (pills.length > 0) {
-    pills[0].classList.add('active');
-    renderOcorrencias('aberta');
-  }
-});
-
-// ==================== RENDER CONFIGURAÇÕES (ADMIN) ====================
+// ==================== RENDER CONFIG (ADMIN) ====================
 
 async function renderConfig() {
   var container = document.getElementById('screen-config');
-  if (!container) return;
-
-  if (!isAdmin()) {
-    toast('Acesso restrito', 'aviso');
-    return;
-  }
+  if (!isAdmin()) return;
 
   try {
-    // Renderizar formulário com valores atuais
-    var html = `
+    var {data: cfgs} = await sb.from('configuracoes').select('*');
+    var maxMes = cfgs?.find(c => c.chave === 'max_reservas_mes')?.valor_inteiro || 4;
+    var faltasSusp = cfgs?.find(c => c.chave === 'faltas_para_susp')?.valor_inteiro || 2;
+
+    container.innerHTML = `
       <div class="card">
-        <div class="card-title"><i class="ti ti-settings"></i>Limites de Reservas</div>
+        <div class="card-title"><i class="ti ti-settings"></i>Configurações</div>
         <div class="form-row">
           <label class="form-lbl">Reservas máximas por mês</label>
           <select class="form-in" id="cfg-max-mes">
-            <option value="1">1 reserva</option>
-            <option value="2">2 reservas</option>
-            <option value="3">3 reservas</option>
-            <option value="4" selected>4 reservas</option>
-            <option value="6">6 reservas</option>
-            <option value="8">8 reservas</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" ${maxMes === 4 ? 'selected' : ''}>4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
           </select>
         </div>
         <div class="form-row">
-          <label class="form-lbl">Reservas simultâneas abertas</label>
-          <select class="form-in" id="cfg-max-simult">
-            <option value="1">1 reserva por vez</option>
-            <option value="2" selected>2 reservas por vez</option>
-            <option value="3">3 reservas por vez</option>
-            <option value="4">4 reservas por vez</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-lbl">Antecedência mínima (minutos)</label>
-          <select class="form-in" id="cfg-ant-min">
-            <option value="0">Sem restrição</option>
-            <option value="30">30 minutos</option>
-            <option value="60" selected>1 hora</option>
-            <option value="120">2 horas</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label class="form-lbl">Antecedência máxima (dias)</label>
-          <select class="form-in" id="cfg-ant-max">
-            <option value="7">7 dias</option>
-            <option value="15" selected>15 dias</option>
-            <option value="30">30 dias</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><i class="ti ti-door-enter"></i>Check-in</div>
-        <div class="form-row">
-          <label class="form-lbl">Janela de check-in (minutos após início)</label>
-          <select class="form-in" id="cfg-ckin-janela">
-            <option value="10">10 minutos</option>
-            <option value="15" selected>15 minutos</option>
-            <option value="20">20 minutos</option>
-            <option value="30">30 minutos</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><i class="ti ti-shield-x"></i>Fair Play</div>
-        <div class="form-row">
-          <label class="form-lbl">Faltas para suspensão automática</label>
+          <label class="form-lbl">Faltas para suspensão</label>
           <select class="form-in" id="cfg-faltas-susp">
-            <option value="1">1 falta</option>
-            <option value="2" selected>2 faltas</option>
-            <option value="3">3 faltas</option>
-            <option value="5">5 faltas</option>
+            <option value="1">1</option>
+            <option value="2" ${faltasSusp === 2 ? 'selected' : ''}>2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
           </select>
         </div>
-        <div class="form-row">
-          <label class="form-lbl">Duração da suspensão (dias)</label>
-          <select class="form-in" id="cfg-susp-dias">
-            <option value="7">7 dias</option>
-            <option value="15" selected>15 dias</option>
-            <option value="30">30 dias</option>
-            <option value="60">60 dias</option>
-          </select>
-        </div>
+        <button class="btn-p" id="btn-salvar-config"><i class="ti ti-device-floppy"></i>Salvar</button>
       </div>
-
-      <button class="btn-p" id="btn-salvar-config" style="margin-bottom:8px"><i class="ti ti-device-floppy"></i>Salvar Configurações</button>
     `;
 
-    // Encontrar elemento específico ou usar a tela
-    var configSection = document.querySelector('[data-config-form]') || 
-                       document.createElement('div');
-    configSection.innerHTML = html;
-    configSection.style.padding = '16px 16px 40px';
-
-    if (!document.querySelector('[data-config-form]')) {
-      container.appendChild(configSection);
-    }
-
-    // Handler de salvamento
-    document.getElementById('btn-salvar-config').addEventListener('click', async function() {
+    document.getElementById('btn-salvar-config').addEventListener('click', async () => {
       try {
-        var maxMes = parseInt(document.getElementById('cfg-max-mes').value);
-        var maxSimult = parseInt(document.getElementById('cfg-max-simult').value);
-        var antMin = parseInt(document.getElementById('cfg-ant-min').value);
-        var antMax = parseInt(document.getElementById('cfg-ant-max').value);
-        var ckinJanela = parseInt(document.getElementById('cfg-ckin-janela').value);
-        var faltasSusp = parseInt(document.getElementById('cfg-faltas-susp').value);
-        var suspDias = parseInt(document.getElementById('cfg-susp-dias').value);
+        var max = parseInt(document.getElementById('cfg-max-mes').value);
+        var faltas = parseInt(document.getElementById('cfg-faltas-susp').value);
 
-        // Atualizar cada configuração
-        var updates = [
-          {chave: 'max_reservas_mes', valor_inteiro: maxMes},
-          {chave: 'max_reservas_simult', valor_inteiro: maxSimult},
-          {chave: 'antecedencia_min', valor_inteiro: antMin},
-          {chave: 'antecedencia_max', valor_inteiro: antMax},
-          {chave: 'ckin_janela', valor_inteiro: ckinJanela},
-          {chave: 'faltas_para_susp', valor_inteiro: faltasSusp},
-          {chave: 'dias_suspensao', valor_inteiro: suspDias},
-          {chave: 'atualizado_por', valor_texto: morador.id},
-          {chave: 'atualizado_em', valor_texto: new Date().toISOString()}
-        ];
+        await sb.from('configuracoes').update({valor_inteiro: max, atualizado_por: morador.id, atualizado_em: new Date().toISOString()}).eq('chave', 'max_reservas_mes');
+        await sb.from('configuracoes').update({valor_inteiro: faltas, atualizado_por: morador.id, atualizado_em: new Date().toISOString()}).eq('chave', 'faltas_para_susp');
 
-        for (var i = 0; i < updates.length; i++) {
-          await sb
-            .from('configuracoes')
-            .update({
-              valor_inteiro: updates[i].valor_inteiro,
-              atualizado_por: morador.id,
-              atualizado_em: new Date().toISOString()
-            })
-            .eq('chave', updates[i].chave);
-        }
+        await registrarAuditoria('editar_config', 'configuracoes', null, {max_reservas_mes: max, faltas_para_susp: faltas});
 
-        // Recarregar configurações globais
+        toast('Configurações salvas!', 'sucesso');
         await carregarConfiguracoes();
 
-        // Registrar auditoria
-        await registrarAuditoria('editar_config', 'configuracoes', null, {
-          max_reservas: maxMes,
-          fair_play: faltasSusp
-        }, 'Configurações atualizadas');
-
-        toast('Configurações salvas com sucesso', 'sucesso');
-
       } catch (err) {
-        console.error('Erro ao salvar configurações:', err);
-        toast('Erro ao salvar: ' + err.message, 'erro');
+        toast('Erro ao salvar', 'erro');
       }
     });
 
   } catch (err) {
-    console.error('Erro ao renderizar configurações:', err);
-    toast('Erro ao carregar configurações', 'erro');
+    toast('Erro ao carregar', 'erro');
   }
 }
 
 // ==================== LOGOUT ====================
 
-document.getElementById('btn-logout')?.addEventListener('click', async function() {
+document.getElementById('btn-logout')?.addEventListener('click', async () => {
   await sb.auth.signOut();
   location.reload();
 });
 
 // ==================== INICIALIZAR ====================
 
-sb.auth.getSession().then(function({data}) {
+sb.auth.getSession().then(({data}) => {
   if (data.session) {
     iniciarApp(data.session.user);
   }
 });
 
-renderCalendarioReservas();
-renderCalendarioGeral();
-
 </script>
+
+</body>
+</html>
