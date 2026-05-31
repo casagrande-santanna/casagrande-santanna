@@ -239,6 +239,24 @@ textarea.form-in{resize:vertical}
   </div>
 </div>
 
+<!-- TELA DE RESET DE SENHA -->
+<div class="login-wrap" id="reset-screen" style="display:none">
+  <div class="login-logo">🔐</div>
+  <div class="login-title">Redefinir Senha</div>
+  <div class="login-sub">Crie uma nova senha para sua conta</div>
+  <div class="login-card">
+    <label class="login-lbl">Nova Senha</label>
+    <input class="login-input" type="password" id="reset-pass" placeholder="Mínimo 6 caracteres">
+    <label class="login-lbl">Confirmar Senha</label>
+    <input class="login-input" type="password" id="reset-pass-confirm" placeholder="Repita a senha">
+    <button class="login-btn" id="btn-resetar">Redefinir Senha</button>
+    <div class="login-err" id="reset-err"></div>
+    <div style="text-align:center;margin-top:10px">
+      <span style="font-size:11px;color:var(--v);cursor:pointer;text-decoration:underline" id="link-voltar-login">← Voltar ao login</span>
+    </div>
+  </div>
+</div>
+
 <div class="app" id="app-main" style="display:none">
   <div class="hdr">
     <div class="hdr-row">
@@ -1431,9 +1449,10 @@ function iniciarApp(user) {
   sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).maybeSingle().then(function(res) {
     if(res.error || !res.data) { bloquearSessao('Cadastro nao encontrado. Fale com a administracao.'); return; }
     morador = res.data;
-    if(morador.status === 'pendente') { bloquearSessao('Seu cadastro esta aguardando aprovacao do administrador.'); return; }
+    // Permitir entrada: status ativo, suspenso, ou admin (mesmo pendente)
     if(morador.status === 'inativo') { bloquearSessao('Seu cadastro esta inativo. Fale com a administracao.'); return; }
-    if(morador.status !== 'ativo' && morador.status !== 'suspenso') { bloquearSessao('Cadastro sem permissao de acesso.'); return; }
+    if(morador.status === 'pendente' && morador.tipo !== 'admin') { bloquearSessao('Seu cadastro esta aguardando aprovacao do administrador.'); return; }
+    if(morador.status !== 'ativo' && morador.status !== 'suspenso' && morador.status !== 'pendente') { bloquearSessao('Cadastro sem permissao de acesso.'); return; }
 
     var n = morador.nome || '';
     var partes = n.split(' ');
@@ -1530,21 +1549,80 @@ function iniciarApp(user) {
   });
 }
 
+// ========== RESET DE SENHA ==========
+async function verificarResetPassword() {
+  var hash = window.location.hash.substring(1);
+  if (!hash) return false;
+  var params = new URLSearchParams(hash);
+  var accessToken = params.get('access_token');
+  var type = params.get('type');
+  if (accessToken && type === 'recovery') {
+    console.log('✓ Reset de senha detectado');
+    sessionStorage.setItem('reset_token', accessToken);
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('reset-screen').style.display = 'flex';
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return true;
+  }
+  return false;
+}
+
+document.getElementById('btn-resetar').addEventListener('click', async () => {
+  var pass = document.getElementById('reset-pass').value;
+  var pass2 = document.getElementById('reset-pass-confirm').value;
+  var err = document.getElementById('reset-err');
+  err.style.display = 'none';
+  if (!pass || !pass2) { err.textContent = 'Preencha as senhas.'; err.style.display = 'block'; return; }
+  if (pass.length < 6) { err.textContent = 'Senha deve ter mínimo 6 caracteres.'; err.style.display = 'block'; return; }
+  if (pass !== pass2) { err.textContent = 'As senhas não coincidem.'; err.style.display = 'block'; return; }
+  try {
+    var resetToken = sessionStorage.getItem('reset_token');
+    if (!resetToken) { err.textContent = 'Token inválido ou expirado. Solicite um novo link de reset.'; err.style.display = 'block'; return; }
+    var {data: verifyData, error: verifyError} = await sb.auth.verifyOtp({token_hash: resetToken, type: 'recovery'});
+    if (verifyError) { err.textContent = 'Link expirado ou inválido. Solicite um novo.'; err.style.display = 'block'; return; }
+    var {error: updateError} = await sb.auth.updateUser({password: pass});
+    if (updateError) { err.textContent = 'Erro ao atualizar senha: ' + updateError.message; err.style.display = 'block'; return; }
+    toast('Senha redefinida com sucesso!', 'sucesso');
+    await sb.auth.signOut();
+    sessionStorage.removeItem('reset_token');
+    setTimeout(() => {
+      document.getElementById('reset-screen').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('reset-pass').value = '';
+      document.getElementById('reset-pass-confirm').value = '';
+      document.getElementById('reset-err').style.display = 'none';
+    }, 2000);
+  } catch (e) {
+    err.textContent = 'Erro inesperado: ' + e.message;
+    err.style.display = 'block';
+  }
+});
+
+document.getElementById('link-voltar-login').addEventListener('click', () => {
+  document.getElementById('reset-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  sessionStorage.removeItem('reset_token');
+});
+
 // Sessao persistente + check-in via QR externo
-sb.auth.getSession().then(function(res) {
-  if(res.data && res.data.session) {
-    iniciarApp(res.data.session.user);
-    // Verifica se o app foi aberto via QR externo
-    var params = new URLSearchParams(window.location.search);
-    if(params.get('checkin') === 'quadra') {
-      setTimeout(function() {
-        if(morador) {
-          processarQrQuadra();
-          // Limpa o parametro da URL sem recarregar
-          window.history.replaceState({}, '', window.location.pathname);
+verificarResetPassword().then(isReset => {
+  if (!isReset) {
+    sb.auth.getSession().then(function(res) {
+      if(res.data && res.data.session) {
+        iniciarApp(res.data.session.user);
+        // Verifica se o app foi aberto via QR externo
+        var params = new URLSearchParams(window.location.search);
+        if(params.get('checkin') === 'quadra') {
+          setTimeout(function() {
+            if(morador) {
+              processarQrQuadra();
+              // Limpa o parametro da URL sem recarregar
+              window.history.replaceState({}, '', window.location.pathname);
+            }
+          }, 1500);
         }
-      }, 1500);
-    }
+      }
+    });
   }
 });
 
@@ -3620,7 +3698,7 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
     aula_max_contratos:     li('cfg-aula-max-contr', 1)
   };
   sb.from('configuracoes').select('id').limit(1).maybeSingle().then(function(rc) {
-    if(rc.data) {
+    if(rc && rc.data) {
       sb.from('configuracoes').update(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).eq('id', rc.data.id).then(function(r) {
         if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
       });
