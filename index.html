@@ -526,6 +526,27 @@ body {
   </div>
 </div>
 
+ <!-- ==================== RESET DE SENHA ====================  -->
+<div class="login-wrap" id="reset-screen" style="display:none;">
+  <div class="login-logo">🔐</div>
+  <div class="login-title">Redefinir Senha</div>
+  <div class="login-sub">Crie uma nova senha para sua conta</div>
+  <div class="login-card">
+    <label class="login-lbl">Nova Senha</label>
+    <input class="login-input" type="password" id="reset-pass" placeholder="Mínimo 6 caracteres">
+    
+    <label class="login-lbl">Confirmar Senha</label>
+    <input class="login-input" type="password" id="reset-pass-confirm" placeholder="Repita a senha">
+    
+    <button class="login-btn" id="btn-resetar">Redefinir Senha</button>
+    
+    <div class="login-err" id="reset-err"></div>
+    
+    <div class="login-cadastro" style="margin-top:16px;">
+      <button class="login-link" id="link-voltar-login">← Voltar ao login</button>
+    </div>
+  </div>
+</div> 
 <!-- ==================== MODAL: ESQUECI SENHA ====================  -->
 <div class="modal-bg" id="m-esqueci">
   <div class="modal-card">
@@ -837,7 +858,7 @@ document.getElementById('btn-enviar-reset').addEventListener('click', async () =
 
   try {
     var {error} = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '?reset=true'
+      redirectTo: window.location.origin + window.location.pathname
     });
 
     if (error) {
@@ -846,14 +867,15 @@ document.getElementById('btn-enviar-reset').addEventListener('click', async () =
       return;
     }
 
-    toast('E-mail de recuperação enviado!', 'sucesso');
+    toast('E-mail de recuperação enviado! Verifique inbox e spam.', 'sucesso');
     fecharModal('m-esqueci');
+    document.getElementById('esqueci-email').value = '';
   } catch (e) {
     err.textContent = 'Erro ao enviar e-mail.';
     err.style.display = 'block';
   }
 });
-
+  
 // ==================== CADASTRO ====================
 
 document.getElementById('link-cadastro').addEventListener('click', () => {
@@ -1230,14 +1252,140 @@ async function logout() {
   location.reload();
 }
 
-// ==================== INICIALIZAR ====================
+  // ==================== DETECTAR RESET DE SENHA NA URL ====================
 
-sb.auth.getSession().then(({data}) => {
-  if (data.session) {
-    iniciarApp(data.session.user);
+async function verificarResetPassword() {
+  var hash = window.location.hash.substring(1);
+  console.log('Hash detectado:', hash);
+  
+  if (!hash) return false;
+
+  var params = new URLSearchParams(hash);
+  var accessToken = params.get('access_token');
+  var type = params.get('type');
+
+  console.log('Access Token:', accessToken ? 'existe' : 'não existe');
+  console.log('Type:', type);
+
+  if (accessToken && type === 'recovery') {
+    console.log('✓ Reset de senha detectado');
+    
+    sessionStorage.setItem('reset_token', accessToken);
+    
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('reset-screen').style.display = 'flex';
+    
+    window.history.replaceState({}, document.title, window.location.pathname);
+    
+    return true;
+  }
+  return false;
+}
+
+// ==================== RESET DE SENHA ====================
+
+document.getElementById('btn-resetar').addEventListener('click', async () => {
+  var pass = document.getElementById('reset-pass').value;
+  var pass2 = document.getElementById('reset-pass-confirm').value;
+  var err = document.getElementById('reset-err');
+  err.style.display = 'none';
+
+  if (!pass || !pass2) {
+    err.textContent = 'Preencha as senhas.';
+    err.style.display = 'block';
+    return;
+  }
+
+  if (pass.length < 6) {
+    err.textContent = 'Senha deve ter mínimo 6 caracteres.';
+    err.style.display = 'block';
+    return;
+  }
+
+  if (pass !== pass2) {
+    err.textContent = 'As senhas não coincidem.';
+    err.style.display = 'block';
+    return;
+  }
+
+  try {
+    console.log('Iniciando reset de senha...');
+    
+    var resetToken = sessionStorage.getItem('reset_token');
+    console.log('Token obtido:', resetToken ? 'sim' : 'não');
+
+    if (!resetToken) {
+      err.textContent = 'Token inválido ou expirado. Solicite um novo link de reset.';
+      err.style.display = 'block';
+      return;
+    }
+
+    console.log('Validando token...');
+    var {data: verifyData, error: verifyError} = await sb.auth.verifyOtp({
+      token_hash: resetToken,
+      type: 'recovery'
+    });
+
+    if (verifyError) {
+      err.textContent = 'Link expirado ou inválido. Solicite um novo.';
+      err.style.display = 'block';
+      console.error('Erro ao verificar token:', verifyError);
+      return;
+    }
+
+    console.log('✓ Token validado');
+
+    console.log('Atualizando senha...');
+    var {error: updateError} = await sb.auth.updateUser({password: pass});
+
+    if (updateError) {
+      err.textContent = 'Erro ao atualizar senha: ' + updateError.message;
+      err.style.display = 'block';
+      console.error('Erro ao atualizar:', updateError);
+      return;
+    }
+
+    console.log('✓ Senha atualizada com sucesso');
+    toast('Senha redefinida com sucesso!', 'sucesso');
+    
+    await sb.auth.signOut();
+    sessionStorage.removeItem('reset_token');
+    
+    setTimeout(() => {
+      document.getElementById('reset-screen').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-pass').value = '';
+      document.getElementById('reset-pass').value = '';
+      document.getElementById('reset-pass-confirm').value = '';
+      document.getElementById('reset-err').style.display = 'none';
+    }, 2000);
+
+  } catch (e) {
+    err.textContent = 'Erro inesperado: ' + e.message;
+    err.style.display = 'block';
+    console.error('Erro completo:', e);
   }
 });
 
+document.getElementById('link-voltar-login').addEventListener('click', () => {
+  document.getElementById('reset-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  sessionStorage.removeItem('reset_token');
+});
+  
+// ==================== INICIALIZAR ====================
+
+verificarResetPassword().then(isReset => {
+  if (!isReset) {
+    sb.auth.getSession().then(({data}) => {
+      if (data.session) {
+        iniciarApp(data.session.user);
+      }
+    });
+  }
+});
+  
 </script>
 
 </body>
