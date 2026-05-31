@@ -984,11 +984,18 @@ async function iniciarApp(user) {
   try {
     var {data: m, error} = await sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).single();
 
-    if (error || !m || m.status !== 'ativo') {
-      toast('Acesso negado ou conta pendente de aprovação.', 'erro');
-      await sb.auth.signOut();
-      return;
-    }
+    if (error) {
+  toast('Acesso negado.', 'erro');
+  await sb.auth.signOut();
+  return;
+}
+
+// Permitir entrada de admins mesmo que pendentes
+if (!m || (m.status !== 'ativo' && m.tipo !== 'admin')) {
+  toast('Acesso negado ou conta pendente de aprovação.', 'erro');
+  await sb.auth.signOut();
+  return;
+}
 
     morador = m;
 
