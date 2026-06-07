@@ -4505,7 +4505,7 @@ document.getElementById('btn-fechar-dispensa').addEventListener('click', functio
 
 // -- ESPACOS ----------------------------------------------------
 function carregarEspacos() {
-  sb.from('espacos').select('*').order('criado_at').then(function(res) {
+  sb.from('espacos').select('*').order('created_at').then(function(res) {
     espacos = res.data || [];
     espacosCarregados = true;
     espacoQuadraId = null;
