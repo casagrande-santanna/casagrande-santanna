@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -1040,6 +1040,30 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
         <div style="margin-top:12px;border-top:0.5px solid var(--br);padding-top:10px">
           <div class="p-row"><span>Notificações push</span><div class="tgl on" id="tgl-push"></div></div>
           <div class="p-row"><span>Modo escuro</span><div class="tgl" id="tgl-dark"></div></div>
+          <div class="p-row" style="cursor:pointer" id="btn-alterar-senha-row">
+            <span><i class="ti ti-key" style="font-size:13px;margin-right:4px"></i>Alterar senha</span>
+            <i class="ti ti-chevron-right" style="font-size:13px;color:var(--t3)"></i>
+          </div>
+          <div id="alterar-senha-wrap" style="display:none;padding:10px 0;border-top:0.5px solid var(--br)">
+            <div class="form-row">
+              <label class="form-lbl">Nova senha</label>
+              <div style="position:relative">
+                <input type="password" class="form-in" id="pf-nova-senha" placeholder="Mínimo 6 caracteres" style="padding-right:38px">
+                <button type="button" onclick="var p=document.getElementById('pf-nova-senha');p.type=p.type==='password'?'text':'password'" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#999;padding:2px">
+                  <i class="ti ti-eye" style="font-size:16px"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-lbl">Confirmar nova senha</label>
+              <input type="password" class="form-in" id="pf-conf-senha" placeholder="Repita a senha">
+            </div>
+            <div id="pf-senha-err" style="font-size:11px;color:var(--rdt);margin-bottom:6px;display:none"></div>
+            <div style="display:flex;gap:6px">
+              <button class="btn-s" id="btn-cancel-senha" style="flex:1">Cancelar</button>
+              <button class="btn-p" id="btn-salvar-senha" style="flex:2"><i class="ti ti-check"></i>Salvar nova senha</button>
+            </div>
+          </div>
           <div class="p-row" style="border:none;padding-top:12px">
             <button class="btn-d" style="width:100%" id="btn-logout"><i class="ti ti-logout" aria-hidden="true"></i>Sair da conta</button>
           </div>
@@ -1396,7 +1420,7 @@ var MODS = [
 ];
 var OCA = {manutencao:'Manutenção',barulho:'Barulho',seguranca:'Seguranca',limpeza:'Limpeza',outros:'Outros'};
 var STL = {aberta:'Aberta',andamento:'Em andamento',resolvida:'Resolvida',encerrada:'Encerrada'};
-var AVL = {urgente:'Urgente',info:'Informativo',manutencao:'Manutenção',comunicado:'Comunicado'};
+var AVL = {urgente:'Urgente',info:'Informativo',manutencao:'Manutenção','manutenção':'Manutenção',comunicado:'Comunicado'};
 
 var usuario = null, morador = null;
 var espacos = [];
@@ -1528,7 +1552,17 @@ document.getElementById('btn-entrar').addEventListener('click', function() {
   setLoading('btn-entrar', true);
   sb.auth.signInWithPassword({email:email, password:pass}).then(function(res) {
     setLoading('btn-entrar', false, 'Entrar');
-    if(res.error) { err.textContent='E-mail ou senha incorretos.'; err.style.display='block'; return; }
+    if(res.error) {
+      var msg = res.error.message || '';
+      if(msg.toLowerCase().includes('confirm') || msg.toLowerCase().includes('verified')) {
+        err.textContent = 'E-mail não confirmado. Verifique sua caixa de entrada e clique no link de confirmação.';
+      } else if(msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials')) {
+        err.textContent = 'E-mail ou senha incorretos.';
+      } else {
+        err.textContent = 'Erro ao entrar: ' + msg;
+      }
+      err.style.display='block'; return;
+    }
     if(cb && cb.checked) localStorage.setItem('cg_remember_email', email);
     else localStorage.removeItem('cg_remember_email');
     iniciarApp(res.data.user);
@@ -1773,6 +1807,7 @@ function iniciarApp(user) {
         abrirModal('m-novo-aviso');
       });
       document.getElementById('tab-config').style.display = 'flex';
+      document.getElementById('tab-dashboard').style.display = 'flex';
       document.getElementById('btn-nova-oco').style.display = 'flex';
       sb.from('moradores').select('id',{count:'exact',head:true}).eq('status','pendente').then(function(r) {
         var nd = document.getElementById('nd-config');
@@ -1824,7 +1859,22 @@ document.getElementById('tab-avisos').addEventListener('click', function() { goS
 document.getElementById('tab-dashboard').addEventListener('click', function() { goScreen('dashboard'); renderDashboard(); });
 document.getElementById('btn-hdr-dashboard').addEventListener('click', function() { goScreen('dashboard'); renderDashboard(); document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');}); document.getElementById('tab-dashboard').classList.add('active'); });
 
-document.getElementById('btn-hdr-config').addEventListener('click', function() { goScreen('config'); document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');}); document.getElementById('tab-config').classList.add('active'); });
+document.getElementById('btn-hdr-config').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  goScreen('config');
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tab-config').classList.add('active');
+  renderConfig();
+  verificarBloqueioEmergencial();
+  var wrap = document.getElementById('qr-fixo-wrap');
+  var urlEl = document.getElementById('qr-fixo-url');
+  if(wrap) {
+    var appUrl = window.location.origin + window.location.pathname + '?check-in=quadra';
+    var qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(appUrl) + '&margin=10';
+    wrap.innerHTML = '<img src="' + qrSrc + '" style="width:180px;height:180px" alt="QR Code">';
+    if(urlEl) urlEl.textContent = appUrl;
+  }
+});
 document.getElementById('tab-reservar').addEventListener('click', function() { goScreen('reservar'); renderCal(); });
 document.getElementById('tab-academia').addEventListener('click', function() { goScreen('academia'); renderAcademia(); });
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
@@ -2527,7 +2577,19 @@ function renderCheckin() {
     .eq('status','confirmada')
     .limit(5).then(function(res) {
     var lista = (res.data||[]).filter(function(r){ return !r.checkin_feito; });
-    var proxima = lista.length ? lista[0] : null;
+    var _agora = new Date();
+    var _janela = appCfg.checkin_janela_min || 15;
+    var _ant = appCfg.checkin_ant_min || 10;
+    // Prefere reserva dentro da janela de check-in; depois próxima futura; depois qualquer
+    var proxima = lista.find(function(r) {
+      var dtI = new Date(r.data_reserva + 'T' + (r.slot_inicio||'00:00'));
+      var dtF = new Date(r.data_reserva + 'T' + (r.slot_fim||'23:59'));
+      var diff = (_agora - dtI) / 60000;
+      var emCurso = _agora >= dtI && _agora < dtF;
+      return diff >= -_ant && (emCurso || diff <= _janela);
+    }) || lista.find(function(r) {
+      return _agora < new Date(r.data_reserva + 'T' + (r.slot_inicio||'00:00'));
+    }) || (lista.length ? lista[0] : null);
     var main = document.getElementById('ckin-main');
     var nd = document.getElementById('nd-ckin');
     if(proxima) {
@@ -2547,7 +2609,8 @@ function renderCheckin() {
       document.getElementById('btn-fazer-ckin').addEventListener('click', function() { doCheckin(proxima.id); });
       document.getElementById('btn-cancelar-ckin').addEventListener('click', function() {
         if(confirm('Cancelar sua reserva e liberar o horário para outros moradores?')) {
-          sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',proxima.id).then(function() {
+          sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',proxima.id).then(function(rc) {
+            if(rc.error) { toast('Erro ao cancelar: ' + rc.error.message); return; }
             toast('Reserva cancelada. Horário liberado.');
             renderCheckin(); renderMinhas();
           });
@@ -3466,6 +3529,16 @@ function renderConfig() {
   if(wrapAc2) wrapAc2.style.display = (acEspaço && acEspaco.ativo) ? 'block' : 'none';
   var selSim2 = document.getElementById('cfg-academia-simult');
   if(selSim2 && acEspaco) selSim2.value = String(acEspaco.max_simult || 3);
+
+  // QR Code fixo da quadra
+  var qrWrap = document.getElementById('qr-fixo-wrap');
+  var qrUrlEl = document.getElementById('qr-fixo-url');
+  if(qrWrap && (!qrWrap.querySelector('img') || qrWrap.querySelector('img').src === '')) {
+    var appUrlQr = window.location.origin + window.location.pathname + '?check-in=quadra';
+    var qrSrcCfg = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(appUrlQr) + '&margin=10';
+    qrWrap.innerHTML = '<img src="' + qrSrcCfg + '" style="width:180px;height:180px" alt="QR Code">';
+    if(qrUrlEl) qrUrlEl.textContent = appUrlQr;
+  }
 
   // Pendentes
   sb.from('moradores').select('*,unidades(codigo)').eq('status','pendente').order('created_at',{ascending:false}).then(function(res) {
@@ -4398,6 +4471,39 @@ document.getElementById('btn-cancelar-foto').addEventListener('click', function(
   document.getElementById('foto-input-wrap').style.display = 'none';
 });
 
+// -- ALTERAR SENHA ----------------------------------------------
+document.getElementById('btn-alterar-senha-row').addEventListener('click', function() {
+  var wrap = document.getElementById('alterar-senha-wrap');
+  if(wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('btn-cancel-senha').addEventListener('click', function() {
+  var wrap = document.getElementById('alterar-senha-wrap');
+  if(wrap) wrap.style.display = 'none';
+  document.getElementById('pf-nova-senha').value = '';
+  document.getElementById('pf-conf-senha').value = '';
+  document.getElementById('pf-senha-err').style.display = 'none';
+});
+document.getElementById('btn-salvar-senha').addEventListener('click', function() {
+  var nova = document.getElementById('pf-nova-senha').value;
+  var conf = document.getElementById('pf-conf-senha').value;
+  var errEl = document.getElementById('pf-senha-err');
+  errEl.style.display = 'none';
+  if(!nova || nova.length < 6) { errEl.textContent = 'A senha deve ter mínimo 6 caracteres.'; errEl.style.display = 'block'; return; }
+  if(nova !== conf) { errEl.textContent = 'As senhas não conferem.'; errEl.style.display = 'block'; return; }
+  var btn = document.getElementById('btn-salvar-senha');
+  btn.innerHTML = '<i class="ti ti-loader"></i> Salvando...';
+  btn.disabled = true;
+  sb.auth.updateUser({ password: nova }).then(function(res) {
+    btn.innerHTML = '<i class="ti ti-check"></i>Salvar nova senha';
+    btn.disabled = false;
+    if(res.error) { errEl.textContent = 'Erro: ' + res.error.message; errEl.style.display = 'block'; return; }
+    document.getElementById('pf-nova-senha').value = '';
+    document.getElementById('pf-conf-senha').value = '';
+    document.getElementById('alterar-senha-wrap').style.display = 'none';
+    toast('Senha alterada com sucesso!');
+  });
+});
+
 // -- MODO ESCURO ------------------------------------------------
 var tglDark = document.getElementById('tgl-dark');
 if(tglDark) {
@@ -5003,7 +5109,7 @@ function selDataAcademia(ds) {
           return r.unidade_id === morador.unidade_id && parseInt((r.slot_inicio||'00:00').slice(0,2))*60 === slotMin;
         });
         var livre = ocupados < maxSimult;
-        var cls = minhaRes ? 'slot minha' : livre ? 'slot livre' : 'slot ocupado';
+        var cls = minhaRes ? 'slot meu' : livre ? 'slot livre' : 'slot ocupado';
         var lbl = minhaRes ? 'Minha' : livre ? (ocupados + '/' + maxSimult) : 'Cheio';
         var action = minhaRes ? '' : livre ? 'ac_' + slot : '';
         html += '<div class="' + cls + '" data-ac-slot="' + (action||'') + '">'
@@ -5029,11 +5135,19 @@ function selDataAcademia(ds) {
             status: 'confirmada'
           };
           if(espacoAcademiaId) acPayload.espaco_id = espacoAcademiaId;
-          sb.from('reservas').insert(acPayload).then(function(r) {
-            if(r.error) { toast('Erro: ' + r.error.message); return; }
-            toast('Academia reservada!');
-            selDataAcademia(ds);
-            renderAcademia();
+          // Busca modalidade "Uso livre" para vincular à reserva da academia
+          sb.from('modalidades').select('id,nome').then(function(modRes) {
+            var mods = modRes.data || [];
+            var semAcento = function(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); };
+            var modAc = mods.find(function(m){ return semAcento(m.nome).includes('livre') || semAcento(m.nome).includes('academia'); });
+            if(!modAc && mods.length) modAc = mods[0];
+            if(modAc) acPayload.modalidade_id = modAc.id;
+            sb.from('reservas').insert(acPayload).then(function(r) {
+              if(r.error) { toast('Erro ao reservar academia: ' + r.error.message); return; }
+              toast('Academia reservada!');
+              selDataAcademia(ds);
+              renderAcademia();
+            });
           });
         });
       });
