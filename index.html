@@ -1432,6 +1432,7 @@ var acSelDate = null;
 var vY = new Date().getFullYear(), vM = new Date().getMonth();
 var selDate = null, pendSlot = null, pendMod = null, pendDur = null;
 var cancelId = null, ocoFiltro = 'todos', ocoDetalhe = null;
+var _statusCancelado = 'cancelada'; // descoberto em runtime (DB pode usar 'cancelado')
 var bloquCache = [];
 var pendEspera = null;
 var html5QrcodeScanner = null;
@@ -2403,21 +2404,26 @@ document.getElementById('btn-exec-cancel').addEventListener('click', function() 
   var isentar = chkIsentar ? chkIsentar.checked : false;
   var mcMotivo = document.getElementById('mc-motivo');
   var motivo = mcMotivo ? mcMotivo.value : '';
-  var upd = {status:'cancelada', cancelado_por: isAdmin() ? 'admin' : 'morador'};
+  var upd = {status:_statusCancelado, cancelado_por: isAdmin() ? 'admin' : 'morador'};
   if(isentar) upd.isento_penalidade = true;
   if(motivo) upd.motivo_cancelamento = motivo;
   var temDispensa = !!dispensaReservaId && !isAdmin() && !isentar;
-  function _executarCancelamento(payload) {
+  function _executarCancelamento(payload, tentativa) {
+    tentativa = tentativa || 1;
     sb.from('reservas').update(payload).eq('id',cancelId).then(function(r) {
       if(r.error) {
-        // Retry com payload mínimo caso colunas extras não existam na tabela
-        if(payload.cancelado_por !== undefined || payload.isento_penalidade !== undefined || payload.motivo_cancelamento !== undefined) {
-          _executarCancelamento({status:'cancelada'});
+        if(tentativa === 1) {
+          // Tenta sem colunas opcionais
+          _executarCancelamento({status: payload.status || 'cancelada'}, 2);
+        } else if(tentativa === 2 && (payload.status === 'cancelada' || !payload.status)) {
+          _executarCancelamento({status:'cancelado'}, 3);
         } else {
           toast('Erro ao cancelar: '+r.error.message);
         }
         return;
       }
+      // Salva o status que funcionou para uso em outros cancelamentos
+      if(payload.status) _statusCancelado = payload.status;
       fecharModal('m-cancelar');
       if(selDate) selData(selDate);
       renderMinhas(); renderCheckin();
@@ -2620,7 +2626,7 @@ function renderCheckin() {
       document.getElementById('btn-fazer-ckin').addEventListener('click', function() { doCheckin(proxima.id); });
       document.getElementById('btn-cancelar-ckin').addEventListener('click', function() {
         if(confirm('Cancelar sua reserva e liberar o horário para outros moradores?')) {
-          sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',proxima.id).then(function(rc) {
+          sb.from('reservas').update({status:_statusCancelado}).eq('id',proxima.id).then(function(rc) {
             if(rc.error) { toast('Erro ao cancelar: ' + rc.error.message); return; }
             toast('Reserva cancelada. Horário liberado.');
             renderCheckin(); renderMinhas();
@@ -2663,7 +2669,7 @@ function renderCheckin() {
     var html = '';
     hist.forEach(function(r) {
       var fezCheckin = !!r.checkin_feito; // !! converte null/undefined para false
-      var cancelada  = r.status === 'cancelada';
+      var cancelada  = r.status === 'cancelada' || r.status === 'cancelado';
       var expirada   = r.status === 'expirada';
       var confirmada = r.status === 'confirmada';
 
@@ -2699,7 +2705,7 @@ function renderCheckin() {
         var hojeL = ts();
         // IDs a ocultar: passados, cancelados ou expirados
         var idsOcultar = todosHist
-          .filter(function(r){ return r.data_reserva < hojeL || r.status==='cancelada' || r.status==='expirada'; })
+          .filter(function(r){ return r.data_reserva < hojeL || (r.status==='cancelada'||r.status==='cancelado') || r.status==='expirada'; })
           .map(function(r){ return r.id; });
         if(!idsOcultar.length) { toast('Nada para limpar.'); return; }
         // Oculta imediatamente no DOM (funciona mesmo sem a coluna)
@@ -2749,11 +2755,11 @@ function renderMinhas() {
       mine.forEach(function(r) {
         var bc = 'b-ok';
         if(r.checkin_feito) bc='b-teal';
-        else if(r.status==='cancelada') bc='b-danger';
+        else if((r.status==='cancelada'||r.status==='cancelado')) bc='b-danger';
         else if(r.status==='expirada') bc='b-gray';
         var bl = 'Confirmada';
         if(r.checkin_feito) bl='Check-in';
-        else if(r.status==='cancelada') bl = r.isento_penalidade ? 'Canc. (Isenta)' : 'Cancelada';
+        else if((r.status==='cancelada'||r.status==='cancelado')) bl = r.isento_penalidade ? 'Canc. (Isenta)' : 'Cancelada';
         else if(r.status==='expirada') bl='Ausencia';
         var m = r.modalidades;
         html += '<div class="res-card '+r.status+'" data-reserva-row="1" data-dt="'+r.data_reserva+'" data-st="'+(r.status||'')+'">';
@@ -2822,7 +2828,7 @@ function renderMinhas() {
           toast('Historico limpo.');
           // Tenta persistir no banco silenciosamente (falha sem impacto se coluna não existir)
           var ids = mine.filter(function(r){
-            return r.data_reserva < hoje || r.status === 'cancelada' || r.status === 'expirada';
+            return r.data_reserva < hoje || (r.status === 'cancelada' || r.status === 'cancelado') || r.status === 'expirada';
           }).map(function(r){ return r.id; });
           if(ids.length) {
             ids.forEach(function(id){
@@ -2842,7 +2848,7 @@ function renderMinhas() {
           if(!ids.length) { toast('Nenhuma reserva pontual ativa para cancelar.'); return; }
           if(!confirm('Cancelar todas as '+ids.length+' reservas pontuais confirmadas?')) return;
           Promise.all(ids.map(function(id){
-            return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id);
+            return sb.from('reservas').update({status:_statusCancelado}).eq('id',id);
           })).then(function() {
             toast(ids.length+' reservas pontuais canceladas.');
             renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
@@ -2860,7 +2866,7 @@ function renderMinhas() {
           if(!ids.length) { toast('Nenhuma aula recorrente ativa para cancelar.'); return; }
           if(!confirm('Cancelar todas as '+ids.length+' aulas recorrentes confirmadas?')) return;
           Promise.all(ids.map(function(id){
-            return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id);
+            return sb.from('reservas').update({status:_statusCancelado}).eq('id',id);
           })).then(function() {
             toast(ids.length+' aulas canceladas.');
             renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
@@ -3242,8 +3248,7 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
     tipo: document.getElementById('av-tipo').value,
     titulo: t, corpo: c,
     publicado_por: morador.id,
-    expira_em: expira,
-    enquete_pergunta: pergunta
+    expira_em: expira
   }).then(function(r) {
     if(r.error) { toast('Erro: '+r.error.message); return; }
     document.getElementById('av-tit').value='';
@@ -3311,7 +3316,6 @@ document.getElementById('btn-salvar-oco').addEventListener('click', function() {
   var t = document.getElementById('oc-tit').value.trim();
   if(!t) { toast('Informe o titulo'); return; }
   sb.from('ocorrencias').insert({
-    unidade_id: morador.unidade_id, morador_id: morador.id,
     categoria: document.getElementById('oc-cat').value,
     titulo: t, descricao: document.getElementById('oc-desc').value||t,
     prioridade: document.getElementById('oc-prio').value,
@@ -3655,7 +3659,7 @@ function renderConfig() {
             var limparQ = Promise.resolve();
             if(uid) {
               limparQ = sb.from('reservas')
-                .update({status:'cancelada', cancelado_por:'admin'})
+                .update({status:_statusCancelado})
                 .eq('unidade_id', uid)
                 .eq('status', 'expirada')
                 .gte('data_reserva', mesAtual+'-01')
@@ -3713,7 +3717,7 @@ function renderConfig() {
 
   // Agenda do dia
   var hoje = ts();
-  sb.from('reservas').select('*,unidades(codigo),modalidades(nome,icone)').eq('data_reserva',hoje).neq('status','cancelada').order('slot_inicio').then(function(res) {
+  sb.from('reservas').select('*,unidades(codigo),modalidades(nome,icone)').eq('data_reserva',hoje).not('status','in','("cancelada","cancelado")').order('slot_inicio').then(function(res) {
     var ags = res.data||[];
     var html = ags.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhuma reserva hoje.</div>';
     ags.forEach(function(r) {
@@ -3852,7 +3856,7 @@ function renderContratosAula() {
           if(!d.ids || !d.ids.length) { toast('Nenhuma reserva encontrada.'); return; }
           if(!confirm('Cancelar todas as aulas futuras do contrato de '+d.cod+'?')) return;
           Promise.all(d.ids.map(function(id){
-            return sb.from('reservas').update({status:'cancelada',cancelado_por:'admin'}).eq('id',id);
+            return sb.from('reservas').update({status:_statusCancelado}).eq('id',id);
           })).then(function(results) {
             var erros = results.filter(function(r){ return r.error; });
             if(erros.length) { toast('Erro ao cancelar: '+erros[0].error.message); return; }
@@ -3967,7 +3971,7 @@ function criarContrato() {
 
     var promiseCancelar = isEdicao
       ? Promise.all(editData.ids.filter(function(id){return !!id;}).map(function(id){
-          return sb.from('reservas').update({status:'cancelada',cancelado_por:'admin'}).eq('id',id);
+          return sb.from('reservas').update({status:_statusCancelado}).eq('id',id);
         }))
       : Promise.resolve([]);
 
@@ -4304,7 +4308,7 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
         }
         Promise.all(lotes.map(function(lote) {
           return sb.from('reservas')
-            .update({status: 'cancelada', cancelado_por: 'admin'})
+            .update({status: _statusCancelado})
             .in('id', lote);
         })).then(function(results) {
           var erros = results.filter(function(r) { return r && r.error; });
@@ -5163,6 +5167,7 @@ function selDataAcademia(ds) {
             data_reserva: ds,
             slot_inicio: horaIni,
             slot_fim: horaFim,
+            duracao_minutos: 60,
             tipo_reserva: 'pontual',
             status: 'confirmada'
           };
