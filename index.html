@@ -1394,9 +1394,9 @@ var MODS = [
   {id:'volei',nome:'Volei',sub:'coletivo',icon:'🏐',fixo:false,durs:[60,120]},
   {id:'livre',nome:'Uso livre',sub:'treino',icon:'🏃',fixo:false,durs:[60,120]}
 ];
-var OCA = {manutenção:'Manutenção',barulho:'Barulho',seguranca:'Seguranca',limpeza:'Limpeza',outros:'Outros'};
+var OCA = {manutencao:'Manutenção',barulho:'Barulho',seguranca:'Seguranca',limpeza:'Limpeza',outros:'Outros'};
 var STL = {aberta:'Aberta',andamento:'Em andamento',resolvida:'Resolvida',encerrada:'Encerrada'};
-var AVL = {urgente:'Urgente',info:'Informativo',manutenção:'Manutenção',comunicado:'Comunicado'};
+var AVL = {urgente:'Urgente',info:'Informativo',manutencao:'Manutenção',comunicado:'Comunicado'};
 
 var usuario = null, morador = null;
 var espacos = [];
@@ -2409,11 +2409,11 @@ function doCheckin(id) {
       if(res.error || !res.data) { toast('Reserva não encontrada.'); return; }
       var rv = res.data;
       // Permite check-in se for o titular OU se o apartamento tiver convite aceito
-      var podeCheck-in = rv.unidade_id === morador.unidade_id;
-      if(!podeCheck-in && morador.unidade_id) {
+      var podeCheckin = rv.unidade_id === morador.unidade_id;
+      if(!podeCheckin && morador.unidade_id) {
         // Verifica convite aceito (sincrono simplificado - continua abaixo)
       }
-      if(!podeCheck-in) {
+      if(!podeCheckin) {
         // Verifica se tem convite aceito para esta reserva
         sb.from('convites_reserva').select('id').eq('reserva_id', id).eq('unidade_convidada_id', morador.unidade_id).eq('status', 'aceito').maybeSingle().then(function(cvRes) {
           if(!cvRes.data) { toast('Esta reserva não pertence ao seu apartamento.'); return; }
@@ -4604,9 +4604,9 @@ document.getElementById('btn-qr-check-in').addEventListener('click', function() 
   var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data='+qrData;
   var qrEl = document.getElementById('qr-code-display');
   // URL com parametro de check-in para QR externo
-  var check-inUrl = window.location.origin + window.location.pathname + '?check-in=quadra';
-  var qrUrlCheck-in = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(check-inUrl);
-  if(qrEl) qrEl.innerHTML = '<img src="'+qrUrlCheck-in+'" style="width:150px;height:150px" alt="QR Code"><div style="font-size:9px;color:var(--t2);margin-top:4px;text-align:center;word-break:break-all">'+check-inUrl+'</div>';
+  var checkinUrl = window.location.origin + window.location.pathname + '?check-in=quadra';
+  var qrUrlCheckin = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(checkinUrl);
+  if(qrEl) qrEl.innerHTML = '<img src="'+qrUrlCheckin+'" style="width:150px;height:150px" alt="QR Code"><div style="font-size:9px;color:var(--t2);margin-top:4px;text-align:center;word-break:break-all">'+checkinUrl+'</div>';
   wrap.style.display = 'block';
 });
 </script>
