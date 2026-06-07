@@ -3081,7 +3081,7 @@ function renderAvisos() {
     var hoje = ts();
     var vistos = avisos.filter(function(a) {
       if(a.expira_em && a.expira_em < hoje) return false;
-      return a.destino==='todos' || (a.destino==='blocoA'&&bloco==='A') || (a.destino==='blocoB'&&bloco==='B');
+      return true;
     });
     var naoLidos = vistos.filter(function(a) {
       return !(a.leituras_avisos||[]).find(function(l){return l.morador_id===morador.id;});
@@ -3241,7 +3241,6 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
   sb.from('avisos').insert({
     tipo: document.getElementById('av-tipo').value,
     titulo: t, corpo: c,
-    destino: document.getElementById('av-dest').value,
     publicado_por: morador.id,
     expira_em: expira,
     enquete_pergunta: pergunta,
@@ -3555,17 +3554,17 @@ function renderConfig() {
   var wrapAc2 = document.getElementById('academia-cfg-wrap');
   var acEspaco = espacos.find(function(e){ return e.id === espacoAcademiaId; });
   if(tglAc2) {
-    if(acEspaço && acEspaco.ativo) tglAc2.classList.add('on');
+    if(acEspaco && acEspaco.ativo) tglAc2.classList.add('on');
     else tglAc2.classList.remove('on');
   }
-  if(wrapAc2) wrapAc2.style.display = (acEspaço && acEspaco.ativo) ? 'block' : 'none';
+  if(wrapAc2) wrapAc2.style.display = (acEspaco && acEspaco.ativo) ? 'block' : 'none';
   var selSim2 = document.getElementById('cfg-academia-simult');
   if(selSim2 && acEspaco) selSim2.value = String(acEspaco.max_simult || 3);
 
   // QR Code fixo da quadra
   var qrWrap = document.getElementById('qr-fixo-wrap');
   var qrUrlEl = document.getElementById('qr-fixo-url');
-  if(qrWrap && (!qrWrap.querySelector('img') || qrWrap.querySelector('img').src === '')) {
+  if(qrWrap) {
     var appUrlQr = window.location.origin + window.location.pathname + '?check-in=quadra';
     var qrSrcCfg = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(appUrlQr) + '&margin=10';
     qrWrap.innerHTML = '<img src="' + qrSrcCfg + '" style="width:180px;height:180px" alt="QR Code">';
@@ -4386,6 +4385,7 @@ document.getElementById('btn-add-bloqueio').addEventListener('click', function()
       var ativo = tglAc.classList.contains('on');
       if(espacoAcademiaId) {
         sb.from('espacos').update({ativo: ativo}).eq('id', espacoAcademiaId).then(function() {
+          espacos = espacos.map(function(e){ if(e.id===espacoAcademiaId) e.ativo=ativo; return e; });
           atualizarTabAcademia();
           toast(ativo ? 'Academia ativada.' : 'Academia desativada.');
           // Atualiza max_simult se necessario
