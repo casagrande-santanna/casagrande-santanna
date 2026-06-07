@@ -20,7 +20,7 @@
   --bl:#E6F1FB;--blb:#85B7EB;--blt:#185FA5;
   --gy:#F1EFE8;--gyb:#B4B2A9;--gyt:#5F5E5A;
   --bg:#F5F5F0;--cd:#fff;--br:#E0E0DA;
-  --tx:#1A1A1A;--t2:#666;--t3:#999;
+  --tx:#1A1A1A;--t1:#1A1A1A;--t2:#666;--t3:#999;
   --r:10px;--rl:14px;
 }
 body.dark{
@@ -30,12 +30,12 @@ body.dark{
   --bl:#081828;--blb:#2B5280;--blt:#85B7EB;
   --gy:#1A1A18;--gyb:#3A3A38;--gyt:#A0A09A;
   --bg:#0F0F0D;--cd:#1C1C1A;--br:#2E2E2A;
-  --tx:#F0F0EC;--t2:#AAA9A4;--t3:#666;
+  --tx:#F0F0EC;--t1:#F0F0EC;--t2:#AAA9A4;--t3:#666;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 .app{flex:1;display:flex;flex-direction:column}
-.hdr{background:var(--v);color:#fff;padding:12px 16px 11px;position:sticky;top:0;z-index:30;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+.hdr{background:linear-gradient(135deg,var(--v) 0%,var(--vm) 100%);color:#fff;padding:12px 16px 11px;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(39,80,10,.25)}
 .hdr-row{display:flex;align-items:center;justify-content:space-between}
 .hdr-title{font-size:15px;font-weight:600}
 .hdr-sub{font-size:10px;opacity:.75;margin-top:1px}
@@ -57,8 +57,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ndot.show{display:block}
 .content{flex:1;overflow-y:auto;padding:12px 16px 80px;scroll-behavior:smooth}
 .screen{display:none}.screen.active{display:block}
-.card{background:var(--cd);border:0.5px solid var(--br);border-radius:var(--rl);padding:12px 14px;margin-bottom:10px;transition:.2s}
-.card:hover{border-color:#B4B2A9}
+.card{background:var(--cd);border:0.5px solid var(--br);border-radius:var(--rl);padding:12px 14px;margin-bottom:10px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card:hover{border-color:#B4B2A9;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .card-title{font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .card-title i{font-size:14px;color:var(--v)}
 .sec-lbl{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 5px}
@@ -160,15 +160,17 @@ textarea.form-in{resize:vertical}
 .filter-bar::-webkit-scrollbar{display:none}
 .fpill{font-size:10px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--br);background:none;cursor:pointer;white-space:nowrap;color:var(--t2)}
 .fpill.active{background:var(--v);color:#fff;border-color:var(--v)}
-.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:var(--v)}
-.login-logo{font-size:48px;margin-bottom:12px}
-.login-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;text-align:center}
-.login-sub{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:32px;text-align:center}
-.login-card{background:#fff;border-radius:var(--rl);padding:24px;width:100%;max-width:360px}
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:linear-gradient(160deg,#1e3d08 0%,var(--v) 50%,#3d6b14 100%)}
+.login-logo{font-size:52px;margin-bottom:12px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.login-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.2)}
+.login-sub{font-size:13px;color:rgba(255,255,255,.75);margin-bottom:28px;text-align:center}
+.login-card{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
 .login-lbl{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:4px;display:block}
-.login-input{width:100%;border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:14px;outline:none}
-.login-input:focus{border-color:var(--v)}
-.login-btn{width:100%;background:var(--v);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
+.login-input{width:100%;border:1px solid #E0E0DA;border-radius:10px;padding:11px 13px;font-size:14px;margin-bottom:14px;outline:none;transition:.2s;background:#FAFAF8}
+.login-input:focus{border-color:var(--v);background:#fff;box-shadow:0 0 0 3px rgba(39,80,10,.1)}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--v),var(--vm));color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 3px 10px rgba(39,80,10,.35)}
+.login-btn:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 5px 14px rgba(39,80,10,.4)}
+.login-btn:active{transform:translateY(0)}
 .login-err{background:var(--rd);color:var(--rdt);border-radius:7px;padding:8px 12px;font-size:11px;margin-top:8px;display:none}
 .perfil-av{width:52px;height:52px;border-radius:50%;background:var(--vl);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--v);margin-bottom:10px}
 .p-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:0.5px solid var(--br);font-size:12px}
@@ -187,11 +189,11 @@ textarea.form-in{resize:vertical}
 @keyframes spin{to{transform:rotate(360deg)}}
 #toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(23,52,4,.94);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:500;pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
 
-.desktop-body{display:flex;flex:1;min-height:0;overflow:hidden;flex-direction:column}
+.desktop-body{display:flex;flex:1;min-height:0;flex-direction:column}
 
 @media(min-width:768px){
   body{max-width:100%;flex-direction:column;align-items:stretch}
-  .desktop-body{flex-direction:row}
+  .desktop-body{flex-direction:row;overflow:hidden}
   .app{flex:1;flex-direction:column;max-width:100%}
   .hdr{position:sticky;top:0;z-index:30}
   .tab-bar{width:200px;flex-direction:column;border-bottom:none;border-right:0.5px solid var(--br);position:sticky;top:0;height:100%;overflow-y:auto;padding:12px 0;flex-shrink:0;align-self:flex-start;max-height:calc(100vh - 58px)}
@@ -221,7 +223,12 @@ textarea.form-in{resize:vertical}
     <label class="login-lbl">E-mail</label>
     <input class="login-input" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
     <label class="login-lbl">Senha</label>
-    <input class="login-input" type="password" id="login-pass" autocomplete="current-password">
+    <div style="position:relative;margin-bottom:14px">
+      <input class="login-input" type="password" id="login-pass" autocomplete="current-password" style="padding-right:40px;margin-bottom:0">
+      <button type="button" id="btn-toggle-pass" onclick="var p=document.getElementById('login-pass');p.type=p.type==='password'?'text':'password';this.querySelector('i').className='ti '+(p.type==='password'?'ti-eye':'ti-eye-off')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#999;padding:4px;display:flex;align-items:center">
+        <i class="ti ti-eye" style="font-size:17px"></i>
+      </button>
+    </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;font-size:11px">
       <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#555">
         <input type="checkbox" id="remember-checkbox" style="accent-color:var(--v)"> Lembrar-me
@@ -235,24 +242,6 @@ textarea.form-in{resize:vertical}
     <div class="login-err" id="login-err"></div>
     <div style="text-align:center;margin-top:10px">
       <span style="font-size:11px;color:#666;cursor:pointer;text-decoration:underline" id="link-cadastro">Nao tem conta? Cadastre-se</span>
-    </div>
-  </div>
-</div>
-
-<!-- TELA DE RESET DE SENHA -->
-<div class="login-wrap" id="reset-screen" style="display:none">
-  <div class="login-logo">🔐</div>
-  <div class="login-title">Redefinir Senha</div>
-  <div class="login-sub">Crie uma nova senha para sua conta</div>
-  <div class="login-card">
-    <label class="login-lbl">Nova Senha</label>
-    <input class="login-input" type="password" id="reset-pass" placeholder="Mínimo 6 caracteres">
-    <label class="login-lbl">Confirmar Senha</label>
-    <input class="login-input" type="password" id="reset-pass-confirm" placeholder="Repita a senha">
-    <button class="login-btn" id="btn-resetar">Redefinir Senha</button>
-    <div class="login-err" id="reset-err"></div>
-    <div style="text-align:center;margin-top:10px">
-      <span style="font-size:11px;color:var(--v);cursor:pointer;text-decoration:underline" id="link-voltar-login">← Voltar ao login</span>
     </div>
   </div>
 </div>
@@ -325,26 +314,59 @@ textarea.form-in{resize:vertical}
     </div>
     <div class="screen" id="screen-dashboard">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div class="card" style="padding:12px;text-align:center">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Reservas este mes</div>
-          <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-total-mes">--</div>
+        <div class="card" style="padding:14px;border-top:3px solid var(--v);box-shadow:0 2px 8px rgba(39,80,10,.08)">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+            <i class="ti ti-calendar-check" aria-hidden="true" style="color:var(--v);font-size:14px"></i>
+            <span style="font-size:9.5px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Reservas</span>
+          </div>
+          <div style="font-size:30px;font-weight:700;color:var(--v);line-height:1" id="dash-total-mes">--</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:4px">este mes</div>
         </div>
-        <div class="card" style="padding:12px;text-align:center">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Taxa de check-in</div>
-          <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-taxa-checkin">--%</div>
+        <div class="card" style="padding:14px;border-top:3px solid var(--blt);box-shadow:0 2px 8px rgba(24,95,165,.08)">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+            <i class="ti ti-door-enter" aria-hidden="true" style="color:var(--blt);font-size:14px"></i>
+            <span style="font-size:9.5px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Check-in</span>
+          </div>
+          <div style="font-size:30px;font-weight:700;color:var(--blt);line-height:1" id="dash-taxa-checkin">--%</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:4px">taxa de presenca</div>
         </div>
-        <div class="card" style="padding:12px;text-align:center">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Horario mais reservado</div>
-          <div style="font-size:18px;font-weight:600;color:var(--v)" id="dash-top-slot">--:--</div>
+        <div class="card" style="padding:14px;border-top:3px solid var(--amb);box-shadow:0 2px 8px rgba(239,159,39,.08)">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+            <i class="ti ti-clock" aria-hidden="true" style="color:var(--amb);font-size:14px"></i>
+            <span style="font-size:9.5px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Horario top</span>
+          </div>
+          <div style="font-size:26px;font-weight:700;color:var(--amt);line-height:1" id="dash-top-slot">--:--</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:4px">mais reservado</div>
         </div>
-        <div class="card" style="padding:12px;text-align:center">
-          <div style="font-size:10px;color:var(--t2);margin-bottom:4px">Ocupacao media</div>
-          <div style="font-size:24px;font-weight:600;color:var(--v)" id="dash-ocupacao">--%</div>
+        <div class="card" style="padding:14px;border-top:3px solid var(--vm);box-shadow:0 2px 8px rgba(59,109,17,.08)">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+            <i class="ti ti-chart-pie" aria-hidden="true" style="color:var(--vm);font-size:14px"></i>
+            <span style="font-size:9.5px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Ocupacao</span>
+          </div>
+          <div style="font-size:30px;font-weight:700;color:var(--vm);line-height:1" id="dash-ocupacao">--%</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:4px">dos slots do mes</div>
+        </div>
+      </div>
+      <!-- Barra de progresso do mês -->
+      <div class="card" style="padding:12px 14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:11px;font-weight:600;color:var(--tx)">Progresso do mes</span>
+          <span style="font-size:10px;color:var(--t2)" id="dash-prog-label"></span>
+        </div>
+        <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden">
+          <div id="dash-prog-bar" style="height:100%;background:linear-gradient(90deg,var(--vm),var(--v));border-radius:4px;transition:width .6s;width:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--t3);margin-top:4px">
+          <span>1</span><span id="dash-prog-hoje"></span><span id="dash-prog-fim"></span>
         </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Ocupacao por dia da semana</div>
         <div id="dash-heatmap" style="margin-top:6px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-clock-hour-4" aria-hidden="true"></i>Horarios mais populares</div>
+        <div id="dash-horas" style="margin-top:6px"></div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-trophy" aria-hidden="true"></i>Ranking do mes</div>
@@ -620,7 +642,7 @@ textarea.form-in{resize:vertical}
           <div><div style="font-size:12px;font-weight:600">Bloquear aulas recorrentes nos fins de semana</div></div>
           <div class="tgl on" id="tgl-blk-aulas-fds" style="margin-left:12px;margin-top:2px"></div>
         </div>
-        <div style="padding:9px 0;border-bottom:0.5px solid var(--br);display:none">
+        <div style="padding:9px 0;border-bottom:0.5px solid var(--br)">
           <div style="font-size:12px;font-weight:600;margin-bottom:6px">Antecedencia minima para reservas pontuais no fim de semana</div>
           <select class="form-in" id="cfg-ant-fds">
             <option value="0">Sem restricao</option><option value="1">1 hora antes</option>
@@ -1172,6 +1194,7 @@ var appCfg = {
   blk_aulas_fds: true,
   blk_sabado: false,
   blk_domingo: false,
+  ant_fds_h: 0,
   aulas_rec_ativo: true,
   aula_duracao_max_meses: 6,
   aula_aviso_dias: 30,
@@ -1448,10 +1471,9 @@ function iniciarApp(user) {
   sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).maybeSingle().then(function(res) {
     if(res.error || !res.data) { bloquearSessao('Cadastro nao encontrado. Fale com a administracao.'); return; }
     morador = res.data;
-    // Permitir entrada: status ativo, suspenso, ou admin (mesmo pendente)
+    if(morador.status === 'pendente') { bloquearSessao('Seu cadastro esta aguardando aprovacao do administrador.'); return; }
     if(morador.status === 'inativo') { bloquearSessao('Seu cadastro esta inativo. Fale com a administracao.'); return; }
-    if(morador.status === 'pendente' && morador.tipo !== 'admin') { bloquearSessao('Seu cadastro esta aguardando aprovacao do administrador.'); return; }
-    if(morador.status !== 'ativo' && morador.status !== 'suspenso' && morador.status !== 'pendente') { bloquearSessao('Cadastro sem permissao de acesso.'); return; }
+    if(morador.status !== 'ativo' && morador.status !== 'suspenso') { bloquearSessao('Cadastro sem permissao de acesso.'); return; }
 
     var n = morador.nome || '';
     var partes = n.split(' ');
@@ -1548,80 +1570,21 @@ function iniciarApp(user) {
   });
 }
 
-// ========== RESET DE SENHA ==========
-async function verificarResetPassword() {
-  var hash = window.location.hash.substring(1);
-  if (!hash) return false;
-  var params = new URLSearchParams(hash);
-  var accessToken = params.get('access_token');
-  var type = params.get('type');
-  if (accessToken && type === 'recovery') {
-    console.log('✓ Reset de senha detectado');
-    sessionStorage.setItem('reset_token', accessToken);
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('reset-screen').style.display = 'flex';
-    window.history.replaceState({}, document.title, window.location.pathname);
-    return true;
-  }
-  return false;
-}
-
-document.getElementById('btn-resetar').addEventListener('click', async () => {
-  var pass = document.getElementById('reset-pass').value;
-  var pass2 = document.getElementById('reset-pass-confirm').value;
-  var err = document.getElementById('reset-err');
-  err.style.display = 'none';
-  if (!pass || !pass2) { err.textContent = 'Preencha as senhas.'; err.style.display = 'block'; return; }
-  if (pass.length < 6) { err.textContent = 'Senha deve ter mínimo 6 caracteres.'; err.style.display = 'block'; return; }
-  if (pass !== pass2) { err.textContent = 'As senhas não coincidem.'; err.style.display = 'block'; return; }
-  try {
-    var resetToken = sessionStorage.getItem('reset_token');
-    if (!resetToken) { err.textContent = 'Token inválido ou expirado. Solicite um novo link de reset.'; err.style.display = 'block'; return; }
-    var {data: verifyData, error: verifyError} = await sb.auth.verifyOtp({token_hash: resetToken, type: 'recovery'});
-    if (verifyError) { err.textContent = 'Link expirado ou inválido. Solicite um novo.'; err.style.display = 'block'; return; }
-    var {error: updateError} = await sb.auth.updateUser({password: pass});
-    if (updateError) { err.textContent = 'Erro ao atualizar senha: ' + updateError.message; err.style.display = 'block'; return; }
-    toast('Senha redefinida com sucesso!', 'sucesso');
-    await sb.auth.signOut();
-    sessionStorage.removeItem('reset_token');
-    setTimeout(() => {
-      document.getElementById('reset-screen').style.display = 'none';
-      document.getElementById('login-screen').style.display = 'flex';
-      document.getElementById('reset-pass').value = '';
-      document.getElementById('reset-pass-confirm').value = '';
-      document.getElementById('reset-err').style.display = 'none';
-    }, 2000);
-  } catch (e) {
-    err.textContent = 'Erro inesperado: ' + e.message;
-    err.style.display = 'block';
-  }
-});
-
-document.getElementById('link-voltar-login').addEventListener('click', () => {
-  document.getElementById('reset-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  sessionStorage.removeItem('reset_token');
-});
-
 // Sessao persistente + check-in via QR externo
-verificarResetPassword().then(isReset => {
-  if (!isReset) {
-    sb.auth.getSession().then(function(res) {
-      if(res.data && res.data.session) {
-        iniciarApp(res.data.session.user);
-        // Verifica se o app foi aberto via QR externo
-        var params = new URLSearchParams(window.location.search);
-        if(params.get('checkin') === 'quadra') {
-          setTimeout(function() {
-            if(morador) {
-              processarQrQuadra();
-              // Limpa o parametro da URL sem recarregar
-              window.history.replaceState({}, '', window.location.pathname);
-            }
-          }, 1500);
+sb.auth.getSession().then(function(res) {
+  if(res.data && res.data.session) {
+    iniciarApp(res.data.session.user);
+    // Verifica se o app foi aberto via QR externo
+    var params = new URLSearchParams(window.location.search);
+    if(params.get('checkin') === 'quadra') {
+      setTimeout(function() {
+        if(morador) {
+          processarQrQuadra();
+          // Limpa o parametro da URL sem recarregar
+          window.history.replaceState({}, '', window.location.pathname);
         }
-      }
-    });
+      }, 1500);
+    }
   }
 });
 
@@ -1801,6 +1764,7 @@ function selData(ds) {
   if(ds < ts()) { toast('Nao e possivel reservar datas passadas.'); return; }
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
   if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
+  selDate = ds;
   renderCal();
 
   var sc = document.getElementById('slots-card');
@@ -2627,6 +2591,7 @@ function renderWidgetStatus() {
   var btnRes = document.getElementById('btn-wsq-reservar');
   var widget = document.getElementById('widget-status-quadra');
   if(!dot || !statusEl) return;
+  widget.style.display = 'block';
   var agora = new Date();
   var h = agora.getHours();
   var agoraMin = h * 60 + agora.getMinutes();
@@ -3230,7 +3195,7 @@ function renderConfig() {
   sl('cfg-faltas-susp',    appCfg.faltas_suspensao);
   sl('cfg-carencia',       appCfg.carencia_cancel_min);
   sl('cfg-susp-dias',      appCfg.suspensao_dias);
-  // sl('cfg-ant-fds',        appCfg.ant_fds_h !== undefined ? appCfg.ant_fds_h : 0); // Campo removido - coluna não existe no banco
+  sl('cfg-ant-fds',        appCfg.ant_fds_h !== undefined ? appCfg.ant_fds_h : 0);
   sl('cfg-aula-duracao',   appCfg.aula_duracao_max_meses);
   sl('cfg-aula-aviso',     appCfg.aula_aviso_dias);
   sl('cfg-aula-max-contr', appCfg.aula_max_contratos);
@@ -3690,13 +3655,15 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
     blk_aulas_fds:  tg('tgl-blk-aulas-fds'),
     blk_sabado:     tg('tgl-blk-sab'),
     blk_domingo:    tg('tgl-blk-dom'),
+    ant_fds_h:              li('cfg-ant-fds', 0),
     aulas_rec_ativo: tg('tgl-aulas-rec'),
     aula_duracao_max_meses: li('cfg-aula-duracao', 6),
     aula_aviso_dias:        li('cfg-aula-aviso', 30),
-    aula_max_contratos:     li('cfg-aula-max-contr', 1)
+    aula_max_contratos:     li('cfg-aula-max-contr', 1),
+    fair_play_ativo:        tg('tgl-fair-play')
   };
   sb.from('configuracoes').select('id').limit(1).maybeSingle().then(function(rc) {
-    if(rc && rc.data) {
+    if(rc.data) {
       sb.from('configuracoes').update(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).eq('id', rc.data.id).then(function(r) {
         if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
       });
@@ -4548,7 +4515,19 @@ function renderDashboard() {
       document.getElementById('dash-ocupacao').textContent = ocupacao + '%';
       document.getElementById('dash-top-slot').textContent = topSlot;
 
-      // Heatmap por dia da semana
+      // Barra de progresso do mês
+      var diaHoje = hoje.getDate();
+      var progPct = Math.round(diaHoje / diasMes * 100);
+      var progBar = document.getElementById('dash-prog-bar');
+      var progLabel = document.getElementById('dash-prog-label');
+      var progHoje = document.getElementById('dash-prog-hoje');
+      var progFim = document.getElementById('dash-prog-fim');
+      if(progBar) progBar.style.width = progPct + '%';
+      if(progLabel) progLabel.textContent = diaHoje + ' de ' + diasMes + ' dias';
+      if(progHoje) progHoje.textContent = 'Hoje (' + diaHoje + ')';
+      if(progFim) progFim.textContent = diasMes;
+
+      // Heatmap por dia da semana — barras verticais
       var diasNome = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
       var diaCount = [0,0,0,0,0,0,0];
       var diaMax = 1;
@@ -4558,19 +4537,52 @@ function renderDashboard() {
         diaCount[d]++;
         if(diaCount[d] > diaMax) diaMax = diaCount[d];
       });
-      var hmHtml = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">';
-      diasNome.forEach(function(d){ hmHtml += '<div style="font-size:9px;color:var(--t2);text-align:center">' + d + '</div>'; });
-      hmHtml += '</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
-      diaCount.forEach(function(cnt) {
+      var hmHtml = '<div style="display:flex;gap:4px;align-items:flex-end;height:72px">';
+      diaCount.forEach(function(cnt, idx) {
         var pct = Math.round(cnt / diaMax * 100);
-        var bg = pct >= 75 ? '#27500A' : pct >= 40 ? '#639922' : pct >= 15 ? '#C0DD97' : '#EAF3DE';
-        hmHtml += '<div style="height:32px;border-radius:6px;background:' + bg + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:' + (pct>=40?'#fff':'var(--t2)') + '">' + cnt + '</div>';
+        var bg = pct >= 75 ? 'var(--v)' : pct >= 40 ? 'var(--vm)' : pct >= 15 ? '#C0DD97' : 'var(--vl)';
+        var barH = Math.max(pct * 0.6, 8);
+        var isFds = idx === 0 || idx === 6;
+        hmHtml += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">';
+        hmHtml += '<div style="font-size:9.5px;font-weight:600;color:var(--t2)">' + (cnt||'') + '</div>';
+        hmHtml += '<div style="width:100%;border-radius:4px 4px 0 0;background:' + bg + ';height:' + barH + 'px;min-height:8px;transition:height .4s"></div>';
+        hmHtml += '<div style="font-size:9px;color:' + (isFds?'var(--amt)':'var(--t2)') + ';font-weight:' + (isFds?'600':'400') + '">' + diasNome[idx] + '</div>';
+        hmHtml += '</div>';
       });
       hmHtml += '</div>';
       var hmEl = document.getElementById('dash-heatmap');
       if(hmEl) hmEl.innerHTML = hmHtml;
 
-      // Ranking por apartamento
+      // Distribuição por hora do dia
+      var horaCount = {};
+      SLOTS.forEach(function(s){ horaCount[s.slice(0,5)] = 0; });
+      confirmadas.forEach(function(r) {
+        var s = (r.slot_inicio || '').slice(0,5);
+        if(horaCount[s] !== undefined) horaCount[s]++;
+      });
+      var horaKeys = SLOTS.map(function(s){ return s.slice(0,5); });
+      var horaMax = Math.max.apply(null, horaKeys.map(function(k){ return horaCount[k]; })) || 1;
+      var horaHtml = '<div style="display:flex;gap:3px;align-items:flex-end;height:60px">';
+      horaKeys.forEach(function(hr) {
+        var cnt = horaCount[hr];
+        var pct = Math.round(cnt / horaMax * 100);
+        var barH = Math.max(pct * 0.52, cnt > 0 ? 6 : 2);
+        var bg = cnt > 0 ? 'var(--blt)' : 'var(--bl)';
+        horaHtml += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px" title="' + hr + ': ' + cnt + ' reserva(s)">';
+        horaHtml += '<div style="width:100%;border-radius:3px 3px 0 0;background:' + bg + ';height:' + barH + 'px;min-height:2px"></div>';
+        horaHtml += '</div>';
+      });
+      horaHtml += '</div>';
+      horaHtml += '<div style="display:flex;gap:3px;margin-top:3px">';
+      horaKeys.forEach(function(hr, i) {
+        var show = i % 3 === 0;
+        horaHtml += '<div style="flex:1;text-align:center;font-size:8px;color:var(--t3)">' + (show ? hr : '') + '</div>';
+      });
+      horaHtml += '</div>';
+      var horaEl = document.getElementById('dash-horas');
+      if(horaEl) horaEl.innerHTML = horaHtml;
+
+      // Ranking por apartamento — com barra de check-in
       var aptoMap = {};
       confirmadas.forEach(function(r) {
         var cod = r.unidades ? r.unidades.codigo : null;
@@ -4582,37 +4594,47 @@ function renderDashboard() {
       var rankList = Object.keys(aptoMap).map(function(k) {
         return {apto:k, total:aptoMap[k].total, taxa: aptoMap[k].total > 0 ? Math.round(aptoMap[k].checkin/aptoMap[k].total*100) : 0};
       }).sort(function(a,b){ return b.total - a.total || b.taxa - a.taxa; }).slice(0,8);
+      var rankMax = rankList.length ? rankList[0].total : 1;
+      var medals = ['🥇','🥈','🥉'];
       var rkHtml = rankList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>';
       rankList.forEach(function(a, i) {
-        var cor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 60 ? 'var(--amb)' : 'var(--rdt)';
+        var taxaCor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 60 ? 'var(--amb)' : 'var(--rdt)';
         var isMeu = morador && morador.unidades && morador.unidades.codigo === a.apto;
-        rkHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--br)">';
-        rkHtml += '<div style="font-size:12px;width:20px;text-align:center;color:var(--t2)">' + (i+1) + '</div>';
-        rkHtml += '<div style="flex:1;font-size:12px;font-weight:' + (isMeu?'600':'400') + ';color:' + (isMeu?'var(--v)':'var(--t1)') + '">Apto ' + a.apto + '</div>';
-        rkHtml += '<div style="font-size:11px;color:var(--t2)">' + a.total + ' reserva(s)</div>';
-        rkHtml += '<div style="font-size:12px;font-weight:600;color:' + cor + ';min-width:32px;text-align:right">' + a.taxa + '%</div>';
+        var barPct = Math.round(a.total / rankMax * 100);
+        rkHtml += '<div style="padding:7px 0;border-bottom:.5px solid var(--br)">';
+        rkHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
+        rkHtml += '<div style="font-size:13px;width:22px;text-align:center">' + (medals[i] || (i+1)) + '</div>';
+        rkHtml += '<div style="flex:1;font-size:12px;font-weight:' + (isMeu?'700':'500') + ';color:' + (isMeu?'var(--v)':'var(--tx)') + '">Apto ' + a.apto + '</div>';
+        rkHtml += '<div style="font-size:10px;color:var(--t2)">' + a.total + ' res.</div>';
+        rkHtml += '<div style="font-size:11px;font-weight:700;color:' + taxaCor + ';min-width:34px;text-align:right">' + a.taxa + '%</div>';
         rkHtml += '</div>';
+        rkHtml += '<div style="display:flex;gap:3px;align-items:center;padding-left:30px">';
+        rkHtml += '<div style="flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden"><div style="height:100%;background:' + (isMeu?'var(--v)':'var(--gyb)') + ';width:' + barPct + '%;border-radius:2px"></div></div>';
+        rkHtml += '</div></div>';
       });
       var rkEl = document.getElementById('dash-ranking');
       if(rkEl) rkEl.innerHTML = rkHtml;
 
-      // Modalidades
+      // Modalidades — barras horizontais com porcentagem
       var modMap = {};
       confirmadas.forEach(function(r) {
         var nome = r.modalidades ? r.modalidades.nome : 'Uso livre';
         modMap[nome] = (modMap[nome] || 0) + 1;
       });
       var modList = Object.keys(modMap).sort(function(a,b){ return modMap[b]-modMap[a]; });
-      var modMax = modList.length ? modMap[modList[0]] : 1;
+      var modTotal = confirmadas.length || 1;
       var modHtml = modList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados.</div>';
-      var modCores = ['#27500A','#185FA5','#854F0B','#A32D2D','#534AB7','#0F6E56'];
+      var modCores = ['var(--v)','var(--blt)','var(--amb)','var(--rdt)','#534AB7','var(--vm)'];
       modList.forEach(function(nome, i) {
         var cnt = modMap[nome];
-        var pct = Math.round(cnt / modMax * 100);
+        var pct = Math.round(cnt / modTotal * 100);
         var cor = modCores[i % modCores.length];
-        modHtml += '<div style="margin-bottom:8px">';
-        modHtml += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--t1)">' + nome + '</span><span style="color:var(--t2)">' + cnt + '</span></div>';
-        modHtml += '<div style="background:var(--bg);border-radius:20px;height:6px;overflow:hidden"><div style="height:100%;border-radius:20px;background:' + cor + ';width:' + pct + '%"></div></div>';
+        modHtml += '<div style="margin-bottom:10px">';
+        modHtml += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">';
+        modHtml += '<span style="font-weight:500;color:var(--tx)">' + nome + '</span>';
+        modHtml += '<span style="color:var(--t2);font-size:10px">' + cnt + ' &bull; ' + pct + '%</span></div>';
+        modHtml += '<div style="background:var(--bg);border-radius:20px;height:7px;overflow:hidden">';
+        modHtml += '<div style="height:100%;border-radius:20px;background:' + cor + ';width:' + pct + '%;transition:width .5s"></div></div>';
         modHtml += '</div>';
       });
       var modEl = document.getElementById('dash-modalidades');
