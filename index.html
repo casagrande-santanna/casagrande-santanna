@@ -1691,6 +1691,7 @@ function processarQrQuadra() {
             unidade_id: morador.unidade_id, morador_id: morador.id,
             modalidade_id: mId, data_reserva: hoje,
             slot_inicio: slotAtual+':00', slot_fim: slotFim+':00',
+            duracao_minutos: 60,
             tipo_reserva: 'pontual', status: 'confirmada',
             checkin_feito: true, checkin_em: new Date().toISOString()
           };
@@ -2061,6 +2062,7 @@ function _fazerInsertReserva() {
           unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
           data_reserva: pendSlot.date,
           slot_inicio: horaInicio, slot_fim: horaFim,
+          duracao_minutos: pendDur,
           tipo_reserva: 'pontual', status: 'confirmada',
           espaco_id: espacoQuadraId
         };
@@ -3628,6 +3630,7 @@ function criarContrato() {
           espaco_id: espacoQuadraId,
           data_reserva: ds,
           slot_inicio: hora+':00', slot_fim: horaFim+':00',
+          duracao_minutos: dur,
           tipo_reserva: 'aula', status: 'confirmada'
         });
       }
