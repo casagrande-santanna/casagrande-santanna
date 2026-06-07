@@ -3639,7 +3639,7 @@ function renderRankingPontualidade() {
     var aptos = {};
     todas.forEach(function(r) {
       var cod = r.unidades ? r.unidades.codigo : (r.unidade_id ? r.unidade_id.slice(0,8) : '---');
-      if(!aptos[cod]) aptos[cod] = {total:0,check-in:0,falta:0};
+      if(!aptos[cod]) aptos[cod] = {total:0,checkin:0,falta:0};
       if(r.status === 'confirmada' || r.checkin_feito || r.status === 'expirada') aptos[cod].total++;
       if(r.checkin_feito) aptos[cod].checkin++;
       if(r.status === 'expirada') aptos[cod].falta++;
@@ -4865,7 +4865,7 @@ function renderDashboard() {
       confirmadas.forEach(function(r) {
         var cod = r.unidades ? r.unidades.codigo : null;
         if(!cod) return;
-        if(!aptoMap[cod]) aptoMap[cod] = {total:0, check-in:0};
+        if(!aptoMap[cod]) aptoMap[cod] = {total:0, checkin:0};
         aptoMap[cod].total++;
         if(r.checkin_feito) aptoMap[cod].checkin++;
       });
