@@ -774,7 +774,7 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
       </div>
       <div class="card" style="background:var(--rd);border-color:var(--rdb);border-width:2px">
         <div class="card-title" style="color:var(--rdt)"><i class="ti ti-nuclear" aria-hidden="true" style="color:var(--rdt)"></i>Zerar aplicativo</div>
-        <div style="font-size:11px;color:var(--rdt);margin-bottom:10px;line-height:1.5">Remove <strong style="font-weight:600">TODAS</strong> as reservas, avisos, ocorrências, achados, placares, convites e suspensoes. Mantem moradores e configuracoes. Ação irreversivel.</div>
+        <div style="font-size:11px;color:var(--rdt);margin-bottom:10px;line-height:1.5">Remove <strong style="font-weight:600">TODAS</strong> as reservas, avisos, ocorrencias, achados, placares, convites e suspensoes. Mantem moradores e configuracoes. Ação irreversivel.</div>
         <button class="btn-d" id="btn-reset-app" style="width:100%"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Zerar tudo agora</button>
       </div>
       <div class="card" style="background:var(--rd);border-color:var(--rdb)">
@@ -1427,7 +1427,7 @@ var appCfg = {
   blk_domingo: false,
   ant_fds_h: 0,
   aulas_rec_ativo: true,
-  aula_duração_max_meses: 6,
+  aula_duracao_max_meses: 6,
   aula_aviso_dias: 30,
   aula_max_contratos: 1,
   fair_play_ativo: true
@@ -1471,7 +1471,7 @@ function requireAdmin() {
   return true;
 }
 
-function carregarConfigurações() {
+function carregarConfiguracoes() {
   sb.from('configuracoes').select('*').limit(1).maybeSingle().then(function(res) {
     if(res.data) Object.assign(appCfg, res.data);
   });
@@ -1722,7 +1722,7 @@ function iniciarApp(user) {
 
     // Indicador de faltas
     if(!isAdmin() && morador.tipo !== 'admin') {
-      var faltas = morador.faltas_mês || 0;
+      var faltas = morador.faltas_mes || 0;
       var limite = appCfg.faltas_suspensao || 2;
       var wrapFaltas = document.getElementById('pf-faltas-wrap');
       if(wrapFaltas && faltas > 0) {
@@ -1788,11 +1788,11 @@ function iniciarApp(user) {
     }
 
     carregarBloqueios();
-    carregarConfigurações();
+    carregarConfiguracoes();
     carregarEspacos();
     renderCal();
     renderAvisos();
-    renderCheck-in();
+    renderCheckin();
     renderConvitesPendentes();
 
     if(!morador.onboarding_visto && morador.tipo !== 'admin') {
@@ -1828,10 +1828,10 @@ document.getElementById('btn-hdr-config').addEventListener('click', function() {
 document.getElementById('tab-reservar').addEventListener('click', function() { goScreen('reservar'); renderCal(); });
 document.getElementById('tab-academia').addEventListener('click', function() { goScreen('academia'); renderAcademia(); });
 document.getElementById('tab-minhas').addEventListener('click', function() { goScreen('minhas'); renderMinhas(); });
-document.getElementById('tab-check-in').addEventListener('click', function() { goScreen('check-in'); renderCheck-in(); });
+document.getElementById('tab-check-in').addEventListener('click', function() { goScreen('check-in'); renderCheckin(); });
 document.getElementById('tab-calendario').addEventListener('click', function() { goScreen('calendario'); renderCalendario(); });
 document.getElementById('tab-quadra').addEventListener('click', function() { goScreen('quadra'); renderRanking('ranking'); });
-document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrências'); renderOco(); renderAchados(); });
+document.getElementById('tab-ocorrencias').addEventListener('click', function() { goScreen('ocorrencias'); renderOco(); renderAchados(); });
 document.getElementById('tab-config').addEventListener('click', function() {
   if(!requireAdmin()) return;
   goScreen('config');
@@ -1850,7 +1850,7 @@ document.getElementById('tab-config').addEventListener('click', function() {
 document.getElementById('av-btn').addEventListener('click', function() { goScreen('perfil'); });
 
 function goScreen(name) {
-  var telas = ['avisos','dashboard','reservar','academia','minhas','check-in','calendario','quadra','ocorrências','config','perfil'];
+  var telas = ['avisos','dashboard','reservar','academia','minhas','check-in','calendario','quadra','ocorrencias','config','perfil'];
   telas.forEach(function(t) {
     document.getElementById('screen-'+t).classList.remove('active');
     var tab = document.getElementById('tab-'+t);
@@ -1920,7 +1920,7 @@ function processarQrQuadra() {
             unidade_id: morador.unidade_id, morador_id: morador.id,
             modalidade_id: mId, data_reserva: hoje,
             slot_inicio: slotAtual+':00', slot_fim: slotFim+':00',
-            duração_minutos: 60,
+            duracao_minutos: 60,
             tipo_reserva: 'pontual', status: 'confirmada',
             checkin_feito: true, checkin_em: new Date().toISOString()
           };
@@ -1928,7 +1928,7 @@ function processarQrQuadra() {
           sb.from('reservas').insert(insPayload).then(function(ins) {
             if(ins.error) { toast('Erro: ' + ins.error.message); return; }
             toast('Quadra livre! Reserva criada e check-in realizado.');
-            renderCheck-in(); renderMinhas(); renderCal();
+            renderCheckin(); renderMinhas(); renderCal();
           });
         });
       }
@@ -2201,8 +2201,8 @@ function buildResumo() {
   var agoraMin2 = agora2.getHours()*60 + agora2.getMinutes();
   var slotMin2 = parseInt(pendSlot.slot.split(':')[0])*60 + parseInt(pendSlot.slot.split(':')[1]);
   var emCurso2 = (pendSlot.date === ts()) && slotMin2 < agoraMin2;
-  var horárioLabel = pendSlot.slot + ' - ' + addH(pendSlot.slot,pendDur/60) + (emCurso2 ? ' <span style="color:var(--amt);font-size:10px">(em andamento)</span>' : '');
-  html += '<div class="resumo-row"><span class="resumo-lbl">Horário</span><span>'+horárioLabel+'</span></div>';
+  var horarioLabel = pendSlot.slot + ' - ' + addH(pendSlot.slot,pendDur/60) + (emCurso2 ? ' <span style="color:var(--amt);font-size:10px">(em andamento)</span>' : '');
+  html += '<div class="resumo-row"><span class="resumo-lbl">Horário</span><span>'+horarioLabel+'</span></div>';
   html += '<div class="resumo-row"><span class="resumo-lbl">Modalidade</span><span>'+m.icon+' '+m.nome+'</span></div>';
   html += '<div class="resumo-row"><span class="resumo-lbl">Duração</span><span>'+(pendDur===60?'1 hora':'2 horas')+'</span></div>';
   document.getElementById('m-resumo').innerHTML = html;
@@ -2226,8 +2226,8 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   if(!morador || !pendSlot || !pendMod || !pendDur) { setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
   if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
 
-  var maxMês = appCfg.max_reservas_mes;
-  if(maxMês > 0) {
+  var maxMes = appCfg.max_reservas_mes;
+  if(maxMes > 0) {
     var mesAtual = ts().slice(0,7);
     sb.from('reservas')
       .select('id', {count:'exact', head:true})
@@ -2291,7 +2291,7 @@ function _fazerInsertReserva() {
           unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
           data_reserva: pendSlot.date,
           slot_inicio: horaInicio, slot_fim: horaFim,
-          duração_minutos: pendDur,
+          duracao_minutos: pendDur,
           tipo_reserva: 'pontual', status: 'confirmada',
           espaco_id: espacoQuadraId
         };
@@ -2339,7 +2339,7 @@ function _fazerInsertReserva() {
             if(convEl2) convEl2.style.display = 'none';
           }
           abrirModal('m-reserva-ok');
-          setTimeout(function(){ selData(_date); renderMinhas(); renderCheck-in(); }, 300);
+          setTimeout(function(){ selData(_date); renderMinhas(); renderCheckin(); }, 300);
         });
       });
     });
@@ -2361,7 +2361,7 @@ document.getElementById('btn-exec-cancel').addEventListener('click', function() 
     if(r.error) { toast('Erro ao cancelar'); return; }
     fecharModal('m-cancelar');
     if(selDate) selData(selDate);
-    renderMinhas(); renderCheck-in();
+    renderMinhas(); renderCheckin();
     if(temDispensa) {
       setTimeout(function() { abrirModal('m-dispensa'); }, 350);
     } else {
@@ -2421,7 +2421,7 @@ function doCheckin(id) {
           if(rv.checkin_feito) { toast('Check-in ja realizado.'); return; }
           sb.from('reservas').update({checkin_feito:true, checkin_em:new Date().toISOString()}).eq('id', id).then(function(r) {
             if(r.error) { toast('Erro no check-in.'); return; }
-            renderCheck-in(); renderMinhas();
+            renderCheckin(); renderMinhas();
             toast('Check-in realizado como convidado!');
           });
         });
@@ -2441,7 +2441,7 @@ function doCheckin(id) {
         toast('Janela de check-in expirou. Reserva sera marcada como ausencia.');
         sb.from('reservas').update({status:'expirada'}).eq('id', id).then(function() {
           verificarFairPlay(morador.unidade_id);
-          renderCheck-in(); renderMinhas();
+          renderCheckin(); renderMinhas();
         });
         return;
       }
@@ -2451,7 +2451,7 @@ function doCheckin(id) {
       }
       sb.from('reservas').update({checkin_feito:true, checkin_em:new Date().toISOString()}).eq('id', id).then(function(r) {
         if(r.error) { toast('Erro no check-in: ' + r.error.message); return; }
-        renderCheck-in(); renderMinhas();
+        renderCheckin(); renderMinhas();
         toast('Check-in realizado! Boa partida!');
       });
     });
@@ -2482,7 +2482,7 @@ function verificarFairPlay(unidadeId) {
     if(espacoQuadraId) faltasQ = faltasQ.eq('espaco_id', espacoQuadraId);
     faltasQ.then(function(rc) {
         var totalFaltas = rc.count || 0;
-        // Atualiza faltas_mês no morador independente de suspender
+        // Atualiza faltas_mes no morador independente de suspender
         sb.from('moradores').update({faltas_mes: totalFaltas})
           .eq('unidade_id', unidadeId).then(function(){});
         if(totalFaltas >= limiteFaltas) {
@@ -2491,8 +2491,8 @@ function verificarFairPlay(unidadeId) {
             .eq('unidade_id', unidadeId).single().then(function(mr) {
               if(!mr.data) return;
               var hoje = new Date().toISOString().slice(0,10);
-              var foiLiberadoManualmente = mr.data.status === 'ativo' && mr.data.faltas_mês === 0;
-              // Não re-suspende se admin ja liberou (faltas_mês foi zerado manualmente)
+              var foiLiberadoManualmente = mr.data.status === 'ativo' && mr.data.faltas_mes === 0;
+              // Não re-suspende se admin ja liberou (faltas_mes foi zerado manualmente)
               if(foiLiberadoManualmente) return;
               if(mr.data.status === 'ativo') {
                 var ate = new Date();
@@ -2513,7 +2513,7 @@ function verificarFairPlay(unidadeId) {
   });
 }
 
-function renderCheck-in() {
+function renderCheckin() {
   if(!morador) return;
   if(!morador.unidade_id) {
     document.getElementById('ckin-main').innerHTML = '<div class="ib ib-blue">Administrador sem apartamento vinculado.</div>';
@@ -2527,15 +2527,15 @@ function renderCheck-in() {
     .eq('status','confirmada')
     .limit(5).then(function(res) {
     var lista = (res.data||[]).filter(function(r){ return !r.checkin_feito; });
-    var próxima = lista.length ? lista[0] : null;
+    var proxima = lista.length ? lista[0] : null;
     var main = document.getElementById('ckin-main');
     var nd = document.getElementById('nd-ckin');
-    if(próxima) {
+    if(proxima) {
       nd.classList.add('show');
-      var m = próxima.modalidades;
+      var m = proxima.modalidades;
       var nomeMod = m ? (m.icone+' '+m.nome) : '';
-      var si = (próxima.slot_inicio||'').slice(0,5);
-      var sf = (próxima.slot_fim||'').slice(0,5);
+      var si = (proxima.slot_inicio||'').slice(0,5);
+      var sf = (proxima.slot_fim||'').slice(0,5);
       var html = '<div class="ckin-hero">';
       html += '<div class="ckin-hero-title">Reserva de hoje</div>';
       html += '<div class="ckin-hero-sub">'+nomeMod+' - '+si+' a '+sf+'</div>';
@@ -2544,12 +2544,12 @@ function renderCheck-in() {
       html += '<button style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;margin-top:10px;width:100%" id="btn-cancelar-ckin">Cancelar minha reserva e liberar a quadra</button>';
       html += '</div>';
       main.innerHTML = html;
-      document.getElementById('btn-fazer-ckin').addEventListener('click', function() { doCheckin(próxima.id); });
+      document.getElementById('btn-fazer-ckin').addEventListener('click', function() { doCheckin(proxima.id); });
       document.getElementById('btn-cancelar-ckin').addEventListener('click', function() {
         if(confirm('Cancelar sua reserva e liberar o horário para outros moradores?')) {
-          sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',próxima.id).then(function() {
+          sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',proxima.id).then(function() {
             toast('Reserva cancelada. Horário liberado.');
-            renderCheck-in(); renderMinhas();
+            renderCheckin(); renderMinhas();
           });
         }
       });
@@ -2759,7 +2759,7 @@ function renderMinhas() {
             return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id);
           })).then(function() {
             toast(ids.length+' reservas pontuais canceladas.');
-            renderMinhas(); renderCheck-in(); if(selDate) selData(selDate);
+            renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
           });
         });
       }
@@ -2777,7 +2777,7 @@ function renderMinhas() {
             return sb.from('reservas').update({status:'cancelada',cancelado_por:'morador'}).eq('id',id);
           })).then(function() {
             toast(ids.length+' aulas canceladas.');
-            renderMinhas(); renderCheck-in(); if(selDate) selData(selDate);
+            renderMinhas(); renderCheckin(); if(selDate) selData(selDate);
           });
         });
       }
@@ -2802,14 +2802,14 @@ function renderHome() {
       .eq('unidade_id',morador.unidade_id).eq('data_reserva',hoje).eq('status','confirmada')
       .order('slot_inicio').then(function(res) {
         var lista = res.data||[];
-        var próxima = lista.find(function(r){
+        var proxima = lista.find(function(r){
           return parseInt((r.slot_inicio||'00:00').slice(0,2))*60 >= agoraMin && !r.checkin_feito;
         });
         var elH = document.getElementById('home-prox-hora');
         var elI = document.getElementById('home-prox-info');
-        if(próxima) {
-          var m = próxima.modalidades;
-          if(elH) elH.textContent = (próxima.slot_inicio||'').slice(0,5)+'-'+(próxima.slot_fim||'').slice(0,5);
+        if(proxima) {
+          var m = proxima.modalidades;
+          if(elH) elH.textContent = (proxima.slot_inicio||'').slice(0,5)+'-'+(proxima.slot_fim||'').slice(0,5);
           if(elI) elI.textContent = m ? m.icone+' '+m.nome : 'Reserva confirmada';
         } else if(lista.length) {
           if(elH) elH.textContent = 'Hoje'; if(elI) elI.textContent = lista.length+' reserva(s)';
@@ -2858,7 +2858,7 @@ function renderWidgetStatus() {
         var fim = parseInt((r.slot_fim||'00:00').slice(0,2))*60 + parseInt((r.slot_fim||'00:00').slice(3,5));
         return agoraMin >= ini && agoraMin < fim;
       });
-      var próximaHoje = reservasHoje.filter(function(r) {
+      var proximaHoje = reservasHoje.filter(function(r) {
         var ini = parseInt((r.slot_inicio||'00:00').slice(0,2))*60 + parseInt((r.slot_inicio||'00:00').slice(3,5));
         return ini > agoraMin;
       }).sort(function(a,b){ return a.slot_inicio > b.slot_inicio ? 1 : -1; })[0];
@@ -2874,15 +2874,15 @@ function renderWidgetStatus() {
         subEl.style.color = 'var(--rdt)';
         subEl.textContent = 'Libera as ' + (ocupadaAgora.slot_fim||'').slice(0,5) + (ocupadaAgora.unidades ? ' • Apto ' + ocupadaAgora.unidades.codigo : '');
         if(btnRes) btnRes.style.display = 'none';
-      } else if(próximaHoje) {
+      } else if(proximaHoje) {
         dot.style.background = '#EF9F27';
-        if(hd)hd.style.background='#EF9F27'; if(hqs)hqs.textContent='Livre agora'; if(hqsub)hqsub.textContent='Ocupa as '+(próximaHoje.slot_inicio||'').slice(0,5);
+        if(hd)hd.style.background='#EF9F27'; if(hqs)hqs.textContent='Livre agora'; if(hqsub)hqsub.textContent='Ocupa as '+(proximaHoje.slot_inicio||'').slice(0,5);
         widget.style.background = 'var(--am)';
         widget.style.borderColor = 'var(--amb)';
         statusEl.style.color = 'var(--amt)';
         statusEl.textContent = 'Quadra livre agora';
         subEl.style.color = 'var(--amt)';
-        subEl.textContent = 'Próxima reserva as ' + (próximaHoje.slot_inicio||'').slice(0,5);
+        subEl.textContent = 'Próxima reserva as ' + (proximaHoje.slot_inicio||'').slice(0,5);
         if(btnRes) { btnRes.style.display = 'flex'; btnRes.onclick = function(){ document.getElementById('tab-reservar').click(); }; }
       } else {
         dot.style.background = '#639922';
@@ -3036,7 +3036,7 @@ function renderAvisos() {
 
         var totalVotos = (av.enquete_sim||0) + (av.enquete_nao||0);
         var pctSim = totalVotos > 0 ? Math.round((av.enquete_sim||0)/totalVotos*100) : 0;
-        var pctNão = totalVotos > 0 ? (100 - pctSim) : 0;
+        var pctNao = totalVotos > 0 ? (100 - pctSim) : 0;
 
         // Todos (morador e admin) podem votar.
         // Considera "já votou" quem tem entrada em leituras_avisos
@@ -3221,7 +3221,7 @@ document.getElementById('btn-salvar-oco').addEventListener('click', function() {
   if(!requireAdmin()) return;
   var t = document.getElementById('oc-tit').value.trim();
   if(!t) { toast('Informe o titulo'); return; }
-  sb.from('ocorrências').insert({
+  sb.from('ocorrencias').insert({
     unidade_id: morador.unidade_id, morador_id: morador.id,
     categoria: document.getElementById('oc-cat').value,
     titulo: t, descricao: document.getElementById('oc-desc').value||t,
@@ -3251,7 +3251,7 @@ function setFiltro(f, el) {
 
 function renderDispensas() {
   if(!isAdmin()) return;
-  sb.from('solicitações_dispensa')
+  sb.from('solicitacoes_dispensa')
     .select('*,moradores(nome,unidades(codigo)),reservas(data_reserva,slot_inicio,slot_fim)')
     .eq('status','pendente')
     .order('created_at',{ascending:false})
@@ -3283,13 +3283,13 @@ function renderDispensas() {
           var acao = btn.dataset.dispAção;
           var novoStatus = acao === 'aprovar' ? 'aprovada' : 'rejeitada';
           var disp = lista.find(function(x){ return x.id === sid; });
-          sb.from('solicitações_dispensa').update({status: novoStatus}).eq('id', sid).then(function(r) {
+          sb.from('solicitacoes_dispensa').update({status: novoStatus}).eq('id', sid).then(function(r) {
             if(r.error) { toast('Erro ao processar.'); return; }
             if(acao === 'aprovar' && disp && disp.reserva_id) {
               sb.from('reservas').update({isento_penalidade: true}).eq('id', disp.reserva_id).then(function() {
                 if(disp.morador_id) {
                   sb.from('moradores').select('faltas_mes').eq('id', disp.morador_id).single().then(function(mr) {
-                    var f = Math.max(0, (mr.data ? mr.data.faltas_mês || 0 : 0) - 1);
+                    var f = Math.max(0, (mr.data ? mr.data.faltas_mes || 0 : 0) - 1);
                     sb.from('moradores').update({faltas_mes: f}).eq('id', disp.morador_id).then(function(){});
                   });
                 }
@@ -3314,7 +3314,7 @@ function renderOco() {
     btnNovaOcoMorador._listenerAdded = true;
     btnNovaOcoMorador.addEventListener('click', function() { abrirModal('m-nova-oco'); });
   }
-  var q = sb.from('ocorrências').select('*,mensagens_ocorrência(*),moradores(nome,unidades(codigo))');
+  var q = sb.from('ocorrencias').select('*,mensagens_ocorrencia(*),moradores(nome,unidades(codigo))');
   var mostrarArquivadas = ocoFiltro === 'arquivadas';
   if(isAdmin()) {
     if(mostrarArquivadas) {
@@ -3347,7 +3347,7 @@ function renderOco() {
       html += '<div style="font-size:10.5px;color:var(--t2);margin-bottom:8px">'+(o.local||'')+' - <span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span></div>';
       html += '<div style="font-size:11px;color:var(--t2);margin-bottom:10px">'+(o.descricao||'')+'</div>';
       html += '<div class="sec-lbl">Timeline</div>';
-      (o.mensagens_ocorrência||[]).forEach(function(msg) {
+      (o.mensagens_ocorrencia||[]).forEach(function(msg) {
         var cor = msg.origem==='admin' ? '#27500A' : '#378ADD';
         html += '<div style="display:flex;gap:8px;margin-bottom:9px">';
         html += '<div style="width:8px;height:8px;border-radius:50%;background:'+cor+';flex-shrink:0;margin-top:3px"></div>';
@@ -3366,7 +3366,7 @@ function renderOco() {
       if(btnArquivar) {
         btnArquivar.addEventListener('click', function() {
           if(!confirm('Arquivar esta ocorrência?')) return;
-          sb.from('ocorrências').update({status:'encerrada'}).eq('id', o.id).then(function(r) {
+          sb.from('ocorrencias').update({status:'encerrada'}).eq('id', o.id).then(function(r) {
             if(r.error) { toast('Erro ao arquivar.'); return; }
             toast('Ocorrência arquivada.');
             ocoDetalhe = null;
@@ -3379,8 +3379,8 @@ function renderOco() {
         btnResp.addEventListener('click', function() {
           var msg = prompt('Mensagem de atualizacao:');
           if(!msg) return;
-          sb.from('mensagens_ocorrência').insert({ocorrência_id:o.id,autor_id:morador.id,origem:'admin',mensagem:msg}).then(function() {
-            sb.from('ocorrências').update({status:'andamento'}).eq('id',o.id).then(function() { renderOco(); toast('Resposta enviada.'); });
+          sb.from('mensagens_ocorrencia').insert({ocorrencia_id:o.id,autor_id:morador.id,origem:'admin',mensagem:msg}).then(function() {
+            sb.from('ocorrencias').update({status:'andamento'}).eq('id',o.id).then(function() { renderOco(); toast('Resposta enviada.'); });
           });
         });
       }
@@ -3414,7 +3414,7 @@ function renderOco() {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
         if(!confirm('Arquivar esta ocorrência? Ela ficara visivel apenas no filtro "Arquivadas".')) return;
-        sb.from('ocorrências').update({status:'encerrada'}).eq('id', btn.dataset.ocoArquivar).then(function(r) {
+        sb.from('ocorrencias').update({status:'encerrada'}).eq('id', btn.dataset.ocoArquivar).then(function(r) {
           if(r.error) { toast('Erro ao arquivar.'); return; }
           toast('Ocorrência arquivada.');
           ocoDetalhe = null;
@@ -3447,7 +3447,7 @@ function renderConfig() {
   sl('cfg-carencia',       appCfg.carencia_cancel_min);
   sl('cfg-susp-dias',      appCfg.suspensao_dias);
   sl('cfg-ant-fds',        appCfg.ant_fds_h !== undefined ? appCfg.ant_fds_h : 0);
-  sl('cfg-aula-duracao',   appCfg.aula_duração_max_meses);
+  sl('cfg-aula-duracao',   appCfg.aula_duracao_max_meses);
   sl('cfg-aula-aviso',     appCfg.aula_aviso_dias);
   sl('cfg-aula-max-contr', appCfg.aula_max_contratos);
   stg('tgl-blk-aulas-fds', appCfg.blk_aulas_fds);
@@ -3458,7 +3458,7 @@ function renderConfig() {
   // Estado da academia
   var tglAc2 = document.getElementById('tgl-academia');
   var wrapAc2 = document.getElementById('academia-cfg-wrap');
-  var acEspaço = espacos.find(function(e){ return e.id === espacoAcademiaId; });
+  var acEspaco = espacos.find(function(e){ return e.id === espacoAcademiaId; });
   if(tglAc2) {
     if(acEspaço && acEspaco.ativo) tglAc2.classList.add('on');
     else tglAc2.classList.remove('on');
@@ -3833,7 +3833,7 @@ function criarContrato() {
   var dataFim = new Date(iniStr+'T12:00:00');
   dataFim.setMonth(dataFim.getMonth() + meses);
 
-  var modNomês = {tenis1:'Tenis simples',tenis2:'Tenis duplas',basquete:'Basquete',futebol:'Futebol',volei:'Volei',livre:'Uso livre'};
+  var modNomes = {tenis1:'Tenis simples',tenis2:'Tenis duplas',basquete:'Basquete',futebol:'Futebol',volei:'Volei',livre:'Uso livre'};
 
   Promise.all([
     sb.from('modalidades').select('id,nome'),
@@ -3859,7 +3859,7 @@ function criarContrato() {
           espaco_id: espacoQuadraId,
           data_reserva: ds,
           slot_inicio: hora+':00', slot_fim: horaFim+':00',
-          duração_minutos: dur,
+          duracao_minutos: dur,
           tipo_reserva: 'aula', status: 'confirmada'
         });
       }
@@ -3909,7 +3909,7 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
     blk_sabado:             tg('tgl-blk-sab'),
     blk_domingo:            tg('tgl-blk-dom'),
     aulas_rec_ativo:        tg('tgl-aulas-rec'),
-    aula_duração_max_meses: li('cfg-aula-duracao', 6),
+    aula_duracao_max_meses: li('cfg-aula-duracao', 6),
     aula_aviso_dias:        li('cfg-aula-aviso', 30),
     aula_max_contratos:     li('cfg-aula-max-contr', 1),
     fair_play_ativo:        tg('tgl-fair-play')
@@ -3985,7 +3985,7 @@ function exportarCSV(dados, nomeArquivo) {
 
 document.getElementById('btn-export-reservas').addEventListener('click', function() {
   setLoading('btn-export-reservas', true);
-  var mês = new Date().toISOString().slice(0,7);
+  var mes = new Date().toISOString().slice(0,7);
   sb.from('reservas')
     .select('data_reserva, slot_inicio, slot_fim, status, tipo_reserva, checkin_feito, motivo_cancelamento, unidades(codigo), modalidades(nome)')
     .gte('data_reserva', mes+'-01')
@@ -4022,7 +4022,7 @@ document.getElementById('btn-export-faltas').addEventListener('click', function(
           Apartamento: m.unidades ? m.unidades.codigo : '',
           Morador: m.nome,
           Status: m.status,
-          Faltas_Mes: m.faltas_mês || 0,
+          Faltas_Mes: m.faltas_mes || 0,
           Suspenso_Ate: m.suspenso_ate || ''
         };
       });
@@ -4033,7 +4033,7 @@ document.getElementById('btn-export-faltas').addEventListener('click', function(
 // -- RESET APP -------------------------------------------------
 document.getElementById('btn-reset-app').addEventListener('click', function() {
   if(!requireAdmin()) return;
-  var conf1 = confirm('ATENCAO: Esta acao apagara TODAS as reservas, avisos, ocorrências, achados, placares e convites.\n\nEsta acao NAO pode ser desfeita.\n\nDeseja continuar?');
+  var conf1 = confirm('ATENCAO: Esta acao apagara TODAS as reservas, avisos, ocorrencias, achados, placares e convites.\n\nEsta acao NAO pode ser desfeita.\n\nDeseja continuar?');
   if(!conf1) return;
   var conf2 = prompt('Digite CONFIRMAR para prosseguir:');
   if(conf2 !== 'CONFIRMAR') { toast('Operacao cancelada.'); return; }
@@ -4042,11 +4042,11 @@ document.getElementById('btn-reset-app').addEventListener('click', function() {
   // Mapeamento: tabela -> {coluna de filtro, valor mínimo}
   var tabelasConfig = [
     {t:'convites_reserva',    col:'criado_em',   val:'2000-01-01T00:00:00Z'},
-    {t:'mensagens_ocorrência',col:'id',           val:'00000000-0000-0000-0000-000000000000', op:'gt'},
+    {t:'mensagens_ocorrencia',col:'id',           val:'00000000-0000-0000-0000-000000000000', op:'gt'},
     {t:'solicitações_dispensa',col:'created_at',  val:'2000-01-01T00:00:00Z'},
     {t:'placares',             col:'created_at',  val:'2000-01-01T00:00:00Z'},
     {t:'achados_perdidos',     col:'created_at',  val:'2000-01-01T00:00:00Z'},
-    {t:'ocorrências',          col:'created_at',  val:'2000-01-01T00:00:00Z'},
+    {t:'ocorrencias',          col:'created_at',  val:'2000-01-01T00:00:00Z'},
     {t:'reservas',             col:'created_at',  val:'2000-01-01T00:00:00Z'},
     {t:'leituras_avisos',      col:'aviso_id',    val:'00000000-0000-0000-0000-000000000000', op:'gt'},
     {t:'avisos',               col:'created_at',  val:'2000-01-01T00:00:00Z'}
@@ -4057,7 +4057,7 @@ document.getElementById('btn-reset-app').addEventListener('click', function() {
         .neq('tipo','admin').then(function() {
           setLoading('btn-reset-app', false, '<i class="ti ti-alert-triangle"></i>Zerar tudo agora');
           toast('App zerado! Todos os dados foram removidos.');
-          renderConfig(); renderAvisos(); renderMinhas(); renderCheck-in(); renderCal();
+          renderConfig(); renderAvisos(); renderMinhas(); renderCheckin(); renderCal();
         });
       return;
     }
@@ -4141,18 +4141,18 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
 
 // -- CANCELAMENTO EM MASSA --------------------------------------
 (function() {
-  var selPeríodo = document.getElementById('cancel-massa-periodo');
+  var selPeriodo = document.getElementById('cancel-massa-periodo');
   var preview    = document.getElementById('cancel-massa-preview');
 
   function getRange() {
     var hoje = new Date();
     var ini, fim;
-    var período = selPeríodo ? selPeríodo.value : 'mes';
-    if(período === 'mes') {
+    var periodo = selPeriodo ? selPeriodo.value : 'mes';
+    if(periodo === 'mes') {
       ini = hoje.toISOString().slice(0,7) + '-01';
       var ult = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0);
       fim = ult.toISOString().slice(0,10);
-    } else if(período === 'semestre') {
+    } else if(periodo === 'semestre') {
       ini = hoje.toISOString().slice(0,10);
       var semFim = new Date(hoje);
       semFim.setMonth(semFim.getMonth() + 6);
@@ -4180,13 +4180,13 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
       });
   }
 
-  if(selPeríodo) {
-    selPeríodo.addEventListener('change', atualizarPreview);
+  if(selPeriodo) {
+    selPeriodo.addEventListener('change', atualizarPreview);
   }
 
   document.getElementById('btn-cancel-massa').addEventListener('click', function() {
     if(!requireAdmin()) return;
-    var período = selPeríodo ? selPeríodo.value : 'mes';
+    var periodo = selPeriodo ? selPeriodo.value : 'mes';
     var labelMap = {mes: 'mês corrente', semestre: 'próximo semestre', todas: 'todas as reservas futuras'};
     var label = labelMap[período] || período;
     var r = getRange();
@@ -4457,7 +4457,7 @@ function renderCalendario() {
     .lte('data_reserva', fim)
     .order('slot_inicio',{ascending:true})
     .then(function(res) {
-      var reservasMês = res.data || [];
+      var reservasMes = res.data || [];
 
       // Agrupa por data
       var porData = {};
@@ -4548,11 +4548,11 @@ function renderCalendario() {
 
       // Taxa de ocupação baseada em SLOTS (horários de 1h disponíveis no mês)
       // 06:00 a 21:00 = 16 slots por dia × dias do mês
-      var diasMês = new Date(calVY,calVM+1,0).getDate();
-      var slotsDisponíveis = 16 * diasMes;
+      var diasMes = new Date(calVY,calVM+1,0).getDate();
+      var slotsDisponiveis = 16 * diasMes;
       // Conta slots efetivamente ocupados (cada hora reservada = 1 slot)
       var slotsOcupados = Math.round(totalMinutos / 60);
-      var taxaSlots = Math.min(100, Math.round(slotsOcupados / slotsDisponíveis * 100));
+      var taxaSlots = Math.min(100, Math.round(slotsOcupados / slotsDisponiveis * 100));
 
       var el = document.getElementById('cal-resumo-mes');
       var resumoHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
@@ -4567,7 +4567,7 @@ function renderCalendario() {
         +'<div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden">'
         +'<div style="height:100%;background:var(--amb);width:'+taxaSlots+'%;border-radius:4px"></div>'
         +'</div>'
-        +'<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponíveis+' horários de 1h reservados</div>'
+        +'<div style="font-size:9.5px;color:var(--amt);margin-top:4px">'+slotsOcupados+' de '+slotsDisponiveis+' horários de 1h reservados</div>'
         +'</div>';
       if(rankApto.length) {
         resumoHtml += '<div style="font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Apartamentos mais ativos</div>';
@@ -4765,7 +4765,7 @@ function renderDashboard() {
   var hoje = new Date();
   var mesFim = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).toISOString().slice(0,10);
   var totalSlotsDia = 16;
-  var diasMês = parseInt(mesFim.slice(8));
+  var diasMes = parseInt(mesFim.slice(8));
 
   sb.from('reservas')
     .select('data_reserva, slot_inicio, status, checkin_feito, modalidades(nome), unidades(codigo)')
@@ -4777,8 +4777,8 @@ function renderDashboard() {
       var comCheckin = todas.filter(function(r){ return r.checkin_feito; });
       var total = confirmadas.length;
       var taxa = total > 0 ? Math.round(comCheckin.length / total * 100) : 0;
-      var totalSlotsMês = totalSlotsDia * diasMes;
-      var ocupação = Math.round(total / totalSlotsMês * 100);
+      var totalSlotsMes = totalSlotsDia * diasMes;
+      var ocupacao = Math.round(total / totalSlotsMes * 100);
 
       // Top slot
       var slotCount = {};
@@ -4790,18 +4790,18 @@ function renderDashboard() {
 
       document.getElementById('dash-total-mes').textContent = total;
       document.getElementById('dash-taxa-check-in').textContent = taxa + '%';
-      document.getElementById('dash-ocupacao').textContent = ocupação + '%';
+      document.getElementById('dash-ocupacao').textContent = ocupacao + '%';
       document.getElementById('dash-top-slot').textContent = topSlot;
 
       // Barra de progresso do mês
       var diaHoje = hoje.getDate();
-      var progPct = Math.round(diaHoje / diasMês * 100);
+      var progPct = Math.round(diaHoje / diasMes * 100);
       var progBar = document.getElementById('dash-prog-bar');
       var progLabel = document.getElementById('dash-prog-label');
       var progHoje = document.getElementById('dash-prog-hoje');
       var progFim = document.getElementById('dash-prog-fim');
       if(progBar) progBar.style.width = progPct + '%';
-      if(progLabel) progLabel.textContent = diaHoje + ' de ' + diasMês + ' dias';
+      if(progLabel) progLabel.textContent = diaHoje + ' de ' + diasMes + ' dias';
       if(progHoje) progHoje.textContent = 'Hoje (' + diaHoje + ')';
       if(progFim) progFim.textContent = diasMes;
 
@@ -5052,7 +5052,7 @@ document.getElementById('btn-enviar-dispensa').addEventListener('click', functio
   if(!dispensaReservaId || !morador) return;
   var texto = (document.getElementById('disp-texto').value || '').trim();
   if(!texto) { toast('Descreva o motivo da solicitação.'); return; }
-  sb.from('solicitações_dispensa').insert({
+  sb.from('solicitacoes_dispensa').insert({
     reserva_id: dispensaReservaId,
     morador_id: morador.id,
     unidade_id: morador.unidade_id,
