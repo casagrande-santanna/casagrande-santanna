@@ -5027,7 +5027,7 @@ function renderRanking(modo) {
       .then(function(res) {
         var dados = res.data || [];
         if(!dados.length) { el.innerHTML = '<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
-        var html = '';
+        var html = '';https://github.com/casagrande-santanna/casagrande-santanna/blob/main/index.html
         dados.forEach(function(p) {
           var cod = p.unidades ? p.unidades.codigo : '---';
           var isMeu = morador && morador.unidades && morador.unidades.codigo === cod;
