@@ -1767,20 +1767,24 @@ function selData(ds) {
   if(!morador || !morador.unidade_id) { toast('Sem apartamento vinculado para reservar.'); return; }
   if(morador.status === 'suspenso' && morador.tipo !== 'admin') { toast('Apartamento suspenso. Novas reservas bloqueadas.'); return; }
   selDate = ds;
-  renderCal();
+
+  // Atualiza .sel sem reconstruir o calendario inteiro
+  document.querySelectorAll('#cal-grid .cal-d').forEach(function(el) {
+    el.classList.toggle('sel', el.dataset.ds === ds);
+  });
 
   var sc = document.getElementById('slots-card');
   sc.style.display = 'block';
-  var maxH = 22; // slots de 06:00 ate 21:00 (encerra as 22:00), valido para todos os dias
+  var maxH = 22;
   document.getElementById('slots-lbl').textContent = 'Horarios - ' + fmtD(ds);
   var sg = document.getElementById('slot-grid');
+  sg.innerHTML = '<div style="font-size:12px;color:var(--t2);padding:8px 0">Carregando horarios...</div>';
 
-  // If espacos not loaded yet, wait and retry (max 3s)
+  // Aguarda espacos serem carregados, mas so retenta se ainda for a data selecionada
   if(!espacosCarregados) {
-    setTimeout(function() { selData(ds); }, 400);
+    setTimeout(function() { if(selDate === ds) selData(ds); }, 400);
     return;
   }
-  // Busca reservas confirmadas da quadra: inclui espaco_id correto E registros antigos sem espaco_id
   var resQ = sb.from('reservas')
     .select('id, unidade_id, slot_inicio, slot_fim, status, tipo_reserva, modalidades(nome, icone), unidades(codigo)')
     .eq('data_reserva', ds)
@@ -1789,6 +1793,8 @@ function selData(ds) {
     resQ = resQ.or('espaco_id.eq.' + espacoQuadraId + ',espaco_id.is.null');
   }
   resQ.then(function(res) {
+      // Ignora resposta se usuario ja selecionou outra data
+      if(selDate !== ds) return;
       var reservasDia = res.data || [];
       var agora = new Date();
       var agoraMin = agora.getHours() * 60 + agora.getMinutes();
@@ -1930,11 +1936,16 @@ var _convitesSelecionados = [];
 function carregarChipsConvite() {
   if(!morador || !morador.unidade_id) return;
   _convitesSelecionados = [];
+  var chips = document.getElementById('conv-chips');
+  if(!chips) return;
+  chips.innerHTML = '<div style="font-size:10px;color:var(--t3);padding:4px">Carregando...</div>';
   sb.from('unidades').select('id,codigo').neq('id', morador.unidade_id).order('codigo').then(function(res) {
+    if(res.error) {
+      chips.innerHTML = '<div style="font-size:10px;color:var(--t3);padding:4px">Erro ao carregar apartamentos.</div>';
+      return;
+    }
     var unids = res.data || [];
-    var chips = document.getElementById('conv-chips');
-    if(!chips) return;
-    if(!unids.length) { chips.innerHTML = '<div style="font-size:10px;color:var(--t3);padding:4px">Nenhum outro apartamento</div>'; return; }
+    if(!unids.length) { chips.innerHTML = '<div style="font-size:10px;color:var(--t3);padding:4px">Nenhum outro apartamento cadastrado.</div>'; return; }
     chips.innerHTML = unids.map(function(u) {
       return '<div class="chip-apto" data-uid="'+u.id+'" data-cod="'+u.codigo+'">'+u.codigo+'</div>';
     }).join('');
@@ -3663,23 +3674,40 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
     aula_max_contratos:     li('cfg-aula-max-contr', 1),
     fair_play_ativo:        tg('tgl-fair-play')
   };
+  function _doSave(cfg, id) {
+    var op = id
+      ? sb.from('configuracoes').update(cfg).eq('id', id)
+      : sb.from('configuracoes').insert(cfg);
+    op.then(function(r) {
+      if(r.error) {
+        // Se coluna inexistente, tenta remover o campo e salvar novamente sem ele
+        var m = r.error.message || '';
+        var match = m.match(/column[^']*'([^']+)'/);
+        if(match && allCfg.hasOwnProperty(match[1])) {
+          delete allCfg[match[1]];
+          delete cfg[match[1]];
+          _doSave(cfg, id);
+        } else {
+          toast('Erro ao salvar: ' + m);
+        }
+      } else {
+        Object.assign(appCfg, cfg);
+        toast('Configuracoes salvas!');
+      }
+    });
+  }
   sb.from('configuracoes').select('*').limit(1).maybeSingle().then(function(rc) {
+    if(rc.error && !rc.data) { toast('Erro ao ler configuracoes: ' + rc.error.message); return; }
     var cfg;
     if(rc.data) {
-      // só envia campos que já existem na tabela do banco
-      cfg = {};
+      cfg = {atualizado_em: new Date().toISOString()};
       Object.keys(allCfg).forEach(function(k) {
         if(Object.prototype.hasOwnProperty.call(rc.data, k)) cfg[k] = allCfg[k];
       });
-      cfg.atualizado_em = new Date().toISOString();
-      sb.from('configuracoes').update(cfg).eq('id', rc.data.id).then(function(r) {
-        if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
-      });
+      _doSave(cfg, rc.data.id);
     } else {
-      cfg = Object.assign({}, allCfg, {atualizado_em: new Date().toISOString()});
-      sb.from('configuracoes').insert(cfg).then(function(r) {
-        if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
-      });
+      cfg = Object.assign({atualizado_em: new Date().toISOString()}, allCfg);
+      _doSave(cfg, null);
     }
   });
 });
@@ -5027,7 +5055,7 @@ function renderRanking(modo) {
       .then(function(res) {
         var dados = res.data || [];
         if(!dados.length) { el.innerHTML = '<div class="empty"><i class="ti ti-history"></i>Sem historico</div>'; return; }
-        var html = '';https://github.com/casagrande-santanna/casagrande-santanna/blob/main/index.html
+        var html = '';
         dados.forEach(function(p) {
           var cod = p.unidades ? p.unidades.codigo : '---';
           var isMeu = morador && morador.unidades && morador.unidades.codigo === cod;
