@@ -3643,7 +3643,7 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
     var v = parseInt(el.value, 10); return isNaN(v) ? def : v;
   };
   var tg = function(id) { var el = document.getElementById(id); return el ? el.classList.contains('on') : false; };
-  var cfg = {
+  var allCfg = {
     max_reservas_mes:       li('cfg-max-mes', 4),
     max_reservas_simult:    li('cfg-max-simult', 2),
     antecedencia_min_h:     li('cfg-ant-min', 1),
@@ -3653,22 +3653,30 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
     faltas_suspensao:       li('cfg-faltas-susp', 2),
     carencia_cancel_min:    li('cfg-carencia', 120),
     suspensao_dias:         li('cfg-susp-dias', 15),
-    blk_aulas_fds:  tg('tgl-blk-aulas-fds'),
-    blk_sabado:     tg('tgl-blk-sab'),
-    blk_domingo:    tg('tgl-blk-dom'),
-    aulas_rec_ativo: tg('tgl-aulas-rec'),
+    blk_aulas_fds:          tg('tgl-blk-aulas-fds'),
+    blk_sabado:             tg('tgl-blk-sab'),
+    blk_domingo:            tg('tgl-blk-dom'),
+    aulas_rec_ativo:        tg('tgl-aulas-rec'),
     aula_duracao_max_meses: li('cfg-aula-duracao', 6),
     aula_aviso_dias:        li('cfg-aula-aviso', 30),
     aula_max_contratos:     li('cfg-aula-max-contr', 1),
     fair_play_ativo:        tg('tgl-fair-play')
   };
-  sb.from('configuracoes').select('id').limit(1).maybeSingle().then(function(rc) {
+  sb.from('configuracoes').select('*').limit(1).maybeSingle().then(function(rc) {
+    var cfg;
     if(rc.data) {
-      sb.from('configuracoes').update(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).eq('id', rc.data.id).then(function(r) {
+      // só envia campos que já existem na tabela do banco
+      cfg = {};
+      Object.keys(allCfg).forEach(function(k) {
+        if(Object.prototype.hasOwnProperty.call(rc.data, k)) cfg[k] = allCfg[k];
+      });
+      cfg.atualizado_em = new Date().toISOString();
+      sb.from('configuracoes').update(cfg).eq('id', rc.data.id).then(function(r) {
         if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
       });
     } else {
-      sb.from('configuracoes').insert(Object.assign(cfg, {atualizado_em: new Date().toISOString()})).then(function(r) {
+      cfg = Object.assign({}, allCfg, {atualizado_em: new Date().toISOString()});
+      sb.from('configuracoes').insert(cfg).then(function(r) {
         if(r.error) toast('Erro ao salvar: '+r.error.message); else { Object.assign(appCfg, cfg); toast('Configuracoes salvas!'); }
       });
     }
