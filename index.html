@@ -1940,7 +1940,7 @@ function processarQrQuadra() {
   var h = agora.getHours();
   var agoraMin = h * 60 + agora.getMinutes();
   var slotAtual = String(h).padStart(2,'0') + ':00';
-  var slotFim   = String(h+1).padStart(2,'0') + ':00';
+  var slotFim   = h < 23 ? String(h+1).padStart(2,'0') + ':00' : '23:59';
 
   var qrQuery = sb.from('reservas')
     .select('id,unidade_id,checkin_feito,slot_inicio,slot_fim')
@@ -2407,17 +2407,28 @@ document.getElementById('btn-exec-cancel').addEventListener('click', function() 
   if(isentar) upd.isento_penalidade = true;
   if(motivo) upd.motivo_cancelamento = motivo;
   var temDispensa = !!dispensaReservaId && !isAdmin() && !isentar;
-  sb.from('reservas').update(upd).eq('id',cancelId).then(function(r) {
-    if(r.error) { toast('Erro ao cancelar'); return; }
-    fecharModal('m-cancelar');
-    if(selDate) selData(selDate);
-    renderMinhas(); renderCheckin();
-    if(temDispensa) {
-      setTimeout(function() { abrirModal('m-dispensa'); }, 350);
-    } else {
-      toast(isentar ? 'Reserva cancelada sem penalidade.' : 'Reserva cancelada.');
-    }
-  });
+  function _executarCancelamento(payload) {
+    sb.from('reservas').update(payload).eq('id',cancelId).then(function(r) {
+      if(r.error) {
+        // Retry com payload mínimo caso colunas extras não existam na tabela
+        if(payload.cancelado_por !== undefined || payload.isento_penalidade !== undefined || payload.motivo_cancelamento !== undefined) {
+          _executarCancelamento({status:'cancelada'});
+        } else {
+          toast('Erro ao cancelar: '+r.error.message);
+        }
+        return;
+      }
+      fecharModal('m-cancelar');
+      if(selDate) selData(selDate);
+      renderMinhas(); renderCheckin();
+      if(temDispensa) {
+        setTimeout(function() { abrirModal('m-dispensa'); }, 350);
+      } else {
+        toast(isentar ? 'Reserva cancelada sem penalidade.' : 'Reserva cancelada.');
+      }
+    });
+  }
+  _executarCancelamento(upd);
 });
 
 function abrirModalCancelar(id) {
@@ -2589,7 +2600,7 @@ function renderCheckin() {
       return diff >= -_ant && (emCurso || diff <= _janela);
     }) || lista.find(function(r) {
       return _agora < new Date(r.data_reserva + 'T' + (r.slot_inicio||'00:00'));
-    }) || (lista.length ? lista[0] : null);
+    }) || null;
     var main = document.getElementById('ckin-main');
     var nd = document.getElementById('nd-ckin');
     if(proxima) {
@@ -2618,10 +2629,15 @@ function renderCheckin() {
       });
     } else {
       nd.classList.remove('show');
-      sb.from('reservas').select('data_reserva,slot_inicio').eq('unidade_id',morador.unidade_id).gt('data_reserva',today).eq('status','confirmada').order('data_reserva').limit(1).maybeSingle().then(function(r2) {
-        var prox = r2.data;
-        main.innerHTML = '<div class="ib ib-blue">'+(prox?'Próxima reserva: '+fmtD(prox.data_reserva)+' as '+(prox.slot_inicio||'').slice(0,5):'Nenhuma reserva ativa.')+'</div>';
-      });
+      // Se havia reservas hoje mas a janela já encerrou, mostrar mensagem específica
+      if(lista.length) {
+        main.innerHTML = '<div class="ib ib-blue">Janela de check-in encerrada para as reservas de hoje.</div>';
+      } else {
+        sb.from('reservas').select('data_reserva,slot_inicio').eq('unidade_id',morador.unidade_id).gt('data_reserva',today).eq('status','confirmada').order('data_reserva').limit(1).maybeSingle().then(function(r2) {
+          var prox = r2.data;
+          main.innerHTML = '<div class="ib ib-blue">'+(prox?'Próxima reserva: '+fmtD(prox.data_reserva)+' às '+(prox.slot_inicio||'').slice(0,5):'Nenhuma reserva ativa.')+'</div>';
+        });
+      }
     }
   });
 
@@ -2748,7 +2764,14 @@ function renderMinhas() {
         html += '<div class="res-info">'+modLabel+' - '+(_dur>=120?(_dur/60)+'h':_dur+'min')+'</div>';
         if(r.status==='confirmada') {
           html += '<div class="res-acts">';
-          if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
+          if(!r.checkin_feito && r.data_reserva===today) {
+            var _dtI2 = new Date(r.data_reserva+'T'+(r.slot_inicio||'00:00'));
+            var _dtF2 = new Date(r.data_reserva+'T'+(r.slot_fim||'23:59'));
+            var _agora2 = new Date();
+            var _dif2 = (_agora2 - _dtI2) / 60000;
+            var _janelaOk = _dif2 >= -(appCfg.checkin_ant_min||10) && (_agora2 < _dtF2 || _dif2 <= (appCfg.checkin_janela_min||15));
+            if(_janelaOk) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
+          }
           html += '<button class="btn-sm" data-share-dt="'+r.data_reserva+'" data-share-ini="'+(r.slot_inicio||'').slice(0,5)+'" data-share-fim="'+(r.slot_fim||'').slice(0,5)+'" data-share-mod="'+(r.modalidades?r.modalidades.nome:'')+'" data-share-apto="" style="color:#25D366;border-color:#25D366"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></button>';
           html += '<button class="btn-sm r" data-cancel-id="'+r.id+'"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
           html += '</div>';
@@ -3043,8 +3066,17 @@ function renderAvisos() {
   renderWidgetStatus();
   renderConvitesPendentes();
   if(!morador) { document.getElementById('avisos-list').innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Faca login</div>'; return; }
-  sb.from('avisos').select('*,enquete_tipo,enquete_label_a,enquete_label_b,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
-    var avisos = res.data||[];
+  sb.from('avisos').select('*,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
+    if(res.error) {
+      // Tenta sem o join caso leituras_avisos não exista
+      sb.from('avisos').select('*').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res2) {
+        processAvisos(res2.data||[]);
+      });
+      return;
+    }
+    processAvisos(res.data||[]);
+  });
+  function processAvisos(avisos) {
     var bloco = morador.unidades ? morador.unidades.bloco : '';
     var hoje = ts();
     var vistos = avisos.filter(function(a) {
@@ -3182,7 +3214,7 @@ function renderAvisos() {
         });
       });
     });
-  });
+  }
 }
 
 // Publicar aviso
