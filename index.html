@@ -1694,7 +1694,7 @@ function processarQrQuadra() {
             tipo_reserva: 'pontual', status: 'confirmada',
             checkin_feito: true, checkin_em: new Date().toISOString()
           };
-          if(espacoQuadraId) insPayload.espaco_id = espacoQuadraId;
+          insPayload.espaco_id = espacoQuadraId;
           sb.from('reservas').insert(insPayload).then(function(ins) {
             if(ins.error) { toast('Erro: ' + ins.error.message); return; }
             toast('Quadra livre! Reserva criada e check-in realizado.');
@@ -1944,7 +1944,7 @@ function carregarChipsConvite() {
       chips.innerHTML = '<div style="font-size:10px;color:var(--t3);padding:4px">Erro ao carregar apartamentos.</div>';
       return;
     }
-    var unids = res.data || [];
+    var unids = (res.data || []).sort(function(a,b){ return parseInt(a.codigo)-parseInt(b.codigo); });
     if(!unids.length) { chips.innerHTML = '<div style="font-size:10px;color:var(--t3);padding:4px">Nenhum outro apartamento cadastrado.</div>'; return; }
     chips.innerHTML = unids.map(function(u) {
       return '<div class="chip-apto" data-uid="'+u.id+'" data-cod="'+u.codigo+'">'+u.codigo+'</div>';
@@ -2061,9 +2061,15 @@ function _fazerInsertReserva() {
           unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
           data_reserva: pendSlot.date,
           slot_inicio: horaInicio, slot_fim: horaFim,
-          tipo_reserva: 'pontual', status: 'confirmada'
+          tipo_reserva: 'pontual', status: 'confirmada',
+          espaco_id: espacoQuadraId
         };
-        if(espacoQuadraId) payload.espaco_id = espacoQuadraId;
+        if(!payload.espaco_id) {
+          toast('Espaço da quadra não carregado. Tente novamente.');
+          setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar');
+          carregarEspacos();
+          return;
+        }
         sb.from('reservas').insert(payload).select('id').then(function(r2) {
           if(r2.error) { toast('Erro: '+r2.error.message); setLoading('btn-confirmar-res', false, '<i class="ti ti-check" aria-hidden="true"></i>Confirmar'); return; }
           fecharModal('m-reserva');
@@ -3619,6 +3625,7 @@ function criarContrato() {
         var ds = cur.toISOString().slice(0,10);
         reservas.push({
           unidade_id: aptoId, morador_id: moradorId, modalidade_id: modDbId,
+          espaco_id: espacoQuadraId,
           data_reserva: ds,
           slot_inicio: hora+':00', slot_fim: horaFim+':00',
           tipo_reserva: 'aula', status: 'confirmada'
