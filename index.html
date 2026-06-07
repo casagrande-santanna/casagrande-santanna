@@ -1691,7 +1691,7 @@ function processarQrQuadra() {
             unidade_id: morador.unidade_id, morador_id: morador.id,
             modalidade_id: mId, data_reserva: hoje,
             slot_inicio: slotAtual+':00', slot_fim: slotFim+':00',
-            duracao_min: 60, tipo_reserva: 'pontual', status: 'confirmada',
+            tipo_reserva: 'pontual', status: 'confirmada',
             checkin_feito: true, checkin_em: new Date().toISOString()
           };
           if(espacoQuadraId) insPayload.espaco_id = espacoQuadraId;
@@ -2061,7 +2061,7 @@ function _fazerInsertReserva() {
           unidade_id: morador.unidade_id, morador_id: morador.id, modalidade_id: mid,
           data_reserva: pendSlot.date,
           slot_inicio: horaInicio, slot_fim: horaFim,
-          duracao_min: pendDur, tipo_reserva: 'pontual', status: 'confirmada'
+          tipo_reserva: 'pontual', status: 'confirmada'
         };
         if(espacoQuadraId) payload.espaco_id = espacoQuadraId;
         sb.from('reservas').insert(payload).select('id').then(function(r2) {
@@ -2444,7 +2444,8 @@ function renderMinhas() {
         html += '<div class="res-top"><div class="res-data">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
         var isAcademia = r.espaco_id && r.espaco_id === espacoAcademiaId;
         var modLabel = isAcademia ? '&#127947; Academia' : (m ? m.icone+' '+m.nome : 'Uso livre');
-        html += '<div class="res-info">'+modLabel+' - '+(r.duracao_min===60?'1 hora':r.duracao_min===120?'2 horas':(r.duracao_min||60)+'min')+'</div>';
+        var _dur = (r.slot_inicio && r.slot_fim) ? (parseInt(r.slot_fim)*60+parseInt((r.slot_fim||'').slice(3,5))) - (parseInt(r.slot_inicio)*60+parseInt((r.slot_inicio||'').slice(3,5))) : 60;
+        html += '<div class="res-info">'+modLabel+' - '+(_dur>=120?(_dur/60)+'h':_dur+'min')+'</div>';
         if(r.status==='confirmada') {
           html += '<div class="res-acts">';
           if(!r.checkin_feito && r.data_reserva===today) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
@@ -3431,7 +3432,7 @@ function renderRankingPontualidade() {
 // -- CONTRATOS DE AULA ------------------------------------------
 function renderContratosAula() {
   sb.from('reservas')
-    .select('id,unidade_id,slot_inicio,slot_fim,duracao_min,status,tipo_reserva,data_reserva,modalidade_id,morador_id,unidades(codigo),modalidades(nome,icone)')
+    .select('id,unidade_id,slot_inicio,slot_fim,status,tipo_reserva,data_reserva,modalidade_id,morador_id,unidades(codigo),modalidades(nome,icone)')
     .eq('tipo_reserva','aula')
     .eq('status','confirmada')
     .gte('data_reserva', ts())
@@ -3444,7 +3445,7 @@ function renderContratosAula() {
         if(!contratos[key]) {
           contratos[key] = {
             unidade: r.unidades, modalidade: r.modalidades,
-            slot: r.slot_inicio, dow: dow, dur: r.duracao_min,
+            slot: r.slot_inicio, dow: dow, dur: (r.slot_inicio && r.slot_fim ? (parseInt(r.slot_fim)*60+parseInt((r.slot_fim).slice(3,5)))-(parseInt(r.slot_inicio)*60+parseInt((r.slot_inicio).slice(3,5))) : 60),
             inicio: r.data_reserva, fim: r.data_reserva, count: 0,
             unidade_id: r.unidade_id, modalidade_id: r.modalidade_id,
             morador_id: r.morador_id, ids: []
@@ -3620,7 +3621,7 @@ function criarContrato() {
           unidade_id: aptoId, morador_id: moradorId, modalidade_id: modDbId,
           data_reserva: ds,
           slot_inicio: hora+':00', slot_fim: horaFim+':00',
-          duracao_min: dur, tipo_reserva: 'aula', status: 'confirmada'
+          tipo_reserva: 'aula', status: 'confirmada'
         });
       }
       cur.setDate(cur.getDate()+1);
@@ -4302,7 +4303,7 @@ function renderCalendario() {
           var hFim = parseInt((r.slot_fim||'00:00').slice(0,2))*60   + parseInt((r.slot_fim||'00:00').slice(3,5));
           if(hFim > hIni) { totalMinutos += (hFim - hIni); return; }
         }
-        totalMinutos += (r.duracao_min || 60);
+        totalMinutos += 60;
       });
       var totalHoras = (totalMinutos / 60).toFixed(1).replace('.0','');
 
@@ -4785,7 +4786,6 @@ function selDataAcademia(ds) {
             data_reserva: ds,
             slot_inicio: horaIni,
             slot_fim: horaFim,
-            duracao_min: 60,
             tipo_reserva: 'pontual',
             status: 'confirmada'
           };
