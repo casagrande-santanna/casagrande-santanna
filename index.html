@@ -191,6 +191,7 @@ textarea.form-in{resize:vertical}
 
 .desktop-body{display:flex;flex:1;min-height:0;flex-direction:column}
 
+@media(max-width:767px){#tab-config{display:none!important}}
 @media(min-width:768px){
   body{max-width:100%;flex-direction:column;align-items:stretch}
   .desktop-body{flex-direction:row;overflow:hidden}
@@ -267,7 +268,7 @@ textarea.form-in{resize:vertical}
       </div>
     </div>
   </div>
-  <div class="desktop-body" style="display:flex;flex:1;overflow:hidden">
+  <div class="desktop-body" style="display:flex;flex:1">
   <div class="tab-bar">
     <button class="tab active" id="tab-avisos"><i class="ti ti-bell" aria-hidden="true"></i>Avisos<span class="ndot" id="nd-avisos"></span></button>
     <button class="tab" id="tab-dashboard" style="display:none"><i class="ti ti-chart-bar" aria-hidden="true"></i>Dashboard</button>
@@ -3655,7 +3656,6 @@ document.getElementById('btn-salvar-config').addEventListener('click', function(
     blk_aulas_fds:  tg('tgl-blk-aulas-fds'),
     blk_sabado:     tg('tgl-blk-sab'),
     blk_domingo:    tg('tgl-blk-dom'),
-    ant_fds_h:              li('cfg-ant-fds', 0),
     aulas_rec_ativo: tg('tgl-aulas-rec'),
     aula_duracao_max_meses: li('cfg-aula-duracao', 6),
     aula_aviso_dias:        li('cfg-aula-aviso', 30),
