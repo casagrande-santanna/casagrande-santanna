@@ -3243,12 +3243,7 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
     titulo: t, corpo: c,
     publicado_por: morador.id,
     expira_em: expira,
-    enquete_pergunta: pergunta,
-    enquete_tipo: enqueteTipo,
-    enquete_label_a: labelA,
-    enquete_label_b: labelB,
-    enquete_sim: 0,
-    enquete_nao: 0
+    enquete_pergunta: pergunta
   }).then(function(r) {
     if(r.error) { toast('Erro: '+r.error.message); return; }
     document.getElementById('av-tit').value='';
@@ -3319,7 +3314,6 @@ document.getElementById('btn-salvar-oco').addEventListener('click', function() {
     unidade_id: morador.unidade_id, morador_id: morador.id,
     categoria: document.getElementById('oc-cat').value,
     titulo: t, descricao: document.getElementById('oc-desc').value||t,
-    local: document.getElementById('oc-loc').value,
     prioridade: document.getElementById('oc-prio').value,
     status: 'aberta'
   }).then(function(r) {
@@ -4383,16 +4377,22 @@ document.getElementById('btn-add-bloqueio').addEventListener('click', function()
       syncAcademiaCfg();
       // Atualiza no banco
       var ativo = tglAc.classList.contains('on');
+      var sel = document.getElementById('cfg-academia-simult');
+      var maxS = sel ? parseInt(sel.value)||3 : 3;
       if(espacoAcademiaId) {
-        sb.from('espacos').update({ativo: ativo}).eq('id', espacoAcademiaId).then(function() {
-          espacos = espacos.map(function(e){ if(e.id===espacoAcademiaId) e.ativo=ativo; return e; });
+        sb.from('espacos').update({ativo: ativo, max_simult: maxS}).eq('id', espacoAcademiaId).then(function() {
+          espacos = espacos.map(function(e){ if(e.id===espacoAcademiaId){ e.ativo=ativo; e.max_simult=maxS; } return e; });
           atualizarTabAcademia();
           toast(ativo ? 'Academia ativada.' : 'Academia desativada.');
-          // Atualiza max_simult se necessario
-          var sel = document.getElementById('cfg-academia-simult');
-          if(sel && ativo) {
-            sb.from('espacos').update({max_simult: parseInt(sel.value)}).eq('id', espacoAcademiaId).then(function(){});
-          }
+        });
+      } else if(ativo) {
+        // Espaco academia não existe ainda — cria
+        sb.from('espacos').insert({nome:'Academia', ativo:true, max_simult:maxS}).select().single().then(function(r) {
+          if(r.error) { toast('Erro ao criar espaço: '+r.error.message); return; }
+          espacoAcademiaId = r.data.id;
+          espacos.push(r.data);
+          atualizarTabAcademia();
+          toast('Academia ativada.');
         });
       }
     });
