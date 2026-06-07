@@ -3245,19 +3245,19 @@ document.getElementById('btn-pub-aviso').addEventListener('click', function() {
   }
 
   sb.from('avisos').insert({
+    titulo: t,
+    corpo: c,
     tipo: document.getElementById('av-tipo').value,
-    titulo: t, corpo: c,
-    publicado_por: morador.id,
-    expira_em: expira
+    criado_por: morador.id,
+    unidade_id: morador.unidade_id || null,
+    ativo: true
   }).then(function(r) {
     if(r.error) { toast('Erro: '+r.error.message); return; }
     document.getElementById('av-tit').value='';
     document.getElementById('av-corpo').value='';
-    document.getElementById('av-enquete-pergunta').value='';
     document.getElementById('tgl-enquete').classList.remove('on');
     document.getElementById('enquete-campos').style.display='none';
     fecharModal('m-novo-aviso'); renderAvisos(); toast('Aviso publicado!');
-  });
 });
 
 // -- LISTA DE ESPERA --------------------------------------------
@@ -3316,10 +3316,13 @@ document.getElementById('btn-salvar-oco').addEventListener('click', function() {
   var t = document.getElementById('oc-tit').value.trim();
   if(!t) { toast('Informe o titulo'); return; }
   sb.from('ocorrencias').insert({
+    titulo: t,
+    descricao: document.getElementById('oc-desc').value || t,
     categoria: document.getElementById('oc-cat').value,
-    titulo: t, descricao: document.getElementById('oc-desc').value||t,
     prioridade: document.getElementById('oc-prio').value,
-    status: 'aberta'
+    status: 'aberta',
+    unidade_id: morador.unidade_id || null,
+    criada_por: morador.id
   }).then(function(r) {
     if(r.error) { toast('Erro: '+r.error.message); return; }
     document.getElementById('oc-tit').value='';
