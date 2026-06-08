@@ -3072,10 +3072,10 @@ function renderAvisos() {
   renderWidgetStatus();
   renderConvitesPendentes();
   if(!morador) { document.getElementById('avisos-list').innerHTML='<div class="empty"><i class="ti ti-bell-off"></i>Faca login</div>'; return; }
-  sb.from('avisos').select('*,leituras_avisos(morador_id)').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res) {
+  sb.from('avisos').select('*,leituras_avisos(morador_id)').eq('ativo',true).order('created_at',{ascending:false}).limit(20).then(function(res) {
     if(res.error) {
       // Tenta sem o join caso leituras_avisos não exista
-      sb.from('avisos').select('*').eq('ativo',true).order('publicado_em',{ascending:false}).limit(20).then(function(res2) {
+      sb.from('avisos').select('*').eq('ativo',true).order('created_at',{ascending:false}).limit(20).then(function(res2) {
         processAvisos(res2.data||[]);
       });
       return;
@@ -4294,7 +4294,7 @@ document.getElementById('btn-desblk-emergencial').addEventListener('click', func
     if(!requireAdmin()) return;
     var periodo = selPeriodo ? selPeriodo.value : 'mes';
     var labelMap = {mes: 'mês corrente', semestre: 'próximo semestre', todas: 'todas as reservas futuras'};
-    var label = labelMap[período] || período;
+    var label = labelMap[periodo] || periodo;
     var r = getRange();
 
     sb.from('reservas')
