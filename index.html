@@ -928,6 +928,19 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
         <div id="lista-pendentes"></div>
       </div>
       <div class="card">
+        <div class="card-title"><i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar morador</div>
+        <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="adm-cad-nome"></div>
+        <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="adm-cad-email"></div>
+        <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="adm-cad-apto"></select></div>
+        <div class="form-row"><label class="form-lbl">Perfil</label><select class="form-in" id="adm-cad-tipo">
+          <option value="proprietario">Morador (proprietário)</option>
+          <option value="inquilino">Morador (inquilino)</option>
+          <option value="admin">Administrador</option>
+        </select></div>
+        <button class="btn-p" id="btn-adm-cad" style="width:100%"><i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar</button>
+        <div style="font-size:10.5px;color:var(--t2);margin-top:8px">O cadastro já entra aprovado. O morador recebe um e-mail para criar a própria senha.</div>
+      </div>
+      <div class="card">
         <div class="card-title"><i class="ti ti-ban" aria-hidden="true"></i>Apartamentos suspensos</div>
         <div id="lista-suspensos"></div>
       </div>
@@ -1466,6 +1479,8 @@ function ts() {
   var day = String(d.getDate()).padStart(2,'0');
   return y+'-'+m+'-'+day;
 }
+// Escapa texto vindo do banco/usuario antes de inserir em HTML (anti-XSS)
+function esc(s) { return s==null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function fmtD(ds) { if(!ds) return ''; var p=ds.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function addH(t,h) { var p=t.split(':').map(Number); return String(p[0]+h).padStart(2,'0')+':'+String(p[1]).padStart(2,'0'); }
 
@@ -2090,7 +2105,7 @@ function selData(ds) {
         // Verificar bloqueio para este slot específico
         var bloqueioInfo = isBlocked(ds, slot);
         if(bloqueioInfo) {
-          html += '<div class="slot bloq" title="'+bloqueioInfo.motivo+'">';
+          html += '<div class="slot bloq" title="'+esc(bloqueioInfo.motivo)+'">';
           html += '<div class="sh">'+slot+'</div><div class="sl">Bloq.</div></div>';
           return;
         }
@@ -2118,7 +2133,7 @@ function selData(ds) {
         } else if(morador && r.unidade_id === morador.unidade_id) {
           cls = 'slot meu'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : 'Minha'); action = 'meu_' + r.id;
         } else {
-          cls = 'slot ocupado'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : (r.modalidades ? r.modalidades.icone : 'Ocupado')); action = 'espera_' + r.id;
+          cls = 'slot ocupado'; lbl = (r.tipo_reserva === 'aula' ? 'Aula' : (r.modalidades ? esc(r.modalidades.icone) : 'Ocupado')); action = 'espera_' + r.id;
         }
 
         html += '<div class="'+cls+'" data-action="'+action+'" data-slot="'+slot+'" data-ds="'+ds+'">';
@@ -2228,7 +2243,7 @@ function carregarChipsConvite() {
     var unids = (res.data || []).sort(function(a,b){ return parseInt(a.codigo)-parseInt(b.codigo); });
     if(!unids.length) { chips.innerHTML = '<div style="font-size:10px;color:var(--t3);padding:4px">Nenhum outro apartamento cadastrado.</div>'; return; }
     chips.innerHTML = unids.map(function(u) {
-      return '<div class="chip-apto" data-uid="'+u.id+'" data-cod="'+u.codigo+'">'+u.codigo+'</div>';
+      return '<div class="chip-apto" data-uid="'+u.id+'" data-cod="'+esc(u.codigo)+'">'+esc(u.codigo)+'</div>';
     }).join('');
     chips.querySelectorAll('.chip-apto').forEach(function(ch) {
       ch.addEventListener('click', function() {
@@ -2246,7 +2261,7 @@ function buildResumo() {
   var m = MODS.find(function(x){return x.id===pendMod;});
   var cod = morador && morador.unidades ? morador.unidades.codigo : '---';
   var html = '';
-  html += '<div class="resumo-row"><span class="resumo-lbl">Apartamento</span><span>'+cod+'</span></div>';
+  html += '<div class="resumo-row"><span class="resumo-lbl">Apartamento</span><span>'+esc(cod)+'</span></div>';
   html += '<div class="resumo-row"><span class="resumo-lbl">Data</span><span>'+fmtD(pendSlot.date)+'</span></div>';
   var agora2 = new Date();
   var agoraMin2 = agora2.getHours()*60 + agora2.getMinutes();
@@ -2612,7 +2627,7 @@ function renderCheckin() {
     if(proxima) {
       nd.classList.add('show');
       var m = proxima.modalidades;
-      var nomeMod = m ? (m.icone+' '+m.nome) : '';
+      var nomeMod = m ? (esc(m.icone)+' '+esc(m.nome)) : '';
       var si = (proxima.slot_inicio||'').slice(0,5);
       var sf = (proxima.slot_fim||'').slice(0,5);
       var html = '<div class="ckin-hero">';
@@ -2684,13 +2699,13 @@ function renderCheckin() {
       else if(cancelada)      bl = r.isento_penalidade ? '<span class="badge b-gray">Canc. (Isenta)</span>' : '<span class="badge b-danger">Cancelada</span>';
       else if(expirada)       bl = '<span class="badge b-gray">Ausencia</span>';
       else if(confirmada)     bl = '<span class="badge b-warn">Confirmada</span>';
-      else                    bl = '<span class="badge b-gray">'+(r.status||'---')+'</span>';
+      else                    bl = '<span class="badge b-gray">'+esc(r.status||'---')+'</span>';
 
       var m = r.modalidades;
-      html += '<div class="ckin-row" data-rid="'+r.id+'" data-dt="'+r.data_reserva+'" data-st="'+(r.status||'')+'">';
+      html += '<div class="ckin-row" data-rid="'+r.id+'" data-dt="'+esc(r.data_reserva)+'" data-st="'+esc(r.status||'')+'">';
       html += '<div class="ckin-dot" style="background:'+dotC+'"></div>';
       html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+(m?m.icone+' '+m.nome:'---')+'</div></div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">'+(m?esc(m.icone)+' '+esc(m.nome):'---')+'</div></div>';
       html += bl+'</div>';
     });
     hel.innerHTML = html;
@@ -2762,10 +2777,10 @@ function renderMinhas() {
         else if((r.status==='cancelada'||r.status==='cancelado')) bl = r.isento_penalidade ? 'Canc. (Isenta)' : 'Cancelada';
         else if(r.status==='expirada') bl='Ausencia';
         var m = r.modalidades;
-        html += '<div class="res-card '+r.status+'" data-reserva-row="1" data-dt="'+r.data_reserva+'" data-st="'+(r.status||'')+'">';
+        html += '<div class="res-card '+esc(r.status)+'" data-reserva-row="1" data-dt="'+esc(r.data_reserva)+'" data-st="'+esc(r.status||'')+'">';
         html += '<div class="res-top"><div class="res-data">'+fmtD(r.data_reserva)+' - '+(r.slot_inicio||'').slice(0,5)+'</div><span class="badge '+bc+'">'+bl+'</span></div>';
         var isAcademia = r.espaco_id && r.espaco_id === espacoAcademiaId;
-        var modLabel = isAcademia ? '&#127947; Academia' : (m ? m.icone+' '+m.nome : 'Uso livre');
+        var modLabel = isAcademia ? '&#127947; Academia' : (m ? esc(m.icone)+' '+esc(m.nome) : 'Uso livre');
         var _dur = (r.slot_inicio && r.slot_fim) ? (parseInt(r.slot_fim)*60+parseInt((r.slot_fim||'').slice(3,5))) - (parseInt(r.slot_inicio)*60+parseInt((r.slot_inicio||'').slice(3,5))) : 60;
         html += '<div class="res-info">'+modLabel+' - '+(_dur>=120?(_dur/60)+'h':_dur+'min')+'</div>';
         if(r.status==='confirmada') {
@@ -2778,7 +2793,7 @@ function renderMinhas() {
             var _janelaOk = _dif2 >= -(appCfg.checkin_ant_min||10) && (_agora2 < _dtF2 || _dif2 <= (appCfg.checkin_janela_min||15));
             if(_janelaOk) html += '<button class="btn-sm b" data-ckin-id="'+r.id+'"><i class="ti ti-door-enter" aria-hidden="true"></i>Check-in Manual</button>';
           }
-          html += '<button class="btn-sm" data-share-dt="'+r.data_reserva+'" data-share-ini="'+(r.slot_inicio||'').slice(0,5)+'" data-share-fim="'+(r.slot_fim||'').slice(0,5)+'" data-share-mod="'+(r.modalidades?r.modalidades.nome:'')+'" data-share-apto="" style="color:#25D366;border-color:#25D366"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></button>';
+          html += '<button class="btn-sm" data-share-dt="'+r.data_reserva+'" data-share-ini="'+(r.slot_inicio||'').slice(0,5)+'" data-share-fim="'+(r.slot_fim||'').slice(0,5)+'" data-share-mod="'+esc(r.modalidades?r.modalidades.nome:'')+'" data-share-apto="" style="color:#25D366;border-color:#25D366"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></button>';
           html += '<button class="btn-sm r" data-cancel-id="'+r.id+'"><i class="ti ti-x" aria-hidden="true"></i>Cancelar</button>';
           html += '</div>';
         }
@@ -3045,8 +3060,8 @@ function renderConvitesPendentes() {
         var aptoOrigem = rv && rv.unidades ? rv.unidades.codigo : '';
         var dt = rv ? fmtD(rv.data_reserva) + ' ' + (rv.slot_inicio||'').slice(0,5) + '-' + (rv.slot_fim||'').slice(0,5) : '';
         html += '<div class="conv-card">';
-        html += '<div style="font-size:12px;font-weight:600;margin-bottom:4px">Apto ' + aptoOrigem + ' convidou você</div>';
-        html += '<div style="font-size:11px;color:var(--amt);margin-bottom:8px">' + dt + (criador ? ' &bull; ' + criador : '') + '</div>';
+        html += '<div style="font-size:12px;font-weight:600;margin-bottom:4px">Apto ' + esc(aptoOrigem) + ' convidou você</div>';
+        html += '<div style="font-size:11px;color:var(--amt);margin-bottom:8px">' + dt + (criador ? ' &bull; ' + esc(criador) : '') + '</div>';
         html += '<div style="display:flex;gap:6px">';
         html += '<button class="btn-sm g" data-conv-id="' + cv.id + '" data-conv-acao="aceito" style="flex:1"><i class="ti ti-check" aria-hidden="true"></i>Aceitar</button>';
         html += '<button class="btn-sm r" data-conv-id="' + cv.id + '" data-conv-acao="recusado" style="flex:1"><i class="ti ti-x" aria-hidden="true"></i>Recusar</button>';
@@ -3100,10 +3115,10 @@ function renderAvisos() {
       var lido = (av.leituras_avisos||[]).find(function(l){return l.morador_id===morador.id;});
       var bcls = av.tipo==='urgente'?'b-danger':av.tipo==='manutenção'?'b-warn':av.tipo==='info'?'b-info':'b-ok';
       var pct = Math.round((av.leituras_avisos||[]).length/60*100);
-      html += '<div class="av-card '+av.tipo+'">';
-      html += '<div class="av-hdr"><div class="av-titulo">'+(lido?'':'<span style="display:inline-block;width:6px;height:6px;background:#E24B4A;border-radius:50%;margin-right:5px;vertical-align:middle"></span>')+av.titulo+'</div>';
-      html += '<span class="badge '+bcls+'" style="margin-left:8px;flex-shrink:0">'+AVL[av.tipo]+'</span></div>';
-      html += '<div class="av-corpo">'+av.corpo+'</div>';
+      html += '<div class="av-card '+esc(av.tipo)+'">';
+      html += '<div class="av-hdr"><div class="av-titulo">'+(lido?'':'<span style="display:inline-block;width:6px;height:6px;background:#E24B4A;border-radius:50%;margin-right:5px;vertical-align:middle"></span>')+esc(av.titulo)+'</div>';
+      html += '<span class="badge '+bcls+'" style="margin-left:8px;flex-shrink:0">'+(AVL[av.tipo]||esc(av.tipo))+'</span></div>';
+      html += '<div class="av-corpo">'+esc(av.corpo)+'</div>';
       if(av.enquete_pergunta) {
         // Suporta tanto colunas dedicadas (novo) quanto formato || (legado)
         var enqueteTipo, enqueteCustomA, enqueteCustomB, enquetePergunta;
@@ -3147,18 +3162,18 @@ function renderAvisos() {
         var podeVotar = !jaVotou; // todos podem votar enquanto não votaram
 
         html += '<div style="background:var(--bg);border-radius:8px;padding:10px 11px;margin:4px 11px 8px;border:0.5px solid var(--br)">';
-        html += '<div style="font-size:11.5px;font-weight:600;margin-bottom:8px;color:var(--tx)">📊 '+enquetePergunta+'</div>';
+        html += '<div style="font-size:11.5px;font-weight:600;margin-bottom:8px;color:var(--tx)">📊 '+esc(enquetePergunta)+'</div>';
         if(podeVotar) {
           html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
-          html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="font-size:12px;padding:11px 6px;font-weight:600;border-radius:8px">'+rotulos.a+'</button>';
-          html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="font-size:12px;padding:11px 6px;font-weight:600;border-radius:8px">'+rotulos.b+'</button>';
+          html += '<button class="btn-sm g" data-vote="sim" data-av-id="'+av.id+'" style="font-size:12px;padding:11px 6px;font-weight:600;border-radius:8px">'+esc(rotulos.a)+'</button>';
+          html += '<button class="btn-sm r" data-vote="nao" data-av-id="'+av.id+'" style="font-size:12px;padding:11px 6px;font-weight:600;border-radius:8px">'+esc(rotulos.b)+'</button>';
           html += '</div>';
           if(totalVotos > 0) html += '<div style="font-size:10px;color:var(--t2);margin-top:6px;text-align:center">'+totalVotos+' voto(s) ja registrado(s)</div>';
         } else {
           html += '<div>';
-          html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--v)">'+rotulos.a+'</span><span style="font-weight:700">'+(av.enquete_sim||0)+' ('+pctSim+'%)</span></div>';
+          html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--v)">'+esc(rotulos.a)+'</span><span style="font-weight:700">'+(av.enquete_sim||0)+' ('+pctSim+'%)</span></div>';
           html += '<div style="height:10px;background:var(--br);border-radius:5px;overflow:hidden;margin-bottom:8px"><div style="height:100%;background:var(--v);width:'+pctSim+'%;border-radius:5px"></div></div>';
-          html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--rdt)">'+rotulos.b+'</span><span style="font-weight:700">'+(av.enquete_nao||0)+' ('+pctNao+'%)</span></div>';
+          html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600;color:var(--rdt)">'+esc(rotulos.b)+'</span><span style="font-weight:700">'+(av.enquete_nao||0)+' ('+pctNao+'%)</span></div>';
           html += '<div style="height:10px;background:var(--br);border-radius:5px;overflow:hidden"><div style="height:100%;background:var(--rdt);width:'+pctNao+'%;border-radius:5px"></div></div>';
           html += '</div>';
           html += '<div style="font-size:10px;color:var(--t2);margin-top:6px;text-align:right">'+totalVotos+' voto(s) registrado(s) - você ja votou</div>';
@@ -3363,10 +3378,10 @@ function renderDispensas() {
         var nome = m ? m.nome : '---';
         var dtRes = r ? fmtD(r.data_reserva) + ' ' + (r.slot_inicio||'').slice(0,5) : '---';
         html += '<div class="oco-card aberta" style="margin-bottom:8px">';
-        html += '<div class="oco-top"><div class="oco-titulo">Apto ' + apto + ' • ' + nome + '</div>';
+        html += '<div class="oco-top"><div class="oco-titulo">Apto ' + esc(apto) + ' • ' + esc(nome) + '</div>';
         html += '<span class="badge b-warn" style="font-size:10px">Pendente</span></div>';
         html += '<div class="oco-meta" style="margin-bottom:6px">Reserva: ' + dtRes + '</div>';
-        html += '<div style="font-size:11px;color:var(--t1);margin-bottom:8px;padding:6px 8px;background:var(--bg);border-radius:6px">' + (s.motivo||'') + '</div>';
+        html += '<div style="font-size:11px;color:var(--t1);margin-bottom:8px;padding:6px 8px;background:var(--bg);border-radius:6px">' + esc(s.motivo||'') + '</div>';
         html += '<div style="display:flex;gap:6px">';
         html += '<button class="btn-sm g" data-disp-id="'+s.id+'" data-disp-acao="aprovar"><i class="ti ti-check" aria-hidden="true"></i>Dispensar falta</button>';
         html += '<button class="btn-sm r" data-disp-id="'+s.id+'" data-disp-acao="rejeitar"><i class="ti ti-x" aria-hidden="true"></i>Indeferir</button>';
@@ -3448,10 +3463,10 @@ function renderOco() {
       if(!o) { det.innerHTML=''; return; }
       var html = '<div class="card">';
       html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">';
-      html += '<div style="font-size:13px;font-weight:600;flex:1">'+o.titulo+'</div>';
-      html += '<span class="badge '+(o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray')+'">'+STL[o.status]+'</span></div>';
-      html += '<div style="font-size:10.5px;color:var(--t2);margin-bottom:8px">'+(o.local||'')+' - <span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span></div>';
-      html += '<div style="font-size:11px;color:var(--t2);margin-bottom:10px">'+(o.descricao||'')+'</div>';
+      html += '<div style="font-size:13px;font-weight:600;flex:1">'+esc(o.titulo)+'</div>';
+      html += '<span class="badge '+(o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray')+'">'+(STL[o.status]||esc(o.status))+'</span></div>';
+      html += '<div style="font-size:10.5px;color:var(--t2);margin-bottom:8px">'+esc(o.local||'')+' - <span class="oco-cat">'+(OCA[o.categoria]||esc(o.categoria))+'</span></div>';
+      html += '<div style="font-size:11px;color:var(--t2);margin-bottom:10px">'+esc(o.descricao||'')+'</div>';
       html += '<div class="sec-lbl">Timeline</div>';
       (o.mensagens_ocorrencia||[]).forEach(function(msg) {
         var cor = msg.origem==='admin' ? '#27500A' : '#378ADD';
@@ -3459,7 +3474,7 @@ function renderOco() {
         html += '<div style="width:8px;height:8px;border-radius:50%;background:'+cor+';flex-shrink:0;margin-top:3px"></div>';
         html += '<div><div style="font-size:11px;font-weight:600">'+(msg.origem==='admin'?'Administração':'Morador')+'</div>';
         html += '<div style="font-size:10px;color:var(--t2)">'+fmtD((msg.created_at||'').slice(0,10))+'</div>';
-        html += '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+msg.mensagem+'</div></div></div>';
+        html += '<div style="font-size:11px;color:var(--t2);margin-top:2px">'+esc(msg.mensagem)+'</div></div></div>';
       });
       html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">';
       html += '<button class="btn-sm" id="btn-voltar-oco">Voltar</button>';
@@ -3499,14 +3514,14 @@ function renderOco() {
       var aptoInfo = '';
       if(isAdmin() && o.moradores) {
         var oc_cod = o.moradores.unidades ? o.moradores.unidades.codigo : '';
-        aptoInfo = oc_cod ? ' - Apto ' + oc_cod : (o.moradores.nome ? ' - ' + o.moradores.nome : '');
+        aptoInfo = oc_cod ? ' - Apto ' + esc(oc_cod) : (o.moradores.nome ? ' - ' + esc(o.moradores.nome) : '');
       }
       var bc = o.status==='aberta'?'b-info':o.status==='andamento'?'b-warn':o.status==='resolvida'?'b-ok':'b-gray';
-      html += '<div class="oco-card '+o.status+'" data-oco-id="'+o.id+'">';
-      html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'⚠ ':'')+o.titulo+'<span style="font-size:9.5px;font-weight:400;color:var(--t2)">'+aptoInfo+'</span></div>';
-      html += '<span class="badge '+bc+'">'+STL[o.status]+'</span></div>';
-      html += '<div class="oco-meta"><span class="oco-cat">'+(OCA[o.categoria]||o.categoria)+'</span>';
-      html += '<span>'+(o.local||'')+'</span><span>'+fmtD((o.created_at||'').slice(0,10))+'</span>';
+      html += '<div class="oco-card '+esc(o.status)+'" data-oco-id="'+o.id+'">';
+      html += '<div class="oco-top"><div class="oco-titulo">'+(o.prioridade==='urgente'?'⚠ ':'')+esc(o.titulo)+'<span style="font-size:9.5px;font-weight:400;color:var(--t2)">'+aptoInfo+'</span></div>';
+      html += '<span class="badge '+bc+'">'+(STL[o.status]||esc(o.status))+'</span></div>';
+      html += '<div class="oco-meta"><span class="oco-cat">'+(OCA[o.categoria]||esc(o.categoria))+'</span>';
+      html += '<span>'+esc(o.local||'')+'</span><span>'+fmtD((o.created_at||'').slice(0,10))+'</span>';
       if(o.status==='resolvida'||o.status==='encerrada') {
         html += '<button class="btn-sm" data-oco-arquivar="'+o.id+'" style="color:var(--gyt);border-color:var(--gyb);font-size:9.5px;padding:2px 7px" onclick="event.stopPropagation()"><i class="ti ti-archive" aria-hidden="true"></i>Arquivar</button>';
       }
@@ -3532,8 +3547,80 @@ function renderOco() {
 }
 
 // -- CONFIGURAÇÕES ----------------------------------------------
+// -- CADASTRO DE MORADOR PELO ADMIN -----------------------------
+// Cliente separado, sem sessão persistente: criar o login do morador
+// não desconecta o administrador.
+var sbCadastro = supabase.createClient(SURL, SKEY, {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'cg-adm-cadastro' }
+});
+
+function carregarAptosAdmCad() {
+  var sel = document.getElementById('adm-cad-apto');
+  if(!sel || sel.options.length) return;
+  sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
+    sel.innerHTML = (res.data||[]).map(function(u) {
+      return '<option value="'+u.id+'">'+esc(u.codigo)+'</option>';
+    }).join('');
+  });
+}
+
+function senhaAleatoria() {
+  var b = new Uint8Array(24);
+  crypto.getRandomValues(b);
+  return btoa(String.fromCharCode.apply(null, b)) + 'Aa1!';
+}
+
+document.getElementById('btn-adm-cad').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  var nome = document.getElementById('adm-cad-nome').value.trim();
+  var email = document.getElementById('adm-cad-email').value.trim().toLowerCase();
+  var unidadeId = document.getElementById('adm-cad-apto').value;
+  var tipo = document.getElementById('adm-cad-tipo').value;
+  if(!nome || !email || !unidadeId) { toast('Preencha nome, e-mail e apartamento.'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('E-mail inválido.'); return; }
+  var btnHtml = '<i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar';
+  setLoading('btn-adm-cad', true);
+  var fim = function(msg) { setLoading('btn-adm-cad', false, btnHtml); if(msg) toast(msg); };
+
+  sb.from('moradores').select('id').ilike('email', email).limit(1).then(function(ex) {
+    if(ex.data && ex.data.length) { fim('Já existe um morador cadastrado com este e-mail.'); return; }
+    sbCadastro.auth.signUp({ email: email, password: senhaAleatoria() }).then(function(res) {
+      if(res.error) { fim('Erro ao criar login: ' + res.error.message); return; }
+      var user = res.data.user;
+      // Supabase devolve identities vazio quando o e-mail já tem login
+      if(!user || (user.identities && user.identities.length === 0)) {
+        fim('Este e-mail já possui login no sistema. Peça ao suporte para vincular o cadastro.');
+        return;
+      }
+      var precisaConfirmar = !res.data.session;
+      sbCadastro.auth.signOut();
+      sb.from('moradores').insert({
+        auth_user_id: user.id, unidade_id: unidadeId,
+        nome: nome, email: email, tipo: tipo, status: 'ativo'
+      }).then(function(r) {
+        if(r.error) { fim('Erro ao salvar cadastro: ' + r.error.message); return; }
+        document.getElementById('adm-cad-nome').value = '';
+        document.getElementById('adm-cad-email').value = '';
+        if(precisaConfirmar) {
+          fim('Morador cadastrado! Ele recebeu um e-mail de confirmação e depois deve usar "Esqueci minha senha".');
+          renderConfig();
+          return;
+        }
+        var redirectTo = window.location.origin + window.location.pathname;
+        sb.auth.resetPasswordForEmail(email, { redirectTo: redirectTo }).then(function(rr) {
+          fim(rr.error
+            ? 'Morador cadastrado, mas o e-mail não foi enviado. Ele pode usar "Esqueci minha senha".'
+            : 'Morador cadastrado! Enviamos um e-mail para ele criar a senha.');
+          renderConfig();
+        });
+      });
+    });
+  });
+});
+
 function renderConfig() {
   if(!requireAdmin()) return;
+  carregarAptosAdmCad();
   var sl = function(id, val) {
     var el = document.getElementById(id); if(!el) return;
     var s = String(val);
@@ -3594,8 +3681,8 @@ function renderConfig() {
     pends.forEach(function(m) {
       var cod = m.unidades ? m.unidades.codigo : 'Sindico';
       html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:7px">';
-      html += '<div style="font-size:12px;font-weight:600">'+m.nome+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+m.email+' - Apto '+cod+'</div>';
+      html += '<div style="font-size:12px;font-weight:600">'+esc(m.nome)+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">'+esc(m.email)+' - Apto '+esc(cod)+'</div>';
       html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">';
       html += '<button class="btn-sm g" data-apr-id="'+m.id+'"><i class="ti ti-check" aria-hidden="true"></i>Aprovar</button>';
       html += '<button class="btn-sm" style="background:var(--bl);border-color:var(--blb);color:var(--blt)" data-adm-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Aprovar como Admin</button>';
@@ -3632,7 +3719,7 @@ function renderConfig() {
       var blkIcons = {manutenção:'🔧',limpeza:'🧹',evento:'🎉',vistoria:'📋',outro:'📌'};
       var blkIcon = blkIcons[b.tipo] || '📌';
       html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
-      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+blkIcon+' '+b.motivo+'</div>';
+      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+blkIcon+' '+esc(b.motivo)+'</div>';
       html += '<div style="font-size:10.5px;color:var(--t2)">'+fmtD(b.data_inicio)+(b.data_inicio!==b.data_fim?' a '+fmtD(b.data_fim):'')+'</div></div>';
       html += '<button class="btn-sm r" data-blk-id="'+b.id+'"><i class="ti ti-trash" aria-hidden="true"></i></button></div>';
     });
@@ -3655,7 +3742,7 @@ function renderConfig() {
     var html = susps.length ? '' : '<div style="font-size:11px;color:var(--t2)">Nenhum apartamento suspenso.</div>';
     susps.forEach(function(m) {
       html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
-      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+(m.unidades?m.unidades.codigo:'')+' - '+m.nome+'</div>';
+      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+esc(m.unidades?m.unidades.codigo:'')+' - '+esc(m.nome)+'</div>';
       html += '<div style="font-size:10.5px;color:var(--rdt)">'+(m.faltas_mes||0)+' falta(s)</div></div>';
       html += '<button class="btn-sm g" data-susp-id="'+m.id+'"><i class="ti ti-lock-open" aria-hidden="true"></i>Liberar</button></div>';
     });
@@ -3699,8 +3786,8 @@ function renderConfig() {
       var cod = m.unidades ? m.unidades.codigo : 'Sindico';
       var isAdm = m.tipo === 'admin';
       html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--br)">';
-      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+m.nome+'</div>';
-      html += '<div style="font-size:10.5px;color:var(--t2)">'+cod+' - '+(isAdm?'Administrador':'Morador')+'</div></div>';
+      html += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">'+esc(m.nome)+'</div>';
+      html += '<div style="font-size:10.5px;color:var(--t2)">'+esc(cod)+' - '+(isAdm?'Administrador':'Morador')+'</div></div>';
       if(m.id !== morador.id) {
         if(!isAdm) html += '<button class="btn-sm b" data-prom-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Tornar admin</button>';
         else html += '<button class="btn-sm" data-rebx-id="'+m.id+'"><i class="ti ti-user" aria-hidden="true"></i>Tornar morador</button>';
@@ -3773,7 +3860,7 @@ function renderRankingPontualidade() {
       var cor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 70 ? 'var(--amb)' : 'var(--rdt)';
       return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--br)">'
         +'<div style="font-size:14px;width:24px;text-align:center">'+medal+'</div>'
-        +'<div style="flex:1;font-size:12px;font-weight:600">Apto '+a.cod+'</div>'
+        +'<div style="flex:1;font-size:12px;font-weight:600">Apto '+esc(a.cod)+'</div>'
         +'<div style="font-size:11px;color:var(--t2)">'+a.total+' reserva(s)</div>'
         +'<div style="font-size:13px;font-weight:700;color:'+cor+'">'+a.taxa+'%</div>'
         +'</div>';
@@ -3818,7 +3905,7 @@ function renderContratosAula() {
         var corV = diasR <= 30 ? 'var(--rdt)' : diasR <= 60 ? 'var(--amt)' : 'var(--t2)';
         var cod = c.unidade ? c.unidade.codigo : '---';
         var icone = c.modalidade ? c.modalidade.icone : '';
-        var mod = c.modalidade ? (icone+' '+c.modalidade.nome) : '---';
+        var mod = c.modalidade ? (esc(icone)+' '+esc(c.modalidade.nome)) : '---';
         var dadosEditar = encodeURIComponent(JSON.stringify({
           unidade_id: c.unidade_id||'', slot: c.slot||'', dow: c.dow,
           dur: c.dur, fim: c.fim, modalidade_id: c.modalidade_id||'',
@@ -3827,7 +3914,7 @@ function renderContratosAula() {
         var dadosCancelar = encodeURIComponent(JSON.stringify({ids: c.ids, cod: cod}));
         html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:8px">';
         html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
-        html += '<div><div style="font-size:12px;font-weight:600">Apto '+cod+' - '+mod+'</div>';
+        html += '<div><div style="font-size:12px;font-weight:600">Apto '+esc(cod)+' - '+mod+'</div>';
         html += '<div style="font-size:10.5px;color:var(--t2)">'+dias[c.dow]+' - '+(c.slot||'').slice(0,5)+' - '+(c.dur===60?'1h':'2h')+'</div>';
         html += '<div style="font-size:10.5px;color:var(--t2)">'+c.count+' aulas | '+fmtD(c.inicio)+' a '+fmtD(c.fim)+'</div></div>';
         html += '<div style="text-align:right"><div style="font-size:10px;color:'+corV+'">Vence: '+fmtD(c.fim)+'</div>';
@@ -3887,7 +3974,7 @@ function abrirModalContrato(dadosExistentes, isRenovar) {
     if(sel && res.data) {
       sel.innerHTML = res.data.map(function(u) {
         var s = (dadosExistentes && u.id === dadosExistentes.unidade_id) ? ' selected' : '';
-        return '<option value="'+u.id+'"'+s+'>'+u.codigo+'</option>';
+        return '<option value="'+u.id+'"'+s+'>'+esc(u.codigo)+'</option>';
       }).join('');
     }
   });
@@ -4158,7 +4245,7 @@ document.getElementById('btn-reset-app').addEventListener('click', function() {
   var tabelasConfig = [
     {t:'convites_reserva',    col:'criado_em',   val:'2000-01-01T00:00:00Z'},
     {t:'mensagens_ocorrencia',col:'id',           val:'00000000-0000-0000-0000-000000000000', op:'gt'},
-    {t:'solicitações_dispensa',col:'created_at',  val:'2000-01-01T00:00:00Z'},
+    {t:'solicitacoes_dispensa',col:'created_at',  val:'2000-01-01T00:00:00Z'},
     {t:'placares',             col:'created_at',  val:'2000-01-01T00:00:00Z'},
     {t:'achados_perdidos',     col:'created_at',  val:'2000-01-01T00:00:00Z'},
     {t:'ocorrencias',          col:'created_at',  val:'2000-01-01T00:00:00Z'},
@@ -4223,7 +4310,9 @@ document.getElementById('btn-blk-emergencial').addEventListener('click', functio
   if(!requireAdmin()) return;
   if(!confirm('Bloquear a quadra para o restante do dia de hoje?')) return;
   var hoje = new Date().toISOString().slice(0,10);
+  if(!espacoQuadraId) { toast('Espaço "Quadra" não encontrado. Recarregue a página.'); return; }
   sb.from('bloqueios').insert({
+    espaco_id: espacoQuadraId,
     data_inicio: hoje, data_fim: hoje,
     hora_inicio: '00:00', hora_fim: '23:59',
     motivo: 'Bloqueio emergencial',
@@ -4363,7 +4452,9 @@ document.getElementById('btn-add-bloqueio').addEventListener('click', function()
       if(el) checklistItens.push({nome:item.nome, ok: el.checked});
     });
   }
+  if(!espacoQuadraId) { toast('Espaço "Quadra" não encontrado. Recarregue a página.'); return; }
   sb.from('bloqueios').insert({
+    espaco_id: espacoQuadraId,
     data_inicio: ini, data_fim: fim,
     hora_inicio: hIni, hora_fim: hFim,
     motivo: mot, tipo: tipoBlk,
@@ -4732,7 +4823,7 @@ function renderCalendario() {
           var medal = medals[i] || (i+1+'.');
           resumoHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--br)">'
             +'<span style="font-size:13px">'+medal+'</span>'
-            +'<span style="flex:1;font-size:12px;font-weight:600">Apto '+a[0]+'</span>'
+            +'<span style="flex:1;font-size:12px;font-weight:600">Apto '+esc(a[0])+'</span>'
             +'<span class="badge b-ok">'+a[1]+' reserva(s)</span>'
             +'</div>';
         });
@@ -5038,7 +5129,7 @@ function renderDashboard() {
         rkHtml += '<div style="padding:7px 0;border-bottom:.5px solid var(--br)">';
         rkHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
         rkHtml += '<div style="font-size:13px;width:22px;text-align:center">' + (medals[i] || (i+1)) + '</div>';
-        rkHtml += '<div style="flex:1;font-size:12px;font-weight:' + (isMeu?'700':'500') + ';color:' + (isMeu?'var(--v)':'var(--tx)') + '">Apto ' + a.apto + '</div>';
+        rkHtml += '<div style="flex:1;font-size:12px;font-weight:' + (isMeu?'700':'500') + ';color:' + (isMeu?'var(--v)':'var(--tx)') + '">Apto ' + esc(a.apto) + '</div>';
         rkHtml += '<div style="font-size:10px;color:var(--t2)">' + a.total + ' res.</div>';
         rkHtml += '<div style="font-size:11px;font-weight:700;color:' + taxaCor + ';min-width:34px;text-align:right">' + a.taxa + '%</div>';
         rkHtml += '</div>';
@@ -5065,7 +5156,7 @@ function renderDashboard() {
         var cor = modCores[i % modCores.length];
         modHtml += '<div style="margin-bottom:10px">';
         modHtml += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">';
-        modHtml += '<span style="font-weight:500;color:var(--tx)">' + nome + '</span>';
+        modHtml += '<span style="font-weight:500;color:var(--tx)">' + esc(nome) + '</span>';
         modHtml += '<span style="color:var(--t2);font-size:10px">' + cnt + ' &bull; ' + pct + '%</span></div>';
         modHtml += '<div style="background:var(--bg);border-radius:20px;height:7px;overflow:hidden">';
         modHtml += '<div style="height:100%;border-radius:20px;background:' + cor + ';width:' + pct + '%;transition:width .5s"></div></div>';
@@ -5320,10 +5411,10 @@ function renderAchados() {
         var statusTxt = isEncontrado ? 'Aguardando dono' : 'Reclamado';
         html += '<div style="border:0.5px solid ' + brdColor + ';border-radius:8px;padding:10px 12px;margin-bottom:7px;background:' + bgColor + '">';
         html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
-        html += '<div style="font-size:12px;font-weight:600;color:var(--t1)">' + item.descricao + '</div>';
+        html += '<div style="font-size:12px;font-weight:600;color:var(--t1)">' + esc(item.descricao) + '</div>';
         html += '<span class="badge ' + (isEncontrado ? 'b-warn' : 'b-ok') + '" style="flex-shrink:0;margin-left:6px">' + statusTxt + '</span>';
         html += '</div>';
-        html += '<div style="font-size:10.5px;color:var(--t2)">' + item.local + ' &bull; Encontrado por ' + quem + '</div>';
+        html += '<div style="font-size:10.5px;color:var(--t2)">' + esc(item.local) + ' &bull; Encontrado por ' + esc(quem) + '</div>';
         if(isEncontrado) {
           html += '<div style="display:flex;gap:5px;margin-top:6px">';
           html += '<button class="btn-sm g" data-achado-id="' + item.id + '" style="font-size:10px"><i class="ti ti-check" aria-hidden="true"></i>Este e meu objeto</button>';
@@ -5442,7 +5533,7 @@ function renderRanking(modo) {
           var isMeu = morador && morador.unidades && morador.unidades.codigo === a.apto;
           html += '<div style="display:grid;grid-template-columns:24px 1fr 32px 32px 32px 32px;gap:4px;padding:5px 4px;align-items:center;border-radius:6px;background:' + (isMeu ? 'var(--vl)' : 'transparent') + ';border-bottom:0.5px solid var(--br)">';
           html += '<div style="font-size:11px;text-align:center">' + medalha + '</div>';
-          html += '<div style="font-size:12px;font-weight:' + (isMeu ? '600' : '400') + ';color:' + (isMeu ? 'var(--v)' : 'var(--t1)') + '">Apto ' + a.apto + '</div>';
+          html += '<div style="font-size:12px;font-weight:' + (isMeu ? '600' : '400') + ';color:' + (isMeu ? 'var(--v)' : 'var(--t1)') + '">Apto ' + esc(a.apto) + '</div>';
           html += '<div style="font-size:12px;font-weight:600;text-align:center;color:var(--v)">' + a.pts + '</div>';
           html += '<div style="font-size:11px;text-align:center;color:var(--t2)">' + a.v + '</div>';
           html += '<div style="font-size:11px;text-align:center;color:var(--t2)">' + a.e + '</div>';
@@ -5466,18 +5557,4 @@ function renderRanking(modo) {
           var venceu = p.vencedor === 'casa';
           var empatou = p.vencedor === 'empate';
           var bcls = venceu ? 'b-teal' : empatou ? 'b-warn' : 'b-danger';
-          var btxt = venceu ? 'Vitoria' : empatou ? 'Empate' : 'Derrota';
-          html += '<div class="res-card confirmada" style="' + (isMeu ? 'background:var(--vl)' : '') + '">';
-          html += '<div class="res-top"><div class="res-data">Apto ' + cod + (p.adversario_apto ? ' x ' + p.adversario_apto : '') + '</div><span class="badge ' + bcls + '">' + btxt + '</span></div>';
-          html += '<div class="res-info">' + p.placar_casa + ' x ' + p.placar_visitante + ' &bull; ' + (p.modalidade || '---') + '</div>';
-          html += '</div>';
-        });
-        el.innerHTML = html;
-      });
-  }
-}
-
-</script>
-
-</body>
-</html>
+          var btxt = venceu ? 'Vitoria' : empatou ?
