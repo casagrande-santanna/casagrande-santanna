@@ -447,8 +447,8 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
 
 <div class="login-wrap" id="login-screen">
   <div class="login-logo">&#127968;</div>
-  <div class="login-title">Casa Grande de Sant'Anna</div>
-  <div class="login-sub">Sistema de reserva da quadra</div>
+  <div class="login-title" data-condo="nome">Casa Grande de Sant'Anna</div>
+  <div class="login-sub" data-condo="subtitulo">Sistema de reserva da quadra</div>
   <div class="login-card">
     <label class="login-lbl">E-mail</label>
     <input class="login-input" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
@@ -473,6 +473,9 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
     <div style="text-align:center;margin-top:10px">
       <span style="font-size:11px;color:#666;cursor:pointer;text-decoration:underline" id="link-cadastro">Não tem conta? Cadastre-se</span>
     </div>
+    <div style="text-align:center;margin-top:8px">
+      <span style="font-size:10.5px;color:#999;cursor:pointer;text-decoration:underline" class="link-privacidade">Política de Privacidade</span>
+    </div>
   </div>
 </div>
 
@@ -480,7 +483,7 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
   <div class="hdr">
     <div class="hdr-row">
       <div>
-        <div class="hdr-title">Casa Grande de Sant'Anna</div>
+        <div class="hdr-title" data-condo="nome">Casa Grande de Sant'Anna</div>
         <div class="hdr-sub" id="hdr-sub">Quadra Poliesportiva</div>
       </div>
       <div class="hdr-right">
@@ -941,6 +944,46 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
         <div style="font-size:10.5px;color:var(--t2);margin-top:8px">O cadastro já entra aprovado. O morador recebe um e-mail para criar a própria senha.</div>
       </div>
       <div class="card">
+        <div class="card-title"><i class="ti ti-building" aria-hidden="true"></i>Dados do condomínio</div>
+        <div class="form-row"><label class="form-lbl">Nome do condomínio</label><input type="text" class="form-in" id="cdo-nome"></div>
+        <div class="form-row"><label class="form-lbl">Subtítulo (tela de login)</label><input type="text" class="form-in" id="cdo-subtitulo"></div>
+        <div class="form-row"><label class="form-lbl">Nome do espaço reservável</label><input type="text" class="form-in" id="cdo-espaco" placeholder="Ex.: Quadra Poliesportiva"></div>
+        <div class="form-row"><label class="form-lbl">CNPJ do condomínio</label><input type="text" class="form-in" id="cdo-cnpj"></div>
+        <div class="form-row"><label class="form-lbl">Endereço</label><input type="text" class="form-in" id="cdo-endereco"></div>
+        <div class="form-row"><label class="form-lbl">Encarregado de dados (LGPD) — nome</label><input type="text" class="form-in" id="cdo-enc-nome" placeholder="Ex.: Síndico(a) ou administradora"></div>
+        <div class="form-row"><label class="form-lbl">Encarregado de dados — e-mail</label><input type="email" class="form-in" id="cdo-enc-email"></div>
+        <div class="form-row"><label class="form-lbl">Locais para ocorrências (um por linha)</label><textarea class="form-in" id="cdo-locais" rows="5"></textarea></div>
+        <button class="btn-p" id="btn-salvar-condo" style="width:100%"><i class="ti ti-device-floppy" aria-hidden="true"></i>Salvar dados</button>
+        <div style="border-top:0.5px solid var(--br);margin-top:12px;padding-top:10px">
+          <div style="font-size:11px;color:var(--t2);margin-bottom:8px" id="cdo-politica-info"></div>
+          <button class="btn-s" id="btn-ver-politica" style="width:100%;margin-bottom:6px"><i class="ti ti-eye" aria-hidden="true"></i>Ver Política de Privacidade</button>
+          <button class="btn-s" id="btn-nova-versao-politica" style="width:100%"><i class="ti ti-refresh" aria-hidden="true"></i>Publicar nova versão (todos aceitam de novo)</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-door" aria-hidden="true"></i>Apartamentos<span id="badge-aptos" class="badge" style="margin-left:8px"></span></div>
+        <div id="lista-aptos" style="display:flex;flex-wrap:wrap;gap:4px;max-height:180px;overflow-y:auto;margin-bottom:10px"></div>
+        <div style="font-size:11px;font-weight:600;color:var(--t1);margin-bottom:6px">Gerar em sequência</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+          <div><label class="form-lbl">Bloco (opcional)</label><input type="text" class="form-in" id="apt-gen-bloco" placeholder="A"></div>
+          <div><label class="form-lbl">Andar inicial</label><input type="number" class="form-in" id="apt-gen-ini" value="1" min="0"></div>
+          <div><label class="form-lbl">Andar final</label><input type="number" class="form-in" id="apt-gen-fim" value="10" min="0"></div>
+        </div>
+        <div class="form-row" style="margin-top:6px"><label class="form-lbl">Finais por andar (separados por vírgula)</label><input type="text" class="form-in" id="apt-gen-finais" placeholder="01,02,03,04"></div>
+        <div style="font-size:10.5px;color:var(--t2);margin:-4px 0 8px">Ex.: andares 1 a 15 com finais 01,02 geram 101, 102 … 1501, 1502. Com bloco "A": A-101, A-102 …</div>
+        <button class="btn-s" id="btn-gerar-aptos" style="width:100%;margin-bottom:8px"><i class="ti ti-wand" aria-hidden="true"></i>Gerar lista abaixo</button>
+        <div class="form-row"><label class="form-lbl">Códigos a adicionar (um por linha)</label><textarea class="form-in" id="apt-novos" rows="4" placeholder="101&#10;102"></textarea></div>
+        <div style="font-size:10.5px;color:var(--t2);margin-bottom:8px" id="apt-preview"></div>
+        <button class="btn-p" id="btn-add-aptos" style="width:100%"><i class="ti ti-plus" aria-hidden="true"></i>Adicionar apartamentos</button>
+        <div style="font-size:10.5px;color:var(--t2);margin-top:8px">Para remover, toque no × do apartamento. Só é possível remover apartamentos sem moradores e sem reservas.</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-database-export" aria-hidden="true"></i>Backup dos dados</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:10px;line-height:1.5">Baixa todas as tabelas em um arquivo (.json). Guarde em local seguro: o arquivo contém dados pessoais dos moradores. Recomendado: uma vez por semana.</div>
+        <div id="backup-status" style="font-size:11px;margin-bottom:8px"></div>
+        <button class="btn-p" id="btn-exportar-backup" style="width:100%"><i class="ti ti-download" aria-hidden="true"></i>Exportar backup</button>
+      </div>
+      <div class="card">
         <div class="card-title"><i class="ti ti-ban" aria-hidden="true"></i>Apartamentos suspensos</div>
         <div id="lista-suspensos"></div>
       </div>
@@ -1076,6 +1119,10 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
               <button class="btn-s" id="btn-cancel-senha" style="flex:1">Cancelar</button>
               <button class="btn-p" id="btn-salvar-senha" style="flex:2"><i class="ti ti-check"></i>Salvar nova senha</button>
             </div>
+          </div>
+          <div class="p-row link-privacidade" style="cursor:pointer">
+            <span><i class="ti ti-shield-lock" style="font-size:13px;margin-right:4px"></i>Política de privacidade</span>
+            <i class="ti ti-chevron-right" style="font-size:13px;color:var(--t3)"></i>
           </div>
           <div class="p-row" style="border:none;padding-top:12px">
             <button class="btn-d" style="width:100%" id="btn-logout"><i class="ti ti-logout" aria-hidden="true"></i>Sair da conta</button>
@@ -1339,16 +1386,47 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
   <div class="modal-card center">
     <div class="mhandle"></div>
     <div class="mtitle">Criar conta</div>
-    <div class="msub">Morador do Casa Grande de Sant'Anna</div>
+    <div class="msub">Morador do <span data-condo="nome">Casa Grande de Sant'Anna</span></div>
     <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="cad-nome" placeholder="Seu nome completo"></div>
     <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="cad-email"></div>
     <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Mínimo 6 caracteres"></div>
     <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="cad-apto"></select></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--t2);margin:4px 0 10px;cursor:pointer">
+      <input type="checkbox" id="cad-lgpd" style="margin-top:2px;accent-color:var(--v)">
+      <span>Li e aceito a <span class="link-privacidade" style="text-decoration:underline;cursor:pointer;color:var(--v)">Política de Privacidade</span>.</span>
+    </label>
     <div class="macts">
       <button class="btn-s" id="btn-fechar-cad">Cancelar</button>
       <button class="btn-p" id="btn-fazer-cad"><i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar</button>
     </div>
     <div class="login-err" id="cad-err"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-privacidade" style="z-index:1001">
+  <div class="modal-card center" style="max-height:90vh;display:flex;flex-direction:column">
+    <div class="mhandle"></div>
+    <div class="mtitle">Política de Privacidade</div>
+    <div id="privacidade-texto" style="overflow-y:auto;font-size:12px;line-height:1.6;color:var(--t1);padding-right:4px"></div>
+    <div class="macts">
+      <button class="btn-p" id="btn-fechar-privacidade"><i class="ti ti-check" aria-hidden="true"></i>Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-aceite-lgpd" data-bloqueante="1">
+  <div class="modal-card center" style="max-height:90vh;display:flex;flex-direction:column">
+    <div class="mtitle"><i class="ti ti-shield-lock" aria-hidden="true"></i> Seus dados e a LGPD</div>
+    <div class="msub" id="aceite-lgpd-sub">Antes de continuar, leia como tratamos seus dados pessoais.</div>
+    <div id="aceite-lgpd-texto" style="overflow-y:auto;font-size:12px;line-height:1.6;color:var(--t1);padding:10px;border:0.5px solid var(--br);border-radius:8px;flex:1;min-height:120px"></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--t1);margin:12px 0 4px;cursor:pointer">
+      <input type="checkbox" id="aceite-lgpd-chk" style="margin-top:2px;accent-color:var(--v)">
+      <span>Li e estou ciente da Política de Privacidade.</span>
+    </label>
+    <div class="macts">
+      <button class="btn-s" id="btn-recusar-lgpd">Recusar e sair</button>
+      <button class="btn-p" id="btn-aceitar-lgpd"><i class="ti ti-check" aria-hidden="true"></i>Aceitar e continuar</button>
+    </div>
   </div>
 </div>
 
@@ -1493,6 +1571,135 @@ function toast(msg) {
 function abrirModal(id) { document.getElementById(id).classList.add('open'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
 
+// -- CONDOMÍNIO (dados configuráveis) ---------------------------
+// Valores padrão usados até a tabela "condominio" responder.
+var CONDO = {
+  nome: "Casa Grande de Sant'Anna",
+  subtitulo: 'Sistema de reserva da quadra',
+  nome_espaco: 'Quadra Poliesportiva',
+  cnpj: '', endereco: '', encarregado_nome: '', encarregado_email: '',
+  locais_ocorrencia: ['Portaria', 'Area externa'],
+  politica_versao: 1,
+  politica_atualizada_em: null
+};
+
+// Ordena códigos de apartamento de forma natural (101, 102, ..., 1001)
+function ordenarAptos(lista) {
+  return (lista || []).slice().sort(function(a, b) {
+    return String(a.codigo).localeCompare(String(b.codigo), 'pt-BR', { numeric: true });
+  });
+}
+
+function aplicarCondominio() {
+  document.querySelectorAll('[data-condo]').forEach(function(el) {
+    var v = CONDO[el.dataset.condo];
+    if(v) el.textContent = v;
+  });
+  document.title = CONDO.nome;
+  var loc = document.getElementById('oc-loc');
+  if(loc && CONDO.locais_ocorrencia && CONDO.locais_ocorrencia.length) {
+    loc.innerHTML = CONDO.locais_ocorrencia.map(function(l) {
+      return '<option>'+esc(l)+'</option>';
+    }).join('');
+  }
+}
+
+function carregarCondominio() {
+  return sb.from('condominio').select('*').eq('id', 1).maybeSingle().then(function(res) {
+    if(res.data) Object.assign(CONDO, res.data);
+    aplicarCondominio();
+  });
+}
+var condominioPronto = carregarCondominio();
+
+// -- POLÍTICA DE PRIVACIDADE -------------------------------------
+function textoPolitica() {
+  var c = CONDO;
+  var nome = esc(c.nome);
+  var contato = c.encarregado_email
+    ? esc(c.encarregado_nome || 'Encarregado') + ' — <a href="mailto:'+esc(c.encarregado_email)+'">'+esc(c.encarregado_email)+'</a>'
+    : 'a administração do condomínio (síndico)';
+  var dataAtual = c.politica_atualizada_em ? fmtD(c.politica_atualizada_em) : '';
+  var h = function(t) { return '<div style="font-weight:600;margin:12px 0 4px">'+t+'</div>'; };
+  return ''
+    + '<div style="font-size:10.5px;color:var(--t2)">Versão '+esc(c.politica_versao)+(dataAtual ? ' — atualizada em '+dataAtual : '')+'</div>'
+    + h('1. Quem trata seus dados')
+    + '<p>O controlador dos dados é o <strong>'+nome+'</strong>'
+    + (c.cnpj ? ', CNPJ '+esc(c.cnpj) : '') + (c.endereco ? ', '+esc(c.endereco) : '') + '. '
+    + 'O aplicativo é uma ferramenta de gestão das áreas comuns usada pelo condomínio.</p>'
+    + h('2. Quais dados coletamos')
+    + '<p>Nome, e-mail, apartamento e perfil (proprietário, inquilino ou administrador); foto de perfil, se você optar por informar; '
+    + 'reservas, check-ins, faltas, suspensões e solicitações de dispensa; convites entre apartamentos; ocorrências e mensagens; '
+    + 'leitura de avisos e votos em enquetes; itens de achados e perdidos; placares de partidas; e o registro do seu aceite desta política. '
+    + 'Não coletamos CPF, telefone, localização nem dados de pagamento.</p>'
+    + h('3. Para que usamos')
+    + '<p>Organizar o uso da '+esc(c.nome_espaco)+' e demais áreas comuns (reservas, check-in, lista de espera e aplicação do regulamento), '
+    + 'comunicar avisos, registrar e responder ocorrências e manter a segurança do sistema.</p>'
+    + h('4. Base legal (LGPD, art. 7º)')
+    + '<p>Execução das regras de convivência e uso das áreas comuns previstas na convenção e no regimento interno do condomínio (inciso V), '
+    + 'cumprimento de obrigações legais do condomínio (inciso II) e legítimo interesse na organização e segurança das áreas comuns (inciso IX).</p>'
+    + h('5. Quem vê seus dados')
+    + '<p>A administração do condomínio vê os dados necessários à gestão. Outros moradores veem apenas o código do apartamento em reservas, '
+    + 'convites, ranking e placares. Ocorrências e mensagens são vistas só por você e pela administração. '
+    + 'Os dados ficam armazenados no Supabase (banco de dados e autenticação) e o site é hospedado na Vercel, empresas que atuam como '
+    + 'operadoras e podem manter servidores fora do Brasil, com as salvaguardas do art. 33 da LGPD. Não vendemos nem compartilhamos dados para publicidade.</p>'
+    + h('6. Por quanto tempo')
+    + '<p>Enquanto você for morador cadastrado. Após a desativação do cadastro, os dados são excluídos ou anonimizados em até 6 meses, '
+    + 'salvo quando a guarda for necessária para cumprir obrigação legal ou para defesa do condomínio em processo.</p>'
+    + h('7. No seu aparelho')
+    + '<p>O navegador guarda sua sessão de login, sua preferência de modo escuro e, se você marcar "Lembrar-me", o seu e-mail. '
+    + 'Não usamos cookies de publicidade nem ferramentas de rastreamento.</p>'
+    + h('8. Seus direitos (LGPD, art. 18)')
+    + '<p>Você pode pedir confirmação e acesso aos seus dados, correção, anonimização ou eliminação de dados desnecessários, portabilidade, '
+    + 'informação sobre compartilhamento e revisão desta política. Fale com: '+contato+'. '
+    + 'Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p>'
+    + h('9. Segurança')
+    + '<p>Conexão criptografada (HTTPS), senhas guardadas de forma protegida pelo provedor de autenticação e regras de acesso no banco de dados '
+    + 'que limitam cada usuário aos dados que lhe dizem respeito. Em caso de incidente de segurança relevante, os titulares e a ANPD serão comunicados.</p>'
+    + h('10. Alterações')
+    + '<p>Quando esta política mudar, você será avisado no aplicativo e precisará aceitá-la novamente.</p>';
+}
+
+function abrirPolitica() {
+  condominioPronto.then(function() {
+    document.getElementById('privacidade-texto').innerHTML = textoPolitica();
+    abrirModal('m-privacidade');
+  });
+}
+document.addEventListener('click', function(e) {
+  if(e.target.closest && e.target.closest('.link-privacidade')) { e.preventDefault(); abrirPolitica(); }
+});
+document.getElementById('btn-fechar-privacidade').addEventListener('click', function() { fecharModal('m-privacidade'); });
+
+// Aceite obrigatório no primeiro acesso e a cada nova versão da política
+function verificarAceiteLgpd() {
+  condominioPronto.then(function() {
+    if(!morador) return;
+    var versao = parseInt(CONDO.politica_versao) || 1;
+    if(morador.lgpd_aceito && (parseInt(morador.lgpd_versao) || 0) >= versao) return;
+    document.getElementById('aceite-lgpd-sub').textContent = morador.lgpd_aceito
+      ? 'A Política de Privacidade foi atualizada. Leia e aceite para continuar.'
+      : 'Antes de continuar, leia como tratamos seus dados pessoais.';
+    document.getElementById('aceite-lgpd-texto').innerHTML = textoPolitica();
+    document.getElementById('aceite-lgpd-chk').checked = false;
+    abrirModal('m-aceite-lgpd');
+  });
+}
+document.getElementById('btn-aceitar-lgpd').addEventListener('click', function() {
+  if(!document.getElementById('aceite-lgpd-chk').checked) { toast('Marque que leu a política para continuar.'); return; }
+  var upd = { lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString(), lgpd_versao: parseInt(CONDO.politica_versao) || 1 };
+  sb.from('moradores').update(upd).eq('id', morador.id).then(function(r) {
+    if(r.error) { toast('Erro ao registrar aceite: ' + r.error.message); return; }
+    Object.assign(morador, upd);
+    fecharModal('m-aceite-lgpd');
+    toast('Obrigado! Aceite registrado.');
+  });
+});
+document.getElementById('btn-recusar-lgpd').addEventListener('click', function() {
+  fecharModal('m-aceite-lgpd');
+  bloquearSessao('Para usar o aplicativo é necessário aceitar a Política de Privacidade.');
+});
+
 function setLoading(btnId, loading, textoOriginal) {
   var btn = document.getElementById(btnId);
   if(!btn) return;
@@ -1543,7 +1750,7 @@ function bloquearSessao(msg) {
 
 // Fechar modais clicando no fundo
 document.querySelectorAll('.modal-bg').forEach(function(m) {
-  m.addEventListener('click', function(e) { if(e.target===m) fecharModal(m.id); });
+  m.addEventListener('click', function(e) { if(e.target===m && !m.dataset.bloqueante) fecharModal(m.id); });
 });
 
 // -- LOGIN ------------------------------------------------------
@@ -1688,19 +1895,17 @@ sb.auth.onAuthStateChange(function(event, session) {
 // -- CADASTRO ---------------------------------------------------
 document.getElementById('link-cadastro').addEventListener('click', function() {
   var sel = document.getElementById('cad-apto');
-  var opts = '';
-  for(var a=1; a<=15; a++) {
-    var andar = String(a).padStart(2,'0');
-    opts += '<option value="A-'+andar+'01">A-'+andar+'01</option>';
-    opts += '<option value="A-'+andar+'02">A-'+andar+'02</option>';
-  }
-  for(var a=1; a<=15; a++) {
-    var andar = String(a).padStart(2,'0');
-    opts += '<option value="B-'+andar+'03">B-'+andar+'03</option>';
-    opts += '<option value="B-'+andar+'04">B-'+andar+'04</option>';
-  }
-  sel.innerHTML = opts;
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  document.getElementById('cad-lgpd').checked = false;
   abrirModal('m-cadastro');
+  sb.from('unidades').select('codigo').order('codigo').then(function(res) {
+    var lista = ordenarAptos(res.data);
+    sel.innerHTML = lista.length
+      ? '<option value="">Selecione</option>' + lista.map(function(u) {
+          return '<option value="'+esc(u.codigo)+'">'+esc(u.codigo)+'</option>';
+        }).join('')
+      : '<option value="">Nenhum apartamento cadastrado</option>';
+  });
 });
 document.getElementById('btn-fechar-cad').addEventListener('click', function() { fecharModal('m-cadastro'); });
 document.getElementById('btn-fazer-cad').addEventListener('click', function() {
@@ -1711,6 +1916,7 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
   var err = document.getElementById('cad-err');
   err.style.display = 'none';
   if(!nome||!email||!pass||!aptoCod) { err.textContent='Preencha todos os campos.'; err.style.display='block'; return; }
+  if(!document.getElementById('cad-lgpd').checked) { err.textContent='É necessário aceitar a Política de Privacidade.'; err.style.display='block'; return; }
   sb.auth.signUp({email:email, password:pass}).then(function(res) {
     if(res.error) { err.textContent=res.error.message; err.style.display='block'; return; }
     if(!res.data.user) { err.textContent='Confirme seu e-mail para continuar.'; err.style.display='block'; return; }
@@ -1722,7 +1928,8 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
         auth_user_id: uid, unidade_id: unidadeId,
         nome: nome, email: email,
         tipo: 'proprietario', status: 'pendente',
-        lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString()
+        lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString(),
+        lgpd_versao: parseInt(CONDO.politica_versao) || 1
       }).then(function(r3) {
         if(r3.error) { err.textContent='Erro: '+r3.error.message; err.style.display='block'; return; }
         fecharModal('m-cadastro');
@@ -1755,6 +1962,7 @@ function iniciarApp(user) {
     if(morador.status === 'pendente') { bloquearSessao('Seu cadastro esta aguardando aprovação do administrador.'); return; }
     if(morador.status === 'inativo') { bloquearSessao('Seu cadastro esta inativo. Fale com a administração.'); return; }
     if(morador.status !== 'ativo' && morador.status !== 'suspenso') { bloquearSessao('Cadastro sem permissão de acesso.'); return; }
+    verificarAceiteLgpd();
 
     var n = morador.nome || '';
     var partes = n.split(' ');
@@ -1768,7 +1976,7 @@ function iniciarApp(user) {
     var cod = morador.unidades ? morador.unidades.codigo : '';
     var aptoLabel = cod ? ('Apto '+cod+' - '+tipoTxt) : 'Administrador / Sindico';
     document.getElementById('pf-apto').textContent = aptoLabel;
-    document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - Quadra Poliesportiva') : 'Administrador / Sindico';
+    document.getElementById('hdr-sub').textContent = cod ? ('Apto '+cod+' - '+CONDO.nome_espaco) : 'Administrador / Sindico';
 
     // Indicador de faltas
     if(!isAdmin() && morador.tipo !== 'admin') {
@@ -2284,7 +2492,7 @@ function gerarLinkGoogleCalendar(date, slotInicio, slotFim, modalidade, apto) {
   var dtStart = date.replace(/-/g,'') + 'T' + slotInicio.replace(':','') + '00';
   var dtEnd   = date.replace(/-/g,'') + 'T' + slotFim.replace(':','') + '00';
   var texto   = encodeURIComponent('🎾 Reserva da Quadra - ' + modalidade);
-  var local   = encodeURIComponent("Quadra Poliesportiva - Casa Grande Sant'Anna");
+  var local   = encodeURIComponent(CONDO.nome_espaco + ' - ' + CONDO.nome);
   var details = encodeURIComponent('Apto ' + apto + ' • Lembre-se do check-in até 15 min após o início.');
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + texto + '&dates=' + dtStart + '/' + dtEnd + '&location=' + local + '&details=' + details;
 }
@@ -2811,7 +3019,7 @@ function renderMinhas() {
           var apto = morador.unidades ? morador.unidades.codigo : '';
           var mod = btn.dataset.shareMod ? 'Modalidade: ' + btn.dataset.shareMod + '\n' : '';
           var txt = encodeURIComponent(
-            'Reserva da Quadra - Casa Grande SantAnna\n'
+            'Reserva - ' + CONDO.nome_espaco + ' - ' + CONDO.nome + '\n'
             + 'Apto ' + apto + '\n'
             + 'Data: ' + fmtD(btn.dataset.shareDt) + '\n'
             + 'Horário: ' + btn.dataset.shareIni + '-' + btn.dataset.shareFim + '\n'
@@ -3554,12 +3762,12 @@ var sbCadastro = supabase.createClient(SURL, SKEY, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'cg-adm-cadastro' }
 });
 
-function carregarAptosAdmCad() {
+function carregarAptosAdmCad(forcar) {
   var sel = document.getElementById('adm-cad-apto');
-  if(!sel || sel.options.length) return;
+  if(!sel || (sel.options.length && !forcar)) return;
   sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
-    sel.innerHTML = (res.data||[]).map(function(u) {
-      return '<option value="'+u.id+'">'+esc(u.codigo)+'</option>';
+    sel.innerHTML = ordenarAptos(res.data).map(function(u) {
+      return '<option value="'+esc(u.id)+'">'+esc(u.codigo)+'</option>';
     }).join('');
   });
 }
@@ -3618,9 +3826,206 @@ document.getElementById('btn-adm-cad').addEventListener('click', function() {
   });
 });
 
+// -- DADOS DO CONDOMÍNIO (admin) ---------------------------------
+function preencherFormCondo() {
+  condominioPronto.then(function() {
+    var set = function(id, v) { var el = document.getElementById(id); if(el) el.value = v || ''; };
+    set('cdo-nome', CONDO.nome);
+    set('cdo-subtitulo', CONDO.subtitulo);
+    set('cdo-espaco', CONDO.nome_espaco);
+    set('cdo-cnpj', CONDO.cnpj);
+    set('cdo-endereco', CONDO.endereco);
+    set('cdo-enc-nome', CONDO.encarregado_nome);
+    set('cdo-enc-email', CONDO.encarregado_email);
+    set('cdo-locais', (CONDO.locais_ocorrencia || []).join('\n'));
+    var info = document.getElementById('cdo-politica-info');
+    if(info) info.textContent = 'Política de Privacidade: versão ' + CONDO.politica_versao
+      + (CONDO.politica_atualizada_em ? ', de ' + fmtD(CONDO.politica_atualizada_em) : '')
+      + (CONDO.encarregado_email ? '' : ' — preencha o e-mail do encarregado.');
+  });
+}
+
+function salvarCondominio(extra) {
+  var val = function(id) { return (document.getElementById(id).value || '').trim(); };
+  var dados = {
+    id: 1,
+    nome: val('cdo-nome') || CONDO.nome,
+    subtitulo: val('cdo-subtitulo'),
+    nome_espaco: val('cdo-espaco') || CONDO.nome_espaco,
+    cnpj: val('cdo-cnpj') || null,
+    endereco: val('cdo-endereco') || null,
+    encarregado_nome: val('cdo-enc-nome') || null,
+    encarregado_email: val('cdo-enc-email') || null,
+    locais_ocorrencia: val('cdo-locais').split('\n').map(function(s){ return s.trim(); }).filter(Boolean),
+    updated_at: new Date().toISOString()
+  };
+  if(extra) Object.assign(dados, extra);
+  return sb.from('condominio').upsert(dados).select().single().then(function(r) {
+    if(r.error) { toast('Erro ao salvar: ' + r.error.message); return false; }
+    Object.assign(CONDO, r.data);
+    aplicarCondominio();
+    preencherFormCondo();
+    return true;
+  });
+}
+
+document.getElementById('btn-salvar-condo').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  salvarCondominio().then(function(ok) { if(ok) toast('Dados do condomínio salvos.'); });
+});
+document.getElementById('btn-ver-politica').addEventListener('click', abrirPolitica);
+document.getElementById('btn-nova-versao-politica').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  if(!confirm('Publicar uma nova versão da Política de Privacidade?\n\nTodos os moradores (inclusive você) terão que aceitá-la de novo no próximo acesso.')) return;
+  salvarCondominio({
+    politica_versao: (parseInt(CONDO.politica_versao) || 1) + 1,
+    politica_atualizada_em: ts()
+  }).then(function(ok) {
+    if(ok) { toast('Nova versão publicada.'); verificarAceiteLgpd(); }
+  });
+});
+
+// -- APARTAMENTOS (admin) ----------------------------------------
+function renderAptos() {
+  var el = document.getElementById('lista-aptos');
+  if(!el) return;
+  sb.from('unidades').select('id,codigo').order('codigo').then(function(res) {
+    var lista = ordenarAptos(res.data);
+    var badge = document.getElementById('badge-aptos');
+    if(badge) badge.textContent = lista.length;
+    el.innerHTML = lista.length ? lista.map(function(u) {
+      return '<span class="badge" style="display:inline-flex;align-items:center;gap:4px">'+esc(u.codigo)
+        + '<span data-del-apto="'+esc(u.id)+'" data-cod="'+esc(u.codigo)+'" style="cursor:pointer;opacity:.6" title="Remover">&times;</span></span>';
+    }).join('') : '<div style="font-size:11px;color:var(--t2)">Nenhum apartamento cadastrado.</div>';
+    el.querySelectorAll('[data-del-apto]').forEach(function(x) {
+      x.addEventListener('click', function() {
+        if(!confirm('Remover o apartamento ' + x.dataset.cod + '?')) return;
+        sb.from('unidades').delete().eq('id', x.dataset.delApto).then(function(r) {
+          if(r.error) { toast('Não foi possível remover: o apartamento tem moradores ou registros vinculados.'); return; }
+          toast('Apartamento removido.');
+          renderAptos(); carregarAptosAdmCad(true);
+        });
+      });
+    });
+  });
+}
+
+function codigosDigitados() {
+  var vistos = {};
+  return document.getElementById('apt-novos').value.split(/[\n,;]+/)
+    .map(function(s){ return s.trim().toUpperCase(); })
+    .filter(function(s){ if(!s || vistos[s]) return false; vistos[s] = true; return true; });
+}
+document.getElementById('apt-novos').addEventListener('input', function() {
+  var n = codigosDigitados().length;
+  document.getElementById('apt-preview').textContent = n ? n + ' apartamento(s) na lista.' : '';
+});
+
+document.getElementById('btn-gerar-aptos').addEventListener('click', function() {
+  var bloco = document.getElementById('apt-gen-bloco').value.trim().toUpperCase();
+  var ini = parseInt(document.getElementById('apt-gen-ini').value);
+  var fim = parseInt(document.getElementById('apt-gen-fim').value);
+  var finais = document.getElementById('apt-gen-finais').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  if(isNaN(ini) || isNaN(fim) || ini > fim || !finais.length) { toast('Informe andar inicial, andar final e os finais.'); return; }
+  if((fim - ini + 1) * finais.length > 2000) { toast('Lista grande demais. Gere por partes.'); return; }
+  var cods = [];
+  for(var a = ini; a <= fim; a++) {
+    finais.forEach(function(f) { cods.push((bloco ? bloco + '-' : '') + String(a) + f); });
+  }
+  var ta = document.getElementById('apt-novos');
+  ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + cods.join('\n');
+  ta.dispatchEvent(new Event('input'));
+});
+
+document.getElementById('btn-add-aptos').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  var cods = codigosDigitados();
+  if(!cods.length) { toast('Digite ou gere os códigos dos apartamentos.'); return; }
+  sb.from('unidades').select('codigo').then(function(ex) {
+    var existentes = {};
+    (ex.data || []).forEach(function(u) { existentes[String(u.codigo).toUpperCase()] = true; });
+    var novos = cods.filter(function(c) { return !existentes[c]; });
+    if(!novos.length) { toast('Todos esses apartamentos já existem.'); return; }
+    if(!confirm('Adicionar ' + novos.length + ' apartamento(s)?' + (novos.length < cods.length ? '\n(' + (cods.length - novos.length) + ' já existiam e serão ignorados)' : ''))) return;
+    sb.from('unidades').insert(novos.map(function(c) { return { codigo: c }; })).then(function(r) {
+      if(r.error) { toast('Erro: ' + r.error.message); return; }
+      document.getElementById('apt-novos').value = '';
+      document.getElementById('apt-preview').textContent = '';
+      toast(novos.length + ' apartamento(s) adicionado(s).');
+      renderAptos(); carregarAptosAdmCad(true);
+    });
+  });
+});
+
+// -- BACKUP (admin) ----------------------------------------------
+var TABELAS_BACKUP = ['condominio', 'configuracoes', 'unidades', 'moradores', 'espacos', 'modalidades',
+  'bloqueios', 'reservas', 'convites_reserva', 'lista_espera', 'solicitacoes_dispensa',
+  'avisos', 'leituras_avisos', 'ocorrencias', 'mensagens_ocorrencia', 'achados_perdidos', 'placares'];
+
+function atualizarStatusBackup() {
+  var el = document.getElementById('backup-status');
+  if(!el) return;
+  var ultimo = null;
+  try { ultimo = localStorage.getItem('cg_ultimo_backup'); } catch(e) {}
+  if(!ultimo) { el.innerHTML = '<span style="color:var(--amt)">Nenhum backup feito neste aparelho.</span>'; return; }
+  var dias = Math.floor((Date.now() - new Date(ultimo).getTime()) / 86400000);
+  var txt = 'Último backup neste aparelho: ' + new Date(ultimo).toLocaleDateString('pt-BR')
+    + (dias === 0 ? ' (hoje)' : ' (há ' + dias + ' dia' + (dias > 1 ? 's' : '') + ')');
+  el.innerHTML = '<span style="color:' + (dias > 7 ? 'var(--rdt)' : 'var(--t2)') + '">' + esc(txt)
+    + (dias > 7 ? ' — faça um novo backup.' : '') + '</span>';
+}
+
+function baixarTabela(nome) {
+  var linhas = [], passo = 1000;
+  function pagina(de) {
+    return sb.from(nome).select('*').range(de, de + passo - 1).then(function(r) {
+      if(r.error) return { erro: r.error.message, linhas: linhas };
+      linhas = linhas.concat(r.data || []);
+      if((r.data || []).length === passo) return pagina(de + passo);
+      return { linhas: linhas };
+    });
+  }
+  return pagina(0);
+}
+
+document.getElementById('btn-exportar-backup').addEventListener('click', function() {
+  if(!requireAdmin()) return;
+  var btnHtml = '<i class="ti ti-download" aria-hidden="true"></i>Exportar backup';
+  setLoading('btn-exportar-backup', true);
+  var backup = { gerado_em: new Date().toISOString(), condominio: CONDO.nome, gerado_por: morador.email, tabelas: {}, erros: {} };
+  var i = 0;
+  function proxima() {
+    if(i >= TABELAS_BACKUP.length) {
+      var blob = new Blob([JSON.stringify(backup, null, 1)], { type: 'application/json' });
+      var a = document.createElement('a');
+      var slug = CONDO.nome.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase();
+      a.href = URL.createObjectURL(blob);
+      a.download = 'backup-' + slug + '-' + ts() + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 5000);
+      try { localStorage.setItem('cg_ultimo_backup', new Date().toISOString()); } catch(e) {}
+      setLoading('btn-exportar-backup', false, btnHtml);
+      var nErros = Object.keys(backup.erros).length;
+      toast(nErros ? 'Backup baixado, mas ' + nErros + ' tabela(s) falharam (veja "erros" no arquivo).' : 'Backup baixado com sucesso!');
+      atualizarStatusBackup();
+      return;
+    }
+    var nome = TABELAS_BACKUP[i++];
+    baixarTabela(nome).then(function(res) {
+      backup.tabelas[nome] = res.linhas;
+      if(res.erro) backup.erros[nome] = res.erro;
+      proxima();
+    });
+  }
+  proxima();
+});
+
 function renderConfig() {
   if(!requireAdmin()) return;
   carregarAptosAdmCad();
+  preencherFormCondo();
+  renderAptos();
+  atualizarStatusBackup();
   var sl = function(id, val) {
     var el = document.getElementById(id); if(!el) return;
     var s = String(val);
@@ -4669,7 +5074,7 @@ if(tglPush) {
         if(perm === 'granted') {
           tglPush.classList.add('on');
           toast('Notificações ativadas!');
-          new Notification('Casa Grande de SantAnna', {body:'Notificações ativadas com sucesso!'});
+          new Notification(CONDO.nome, {body:'Notificações ativadas com sucesso!'});
         } else {
           tglPush.classList.remove('on');
           toast('Permissão negada.');
@@ -5557,4 +5962,18 @@ function renderRanking(modo) {
           var venceu = p.vencedor === 'casa';
           var empatou = p.vencedor === 'empate';
           var bcls = venceu ? 'b-teal' : empatou ? 'b-warn' : 'b-danger';
-          var btxt = venceu ? 'Vitoria' : empatou ?
+          var btxt = venceu ? 'Vitoria' : empatou ? 'Empate' : 'Derrota';
+          html += '<div class="res-card confirmada" style="' + (isMeu ? 'background:var(--vl)' : '') + '">';
+          html += '<div class="res-top"><div class="res-data">Apto ' + cod + (p.adversario_apto ? ' x ' + esc(p.adversario_apto) : '') + '</div><span class="badge ' + bcls + '">' + btxt + '</span></div>';
+          html += '<div class="res-info">' + esc(p.placar_casa) + ' x ' + esc(p.placar_visitante) + ' &bull; ' + esc(p.modalidade || '---') + '</div>';
+          html += '</div>';
+        });
+        el.innerHTML = html;
+      });
+  }
+}
+
+</script>
+
+</body>
+</html>
