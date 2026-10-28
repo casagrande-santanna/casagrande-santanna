@@ -9,9 +9,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CG Quadra">
 <title>Casa Grande de Sant'Anna</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<!-- Versões fixas + SRI: o navegador recusa o arquivo se ele for alterado na origem.
+     Para atualizar uma biblioteca, troque a versão E recalcule o "integrity". -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.49.0/dist/tabler-icons.min.css" integrity="sha384-IcAOG/1tqv9Qnam+j3mZYPAFcNQMnQpMcafc8Nsvd44AUeTCzhUzdQiJkrROmqW6" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.min.js" integrity="sha384-dl/4LkSyQ4uEucc48NM6VDZLAjLLq9yMzZ5JLXumBq7Ld33XBof73hseOqPhO89+" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" integrity="sha384-c9d8RFSL+u3exBOJ4Yp3HUJXS4znl9f+z66d1y54ig+ea249SpqR+w1wyvXz/lk+" crossorigin="anonymous"></script>
 <style>
 :root{
   --v:#27500A;--vl:#EAF3DE;--vm:#3B6D11;
@@ -776,7 +778,7 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
         <button class="btn-s" id="btn-desblk-emergencial" style="width:100%;margin-top:6px;display:none;border-color:var(--rdb);color:var(--rdt)"><i class="ti ti-lock-open" aria-hidden="true"></i>Remover bloqueio emergencial</button>
       </div>
       <div class="card" style="background:var(--rd);border-color:var(--rdb);border-width:2px">
-        <div class="card-title" style="color:var(--rdt)"><i class="ti ti-nuclear" aria-hidden="true" style="color:var(--rdt)"></i>Zerar aplicativo</div>
+        <div class="card-title" style="color:var(--rdt)"><i class="ti ti-radioactive" aria-hidden="true" style="color:var(--rdt)"></i>Zerar aplicativo</div>
         <div style="font-size:11px;color:var(--rdt);margin-bottom:10px;line-height:1.5">Remove <strong style="font-weight:600">TODAS</strong> as reservas, avisos, ocorrencias, achados, placares, convites e suspensoes. Mantem moradores e configuracoes. Ação irreversivel.</div>
         <button class="btn-d" id="btn-reset-app" style="width:100%"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Zerar tudo agora</button>
       </div>
@@ -2757,59 +2759,17 @@ function doCheckin(id) {
     });
 }
 
-// Verifica e aplica suspensão por fair play após uma falta (reserva expirada)
+// Após uma falta: o banco calcula as faltas e aplica a suspensão
+// (regras_reservas_servidor.sql). Aqui só relemos o cadastro e avisamos.
 function verificarFairPlay(unidadeId) {
-  if(!appCfg.fair_play_ativo) return;
-  // Sempre busca configuração atualizada do banco antes de verificar
-  sb.from('configuracoes').select('faltas_suspensao,suspensao_dias,fair_play_ativo').limit(1).maybeSingle().then(function(cfgRes) {
-    var cfg = cfgRes.data || {};
-    var ativo = cfg.fair_play_ativo !== false && appCfg.fair_play_ativo !== false;
-    if(!ativo) return;
-    var limiteFaltas = parseInt(cfg.faltas_suspensao || appCfg.faltas_suspensao) || 2;
-    var diasSusp = parseInt(cfg.suspensao_dias || appCfg.suspensao_dias) || 15;
-    // Sincroniza appCfg com valor real do banco
-    if(cfg.faltas_suspensao) appCfg.faltas_suspensao = limiteFaltas;
-    if(cfg.suspensao_dias) appCfg.suspensao_dias = diasSusp;
-
-    var mesAtual = ts().slice(0,7);
-    // Só conta faltas da quadra (não academia) - usa espaco_id ou tipo_reserva
-    var faltasQ = sb.from('reservas')
-      .select('id', {count:'exact', head:true})
-      .eq('unidade_id', unidadeId)
-      .eq('status', 'expirada')
-      .gte('data_reserva', mesAtual+'-01')
-      .lte('data_reserva', mesAtual+'-31');
-    if(espacoQuadraId) faltasQ = faltasQ.eq('espaco_id', espacoQuadraId);
-    faltasQ.then(function(rc) {
-        var totalFaltas = rc.count || 0;
-        // Atualiza faltas_mes no morador independente de suspender
-        sb.from('moradores').update({faltas_mes: totalFaltas})
-          .eq('unidade_id', unidadeId).then(function(){});
-        if(totalFaltas >= limiteFaltas) {
-          // Verifica se o morador não foi liberado manualmente (suspenso_ate no passado ou nulo)
-          sb.from('moradores').select('status,suspenso_ate,faltas_mes')
-            .eq('unidade_id', unidadeId).single().then(function(mr) {
-              if(!mr.data) return;
-              var hoje = new Date().toISOString().slice(0,10);
-              var foiLiberadoManualmente = mr.data.status === 'ativo' && mr.data.faltas_mes === 0;
-              // Não re-suspende se admin ja liberou (faltas_mes foi zerado manualmente)
-              if(foiLiberadoManualmente) return;
-              if(mr.data.status === 'ativo') {
-                var ate = new Date();
-                ate.setDate(ate.getDate() + diasSusp);
-                var ateStr = ate.toISOString().slice(0,10);
-                sb.from('moradores')
-                  .update({status:'suspenso', suspenso_ate: ateStr, faltas_mes: totalFaltas})
-                  .eq('unidade_id', unidadeId)
-                  .then(function(upd) {
-                    if(!upd.error) {
-                      toast('Atenção: apartamento suspenso por '+diasSusp+' dias ('+totalFaltas+'/'+limiteFaltas+' faltas este mes).');
-                    }
-                  });
-              }
-            });
-        }
-      });
+  if(!morador || morador.unidade_id !== unidadeId) return;
+  sb.from('moradores').select('status,suspenso_ate,faltas_mes').eq('id', morador.id).maybeSingle().then(function(mr) {
+    if(!mr.data) return;
+    var eraAtivo = morador.status === 'ativo';
+    Object.assign(morador, mr.data);
+    if(eraAtivo && mr.data.status === 'suspenso') {
+      toast('Atenção: apartamento suspenso até ' + fmtD(mr.data.suspenso_ate) + ' por faltas (' + mr.data.faltas_mes + ' este mês).');
+    }
   });
 }
 
