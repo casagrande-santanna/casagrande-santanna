@@ -1423,6 +1423,7 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
       <input type="checkbox" id="aceite-lgpd-chk" style="margin-top:2px;accent-color:var(--v)">
       <span>Li e estou ciente da Política de Privacidade.</span>
     </label>
+    <div id="aceite-lgpd-err" style="display:none;font-size:11px;color:var(--rdt);background:var(--rd);border-radius:6px;padding:6px 8px;margin-bottom:6px"></div>
     <div class="macts">
       <button class="btn-s" id="btn-recusar-lgpd">Recusar e sair</button>
       <button class="btn-p" id="btn-aceitar-lgpd"><i class="ti ti-check" aria-hidden="true"></i>Aceitar e continuar</button>
@@ -1687,9 +1688,18 @@ function verificarAceiteLgpd() {
 }
 document.getElementById('btn-aceitar-lgpd').addEventListener('click', function() {
   if(!document.getElementById('aceite-lgpd-chk').checked) { toast('Marque que leu a política para continuar.'); return; }
+  var errEl = document.getElementById('aceite-lgpd-err');
+  errEl.style.display = 'none';
   var upd = { lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString(), lgpd_versao: parseInt(CONDO.politica_versao) || 1 };
-  sb.from('moradores').update(upd).eq('id', morador.id).then(function(r) {
-    if(r.error) { toast('Erro ao registrar aceite: ' + r.error.message); return; }
+  sb.from('moradores').update(upd).eq('id', morador.id).select('id').then(function(r) {
+    var msg = r.error ? r.error.message
+      : (!r.data || !r.data.length) ? 'o banco não permitiu atualizar o seu cadastro (0 linhas alteradas).' : null;
+    if(msg) {
+      console.error('Aceite LGPD:', r.error || r);
+      errEl.textContent = 'Erro ao registrar aceite: ' + msg + ' Tire um print desta mensagem e envie ao suporte.';
+      errEl.style.display = 'block';
+      return;
+    }
     Object.assign(morador, upd);
     fecharModal('m-aceite-lgpd');
     toast('Obrigado! Aceite registrado.');
