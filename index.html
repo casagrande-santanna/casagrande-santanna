@@ -2312,10 +2312,14 @@ function selData(ds) {
   if(espacoQuadraId) {
     resQ = resQ.or('espaco_id.eq.' + espacoQuadraId + ',espaco_id.is.null');
   }
-  resQ.then(function(res) {
+  // Eventos da agenda do Google (espelho sincronizado pelo banco)
+  var googleQ = sb.from('agenda_google').select('hora_inicio,hora_fim,titulo').eq('data', ds).order('hora_inicio');
+  Promise.all([resQ, googleQ]).then(function(resps) {
+      var res = resps[0];
       // Ignora resposta se usuario ja selecionou outra data
       if(selDate !== ds) return;
       var reservasDia = res.data || [];
+      var googleDia = resps[1].data || [];
       var agora = new Date();
       var agoraMin = agora.getHours() * 60 + agora.getMinutes();
       var ehHoje = (ds === ts());
@@ -2341,6 +2345,17 @@ function selData(ds) {
           var sStr = slot.substring(0,5);
           return sStr >= ini && sStr < fim;
         });
+
+        // Evento do Google que ocupa qualquer parte desta hora
+        var sFimStr = addH(slot.substring(0,5), 1);
+        var gEv = !r && googleDia.find(function(g) {
+          return (g.hora_inicio || '').substring(0,5) < sFimStr && (g.hora_fim || '').substring(0,5) > slot.substring(0,5);
+        });
+        if(gEv) {
+          html += '<div class="slot ocupado" data-action="google" data-titulo="'+esc(gEv.titulo)+'" title="'+esc(gEv.titulo)+'">';
+          html += '<div class="sh">'+slot+'</div><div class="sl">Agenda</div></div>';
+          return;
+        }
 
         // Mostra slot se: não começou ainda, OU já começou mas tem pelo menos 30min restantes
         var slotFimMin = slotMin + 60; // slot padrão de 1h
@@ -2368,7 +2383,8 @@ function selData(ds) {
       sg.querySelectorAll('.slot').forEach(function(el) {
         el.addEventListener('click', function() {
           var act = el.dataset.action;
-          if(act === 'livre') abrirModalReserva(el.dataset.ds, el.dataset.slot);
+          if(act === 'google') toast('Reservado na agenda do condomínio: ' + (el.dataset.titulo || ''));
+          else if(act === 'livre') abrirModalReserva(el.dataset.ds, el.dataset.slot);
           else if(act && act.indexOf('meu_') === 0) abrirModalCancelar(act.replace('meu_',''));
           else if(act && act.indexOf('espera_') === 0) abrirListaEspera(el.dataset.ds, el.dataset.slot, act.replace('espera_',''));
         });
@@ -2376,12 +2392,16 @@ function selData(ds) {
 
       var cardDia = document.getElementById('card-reservas-dia');
       var listaDia = document.getElementById('lista-reservas-dia');
-      if(reservasDia.length > 0) {
+      if(reservasDia.length > 0 || googleDia.length > 0) {
         cardDia.style.display = 'block';
         listaDia.innerHTML = reservasDia.map(function(r) {
           return '<div style="font-size:11px;padding:4px 0;border-bottom:0.5px solid var(--br)">'
             +'<b>'+(r.slot_inicio||'').substring(0,5)+'</b> - Apto '+(r.unidade_id ? r.unidade_id.slice(0,8) : '---')
             +'</div>';
+        }).join('') + googleDia.map(function(g) {
+          return '<div style="font-size:11px;padding:4px 0;border-bottom:0.5px solid var(--br)">'
+            +'<b>'+(g.hora_inicio||'').substring(0,5)+'–'+(g.hora_fim||'').substring(0,5)+'</b> - '+esc(g.titulo)
+            +' <span class="badge" style="font-size:9px">Google Agenda</span></div>';
         }).join('');
       } else {
         cardDia.style.display = 'none';
