@@ -942,6 +942,13 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
           <option value="inquilino">Morador (inquilino)</option>
           <option value="admin">Administrador</option>
         </select></div>
+        <label style="display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--t1);margin:2px 0 8px;cursor:pointer">
+          <input type="checkbox" id="adm-cad-menor" data-menor-toggle="adm-cad" style="accent-color:var(--v)"> Menor de 18 anos
+        </label>
+        <div class="form-row" id="adm-cad-resp-wrap" style="display:none">
+          <label class="form-lbl">Responsável legal que autorizou</label>
+          <input type="text" class="form-in" id="adm-cad-resp" placeholder="Nome completo do pai, mãe ou tutor">
+        </div>
         <button class="btn-p" id="btn-adm-cad" style="width:100%"><i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar</button>
         <div style="font-size:10.5px;color:var(--t2);margin-top:8px">O cadastro já entra aprovado. O morador recebe um e-mail para criar a própria senha.</div>
       </div>
@@ -1393,6 +1400,14 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
     <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="cad-email"></div>
     <div class="form-row"><label class="form-lbl">Senha</label><input type="password" class="form-in" id="cad-pass" placeholder="Mínimo 6 caracteres"></div>
     <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="cad-apto"></select></div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--t1);margin:2px 0 8px;cursor:pointer">
+      <input type="checkbox" id="cad-menor" data-menor-toggle="cad" style="accent-color:var(--v)"> Tenho menos de 18 anos
+    </label>
+    <div class="form-row" id="cad-resp-wrap" style="display:none">
+      <label class="form-lbl">Nome do responsável legal (pai, mãe ou tutor)</label>
+      <input type="text" class="form-in" id="cad-resp" placeholder="Nome completo do responsável">
+      <div style="font-size:10px;color:var(--t2);margin-top:4px">A administração confirma a autorização do responsável antes de liberar o acesso (LGPD, art. 14).</div>
+    </div>
     <label style="display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--t2);margin:4px 0 10px;cursor:pointer">
       <input type="checkbox" id="cad-lgpd" style="margin-top:2px;accent-color:var(--v)">
       <span>Li e aceito a <span class="link-privacidade" style="text-decoration:underline;cursor:pointer;color:var(--v)">Política de Privacidade</span>.</span>
@@ -1412,6 +1427,14 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
     <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="ccad-email" disabled></div>
     <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="ccad-nome" placeholder="Seu nome completo"></div>
     <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="ccad-apto"></select></div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--t1);margin:2px 0 8px;cursor:pointer">
+      <input type="checkbox" id="ccad-menor" data-menor-toggle="ccad" style="accent-color:var(--v)"> Tenho menos de 18 anos
+    </label>
+    <div class="form-row" id="ccad-resp-wrap" style="display:none">
+      <label class="form-lbl">Nome do responsável legal (pai, mãe ou tutor)</label>
+      <input type="text" class="form-in" id="ccad-resp" placeholder="Nome completo do responsável">
+      <div style="font-size:10px;color:var(--t2);margin-top:4px">A administração confirma a autorização do responsável antes de liberar o acesso (LGPD, art. 14).</div>
+    </div>
     <label style="display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--t2);margin:4px 0 10px;cursor:pointer">
       <input type="checkbox" id="ccad-lgpd" style="margin-top:2px;accent-color:var(--v)">
       <span>Li e aceito a <span class="link-privacidade" style="text-decoration:underline;cursor:pointer;color:var(--v)">Política de Privacidade</span>.</span>
@@ -1744,10 +1767,14 @@ function textoPolitica() {
     + '<p>Você pode pedir confirmação e acesso aos seus dados, correção, anonimização ou eliminação de dados desnecessários, portabilidade, '
     + 'informação sobre compartilhamento e revisão desta política. Fale com: '+contato+'. '
     + 'Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p>'
-    + h('9. Segurança')
+    + h('9. Crianças e adolescentes (LGPD, art. 14)')
+    + '<p>Moradores com menos de 18 anos só têm o acesso liberado depois que a administração confirma, com o pai, a mãe ou o responsável legal, '
+    + 'a autorização para o cadastro e o tratamento dos dados. Ficam registrados o nome do responsável, a data da confirmação e quem a fez. '
+    + 'São tratados apenas os dados necessários ao uso das áreas comuns, e o responsável pode pedir a correção ou a exclusão a qualquer momento.</p>'
+    + h('10. Segurança')
     + '<p>Conexão criptografada (HTTPS), senhas guardadas de forma protegida pelo provedor de autenticação e regras de acesso no banco de dados '
     + 'que limitam cada usuário aos dados que lhe dizem respeito. Em caso de incidente de segurança relevante, os titulares e a ANPD serão comunicados.</p>'
-    + h('10. Alterações')
+    + h('11. Alterações')
     + '<p>Quando esta política mudar, você será avisado no aplicativo e precisará aceitá-la novamente.</p>';
 }
 
@@ -1848,6 +1875,31 @@ function bloquearSessao(msg) {
   });
 }
 
+// -- MENORES DE 18 ANOS (LGPD, art. 14) --------------------------
+// Caixa "menor de 18" mostra o campo do responsável legal (prefixo: cad, ccad, adm-cad)
+document.querySelectorAll('[data-menor-toggle]').forEach(function(chk) {
+  chk.addEventListener('change', function() {
+    var wrap = document.getElementById(chk.dataset.menorToggle + '-resp-wrap');
+    if(wrap) wrap.style.display = chk.checked ? 'block' : 'none';
+  });
+});
+// Lê e valida os campos; devolve {dados} ou {erro}
+function lerMenor(prefixo) {
+  var chk = document.getElementById(prefixo + '-menor');
+  var menor = !!(chk && chk.checked);
+  var resp = ((document.getElementById(prefixo + '-resp') || {}).value || '').trim();
+  if(menor && resp.length < 5) return { erro: 'Informe o nome completo do responsável legal.' };
+  return { dados: { menor_idade: menor, responsavel_nome: menor ? resp : null } };
+}
+function limparMenor(prefixo) {
+  var chk = document.getElementById(prefixo + '-menor');
+  if(chk) chk.checked = false;
+  var resp = document.getElementById(prefixo + '-resp');
+  if(resp) resp.value = '';
+  var wrap = document.getElementById(prefixo + '-resp-wrap');
+  if(wrap) wrap.style.display = 'none';
+}
+
 // Login sem cadastro de morador (ex.: cadastro antigo que falhou no meio):
 // o próprio usuário completa e o cadastro vai para "Inscrições pendentes"
 var _ccadUser = null;
@@ -1859,6 +1911,7 @@ function abrirCompletarCadastro(user) {
   document.getElementById('ccad-nome').value = '';
   document.getElementById('ccad-lgpd').checked = false;
   document.getElementById('ccad-err').style.display = 'none';
+  limparMenor('ccad');
   var sel = document.getElementById('ccad-apto');
   sel.innerHTML = '<option value="">Carregando...</option>';
   abrirModal('m-completar-cad');
@@ -1880,15 +1933,17 @@ document.getElementById('btn-ccad-enviar').addEventListener('click', function() 
   var falha = function(msg) { err.textContent = msg; err.style.display = 'block'; };
   if(!_ccadUser) { falha('Sessão expirada. Entre de novo.'); return; }
   if(nome.length < 3 || !unidadeId) { falha('Informe seu nome completo e o apartamento.'); return; }
+  var mn = lerMenor('ccad');
+  if(mn.erro) { falha(mn.erro); return; }
   if(!document.getElementById('ccad-lgpd').checked) { falha('É necessário aceitar a Política de Privacidade.'); return; }
   setLoading('btn-ccad-enviar', true);
-  sb.from('moradores').insert({
+  sb.from('moradores').insert(Object.assign({
     auth_user_id: _ccadUser.id, unidade_id: unidadeId, nome: nome,
     email: (_ccadUser.email || '').toLowerCase(),
     tipo: 'proprietario', status: 'pendente',
     lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString(),
     lgpd_versao: parseInt(CONDO.politica_versao) || 1
-  }).then(function(r) {
+  }, mn.dados)).then(function(r) {
     setLoading('btn-ccad-enviar', false, '<i class="ti ti-send" aria-hidden="true"></i>Enviar cadastro');
     if(r.error) { falha('Não foi possível enviar: ' + r.error.message); return; }
     fecharModal('m-completar-cad');
@@ -2045,6 +2100,7 @@ document.getElementById('link-cadastro').addEventListener('click', function() {
   var sel = document.getElementById('cad-apto');
   sel.innerHTML = '<option value="">Carregando...</option>';
   document.getElementById('cad-lgpd').checked = false;
+  limparMenor('cad');
   abrirModal('m-cadastro');
   sb.from('unidades').select('codigo').order('codigo').then(function(res) {
     var lista = ordenarAptos(res.data);
@@ -2064,22 +2120,31 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
   var err = document.getElementById('cad-err');
   err.style.display = 'none';
   if(!nome||!email||!pass||!aptoCod) { err.textContent='Preencha todos os campos.'; err.style.display='block'; return; }
+  var mn = lerMenor('cad');
+  if(mn.erro) { err.textContent = mn.erro; err.style.display = 'block'; return; }
   if(!document.getElementById('cad-lgpd').checked) { err.textContent='É necessário aceitar a Política de Privacidade.'; err.style.display='block'; return; }
   sb.auth.signUp({email:email, password:pass}).then(function(res) {
     if(res.error) { err.textContent=res.error.message; err.style.display='block'; return; }
     if(!res.data.user) { err.textContent='Confirme seu e-mail para continuar.'; err.style.display='block'; return; }
+    if(!res.data.session) {
+      // Supabase exige confirmação de e-mail: sem sessão não dá para gravar o morador agora.
+      // Ao entrar depois de confirmar, o site pede para completar o cadastro.
+      fecharModal('m-cadastro');
+      toast('Login criado! Confirme seu e-mail pelo link enviado e depois entre para completar o cadastro.');
+      return;
+    }
     var uid = res.data.user.id;
     sb.from('unidades').select('id').eq('codigo',aptoCod).single().then(function(r2) {
       var unidadeId = r2.data ? r2.data.id : null;
       if(!unidadeId) { err.textContent='Apartamento não encontrado.'; err.style.display='block'; return; }
-      sb.from('moradores').insert({
+      sb.from('moradores').insert(Object.assign({
         auth_user_id: uid, unidade_id: unidadeId,
-        nome: nome, email: email,
+        nome: nome, email: email.toLowerCase(),
         tipo: 'proprietario', status: 'pendente',
         lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString(),
         lgpd_versao: parseInt(CONDO.politica_versao) || 1
-      }).then(function(r3) {
-        if(r3.error) { err.textContent='Erro: '+r3.error.message; err.style.display='block'; return; }
+      }, mn.dados)).then(function(r3) {
+        if(r3.error) { err.textContent='Erro: '+r3.error.message+' — entre com seu e-mail e senha para completar o cadastro.'; err.style.display='block'; return; }
         fecharModal('m-cadastro');
         toast('Cadastro enviado para aprovação do administrador.');
       });
@@ -3930,6 +3995,16 @@ document.getElementById('btn-adm-cad').addEventListener('click', function() {
   var tipo = document.getElementById('adm-cad-tipo').value;
   if(!nome || !email || !unidadeId) { toast('Preencha nome, e-mail e apartamento.'); return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('E-mail inválido.'); return; }
+  var mn = lerMenor('adm-cad');
+  if(mn.erro) { toast(mn.erro); return; }
+  var dadosMenor = mn.dados;
+  if(dadosMenor.menor_idade) {
+    if(tipo === 'admin') { toast('Menor de idade não pode ser administrador.'); return; }
+    if(!confirm('Confirma que ' + dadosMenor.responsavel_nome + ', responsável legal de ' + nome
+      + ', autorizou o cadastro e o tratamento dos dados do menor (LGPD, art. 14)?')) return;
+    dadosMenor.responsavel_confirmado_em = new Date().toISOString();
+    dadosMenor.responsavel_confirmado_por = morador.id;
+  }
   var btnHtml = '<i class="ti ti-user-plus" aria-hidden="true"></i>Cadastrar';
   setLoading('btn-adm-cad', true);
   var fim = function(msg) { setLoading('btn-adm-cad', false, btnHtml); if(msg) toast(msg); };
@@ -3944,22 +4019,28 @@ document.getElementById('btn-adm-cad').addEventListener('click', function() {
         // Login já existe sem cadastro de morador: vincula pelo servidor
         sb.rpc('admin_vincular_login', { p_email: email, p_unidade: unidadeId, p_nome: nome, p_tipo: tipo }).then(function(rv) {
           if(rv.error) { fim('Este e-mail já tem login, mas não foi possível vincular: ' + rv.error.message); return; }
-          document.getElementById('adm-cad-nome').value = '';
-          document.getElementById('adm-cad-email').value = '';
-          fim('Este e-mail já tinha login: cadastro vinculado! O morador entra com a senha que já usa (ou "Esqueci minha senha").');
-          renderConfig();
+          var concluir = function() {
+            document.getElementById('adm-cad-nome').value = '';
+            document.getElementById('adm-cad-email').value = '';
+            limparMenor('adm-cad');
+            fim('Este e-mail já tinha login: cadastro vinculado! O morador entra com a senha que já usa (ou "Esqueci minha senha").');
+            renderConfig();
+          };
+          if(dadosMenor.menor_idade) sb.from('moradores').update(dadosMenor).eq('id', rv.data).then(concluir);
+          else concluir();
         });
         return;
       }
       var precisaConfirmar = !res.data.session;
       sbCadastro.auth.signOut();
-      sb.from('moradores').insert({
+      sb.from('moradores').insert(Object.assign({
         auth_user_id: user.id, unidade_id: unidadeId,
         nome: nome, email: email, tipo: tipo, status: 'ativo'
-      }).then(function(r) {
+      }, dadosMenor)).then(function(r) {
         if(r.error) { fim('Erro ao salvar cadastro: ' + r.error.message); return; }
         document.getElementById('adm-cad-nome').value = '';
         document.getElementById('adm-cad-email').value = '';
+        limparMenor('adm-cad');
         if(precisaConfirmar) {
           fim('Morador cadastrado! Ele recebeu um e-mail de confirmação e depois deve usar "Esqueci minha senha".');
           renderConfig();
@@ -4239,9 +4320,14 @@ function renderConfig() {
       html += '<div style="border:0.5px solid var(--br);border-radius:8px;padding:10px 12px;margin-bottom:7px">';
       html += '<div style="font-size:12px;font-weight:600">'+esc(m.nome)+'</div>';
       html += '<div style="font-size:10.5px;color:var(--t2)">'+esc(m.email)+' - Apto '+esc(cod)+'</div>';
+      if(m.menor_idade) {
+        html += '<div style="margin-top:6px;font-size:10.5px;background:var(--am);border-left:3px solid var(--amb);color:var(--amt);padding:6px 8px;border-radius:4px">'
+          + '<b>Menor de 18 anos.</b> Responsável informado: ' + esc(m.responsavel_nome || '—')
+          + '. Antes de aprovar, confirme com o responsável que ele autoriza o cadastro (LGPD, art. 14).</div>';
+      }
       html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">';
-      html += '<button class="btn-sm g" data-apr-id="'+m.id+'"><i class="ti ti-check" aria-hidden="true"></i>Aprovar</button>';
-      html += '<button class="btn-sm" style="background:var(--bl);border-color:var(--blb);color:var(--blt)" data-adm-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Aprovar como Admin</button>';
+      html += '<button class="btn-sm g" data-apr-id="'+m.id+'" data-menor="'+(m.menor_idade?'1':'')+'" data-nome="'+esc(m.nome)+'" data-resp="'+esc(m.responsavel_nome||'')+'"><i class="ti ti-check" aria-hidden="true"></i>Aprovar</button>';
+      if(!m.menor_idade) html += '<button class="btn-sm" style="background:var(--bl);border-color:var(--blb);color:var(--blt)" data-adm-id="'+m.id+'"><i class="ti ti-shield" aria-hidden="true"></i>Aprovar como Admin</button>';
       html += '<button class="btn-sm r" data-rej-id="'+m.id+'"><i class="ti ti-x" aria-hidden="true"></i>Rejeitar</button>';
       html += '</div></div>';
     });
@@ -4250,7 +4336,17 @@ function renderConfig() {
       lp.innerHTML = html;
       lp.querySelectorAll('[data-apr-id]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          sb.from('moradores').update({status:'ativo'}).eq('id',btn.dataset.aprId).then(function() { toast('Inscricao aprovada!'); renderConfig(); });
+          var upd = {status:'ativo'};
+          if(btn.dataset.menor) {
+            if(!confirm('Confirma que ' + (btn.dataset.resp || 'o responsável legal') + ', responsável por ' + btn.dataset.nome
+              + ', autorizou o cadastro e o tratamento dos dados do menor (LGPD, art. 14)?\n\nA confirmação fica registrada com data e o seu nome.')) return;
+            upd.responsavel_confirmado_em = new Date().toISOString();
+            upd.responsavel_confirmado_por = morador.id;
+          }
+          sb.from('moradores').update(upd).eq('id',btn.dataset.aprId).then(function(r) {
+            if(r.error) { toast('Erro ao aprovar: ' + r.error.message); return; }
+            toast('Inscricao aprovada!'); renderConfig();
+          });
         });
       });
       lp.querySelectorAll('[data-adm-id]').forEach(function(btn) {
