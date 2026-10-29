@@ -1498,8 +1498,17 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
   <script>
 
 if('serviceWorker' in navigator){
+  // Sempre procura uma versão nova do sw.js (sem cache) e recarrega uma vez
+  // quando ela assume, para ninguém ficar preso numa versão antiga do site
+  var _swTinhaControle = !!navigator.serviceWorker.controller;
+  var _swRecarregou = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    if(_swTinhaControle && !_swRecarregou) { _swRecarregou = true; window.location.reload(); }
+  });
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js')
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+      .then(function(reg) { reg.update(); })
+      .catch(function(){});
   })
 }
 
