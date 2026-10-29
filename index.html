@@ -1405,6 +1405,25 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
   </div>
 </div>
 
+<div class="modal-bg" id="m-completar-cad" data-bloqueante="1">
+  <div class="modal-card center">
+    <div class="mtitle"><i class="ti ti-user-edit" aria-hidden="true"></i> Complete seu cadastro</div>
+    <div class="msub">Seu login existe, mas o cadastro de morador não foi concluído. Informe seus dados para enviar à administração.</div>
+    <div class="form-row"><label class="form-lbl">E-mail</label><input type="email" class="form-in" id="ccad-email" disabled></div>
+    <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="ccad-nome" placeholder="Seu nome completo"></div>
+    <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="ccad-apto"></select></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--t2);margin:4px 0 10px;cursor:pointer">
+      <input type="checkbox" id="ccad-lgpd" style="margin-top:2px;accent-color:var(--v)">
+      <span>Li e aceito a <span class="link-privacidade" style="text-decoration:underline;cursor:pointer;color:var(--v)">Política de Privacidade</span>.</span>
+    </label>
+    <div class="login-err" id="ccad-err"></div>
+    <div class="macts">
+      <button class="btn-s" id="btn-ccad-sair">Sair</button>
+      <button class="btn-p" id="btn-ccad-enviar"><i class="ti ti-send" aria-hidden="true"></i>Enviar cadastro</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="m-privacidade" style="z-index:1001">
   <div class="modal-card center" style="max-height:90vh;display:flex;flex-direction:column">
     <div class="mhandle"></div>
@@ -1829,6 +1848,54 @@ function bloquearSessao(msg) {
   });
 }
 
+// Login sem cadastro de morador (ex.: cadastro antigo que falhou no meio):
+// o próprio usuário completa e o cadastro vai para "Inscrições pendentes"
+var _ccadUser = null;
+function abrirCompletarCadastro(user) {
+  _ccadUser = user;
+  document.getElementById('app-main').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('ccad-email').value = user.email || '';
+  document.getElementById('ccad-nome').value = '';
+  document.getElementById('ccad-lgpd').checked = false;
+  document.getElementById('ccad-err').style.display = 'none';
+  var sel = document.getElementById('ccad-apto');
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  abrirModal('m-completar-cad');
+  sb.from('unidades').select('id,codigo').then(function(r) {
+    sel.innerHTML = '<option value="">Selecione</option>' + ordenarAptos(r.data).map(function(u) {
+      return '<option value="'+esc(u.id)+'">'+esc(u.codigo)+'</option>';
+    }).join('');
+  });
+}
+document.getElementById('btn-ccad-sair').addEventListener('click', function() {
+  fecharModal('m-completar-cad');
+  bloquearSessao('Cadastro não concluído. Entre de novo quando quiser completar.');
+});
+document.getElementById('btn-ccad-enviar').addEventListener('click', function() {
+  var err = document.getElementById('ccad-err');
+  var nome = document.getElementById('ccad-nome').value.trim();
+  var unidadeId = document.getElementById('ccad-apto').value;
+  err.style.display = 'none';
+  var falha = function(msg) { err.textContent = msg; err.style.display = 'block'; };
+  if(!_ccadUser) { falha('Sessão expirada. Entre de novo.'); return; }
+  if(nome.length < 3 || !unidadeId) { falha('Informe seu nome completo e o apartamento.'); return; }
+  if(!document.getElementById('ccad-lgpd').checked) { falha('É necessário aceitar a Política de Privacidade.'); return; }
+  setLoading('btn-ccad-enviar', true);
+  sb.from('moradores').insert({
+    auth_user_id: _ccadUser.id, unidade_id: unidadeId, nome: nome,
+    email: (_ccadUser.email || '').toLowerCase(),
+    tipo: 'proprietario', status: 'pendente',
+    lgpd_aceito: true, lgpd_aceito_em: new Date().toISOString(),
+    lgpd_versao: parseInt(CONDO.politica_versao) || 1
+  }).then(function(r) {
+    setLoading('btn-ccad-enviar', false, '<i class="ti ti-send" aria-hidden="true"></i>Enviar cadastro');
+    if(r.error) { falha('Não foi possível enviar: ' + r.error.message); return; }
+    fecharModal('m-completar-cad');
+    bloquearSessao('Cadastro enviado! Aguarde a aprovação da administração para entrar.');
+  });
+});
+
 // Fechar modais clicando no fundo
 document.querySelectorAll('.modal-bg').forEach(function(m) {
   m.addEventListener('click', function(e) { if(e.target===m && !m.dataset.bloqueante) fecharModal(m.id); });
@@ -2038,7 +2105,8 @@ function iniciarApp(user) {
   document.getElementById('app-main').style.display = 'flex';
 
   sb.from('moradores').select('*,unidades(*)').eq('auth_user_id', user.id).maybeSingle().then(function(res) {
-    if(res.error || !res.data) { bloquearSessao('Cadastro não encontrado. Fale com a administração.'); return; }
+    if(res.error) { bloquearSessao('Erro ao carregar o cadastro: ' + res.error.message); return; }
+    if(!res.data) { abrirCompletarCadastro(user); return; }
     morador = res.data;
     if(morador.status === 'pendente') { bloquearSessao('Seu cadastro esta aguardando aprovação do administrador.'); return; }
     if(morador.status === 'inativo') { bloquearSessao('Seu cadastro esta inativo. Fale com a administração.'); return; }
