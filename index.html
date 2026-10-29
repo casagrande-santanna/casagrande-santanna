@@ -132,7 +132,7 @@ textarea.form-in{resize:vertical}
 .av-card{border:0.5px solid var(--br);border-radius:var(--r);overflow:hidden;margin-bottom:8px}
 .av-card.urgente{border-left:3px solid #E24B4A;border-radius:0 var(--r) var(--r) 0}
 .av-card.info{border-left:3px solid var(--blt);border-radius:0 var(--r) var(--r) 0}
-.av-card.manutenção{border-left:3px solid var(--amb);border-radius:0 var(--r) var(--r) 0}
+.av-card.manutencao{border-left:3px solid var(--amb);border-radius:0 var(--r) var(--r) 0}
 .av-card.comunicado{border-left:3px solid var(--v);border-radius:0 var(--r) var(--r) 0}
 .av-hdr{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 11px 4px}
 .av-titulo{font-size:12px;font-weight:600;flex:1;line-height:1.3}
@@ -372,7 +372,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .av-card:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px)}
 .av-card.urgente{border-left:4px solid #E24B4A}
 .av-card.info{border-left:4px solid var(--blt)}
-.av-card.manutenção{border-left:4px solid var(--amb)}
+.av-card.manutencao{border-left:4px solid var(--amb)}
 .av-card.comunicado{border-left:4px solid var(--v)}
 .av-titulo{font-size:12.5px;font-weight:700;letter-spacing:-.01em}
 .av-corpo{font-size:11.5px;line-height:1.55}
@@ -3249,7 +3249,7 @@ function renderConvitesPendentes() {
       wrap.querySelectorAll('[data-conv-id]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           var cid = btn.dataset.convId;
-          var acao = btn.dataset.convAção;
+          var acao = btn.dataset.convAcao;
           sb.from('convites_reserva').update({status: acao, respondido_em: new Date().toISOString()}).eq('id', cid).then(function(r) {
             if(r.error) { toast('Erro ao responder convite.'); return; }
             toast(acao === 'aceito' ? 'Convite aceito! Você pode fazer check-in na reserva.' : 'Convite recusado.');
@@ -3569,7 +3569,7 @@ function renderDispensas() {
       el.querySelectorAll('[data-disp-id]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           var sid = btn.dataset.dispId;
-          var acao = btn.dataset.dispAção;
+          var acao = btn.dataset.dispAcao;
           var novoStatus = acao === 'aprovar' ? 'aprovada' : 'rejeitada';
           var disp = lista.find(function(x){ return x.id === sid; });
           sb.from('solicitacoes_dispensa').update({status: novoStatus}).eq('id', sid).then(function(r) {
@@ -3767,7 +3767,14 @@ document.getElementById('btn-adm-cad').addEventListener('click', function() {
       var user = res.data.user;
       // Supabase devolve identities vazio quando o e-mail já tem login
       if(!user || (user.identities && user.identities.length === 0)) {
-        fim('Este e-mail já possui login no sistema. Peça ao suporte para vincular o cadastro.');
+        // Login já existe sem cadastro de morador: vincula pelo servidor
+        sb.rpc('admin_vincular_login', { p_email: email, p_unidade: unidadeId, p_nome: nome, p_tipo: tipo }).then(function(rv) {
+          if(rv.error) { fim('Este e-mail já tem login, mas não foi possível vincular: ' + rv.error.message); return; }
+          document.getElementById('adm-cad-nome').value = '';
+          document.getElementById('adm-cad-email').value = '';
+          fim('Este e-mail já tinha login: cadastro vinculado! O morador entra com a senha que já usa (ou "Esqueci minha senha").');
+          renderConfig();
+        });
         return;
       }
       var precisaConfirmar = !res.data.session;
