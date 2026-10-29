@@ -2174,6 +2174,10 @@ function processarQrQuadra() {
   var hoje = ts();
   var agora = new Date();
   var h = agora.getHours();
+  if(h < parseInt(SLOTS[0]) || h > parseInt(SLOTS[SLOTS.length - 1])) {
+    toast('A quadra funciona das ' + SLOTS[0] + ' às ' + addH(SLOTS[SLOTS.length - 1], 1) + '.');
+    return;
+  }
   var agoraMin = h * 60 + agora.getMinutes();
   var slotAtual = String(h).padStart(2,'0') + ':00';
   var slotFim   = h < 23 ? String(h+1).padStart(2,'0') + ':00' : '23:59';
