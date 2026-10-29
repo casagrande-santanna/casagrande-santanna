@@ -1599,6 +1599,69 @@ function ordenarAptos(lista) {
   });
 }
 
+// -- RESERVAS DO SITE + AGENDA DO GOOGLE --------------------------
+// Tabelas de apoio (apartamentos e modalidades), carregadas uma vez por sessão
+var _refsReservas = null;
+function carregarRefsReservas() {
+  if(_refsReservas) return _refsReservas;
+  _refsReservas = Promise.all([
+    sb.from('unidades').select('id,codigo'),
+    sb.from('modalidades').select('id,nome')
+  ]).then(function(r) {
+    var refs = { codApto: {}, nomeMod: {}, codigos: {}, mods: r[1].data || [] };
+    (r[0].data || []).forEach(function(u) { refs.codApto[u.id] = u.codigo; refs.codigos[String(u.codigo)] = true; });
+    refs.mods.forEach(function(m) { refs.nomeMod[m.id] = m.nome; });
+    if(!r[0].data || !r[1].data) _refsReservas = null; // tenta de novo na próxima vez
+    return refs;
+  });
+  return _refsReservas;
+}
+
+function semAcentoTxt(s) { return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+
+// Apartamentos citados no título de um evento do Google ("Tênis 1501 e 201" -> ['1501','201'])
+function aptosNoTitulo(titulo, refs) {
+  var achados = [];
+  (String(titulo || '').match(/\d{2,5}/g) || []).forEach(function(n) {
+    if(refs.codigos[n] && achados.indexOf(n) < 0) achados.push(n);
+  });
+  return achados;
+}
+
+// Modalidade pelo título ("Basquete ap 201" -> "Basquete")
+function modalidadeNoTitulo(titulo, refs) {
+  var t = semAcentoTxt(titulo);
+  var m = refs.mods.find(function(x) { var n = semAcentoTxt(x.nome); return n && t.indexOf(n) >= 0; });
+  return m ? m.nome : 'Outros (agenda)';
+}
+
+// Lista unificada de um período: reservas da quadra no site + eventos do Google.
+// Cada item: {origem:'site'|'google', data, inicio, fim, aptos:[códigos], modalidade, checkin, status, titulo}
+function carregarOcupacao(dataIni, dataFim, opcoes) {
+  opcoes = opcoes || {};
+  var resQ = sb.from('reservas')
+    .select('data_reserva,slot_inicio,slot_fim,status,checkin_feito,unidade_id,modalidade_id,tipo_reserva')
+    .gte('data_reserva', dataIni).lte('data_reserva', dataFim);
+  if(!opcoes.todosStatus) resQ = resQ.eq('status', 'confirmada');
+  if(espacoQuadraId) resQ = resQ.or('espaco_id.eq.' + espacoQuadraId + ',espaco_id.is.null');
+  var gQ = sb.from('agenda_google').select('data,hora_inicio,hora_fim,titulo').gte('data', dataIni).lte('data', dataFim);
+  return Promise.all([resQ, gQ, carregarRefsReservas()]).then(function(r) {
+    var refs = r[2];
+    var site = (r[0].data || []).map(function(x) {
+      return { origem: 'site', data: x.data_reserva, inicio: (x.slot_inicio || '').slice(0, 5), fim: (x.slot_fim || '').slice(0, 5),
+               aptos: x.unidade_id && refs.codApto[x.unidade_id] ? [String(refs.codApto[x.unidade_id])] : [],
+               modalidade: refs.nomeMod[x.modalidade_id] || 'Uso livre', checkin: !!x.checkin_feito,
+               status: x.status, tipo: x.tipo_reserva, titulo: '' };
+    });
+    var google = (r[1].data || []).map(function(g) {
+      return { origem: 'google', data: g.data, inicio: (g.hora_inicio || '').slice(0, 5), fim: (g.hora_fim || '').slice(0, 5),
+               aptos: aptosNoTitulo(g.titulo, refs), modalidade: modalidadeNoTitulo(g.titulo, refs), checkin: false,
+               status: 'confirmada', tipo: 'google', titulo: g.titulo || '' };
+    });
+    return { itens: site.concat(google), refs: refs, erro: r[0].error };
+  });
+}
+
 function aplicarCondominio() {
   document.querySelectorAll('[data-condo]').forEach(function(el) {
     var v = CONDO[el.dataset.condo];
@@ -3113,22 +3176,30 @@ function renderHome() {
   var agora = new Date();
   var agoraMin = agora.getHours()*60 + agora.getMinutes();
   if(morador.unidade_id) {
-    sb.from('reservas').select('slot_inicio,slot_fim,checkin_feito')
-      .eq('unidade_id',morador.unidade_id).eq('data_reserva',hoje).eq('status','confirmada')
-      .order('slot_inicio').then(function(res) {
-        var lista = res.data||[];
-        var proxima = lista.find(function(r){
-          return parseInt((r.slot_inicio||'00:00').slice(0,2))*60 >= agoraMin && !r.checkin_feito;
-        });
+    // Próximos 14 dias: reservas do apto no site + eventos do Google que citam o apto no título
+    var limite = new Date(); limite.setDate(limite.getDate() + 14);
+    var dataLimite = limite.getFullYear() + '-' + String(limite.getMonth()+1).padStart(2,'0') + '-' + String(limite.getDate()).padStart(2,'0');
+    var meuCod = morador.unidades ? String(morador.unidades.codigo) : '';
+    carregarOcupacao(hoje, dataLimite).then(function(oc) {
+        var minhas = oc.itens.filter(function(r) {
+          if(r.aptos.indexOf(meuCod) < 0) return false;
+          if(r.checkin) return false;
+          if(r.data > hoje) return true;
+          var fimMin = parseInt(r.fim.slice(0,2))*60 + parseInt(r.fim.slice(3,5) || 0);
+          return fimMin > agoraMin; // de hoje: ainda não terminou
+        }).sort(function(a, b) { return (a.data + a.inicio) < (b.data + b.inicio) ? -1 : 1; });
+        var proxima = minhas[0];
         var elH = document.getElementById('home-prox-hora');
         var elI = document.getElementById('home-prox-info');
         if(proxima) {
-          if(elH) elH.textContent = (proxima.slot_inicio||'').slice(0,5)+'-'+(proxima.slot_fim||'').slice(0,5);
-          if(elI) elI.textContent = 'Reserva confirmada';
-        } else if(lista.length) {
-          if(elH) elH.textContent = 'Hoje'; if(elI) elI.textContent = lista.length+' reserva(s)';
+          var quando = proxima.data === hoje ? '' : fmtD(proxima.data).slice(0,5) + ' ';
+          if(elH) elH.textContent = quando + proxima.inicio + '-' + proxima.fim;
+          if(elI) elI.textContent = proxima.origem === 'google'
+            ? (proxima.modalidade !== 'Outros (agenda)' ? proxima.modalidade + ' • ' : '') + 'pela agenda'
+            : proxima.modalidade + ' • confirmada';
         } else {
-          if(elH) elH.textContent = '--:--'; if(elI) elI.textContent = 'Você não tem reservas hoje';
+          if(elH) elH.textContent = '--:--';
+          if(elI) elI.textContent = 'Sem reservas nos próximos 14 dias';
         }
       });
   }
@@ -5445,30 +5516,42 @@ function atualizarTabAcademia() {
 
 // -- DASHBOARD --------------------------------------------------
 function renderDashboard() {
-  var mesIni = new Date().toISOString().slice(0,7) + '-01';
   var hoje = new Date();
-  var mesFim = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).toISOString().slice(0,10);
-  var totalSlotsDia = 16;
+  var mesAtual = ts().slice(0,7);
+  var mesIni = mesAtual + '-01';
+  var mesFim = fimMes(mesAtual);
+  var totalSlotsDia = SLOTS.length;
   var diasMes = parseInt(mesFim.slice(8));
 
-  sb.from('reservas')
-    .select('data_reserva, slot_inicio, status, checkin_feito, unidade_id, modalidade_id')
-    .gte('data_reserva', mesIni)
-    .lte('data_reserva', mesFim)
-    .then(function(res) {
-      var todas = res.data || [];
-      var confirmadas = todas.filter(function(r){ return r.status === 'confirmada' || r.checkin_feito; });
-      var comCheckin = todas.filter(function(r){ return r.checkin_feito; });
+  // Reservas do site (todas as situações) + eventos da agenda do Google
+  carregarOcupacao(mesIni, mesFim, { todosStatus: true }).then(function(oc) {
+      // Uma "reserva" válida: confirmada (ou já com check-in). Aqui r.data_reserva/slot_inicio
+      // são mantidos com os nomes antigos para o resto do painel.
+      var confirmadas = oc.itens.filter(function(r){ return r.status === 'confirmada' || r.checkin; })
+        .map(function(r) {
+          return { data_reserva: r.data, slot_inicio: r.inicio, slot_fim: r.fim, checkin_feito: r.checkin,
+                   origem: r.origem, aptos: r.aptos, modalidade: r.modalidade };
+        });
+      // Taxa de check-in só faz sentido para reservas do site (o Google não tem check-in)
+      var doSite = confirmadas.filter(function(r){ return r.origem === 'site'; });
+      var comCheckin = doSite.filter(function(r){ return r.checkin_feito; });
       var total = confirmadas.length;
-      var taxa = total > 0 ? Math.round(comCheckin.length / total * 100) : 0;
+      var taxa = doSite.length > 0 ? Math.round(comCheckin.length / doSite.length * 100) : 0;
+      // Ocupação: horas de 1h ocupadas no mês
+      var horasOcupadas = 0;
+      confirmadas.forEach(function(r) {
+        var ini = parseInt(r.slot_inicio.slice(0,2)) * 60 + parseInt(r.slot_inicio.slice(3,5) || 0);
+        var fim = parseInt(r.slot_fim.slice(0,2)) * 60 + parseInt(r.slot_fim.slice(3,5) || 0);
+        horasOcupadas += fim > ini ? Math.ceil((fim - ini) / 60) : 1;
+      });
       var totalSlotsMes = totalSlotsDia * diasMes;
-      var ocupacao = Math.round(total / totalSlotsMes * 100);
+      var ocupacao = Math.min(100, Math.round(horasOcupadas / totalSlotsMes * 100));
 
-      // Top slot
+      // Top slot (hora cheia de início)
       var slotCount = {};
       confirmadas.forEach(function(r) {
-        var s = (r.slot_inicio || '').slice(0,5);
-        if(s) slotCount[s] = (slotCount[s] || 0) + 1;
+        var s = (r.slot_inicio || '').slice(0,2);
+        if(s) { s += ':00'; slotCount[s] = (slotCount[s] || 0) + 1; }
       });
       var topSlot = Object.keys(slotCount).sort(function(a,b){ return slotCount[b]-slotCount[a]; })[0] || '--:--';
 
@@ -5519,7 +5602,7 @@ function renderDashboard() {
       var horaCount = {};
       SLOTS.forEach(function(s){ horaCount[s.slice(0,5)] = 0; });
       confirmadas.forEach(function(r) {
-        var s = (r.slot_inicio || '').slice(0,5);
+        var s = (r.slot_inicio || '').slice(0,2) + ':00';
         if(horaCount[s] !== undefined) horaCount[s]++;
       });
       var horaKeys = SLOTS.map(function(s){ return s.slice(0,5); });
@@ -5545,30 +5628,32 @@ function renderDashboard() {
       if(horaEl) horaEl.innerHTML = horaHtml;
 
       // Ranking por apartamento — com barra de check-in
+      // (eventos do Google contam para cada apartamento citado no título)
       var aptoMap = {};
       confirmadas.forEach(function(r) {
-        var cod = r.unidade_id || null;
-        if(!cod) return;
-        if(!aptoMap[cod]) aptoMap[cod] = {total:0, checkin:0};
-        aptoMap[cod].total++;
-        if(r.checkin_feito) aptoMap[cod].checkin++;
+        (r.aptos || []).forEach(function(cod) {
+          if(!aptoMap[cod]) aptoMap[cod] = {total:0, site:0, checkin:0};
+          aptoMap[cod].total++;
+          if(r.origem === 'site') { aptoMap[cod].site++; if(r.checkin_feito) aptoMap[cod].checkin++; }
+        });
       });
       var rankList = Object.keys(aptoMap).map(function(k) {
-        return {apto:k, total:aptoMap[k].total, taxa: aptoMap[k].total > 0 ? Math.round(aptoMap[k].checkin/aptoMap[k].total*100) : 0};
-      }).sort(function(a,b){ return b.total - a.total || b.taxa - a.taxa; }).slice(0,8);
+        var a = aptoMap[k];
+        return {apto:k, total:a.total, taxa: a.site > 0 ? Math.round(a.checkin/a.site*100) : null};
+      }).sort(function(a,b){ return b.total - a.total || (b.taxa||0) - (a.taxa||0); }).slice(0,8);
       var rankMax = rankList.length ? rankList[0].total : 1;
       var medals = ['🥇','🥈','🥉'];
       var rkHtml = rankList.length ? '' : '<div style="font-size:11px;color:var(--t2)">Sem dados este mes.</div>';
       rankList.forEach(function(a, i) {
-        var taxaCor = a.taxa >= 90 ? 'var(--v)' : a.taxa >= 60 ? 'var(--amb)' : 'var(--rdt)';
-        var isMeu = morador && morador.unidades && morador.unidades.codigo === a.apto;
+        var taxaCor = a.taxa === null ? 'var(--t3)' : a.taxa >= 90 ? 'var(--v)' : a.taxa >= 60 ? 'var(--amb)' : 'var(--rdt)';
+        var isMeu = morador && morador.unidades && String(morador.unidades.codigo) === String(a.apto);
         var barPct = Math.round(a.total / rankMax * 100);
         rkHtml += '<div style="padding:7px 0;border-bottom:.5px solid var(--br)">';
         rkHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
         rkHtml += '<div style="font-size:13px;width:22px;text-align:center">' + (medals[i] || (i+1)) + '</div>';
         rkHtml += '<div style="flex:1;font-size:12px;font-weight:' + (isMeu?'700':'500') + ';color:' + (isMeu?'var(--v)':'var(--tx)') + '">Apto ' + esc(a.apto) + '</div>';
         rkHtml += '<div style="font-size:10px;color:var(--t2)">' + a.total + ' res.</div>';
-        rkHtml += '<div style="font-size:11px;font-weight:700;color:' + taxaCor + ';min-width:34px;text-align:right">' + a.taxa + '%</div>';
+        rkHtml += '<div style="font-size:11px;font-weight:700;color:' + taxaCor + ';min-width:34px;text-align:right" title="Check-in (só reservas do site)">' + (a.taxa === null ? '—' : a.taxa + '%') + '</div>';
         rkHtml += '</div>';
         rkHtml += '<div style="display:flex;gap:3px;align-items:center;padding-left:30px">';
         rkHtml += '<div style="flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden"><div style="height:100%;background:' + (isMeu?'var(--v)':'var(--gyb)') + ';width:' + barPct + '%;border-radius:2px"></div></div>';
@@ -5580,7 +5665,7 @@ function renderDashboard() {
       // Modalidades — barras horizontais com porcentagem
       var modMap = {};
       confirmadas.forEach(function(r) {
-        var nome = r.modalidades ? r.modalidades.nome : 'Uso livre';
+        var nome = r.modalidade || 'Uso livre';
         modMap[nome] = (modMap[nome] || 0) + 1;
       });
       var modList = Object.keys(modMap).sort(function(a,b){ return modMap[b]-modMap[a]; });
