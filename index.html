@@ -537,6 +537,14 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
         </div>
         <button onclick="document.getElementById('tab-reservar').click()" style="margin-top:10px;width:100%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:8px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-calendar-plus" aria-hidden="true"></i>Reservar quadra</button>
       </div>
+      <button type="button" id="btn-home-ocorrencia" style="width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:#FFF4E5;border:1.5px solid #EF9F27;border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer;font-family:inherit">
+        <span style="width:38px;height:38px;border-radius:50%;background:#EF9F27;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-message-report" style="font-size:20px" aria-hidden="true"></i></span>
+        <span style="flex:1;min-width:0">
+          <span style="display:block;font-size:13px;font-weight:700;color:#7A4A00">Registre aqui suas ocorrências e reclamações</span>
+          <span style="display:block;font-size:11px;color:#8A5A10;margin-top:2px">Danos, barulho, manutenção ou sugestões. A administração responde por aqui.</span>
+        </span>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:#B87A1A" aria-hidden="true"></i>
+      </button>
       <div id="conv-pendentes-wrap" style="display:none;margin-bottom:8px"></div>
       <div id="wsq-lembrete" style="display:none;background:var(--vl);border:0.5px solid #97C459;border-radius:10px;padding:10px 14px;margin-bottom:8px"></div>
       <div id="home-faltas-alert" style="display:none;margin-bottom:8px"></div>
@@ -748,7 +756,7 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
         <div id="achados-list"><div class="empty"><i class="ti ti-search"></i>Nenhum item cadastrado</div></div>
       </div>
       <!-- Botão nova ocorrência (todos os moradores) -->
-      <button class="btn-p" id="btn-nova-oco-morador" style="margin-bottom:10px"><i class="ti ti-plus" aria-hidden="true"></i>Abrir nova ocorrência</button>
+      <button class="btn-p" id="btn-nova-oco-morador" style="margin-bottom:10px;background:#EF9F27;font-size:14px;padding:13px"><i class="ti ti-message-report" aria-hidden="true"></i>Registre aqui suas ocorrências / reclamações</button>
       <div class="card" style="background:var(--bl);border-color:var(--blb)">
         <div style="display:flex;align-items:flex-start;gap:8px">
           <i class="ti ti-clipboard-list" style="font-size:20px;color:var(--blt);flex-shrink:0;margin-top:2px" aria-hidden="true"></i>
@@ -2895,8 +2903,7 @@ document.getElementById('btn-exec-cancel').addEventListener('click', function() 
       // Salva o status que funcionou para uso em outros cancelamentos
       if(payload.status) _statusCancelado = payload.status;
       fecharModal('m-cancelar');
-      if(selDate) selData(selDate);
-      renderMinhas(); renderCheckin();
+      atualizarTelasReservas();
       if(temDispensa) {
         setTimeout(function() { abrirModal('m-dispensa'); }, 350);
       } else {
@@ -3057,7 +3064,7 @@ function renderCheckin() {
           sb.from('reservas').update({status:_statusCancelado}).eq('id',proxima.id).then(function(rc) {
             if(rc.error) { toast('Erro ao cancelar: ' + rc.error.message); return; }
             toast('Reserva cancelada. Horário liberado.');
-            renderCheckin(); renderMinhas();
+            atualizarTelasReservas();
           });
         }
       });
@@ -3158,8 +3165,19 @@ function renderCheckin() {
 }
 
 // -- MINHAS RESERVAS --------------------------------------------
+// Redesenha todas as telas que mostram reservas (após cancelar, por exemplo)
+function atualizarTelasReservas() {
+  renderMinhas(); renderCheckin(); renderWidgetStatus();
+  if(selDate) selData(selDate);
+  var acCard = document.getElementById('ac-slots-card');
+  if(acSelDate && acSelDate >= ts() && acCard && acCard.style.display !== 'none') selDataAcademia(acSelDate);
+  else if(espacoAcademiaId) renderAcademia();
+}
+
+var _minhasSeq = 0;
 function renderMinhas() {
   if(!morador) return;
+  var seq = ++_minhasSeq;
   if(!morador.unidade_id) {
     document.getElementById('minhas-list').innerHTML='<div class="empty"><i class="ti ti-user-check"></i>Administrador sem apartamento vinculado.</div>';
     return;
@@ -3169,6 +3187,7 @@ function renderMinhas() {
     .order('data_reserva', {ascending:true})
     .order('slot_inicio', {ascending:true})
     .then(function(res) {
+      if(seq !== _minhasSeq) return; // resposta antiga: uma leitura mais nova já foi pedida
       var mine = (res.data||[]).filter(function(r){ return !r.oculto_morador; });
       // Ordena: futuras primeiro (mais próxima no topo), passadas depois (mais recente no topo)
       var hoje = ts();
@@ -3753,8 +3772,12 @@ document.getElementById('btn-nova-oco').addEventListener('click', function() {
   abrirModal('m-nova-oco');
 });
 document.getElementById('btn-fechar-oco').addEventListener('click', function() { fecharModal('m-nova-oco'); });
+document.getElementById('btn-home-ocorrencia').addEventListener('click', function() {
+  document.getElementById('tab-ocorrencias').click();
+  abrirModal('m-nova-oco');
+});
 document.getElementById('btn-salvar-oco').addEventListener('click', function() {
-  if(!requireAdmin()) return;
+  if(!morador) return;
   var t = document.getElementById('oc-tit').value.trim();
   if(!t) { toast('Informe o titulo'); return; }
   sb.from('ocorrencias').insert({
