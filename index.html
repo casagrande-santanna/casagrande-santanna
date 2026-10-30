@@ -2848,7 +2848,7 @@ function iniciarTempoReal() {
     _canalTempoReal.on('postgres_changes', {event: '*', schema: 'public', table: t}, function() { agendar(t); });
   });
   // Sininho e chat (cada um só recebe o que pode ver, pelo RLS)
-  _canalTempoReal.on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'notificacoes'}, function(p) {
+  _canalTempoReal.on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'alertas'}, function(p) {
     carregarNotificacoes();
     avisarNoNavegador(p && p.new);
   });
@@ -5174,7 +5174,7 @@ var NOTIF_ICONE = {
 
 function carregarNotificacoes() {
   if(!morador) return;
-  sb.from('notificacoes').select('*').eq('destinatario_id', morador.id)
+  sb.from('alertas').select('*').eq('destinatario_id', morador.id)
     .order('created_at', {ascending: false}).limit(40).then(function(r) {
       if(r.error) return; // script ainda não rodado: o sininho fica vazio
       _notifs = r.data || [];
@@ -5211,7 +5211,7 @@ function renderNotificacoes() {
     el.addEventListener('click', function() {
       var n = _notifs.find(function(x) { return x.id === el.dataset.notif; });
       if(!n) return;
-      if(!n.lida_em) sb.from('notificacoes').update({lida_em: new Date().toISOString()}).eq('id', n.id).then(carregarNotificacoes);
+      if(!n.lida_em) sb.from('alertas').update({lida_em: new Date().toISOString()}).eq('id', n.id).then(carregarNotificacoes);
       fecharPainelNotif();
       abrirTelaDaNotificacao(n);
     });
@@ -5245,7 +5245,7 @@ document.addEventListener('click', function(e) {
 });
 document.getElementById('btn-notif-todas').addEventListener('click', function() {
   if(!morador) return;
-  sb.from('notificacoes').update({lida_em: new Date().toISOString()})
+  sb.from('alertas').update({lida_em: new Date().toISOString()})
     .eq('destinatario_id', morador.id).is('lida_em', null).then(carregarNotificacoes);
 });
 
@@ -5387,7 +5387,7 @@ function marcarChatLido(uid, msgs) {
     sb.from('mensagens_chat').update(upd).in('id', pendentes.map(function(m) { return m.id; })).then(atualizarBadgeChat);
   }
   // Notificações desta conversa também ficam lidas
-  sb.from('notificacoes').update({lida_em: new Date().toISOString()})
+  sb.from('alertas').update({lida_em: new Date().toISOString()})
     .eq('destinatario_id', morador.id).eq('tipo', 'chat').eq('ref_id', uid).is('lida_em', null).then(carregarNotificacoes);
 }
 
