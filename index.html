@@ -550,6 +550,19 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
         </span>
         <i class="ti ti-chevron-right" style="font-size:18px;color:#B87A1A" aria-hidden="true"></i>
       </button>
+      <div id="card-ativar-push" style="display:none;background:var(--bl);border:1px solid var(--blt);border-radius:12px;padding:12px 14px;margin-bottom:10px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <i class="ti ti-bell-ringing" style="font-size:22px;color:var(--blt);flex-shrink:0" aria-hidden="true"></i>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:var(--blt)">Ative as notificações</div>
+            <div style="font-size:11px;color:var(--blt);margin-top:2px" id="card-push-txt">Receba lembrete da reserva, respostas da administração e avisos importantes, mesmo com o app fechado.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button class="btn-s" id="btn-push-depois" style="flex:1">Agora não</button>
+          <button class="btn-p" id="btn-push-ativar" style="flex:2"><i class="ti ti-bell" aria-hidden="true"></i>Ativar</button>
+        </div>
+      </div>
       <div id="conv-pendentes-wrap" style="display:none;margin-bottom:8px"></div>
       <div id="wsq-lembrete" style="display:none;background:var(--vl);border:0.5px solid #97C459;border-radius:10px;padding:10px 14px;margin-bottom:8px"></div>
       <div id="home-faltas-alert" style="display:none;margin-bottom:8px"></div>
@@ -1164,7 +1177,7 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
           <div style="font-size:10px;color:var(--amt);margin-top:5px" id="pf-faltas-msg"></div>
         </div>
         <div style="margin-top:12px;border-top:0.5px solid var(--br);padding-top:10px">
-          <div class="p-row"><span>Notificações push</span><div class="tgl on" id="tgl-push"></div></div>
+          <div class="p-row"><span>Notificações push</span><div class="tgl" id="tgl-push"></div></div>
           <div class="p-row"><span>Modo escuro</span><div class="tgl" id="tgl-dark"></div></div>
           <div class="p-row" style="cursor:pointer" id="btn-alterar-senha-row">
             <span><i class="ti ti-key" style="font-size:13px;margin-right:4px"></i>Alterar senha</span>
@@ -2411,7 +2424,8 @@ document.getElementById('btn-fazer-cad').addEventListener('click', function() {
 // -- LOGOUT -----------------------------------------------------
 document.getElementById('btn-logout').addEventListener('click', function() {
   pararTempoReal();
-  sb.auth.signOut().then(function() {
+  // Este aparelho para de receber as notificações desta conta
+  desativarPush().catch(function(){}).then(function() { return sb.auth.signOut(); }).then(function() {
     resetPermissoesUI();
     document.getElementById('app-main').style.display='none';
     document.getElementById('login-screen').style.display='flex';
@@ -2658,6 +2672,17 @@ function carregarMoradorEIniciar(user) {
     iniciarTempoReal();
     carregarNotificacoes();
     atualizarBadgeChat();
+    // Push: religa este aparelho à pessoa logada e mostra o convite para ativar
+    if(pushSuportado() && Notification.permission === 'granted') ativarPush(true).then(atualizarTogglePush);
+    else atualizarTogglePush();
+    mostrarConvitePush();
+    // Aberto pelo toque numa notificação (?tela=...&ref=...)
+    var qs = new URLSearchParams(location.search);
+    if(qs.get('tela')) {
+      var alvo = {tela: qs.get('tela'), ref_id: qs.get('ref') || null};
+      history.replaceState(null, '', location.pathname);
+      setTimeout(function() { abrirTelaDaNotificacao(alvo); }, 600);
+    }
 
     if(!onboardingJaVisto() && morador.tipo !== 'admin') {
       setTimeout(abrirOnboarding, 900);
@@ -5169,7 +5194,8 @@ document.getElementById('m2fa-fechar').addEventListener('click', function() { fe
 var _notifs = [];
 var NOTIF_ICONE = {
   cadastro: 'ti-user-plus', suspensao: 'ti-ban', falta: 'ti-clock-x', isencao: 'ti-gavel',
-  lgpd: 'ti-shield-check', ocorrencia: 'ti-alert-circle', chat: 'ti-messages', seguranca: 'ti-lock'
+  lgpd: 'ti-shield-check', ocorrencia: 'ti-alert-circle', chat: 'ti-messages', seguranca: 'ti-lock',
+  lembrete: 'ti-alarm'
 };
 
 function carregarNotificacoes() {
@@ -5223,6 +5249,7 @@ function abrirTelaDaNotificacao(n) {
   if(n.tela === 'config' && isAdmin()) clicar('tab-config');
   else if(n.tela === 'ocorrencias') clicar('tab-ocorrencias');
   else if(n.tela === 'minhas') clicar('tab-minhas');
+  else if(n.tela === 'check-in') clicar('tab-check-in');
   else if(n.tela === 'perfil') clicar('av-btn');
   else if(n.tela === 'chat') {
     goScreen('chat');
@@ -5253,6 +5280,8 @@ document.getElementById('btn-notif-todas').addEventListener('click', function() 
 function avisarNoNavegador(n) {
   if(!n || !('Notification' in window) || Notification.permission !== 'granted') return;
   if(document.visibilityState === 'visible') return;
+  var tp = document.getElementById('tgl-push');
+  if(tp && tp.classList.contains('on')) return; // o push do servidor já vai avisar
   try { new Notification(n.titulo, {body: n.texto || '', icon: 'icon-192.png', tag: n.tipo + (n.ref_id || '')}); } catch(e) {}
 }
 
@@ -6499,25 +6528,127 @@ if(tglDark) {
 }
 
 // -- NOTIFICAÇÕES PUSH ------------------------------------------
+// Chave PÚBLICA do servidor de push (a privada fica só no Supabase)
+var VAPID_PUBLIC_KEY = 'BGvdF4I8vIoY0KGjO4JaSVlAV0lOxh83Vu-mD0w0Kd6_5jIZBvM8v3KYQyeft6-GfP4rFnaMyCJI5p6fLBWitF8';
+
+function pushSuportado() {
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+function chaveVapidBytes() {
+  var b64 = VAPID_PUBLIC_KEY.replace(/-/g, '+').replace(/_/g, '/');
+  b64 += '===='.slice(0, (4 - b64.length % 4) % 4);
+  var raw = atob(b64), arr = new Uint8Array(raw.length);
+  for(var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+function ehIphoneSemInstalar() {
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var instalado = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  return ios && !instalado;
+}
+
+// Inscreve este aparelho e guarda no banco (de novo a cada login: assim o
+// aparelho fica sempre ligado à pessoa que está usando)
+function ativarPush(silencioso) {
+  if(!pushSuportado()) {
+    if(!silencioso) toast(ehIphoneSemInstalar()
+      ? 'No iPhone: toque em Compartilhar > "Adicionar à Tela de Início" e abra o app por lá para ativar.'
+      : 'Este navegador não recebe notificações push.');
+    return Promise.resolve(false);
+  }
+  return navigator.serviceWorker.ready.then(function(reg) {
+    return reg.pushManager.getSubscription().then(function(sub) {
+      return sub || reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: chaveVapidBytes()});
+    });
+  }).then(function(sub) {
+    var j = sub.toJSON();
+    return sb.rpc('registrar_push', {
+      p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth,
+      p_aparelho: navigator.userAgent
+    }).then(function(r) {
+      if(r.error) throw r.error;
+      return true;
+    });
+  }).catch(function(e) {
+    if(!silencioso) toast('Não foi possível ativar: ' + (e && e.message ? e.message : e));
+    return false;
+  });
+}
+
+function desativarPush() {
+  if(!pushSuportado()) return Promise.resolve();
+  return navigator.serviceWorker.ready.then(function(reg) {
+    return reg.pushManager.getSubscription();
+  }).then(function(sub) {
+    if(!sub) return;
+    var ep = sub.endpoint;
+    return sub.unsubscribe().then(function() {
+      return sb.from('push_inscricoes').delete().eq('endpoint', ep);
+    });
+  });
+}
+
+// Convite na tela inicial (some depois de ativar, ou por 7 dias em "Agora não")
+function mostrarConvitePush() {
+  var card = document.getElementById('card-ativar-push');
+  if(!card) return;
+  var adiado = 0;
+  try { adiado = parseInt(localStorage.getItem('cg_push_adiado') || '0', 10); } catch(e) {}
+  var mostrar = false;
+  if(Date.now() - adiado > 7 * 86400000) {
+    if(ehIphoneSemInstalar()) {
+      mostrar = true;
+      document.getElementById('card-push-txt').textContent = 'No iPhone, as notificações funcionam com o app instalado: toque em Compartilhar e depois em "Adicionar à Tela de Início". Abra o app pelo ícone e ative aqui.';
+      document.getElementById('btn-push-ativar').style.display = 'none';
+    } else if(pushSuportado() && Notification.permission === 'default') {
+      mostrar = true;
+    }
+  }
+  card.style.display = mostrar ? 'block' : 'none';
+}
+document.getElementById('btn-push-depois').addEventListener('click', function() {
+  try { localStorage.setItem('cg_push_adiado', String(Date.now())); } catch(e) {}
+  document.getElementById('card-ativar-push').style.display = 'none';
+});
+document.getElementById('btn-push-ativar').addEventListener('click', function() {
+  document.getElementById('card-ativar-push').style.display = 'none';
+  var t = document.getElementById('tgl-push');
+  if(t && !t.classList.contains('on')) t.click();
+});
+
+function atualizarTogglePush() {
+  var t = document.getElementById('tgl-push');
+  if(!t) return;
+  if(!pushSuportado() || Notification.permission !== 'granted') { t.classList.remove('on'); return; }
+  navigator.serviceWorker.ready.then(function(reg) { return reg.pushManager.getSubscription(); })
+    .then(function(sub) { t.classList.toggle('on', !!sub); });
+}
+
 var tglPush = document.getElementById('tgl-push');
 if(tglPush) {
-  if('Notification' in window && Notification.permission === 'granted') tglPush.classList.add('on');
+  tglPush.classList.remove('on');
   tglPush.addEventListener('click', function() {
-    if(!('Notification' in window)) { toast('Notificações não suportadas neste navegador.'); return; }
-    if(Notification.permission === 'granted') {
-      toast('Para desativar, acesse as configuracoes do navegador.');
-    } else {
-      Notification.requestPermission().then(function(perm) {
-        if(perm === 'granted') {
-          tglPush.classList.add('on');
-          toast('Notificações ativadas!');
-          new Notification(CONDO.nome, {body:'Notificações ativadas com sucesso!'});
-        } else {
-          tglPush.classList.remove('on');
-          toast('Permissão negada.');
-        }
-      });
+    if(tglPush.classList.contains('on')) {
+      desativarPush().then(function() { tglPush.classList.remove('on'); toast('Notificações desativadas neste aparelho.'); });
+      return;
     }
+    if(!pushSuportado()) { ativarPush(false); return; }
+    Notification.requestPermission().then(function(perm) {
+      if(perm !== 'granted') {
+        toast('Permissão negada. Libere as notificações nas configurações do navegador para este site.');
+        return;
+      }
+      ativarPush(false).then(function(ok) {
+        if(ok) { tglPush.classList.add('on'); toast('Pronto! Você será avisado mesmo com o app fechado.'); }
+      });
+    });
+  });
+}
+
+// Toque numa notificação com o app já aberto
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', function(e) {
+    if(e.data && e.data.tipo === 'abrir-tela' && morador) abrirTelaDaNotificacao({tela: e.data.tela, ref_id: e.data.ref || null});
   });
 }
 
