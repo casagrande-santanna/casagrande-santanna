@@ -2659,8 +2659,8 @@ function carregarMoradorEIniciar(user) {
     carregarNotificacoes();
     atualizarBadgeChat();
 
-    if(!morador.onboarding_visto && morador.tipo !== 'admin') {
-      setTimeout(function() { abrirModal('m-onboarding'); }, 900);
+    if(!onboardingJaVisto() && morador.tipo !== 'admin') {
+      setTimeout(abrirOnboarding, 900);
     }
   });
 }
@@ -6795,7 +6795,7 @@ document.getElementById('btn-qr-check-in').addEventListener('click', function() 
     <div id="onb-step-2" style="display:none;padding:28px 24px;text-align:center">
       <div style="font-size:44px;margin-bottom:12px">&#9971;</div>
       <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Regras do fair play</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Cada apartamento tem limite mensal de reservas. Cancelamentos fora do prazo ou ausencias sem check-in geram faltas. Com 2 faltas no mes, o apartamento fica suspenso por 15 dias.</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">Cada apartamento tem limite mensal de reservas. Ausências sem check-in geram faltas. Com <span id="onb-faltas">2</span> faltas no mês, o apartamento fica suspenso por <span id="onb-susp">15</span> dias.</div>
       <div style="display:flex;gap:8px">
         <button class="btn-s" onclick="onbStep(1)" style="flex:1">Voltar</button>
         <button class="btn-p" onclick="onbStep(3)" style="flex:2">Próximo <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
@@ -6804,7 +6804,7 @@ document.getElementById('btn-qr-check-in').addEventListener('click', function() 
     <div id="onb-step-3" style="display:none;padding:28px 24px;text-align:center">
       <div style="font-size:44px;margin-bottom:12px">&#9989;</div>
       <div style="font-size:16px;font-weight:600;color:var(--t1);margin-bottom:8px">Check-in obrigatório</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">No dia da sua reserva, faca o check-in pela aba Check-in ou escaneando o QR Code na entrada da quadra. Você tem ate 15 minutos após o inicio do horário.</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px">No dia da sua reserva, faca o check-in pela aba Check-in ou escaneando o QR Code na entrada da quadra. Você tem até <span id="onb-janela">15</span> minutos após o início do horário.</div>
       <div style="display:flex;gap:8px">
         <button class="btn-s" onclick="onbStep(2)" style="flex:1">Voltar</button>
         <button class="btn-p" id="btn-fechar-onboarding" style="flex:2"><i class="ti ti-check" aria-hidden="true"></i>Entendido!</button>
@@ -6815,6 +6815,7 @@ document.getElementById('btn-qr-check-in').addEventListener('click', function() 
       <div id="onb-dot-2" style="width:6px;height:6px;border-radius:50%;background:var(--br)"></div>
       <div id="onb-dot-3" style="width:6px;height:6px;border-radius:50%;background:var(--br)"></div>
     </div>
+    <button type="button" id="btn-onb-pular" style="display:block;width:100%;background:none;border:none;border-top:0.5px solid var(--br);padding:12px;font-size:12px;color:var(--t2);cursor:pointer">Não mostrar novamente</button>
   </div>
 </div>
 
@@ -7209,12 +7210,29 @@ function onbStep(n) {
   });
 }
 
-document.getElementById('btn-fechar-onboarding').addEventListener('click', function() {
+// Guarda no aparelho e, se a coluna existir, no cadastro (vale em todos os aparelhos)
+function onboardingJaVisto() {
+  if(!morador) return true;
+  if(morador.onboarding_visto) return true;
+  try { return localStorage.getItem('cg_onb_' + morador.id) === '1'; } catch(e) { return false; }
+}
+function concluirOnboarding() {
   fecharModal('m-onboarding');
-  if(morador) {
-    sb.from('moradores').update({onboarding_visto: true}).eq('id', morador.id).then(function(){});
-  }
-});
+  if(!morador) return;
+  morador.onboarding_visto = true;
+  try { localStorage.setItem('cg_onb_' + morador.id, '1'); } catch(e) {}
+  sb.from('moradores').update({onboarding_visto: true}).eq('id', morador.id).then(function(){});
+}
+function abrirOnboarding() {
+  var set = function(id, v) { var el = document.getElementById(id); if(el) el.textContent = v; };
+  set('onb-faltas', appCfg.faltas_suspensao || 2);
+  set('onb-susp', appCfg.suspensao_dias || 15);
+  set('onb-janela', appCfg.checkin_janela_min || 15);
+  onbStep(1);
+  abrirModal('m-onboarding');
+}
+document.getElementById('btn-fechar-onboarding').addEventListener('click', concluirOnboarding);
+document.getElementById('btn-onb-pular').addEventListener('click', concluirOnboarding);
 
 // -- ACHADOS E PERDIDOS -----------------------------------------
 // Pills achados
