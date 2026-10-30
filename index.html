@@ -1005,6 +1005,18 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
         <div id="lista-suspensos"></div>
       </div>
       <div class="card">
+        <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i>Moradores<span id="mor-total" class="badge b-gray" style="margin-left:8px"></span></div>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <input type="search" class="form-in" id="mor-busca" placeholder="Buscar por nome, e-mail ou apto" style="flex:1;min-width:0">
+          <select class="form-in" id="mor-filtro" style="width:auto">
+            <option value="">Todos</option><option value="ativo">Ativos</option><option value="pendente">Pendentes</option>
+            <option value="suspenso">Suspensos</option><option value="inativo">Inativos</option>
+          </select>
+        </div>
+        <div id="lista-moradores-adm" style="max-height:420px;overflow-y:auto"></div>
+        <div style="font-size:10.5px;color:var(--t2);margin-top:6px">Toque em um morador para corrigir nome, apartamento, perfil ou situação, ou para excluir um cadastro duplicado.</div>
+      </div>
+      <div class="card">
         <div class="card-title"><i class="ti ti-shield" aria-hidden="true"></i>Gerenciar administradores</div>
         <div id="lista-admins"></div>
       </div>
@@ -1285,6 +1297,39 @@ body.dark .resumo-box{background:linear-gradient(135deg,rgba(39,80,10,.3),rgba(3
       <button class="btn-s" id="btn-fechar-contrato">Cancelar</button>
       <button class="btn-p" id="btn-criar-contrato"><i class="ti ti-repeat" aria-hidden="true"></i>Criar contrato</button>
     </div>
+  </div>
+</div>
+
+<!-- Editar cadastro de morador (admin) -->
+<div class="modal-bg" id="m-editar-morador">
+  <div class="modal-card center">
+    <div class="mhandle"></div>
+    <div class="mtitle">Editar morador</div>
+    <div class="msub" id="em-sub"></div>
+    <div class="form-row"><label class="form-lbl">Nome completo</label><input type="text" class="form-in" id="em-nome" maxlength="120"></div>
+    <div class="form-row"><label class="form-lbl">E-mail de contato</label><input type="email" class="form-in" id="em-email" maxlength="160">
+      <div style="font-size:10px;color:var(--t2);margin-top:3px">Muda só o contato no cadastro. O e-mail de login continua o mesmo.</div></div>
+    <div class="form-row"><label class="form-lbl">Apartamento</label><select class="form-in" id="em-apto"></select></div>
+    <div class="form-row"><label class="form-lbl">Perfil</label><select class="form-in" id="em-tipo">
+      <option value="proprietario">Morador (proprietário)</option>
+      <option value="inquilino">Morador (inquilino)</option>
+      <option value="admin">Administrador</option>
+    </select></div>
+    <div class="form-row"><label class="form-lbl">Situação</label><select class="form-in" id="em-status">
+      <option value="ativo">Ativo</option><option value="pendente">Pendente (aguardando aprovação)</option>
+      <option value="suspenso">Suspenso</option><option value="inativo">Inativo (não entra no app)</option>
+    </select></div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--t1);margin:2px 0 8px;cursor:pointer">
+      <input type="checkbox" id="em-menor" style="accent-color:var(--v)"> Menor de 18 anos
+    </label>
+    <div class="form-row" id="em-resp-wrap" style="display:none"><label class="form-lbl">Nome do responsável legal</label><input type="text" class="form-in" id="em-resp" maxlength="120"></div>
+    <div id="em-info" style="font-size:10.5px;color:var(--t2);margin-bottom:8px"></div>
+    <div id="em-err" style="display:none;font-size:12px;color:var(--rdt);margin-bottom:8px"></div>
+    <div class="macts">
+      <button class="btn-s" id="em-cancelar">Cancelar</button>
+      <button class="btn-p" id="em-salvar"><i class="ti ti-check" aria-hidden="true"></i>Salvar</button>
+    </div>
+    <button class="btn-s" id="em-excluir" style="width:100%;margin-top:8px;color:var(--rdt);border-color:var(--rdb)"><i class="ti ti-trash" aria-hidden="true"></i>Excluir cadastro</button>
   </div>
 </div>
 
@@ -4436,12 +4481,192 @@ document.getElementById('btn-exportar-backup').addEventListener('click', functio
   proxima();
 });
 
+// -- PAINEL DE MORADORES (admin) --------------------------------
+var _moradoresAdm = [], _edMorador = null;
+var STATUS_MOR = {
+  ativo:    ['b-ok', 'Ativo'],
+  pendente: ['b-warn', 'Pendente'],
+  suspenso: ['b-danger', 'Suspenso'],
+  inativo:  ['b-gray', 'Inativo']
+};
+var TIPO_MOR = {admin: 'Administrador', proprietario: 'Proprietário', inquilino: 'Inquilino', morador: 'Morador'};
+
+function carregarMoradoresAdm() {
+  sb.from('moradores').select('*,unidades(codigo)').order('nome').then(function(res) {
+    if(res.error) {
+      document.getElementById('lista-moradores-adm').innerHTML = '<div style="font-size:11px;color:var(--rdt)">Erro ao carregar: ' + esc(res.error.message) + '</div>';
+      return;
+    }
+    _moradoresAdm = res.data || [];
+    renderMoradoresAdm();
+  });
+}
+
+function renderMoradoresAdm() {
+  var lista = document.getElementById('lista-moradores-adm');
+  if(!lista) return;
+  var termo = semAcentoTxt(document.getElementById('mor-busca').value.trim());
+  var filtro = document.getElementById('mor-filtro').value;
+  // Nomes repetidos no mesmo apto costumam ser cadastro duplicado
+  var contagem = {};
+  _moradoresAdm.forEach(function(m) {
+    var k = (m.unidade_id || '') + '|' + semAcentoTxt(m.nome).split(' ')[0];
+    contagem[k] = (contagem[k] || 0) + 1;
+  });
+  var vis = _moradoresAdm.filter(function(m) {
+    if(filtro && m.status !== filtro) return false;
+    if(!termo) return true;
+    var cod = m.unidades ? m.unidades.codigo : '';
+    return semAcentoTxt(m.nome + ' ' + (m.email || '') + ' ' + cod).indexOf(termo) >= 0;
+  });
+  document.getElementById('mor-total').textContent = _moradoresAdm.length;
+  if(!vis.length) { lista.innerHTML = '<div style="font-size:11px;color:var(--t2)">Nenhum morador encontrado.</div>'; return; }
+  lista.innerHTML = vis.map(function(m) {
+    var st = STATUS_MOR[m.status] || ['b-gray', m.status || '-'];
+    var cod = m.unidades ? m.unidades.codigo : 'sem apto';
+    var dup = contagem[(m.unidade_id || '') + '|' + semAcentoTxt(m.nome).split(' ')[0]] > 1;
+    return '<div data-ed-mor="' + esc(m.id) + '" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--br);cursor:pointer">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(m.nome)
+      + (m.id === morador.id ? ' <span style="font-weight:400;color:var(--t2)">(você)</span>' : '') + '</div>'
+      + '<div style="font-size:10.5px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Apto ' + esc(cod) + ' · ' + esc(TIPO_MOR[m.tipo] || m.tipo || '') + (m.email ? ' · ' + esc(m.email) : '') + '</div>'
+      + (dup ? '<div style="font-size:10px;color:var(--amt);margin-top:2px"><i class="ti ti-copy" aria-hidden="true"></i> Possível cadastro duplicado</div>' : '')
+      + '</div>'
+      + '<span class="badge ' + st[0] + '">' + esc(st[1]) + '</span>'
+      + '<i class="ti ti-pencil" style="color:var(--t2)" aria-hidden="true"></i>'
+      + '</div>';
+  }).join('');
+  lista.querySelectorAll('[data-ed-mor]').forEach(function(el) {
+    el.addEventListener('click', function() { abrirEditarMorador(el.dataset.edMor); });
+  });
+}
+
+document.getElementById('mor-busca').addEventListener('input', renderMoradoresAdm);
+document.getElementById('mor-filtro').addEventListener('change', renderMoradoresAdm);
+
+function abrirEditarMorador(id) {
+  var m = _moradoresAdm.find(function(x) { return x.id === id; });
+  if(!m) return;
+  _edMorador = m;
+  var proprio = m.id === morador.id;
+  document.getElementById('em-sub').textContent = proprio ? 'Seu próprio cadastro' : 'Cadastrado em ' + (m.created_at ? fmtD(m.created_at.slice(0, 10)) : '-');
+  document.getElementById('em-nome').value = m.nome || '';
+  document.getElementById('em-email').value = m.email || '';
+  document.getElementById('em-tipo').value = m.tipo === 'morador' ? 'proprietario' : (m.tipo || 'proprietario');
+  document.getElementById('em-status').value = m.status || 'ativo';
+  document.getElementById('em-menor').checked = !!m.menor_idade;
+  document.getElementById('em-resp').value = m.responsavel_nome || '';
+  document.getElementById('em-resp-wrap').style.display = m.menor_idade ? 'block' : 'none';
+  // O admin não rebaixa, desativa nem exclui a si mesmo (evita ficar sem acesso)
+  document.getElementById('em-tipo').disabled = proprio;
+  document.getElementById('em-status').disabled = proprio;
+  document.getElementById('em-excluir').style.display = proprio ? 'none' : '';
+  var info = [];
+  if(m.faltas_mes) info.push(m.faltas_mes + ' falta(s) este mês');
+  if(m.suspenso_ate) info.push('suspenso até ' + fmtD(m.suspenso_ate));
+  info.push(m.auth_user_id ? 'tem login no app' : 'sem login vinculado');
+  if(m.lgpd_aceito) info.push('aceitou a política de privacidade');
+  document.getElementById('em-info').textContent = info.join(' · ');
+  document.getElementById('em-err').style.display = 'none';
+  var sel = document.getElementById('em-apto');
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  sb.from('unidades').select('id,codigo').then(function(r) {
+    var aptos = ordenarAptos(r.data || []);
+    sel.innerHTML = '<option value="">Sem apartamento</option>' + aptos.map(function(u) {
+      return '<option value="' + esc(u.id) + '">' + esc(u.codigo) + '</option>';
+    }).join('');
+    sel.value = m.unidade_id || '';
+  });
+  abrirModal('m-editar-morador');
+}
+
+document.getElementById('em-menor').addEventListener('change', function() {
+  document.getElementById('em-resp-wrap').style.display = this.checked ? 'block' : 'none';
+});
+document.getElementById('em-cancelar').addEventListener('click', function() { fecharModal('m-editar-morador'); });
+
+function erroEditarMorador(msg) {
+  var e = document.getElementById('em-err');
+  e.textContent = msg; e.style.display = 'block';
+}
+
+document.getElementById('em-salvar').addEventListener('click', function() {
+  if(!requireAdmin() || !_edMorador) return;
+  var m = _edMorador;
+  var nome = document.getElementById('em-nome').value.trim();
+  var email = document.getElementById('em-email').value.trim().toLowerCase();
+  var menor = document.getElementById('em-menor').checked;
+  var resp = document.getElementById('em-resp').value.trim();
+  if(nome.length < 3) { erroEditarMorador('Informe o nome completo.'); return; }
+  if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { erroEditarMorador('E-mail inválido.'); return; }
+  if(menor && !resp) { erroEditarMorador('Informe o nome do responsável legal.'); return; }
+  var upd = {
+    nome: nome,
+    email: email || null,
+    unidade_id: document.getElementById('em-apto').value || null,
+    menor_idade: menor,
+    responsavel_nome: menor ? resp : null
+  };
+  if(m.id !== morador.id) {
+    upd.tipo = document.getElementById('em-tipo').value;
+    upd.status = document.getElementById('em-status').value;
+    if(upd.status !== 'suspenso') upd.suspenso_ate = null;
+    if(upd.tipo !== 'admin' && upd.unidade_id === null) { erroEditarMorador('Escolha o apartamento do morador.'); return; }
+  }
+  // Ao marcar como menor pela primeira vez, a confirmação do responsável fica registrada
+  if(menor && !m.menor_idade) {
+    if(!confirm('Você confirma que o responsável legal (' + resp + ') autorizou o cadastro deste menor?')) return;
+    upd.responsavel_confirmado_em = new Date().toISOString();
+    upd.responsavel_confirmado_por = morador.id;
+  }
+  setLoading('em-salvar', true);
+  sb.from('moradores').update(upd).eq('id', m.id).then(function(r) {
+    setLoading('em-salvar', false, '<i class="ti ti-check" aria-hidden="true"></i>Salvar');
+    if(r.error) { erroEditarMorador('Não foi possível salvar: ' + r.error.message); return; }
+    fecharModal('m-editar-morador');
+    toast('Cadastro atualizado.');
+    if(m.id === morador.id) Object.assign(morador, upd);
+    renderConfig();
+  });
+});
+
+document.getElementById('em-excluir').addEventListener('click', function() {
+  if(!requireAdmin() || !_edMorador || _edMorador.id === morador.id) return;
+  var m = _edMorador;
+  // Quem já tem histórico não é apagado: o histórico é usado em faltas,
+  // ocorrências e prestação de contas. Nesse caso, desativa.
+  var checagens = [
+    sb.from('reservas').select('id', {count: 'exact', head: true}).eq('morador_id', m.id),
+    sb.from('ocorrencias').select('id', {count: 'exact', head: true}).eq('criada_por', m.id)
+  ];
+  Promise.all(checagens).then(function(rs) {
+    var hist = rs.reduce(function(s, r) { return s + (r.count || 0); }, 0);
+    if(hist > 0) {
+      if(!confirm(m.nome + ' tem ' + hist + ' registro(s) no histórico (reservas/ocorrências) e não pode ser excluído.\n\nDeseja DESATIVAR o cadastro? A pessoa deixa de entrar no app e o histórico é mantido.')) return;
+      sb.from('moradores').update({status: 'inativo'}).eq('id', m.id).then(function(r) {
+        if(r.error) { erroEditarMorador('Erro ao desativar: ' + r.error.message); return; }
+        fecharModal('m-editar-morador'); toast('Cadastro desativado.'); renderConfig();
+      });
+      return;
+    }
+    if(!confirm('Excluir definitivamente o cadastro de ' + m.nome + '?\n\nUse para cadastros duplicados ou feitos por engano. Esta ação não pode ser desfeita.')) return;
+    sb.from('moradores').delete().eq('id', m.id).select('id').then(function(r) {
+      if(r.error || !(r.data || []).length) {
+        erroEditarMorador('Não foi possível excluir' + (r.error ? ': ' + r.error.message : '.') + ' Você pode desativar o cadastro em "Situação".');
+        return;
+      }
+      fecharModal('m-editar-morador'); toast('Cadastro excluído.'); renderConfig();
+    });
+  });
+});
+
 function renderConfig() {
   if(!requireAdmin()) return;
   carregarAptosAdmCad();
   preencherFormCondo();
   renderAptos();
   atualizarStatusBackup();
+  carregarMoradoresAdm();
   var sl = function(id, val) {
     var el = document.getElementById(id); if(!el) return;
     var s = String(val);
